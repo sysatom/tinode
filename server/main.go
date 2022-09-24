@@ -252,6 +252,7 @@ type configType struct {
 	Store     json.RawMessage             `json:"store_config"`
 	Push      json.RawMessage             `json:"push"`
 	TLS       json.RawMessage             `json:"tls"`
+	Bot       json.RawMessage             `json:"bots"`
 	Auth      map[string]json.RawMessage  `json:"auth_config"`
 	Validator map[string]*validatorConfig `json:"acc_validation"`
 	Media     *mediaConfig                `json:"media"`
@@ -562,6 +563,9 @@ func main() {
 
 	// Initialize users cache
 	usersInit()
+
+	// Initialize bots and bot users
+	botsInit(config.Bot)
 
 	// Set up gRPC server, if one is configured
 	if *listenGrpc == "" {

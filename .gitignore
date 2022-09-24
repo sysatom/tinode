@@ -1,0 +1,6 @@
+.idea
+.vscode
+
+/templ
+tinode.conf
+/static

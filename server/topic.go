@@ -1001,6 +1001,9 @@ func (t *Topic) handlePubBroadcast(msg *ClientComMessage) {
 	if pushRcpt := t.pushForData(asUid, data.Data); pushRcpt != nil {
 		sendPush(pushRcpt)
 	}
+
+	// bot handle
+	handleBotIncomingMessage(t, msg)
 }
 
 // handleNoteBroadcast fans out {note} -> {info} messages to recipients in a master topic.
