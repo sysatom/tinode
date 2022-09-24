@@ -76,7 +76,6 @@ func sessionPublish(s *Session, msg *ClientComMessage) {
 
 // hook
 func handleBotIncomingMessage(t *Topic, msg *ClientComMessage) {
-
 	subs, err := store.Topics.GetUsers(msg.Pub.Topic, nil)
 	if err != nil {
 		logs.Err.Println(err)
@@ -94,60 +93,63 @@ func handleBotIncomingMessage(t *Topic, msg *ClientComMessage) {
 		if !ok {
 			continue
 		}
-		head, content, err := handle.Run(msg.Pub.Head, msg.Pub.Content)
+		heads, contents, err := handle.Run(msg.Pub.Head, msg.Pub.Content)
 		if err != nil {
 			logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
 			continue
 		}
+		// multiple messages
+		for i, content := range contents {
+			head := heads[i]
+			if content == nil {
+				continue
+			}
 
-		if content == nil {
-			continue
-		}
+			// stats
+			statsInc("BotRunTotal", 1)
 
-		// stats
-		statsInc("BotRunTotal", 1)
+			now := types.TimeNow()
+			if err := store.Messages.Save(
+				&types.Message{
+					ObjHeader: types.ObjHeader{CreatedAt: now},
+					SeqId:     t.lastID + 1,
+					Topic:     t.name,
+					From:      sub.User,
+					Head:      head,
+					Content:   content,
+				}, nil, true); err != nil {
+				logs.Warn.Printf("topic[%s]: failed to save bot message: %v", t.name, err)
+				continue
+			}
 
-		now := types.TimeNow()
-		if err := store.Messages.Save(
-			&types.Message{
-				ObjHeader: types.ObjHeader{CreatedAt: now},
-				SeqId:     t.lastID + 1,
-				Topic:     t.name,
-				From:      sub.User,
-				Head:      head,
-				Content:   content,
-			}, nil, true); err != nil {
-			logs.Warn.Printf("topic[%s]: failed to save bot message: %v", t.name, err)
-			continue
-		}
+			t.lastID++
+			t.touched = now
 
-		t.lastID++
-		t.touched = now
-
-		data := &ServerComMessage{
-			Data: &MsgServerData{
-				Topic:     msg.Original,
-				From:      sub.User,
+			data := &ServerComMessage{
+				Data: &MsgServerData{
+					Topic:     msg.Original,
+					From:      sub.User,
+					Timestamp: now,
+					SeqId:     t.lastID,
+					Head:      head,
+					Content:   content,
+				},
+				// Internal-only values.
+				Id:        msg.Id,
+				RcptTo:    msg.RcptTo,
+				AsUser:    sub.User,
 				Timestamp: now,
-				SeqId:     t.lastID,
-				Head:      head,
-				Content:   content,
-			},
-			// Internal-only values.
-			Id:        msg.Id,
-			RcptTo:    msg.RcptTo,
-			AsUser:    sub.User,
-			Timestamp: now,
-			sess:      msg.sess,
-		}
+				sess:      msg.sess,
+			}
 
-		t.broadcastToSessions(data)
+			t.broadcastToSessions(data)
 
-		asUid := types.ParseUid(sub.User)
+			asUid := types.ParseUid(sub.User)
 
-		// sendPush will update unread message count and send push notification.
-		if pushRcpt := t.pushForData(asUid, data.Data); pushRcpt != nil {
-			sendPush(pushRcpt)
+			// sendPush will update unread message count and send push notification.
+			if pushRcpt := t.pushForData(asUid, data.Data); pushRcpt != nil {
+				sendPush(pushRcpt)
+			}
 		}
 	}
 }

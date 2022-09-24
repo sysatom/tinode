@@ -15,7 +15,7 @@ type Bot interface {
 	IsReady() bool
 
 	// Run return bot result
-	Run(head map[string]interface{}, content interface{}) (map[string]interface{}, interface{}, error)
+	Run(head map[string]interface{}, content interface{}) ([]map[string]interface{}, []interface{}, error)
 }
 
 type configType struct {
