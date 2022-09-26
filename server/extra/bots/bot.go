@@ -1,4 +1,4 @@
-package bot
+package bots
 
 import (
 	"encoding/json"
@@ -7,7 +7,7 @@ import (
 
 const BotNameSuffix = "_bot"
 
-type Bot interface {
+type Handler interface {
 	// Init initializes the bot.
 	Init(jsonconf string) error
 
@@ -23,20 +23,20 @@ type configType struct {
 	Config json.RawMessage `json:"config"`
 }
 
-var bots map[string]Bot
+var handlers map[string]Handler
 
-func Register(name string, bot Bot) {
-	if bots == nil {
-		bots = make(map[string]Bot)
+func Register(name string, bot Handler) {
+	if handlers == nil {
+		handlers = make(map[string]Handler)
 	}
 
 	if bot == nil {
 		panic("Register: bot is nil")
 	}
-	if _, dup := bots[name]; dup {
+	if _, dup := handlers[name]; dup {
 		panic("Register: called twice for bot " + name)
 	}
-	bots[name] = bot
+	handlers[name] = bot
 }
 
 // Init initializes registered handlers.
@@ -48,7 +48,7 @@ func Init(jsconfig string) error {
 	}
 
 	for _, cc := range config {
-		if bot := bots[cc.Name]; bot != nil {
+		if bot := handlers[cc.Name]; bot != nil {
 			if err := bot.Init(string(cc.Config)); err != nil {
 				return err
 			}
@@ -58,6 +58,6 @@ func Init(jsconfig string) error {
 	return nil
 }
 
-func List() map[string]Bot {
-	return bots
+func List() map[string]Handler {
+	return handlers
 }

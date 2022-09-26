@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/tinode/chat/server/extra/bot"
+	"github.com/tinode/chat/server/extra/bots"
 	"github.com/tinode/chat/server/extra/command"
 	"github.com/tinode/chat/server/extra/types"
 )
@@ -70,5 +70,5 @@ func (demoBot) Run(_ map[string]interface{}, content interface{}) ([]map[string]
 }
 
 func init() {
-	bot.Register("demo", &handler)
+	bots.Register("demo", &handler)
 }
