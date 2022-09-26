@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/tinode/chat/server/extra/channels"
+	"github.com/tinode/chat/server/extra/crawler"
 )
 
 var publisher demoChannel
@@ -50,6 +51,27 @@ func (demoChannel) IsReady() bool {
 
 func (demoChannel) Id() string {
 	return publisher.id
+}
+
+func (demoChannel) Rule() crawler.Rule {
+	return crawler.Rule{
+		Name:    "demo",
+		Channel: publisher.id,
+		When:    "* * * * *",
+		Mode:    channels.Instant,
+		Page: struct {
+			URL  string
+			List string
+			Item map[string]string
+		}{
+			"https://news.ycombinator.com/news",
+			"tr.athing",
+			map[string]string{
+				"title": `$(".title a.titlelink").text`,
+				"url":   `$(".title a.titlelink").href`,
+			},
+		},
+	}
 }
 
 func init() {

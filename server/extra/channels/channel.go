@@ -3,6 +3,12 @@ package channels
 import (
 	"encoding/json"
 	"errors"
+	"github.com/tinode/chat/server/extra/crawler"
+)
+
+const (
+	Instant = "instant"
+	Daily   = "daily"
 )
 
 const ChannelNameSuffix = "_channel"
@@ -16,6 +22,9 @@ type Publisher interface {
 
 	// Id return channel id
 	Id() string
+
+	// Rule return publish rule
+	Rule() crawler.Rule
 }
 
 type configType struct {

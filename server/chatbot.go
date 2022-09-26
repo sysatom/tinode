@@ -1,12 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/tinode/chat/server/auth"
 	"github.com/tinode/chat/server/extra/bots"
 	"github.com/tinode/chat/server/extra/channels"
+	"github.com/tinode/chat/server/extra/crawler"
 	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/store"
 	"github.com/tinode/chat/server/store/types"
@@ -56,6 +58,11 @@ func channelsInit(configString json.RawMessage) {
 	err = initializeChannels()
 	if err != nil {
 		logs.Err.Fatal("Failed to create or update channels:", err)
+	}
+
+	err = initializeCrawler()
+	if err != nil {
+		logs.Err.Fatal("Failed to initialize crawler:", err)
 	}
 
 	// stats register
@@ -396,6 +403,12 @@ func initializeChannels() error {
 	}
 
 	for name, channel := range channels.List() {
+		topic, _ := store.Topics.Get(fmt.Sprintf("grp%s", channel.Id()))
+		if topic != nil && topic.Id != "" {
+			logs.Info.Printf("channel %s registered", channel.Id())
+			continue
+		}
+
 		var msg = &ClientComMessage{
 			Sub: &MsgClientSub{
 				Topic: channel.Id(),
@@ -430,5 +443,71 @@ func initializeChannels() error {
 		statsInc("TotalTopics", 1)
 	}
 
+	return nil
+}
+
+// init crawler
+func initializeCrawler() error {
+	uid, _, _, _, err := store.Users.GetAuthUniqueRecord("basic", "botfather")
+	if err != nil {
+		return err
+	}
+
+	c := crawler.New()
+	c.Send = func(channel, name string, out [][]byte) {
+		fmt.Println(channel, name, len(out))
+		if len(out) == 0 {
+			return
+		}
+		topic := fmt.Sprintf("grp%s", channel)
+		dst, err := store.Topics.Get(topic)
+		if err != nil {
+			logs.Err.Println(err)
+			return
+		}
+		if dst == nil {
+			return
+		}
+		content := bytes.Buffer{}
+		for _, i := range out {
+			content.Write(i)
+		}
+
+		msg := &ClientComMessage{
+			Pub: &MsgClientPub{
+				Topic:   topic,
+				Head:    nil,
+				Content: content.String(),
+			},
+			AsUser:    uid.UserId(),
+			Timestamp: types.TimeNow(),
+		}
+
+		t := &Topic{
+			name:   topic,
+			cat:    types.TopicCatGrp,
+			status: topicStatusLoaded,
+			lastID: dst.SeqId,
+			perUser: map[types.Uid]perUserData{
+				uid: {
+					modeGiven: types.ModeCFull,
+					modeWant:  types.ModeCFull,
+					private:   nil,
+				},
+			},
+		}
+		t.handleClientMsg(msg)
+	}
+
+	var rules []crawler.Rule
+	for _, publisher := range channels.List() {
+		rules = append(rules, publisher.Rule())
+	}
+
+	err = c.Init(rules...)
+	if err != nil {
+		return err
+	}
+	c.Run()
 	return nil
 }

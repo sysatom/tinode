@@ -6,8 +6,10 @@ require (
 	cloud.google.com/go v0.102.0 // indirect
 	cloud.google.com/go/firestore v1.6.1 // indirect
 	firebase.google.com/go v3.13.0+incompatible
+	github.com/PuerkitoBio/goquery v1.8.0 // indirect
 	github.com/aws/aws-sdk-go v1.29.29
 	github.com/felixge/httpsnoop v1.0.3 // indirect
+	github.com/flower-corp/rosedb v1.1.1 // indirect
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/mock v1.6.0
@@ -15,6 +17,7 @@ require (
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/handlers v1.5.1
 	github.com/gorilla/websocket v1.5.0
+	github.com/influxdata/cron v0.0.0-20201006132531-4bb0a200dcbe // indirect
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/nyaruka/phonenumbers v1.0.75
 	github.com/prometheus/client_golang v1.12.2
