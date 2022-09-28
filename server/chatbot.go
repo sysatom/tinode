@@ -20,6 +20,9 @@ import (
 
 	// channels
 	_ "github.com/tinode/chat/server/extra/channels/demo"
+
+	// push
+	_ "github.com/tinode/chat/server/extra/bark"
 )
 
 // init
