@@ -88,6 +88,7 @@ func (s *Crawler) ruleWorker(name string, r Rule) {
 				}()
 				return r.Run()
 			}()
+			logs.Info.Println("crawler: result", len(result))
 			if len(result) > 0 {
 				s.outCh <- Result{
 					Name:    name,

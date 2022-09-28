@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -9,6 +8,7 @@ import (
 	"github.com/tinode/chat/server/extra/bots"
 	"github.com/tinode/chat/server/extra/channels"
 	"github.com/tinode/chat/server/extra/crawler"
+	extraTypes "github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/store"
 	"github.com/tinode/chat/server/store/types"
@@ -471,16 +471,17 @@ func initializeCrawler() error {
 		if dst == nil {
 			return
 		}
-		content := bytes.Buffer{}
+		builder := extraTypes.MsgBuilder{}
 		for _, i := range out {
-			content.Write(i)
+			builder.AppendText(string(i), extraTypes.TextOption{})
 		}
+		head, content := builder.Message.Content()
 
 		msg := &ClientComMessage{
 			Pub: &MsgClientPub{
 				Topic:   topic,
-				Head:    nil,
-				Content: content.String(),
+				Head:    head,
+				Content: content,
 			},
 			AsUser:    uid.UserId(),
 			Timestamp: types.TimeNow(),

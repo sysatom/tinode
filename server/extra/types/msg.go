@@ -87,6 +87,19 @@ func (c ChatMessage) GetGenericAttachment() []EntData {
 	return c.GetEntDatas("EX")
 }
 
+func (c ChatMessage) Content() (map[string]interface{}, string) {
+	if c.IsPlainText {
+		return nil, c.Text
+	}
+	d, err := json.Marshal(c)
+	if err != nil {
+		return nil, ""
+	}
+	return map[string]interface{}{
+		"mime": "text/x-drafty",
+	}, string(d)
+}
+
 type MsgBuilder struct {
 	Message ChatMessage
 }
@@ -267,6 +280,8 @@ func (m *MsgBuilder) AppendFile(fileName string, opt FileOption) {
 		},
 	})
 }
+
+// AppendAttachment append a attachment file to chat message
 func (m *MsgBuilder) AppendAttachment(fileName string, opt AttachmentOption) {
 	m.Message.Fmt = append(m.Message.Fmt, FmtMessage{
 		At:  len(m.Message.Text),
