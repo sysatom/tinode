@@ -18,6 +18,7 @@ require (
 	github.com/gorilla/handlers v1.5.1
 	github.com/gorilla/websocket v1.5.0
 	github.com/influxdata/cron v0.0.0-20201006132531-4bb0a200dcbe // indirect
+	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/nyaruka/phonenumbers v1.0.75
 	github.com/prometheus/client_golang v1.12.2
@@ -35,4 +36,6 @@ require (
 	google.golang.org/grpc v1.46.2
 	google.golang.org/protobuf v1.28.0
 	gopkg.in/rethinkdb/rethinkdb-go.v6 v6.2.1
+	gorm.io/driver/mysql v1.4.1 // indirect
+	gorm.io/gorm v1.24.0 // indirect
 )

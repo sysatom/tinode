@@ -93,6 +93,8 @@ func (a *adapter) getContextForTx() (context.Context, context.CancelFunc) {
 	return context.Background(), nil
 }
 
+var RawDB *sql.DB
+
 // Open initializes database session
 func (a *adapter) Open(jsonconfig json.RawMessage) error {
 	if a.db != nil {
@@ -145,6 +147,9 @@ func (a *adapter) Open(jsonconfig json.RawMessage) error {
 	if err != nil {
 		return err
 	}
+
+	// RAW conn
+	RawDB = a.db.DB
 
 	// Actually opening the network connection.
 	err = a.db.Ping()

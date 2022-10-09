@@ -15,14 +15,14 @@ func TestRegexRule(t *testing.T) {
 		{
 			Define: `test`,
 			Help:   `Test info`,
-			Parse: func(ctx context.Context, tokens []*Token) []types.MsgPayload {
+			Handler: func(ctx context.Context, tokens []*Token) []types.MsgPayload {
 				return []types.MsgPayload{types.TextMsg{Text: "test"}}
 			},
 		},
 		{
 			Define: `todo [string]`,
 			Help:   `todo something`,
-			Parse: func(ctx context.Context, tokens []*Token) []types.MsgPayload {
+			Handler: func(ctx context.Context, tokens []*Token) []types.MsgPayload {
 				text, _ := tokens[1].Value.String()
 				return []types.MsgPayload{types.TextMsg{Text: text}}
 			},
@@ -30,7 +30,7 @@ func TestRegexRule(t *testing.T) {
 		{
 			Define: `add [number] [number]`,
 			Help:   `Addition`,
-			Parse: func(ctx context.Context, tokens []*Token) []types.MsgPayload {
+			Handler: func(ctx context.Context, tokens []*Token) []types.MsgPayload {
 				tt1, _ := tokens[1].Value.Int64()
 				tt2, _ := tokens[2].Value.Int64()
 				return []types.MsgPayload{types.TextMsg{Text: strconv.Itoa(int(tt1 + tt2))}}

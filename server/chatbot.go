@@ -8,6 +8,7 @@ import (
 	"github.com/tinode/chat/server/extra/bots"
 	"github.com/tinode/chat/server/extra/channels"
 	"github.com/tinode/chat/server/extra/crawler"
+	extraStore "github.com/tinode/chat/server/extra/store"
 	extraTypes "github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/store"
@@ -23,7 +24,17 @@ import (
 
 	// push
 	_ "github.com/tinode/chat/server/extra/bark"
+
+	// store
+	_ "github.com/tinode/chat/server/extra/store/mysql"
 )
+
+func storeInit() {
+	err := extraStore.Store.Open()
+	if err != nil {
+		panic(err)
+	}
+}
 
 // init
 func botsInit(configString json.RawMessage) {

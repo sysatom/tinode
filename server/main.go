@@ -559,6 +559,9 @@ func main() {
 		logs.Err.Fatalln(err)
 	}
 
+	// Initialize chatbot store.
+	storeInit()
+
 	// Initialize plugins.
 	pluginsInit(config.Plugin)
 

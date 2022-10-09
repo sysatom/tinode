@@ -9,9 +9,9 @@ import (
 )
 
 type Rule struct {
-	Define string
-	Help   string
-	Parse  func(context.Context, []*Token) []types.MsgPayload
+	Define  string
+	Help    string
+	Handler func(context.Context, []*Token) []types.MsgPayload
 }
 
 type Ruleset []Rule
@@ -44,7 +44,7 @@ func (r Ruleset) ProcessCommand(ctx context.Context, in string) ([]types.MsgPayl
 			continue
 		}
 
-		if ret := rule.Parse(ctx, tokens); len(ret) > 0 {
+		if ret := rule.Handler(ctx, tokens); len(ret) > 0 {
 			result = ret
 		}
 	}
