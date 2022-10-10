@@ -13,6 +13,7 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"github.com/tinode/chat/server/extra/router"
 	"math/rand"
 	"net/http"
 	"os"
@@ -646,6 +647,9 @@ func main() {
 		logs.Info.Printf("Server status is available at '%s'", sspath)
 		mux.HandleFunc(sspath, serveStatus)
 	}
+
+	// Handle extra
+	mux.Handle("/extra/", http.HandlerFunc(router.ServeExtra))
 
 	// Handle websocket clients.
 	mux.HandleFunc(config.ApiPath+"v0/channels", serveWebSocket)
