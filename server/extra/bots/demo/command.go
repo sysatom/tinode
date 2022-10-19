@@ -8,6 +8,7 @@ import (
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
+	storeTypes "github.com/tinode/chat/server/store/types"
 	"math/big"
 	"strconv"
 )
@@ -15,7 +16,7 @@ import (
 var commandRules = []command.Rule{
 	{
 		Define: "version",
-		Help:   `Chatbot framework version`,
+		Help:   `Version`,
 		Handler: func(ctx context.Context, tokens []*command.Token) []types.MsgPayload {
 
 			err := store.Chatbot.ConfigSet(1, "abc", "k", map[string]interface{}{
@@ -58,10 +59,43 @@ var commandRules = []command.Rule{
 		},
 	},
 	{
+		Define: "id",
+		Help:   `Generate random id`,
+		Handler: func(ctx context.Context, tokens []*command.Token) []types.MsgPayload {
+			key, err := generateRandomString(16)
+			if err != nil {
+				logs.Err.Println(err)
+				return nil
+			}
+
+			uGen := storeTypes.UidGenerator{}
+			err = uGen.Init(1, []byte(key))
+			if err != nil {
+				logs.Err.Println(err)
+				return nil
+			}
+			return []types.MsgPayload{types.TextMsg{Text: uGen.GetStr()}}
+		},
+	},
+	{
 		Define: "messages",
 		Help:   `Demo messages`,
 		Handler: func(ctx context.Context, tokens []*command.Token) []types.MsgPayload {
 			return []types.MsgPayload{types.TextMsg{Text: "msg1"}, types.TextMsg{Text: "msg2"}}
 		},
 	},
+}
+
+func generateRandomString(n int) (string, error) {
+	const letters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-"
+	ret := make([]byte, n)
+	for i := 0; i < n; i++ {
+		num, err := rand.Int(rand.Reader, big.NewInt(int64(len(letters))))
+		if err != nil {
+			return "", err
+		}
+		ret[i] = letters[num.Int64()]
+	}
+
+	return string(ret), nil
 }

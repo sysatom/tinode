@@ -11,6 +11,7 @@ import (
 
 type Rule struct {
 	Name    string
+	Id      string
 	Channel string
 	When    string
 	Mode    string

@@ -1,17 +1,17 @@
-package demo
+package bark
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"github.com/tinode/chat/server/extra/bots"
 	"github.com/tinode/chat/server/extra/command"
 	"github.com/tinode/chat/server/extra/types"
 )
 
-var handler demoBot
+var handler bot
+var config configType
 
-type demoBot struct {
+type bot struct {
 	initialized bool
 }
 
@@ -19,16 +19,11 @@ type configType struct {
 	Enabled bool `json:"enabled"`
 }
 
-func (demoBot) Init(jsonconf string) error {
+func (bot) Init() error {
 
 	// Check if the handler is already initialized
 	if handler.initialized {
 		return errors.New("already initialized")
-	}
-
-	var config configType
-	if err := json.Unmarshal([]byte(jsonconf), &config); err != nil {
-		return errors.New("failed to parse config: " + err.Error())
 	}
 
 	handler.initialized = true
@@ -40,11 +35,11 @@ func (demoBot) Init(jsonconf string) error {
 	return nil
 }
 
-func (demoBot) IsReady() bool {
+func (bot) IsReady() bool {
 	return handler.initialized
 }
 
-func (demoBot) Run(_ map[string]interface{}, content interface{}) ([]map[string]interface{}, []interface{}, error) {
+func (bot) Run(_ map[string]interface{}, content interface{}) ([]map[string]interface{}, []interface{}, error) {
 	in, ok := content.(string)
 	if !ok {
 		return nil, nil, nil
@@ -70,5 +65,6 @@ func (demoBot) Run(_ map[string]interface{}, content interface{}) ([]map[string]
 }
 
 func init() {
-	bots.Register("demo", &handler)
+	config.Enabled = true
+	bots.Register("bark", &handler)
 }

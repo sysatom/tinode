@@ -1003,7 +1003,7 @@ func (t *Topic) handlePubBroadcast(msg *ClientComMessage) {
 	}
 
 	// bot handle
-	handleBotIncomingMessage(t, msg)
+	hookHandleBotIncomingMessage(t, msg)
 }
 
 // handleNoteBroadcast fans out {note} -> {info} messages to recipients in a master topic.

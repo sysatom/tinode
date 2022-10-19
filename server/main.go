@@ -13,7 +13,6 @@ package main
 import (
 	"encoding/json"
 	"flag"
-	"github.com/tinode/chat/server/extra/router"
 	"math/rand"
 	"net/http"
 	"os"
@@ -253,7 +252,6 @@ type configType struct {
 	Store     json.RawMessage             `json:"store_config"`
 	Push      json.RawMessage             `json:"push"`
 	TLS       json.RawMessage             `json:"tls"`
-	Bot       json.RawMessage             `json:"bots"`
 	Channel   json.RawMessage             `json:"channels"`
 	Auth      map[string]json.RawMessage  `json:"auth_config"`
 	Validator map[string]*validatorConfig `json:"acc_validation"`
@@ -561,7 +559,7 @@ func main() {
 	}
 
 	// Initialize chatbot store.
-	storeInit()
+	hookStore()
 
 	// Initialize plugins.
 	pluginsInit(config.Plugin)
@@ -570,10 +568,10 @@ func main() {
 	usersInit()
 
 	// Initialize bots
-	botsInit(config.Bot)
+	hookBot()
 
 	// Initialize channels
-	channelsInit(config.Channel)
+	hookChannel(config.Channel)
 
 	// Set up gRPC server, if one is configured
 	if *listenGrpc == "" {
@@ -649,7 +647,7 @@ func main() {
 	}
 
 	// Handle extra
-	mux.Handle("/extra/", http.HandlerFunc(router.ServeExtra))
+	hookMux(mux)
 
 	// Handle websocket clients.
 	mux.HandleFunc(config.ApiPath+"v0/channels", serveWebSocket)

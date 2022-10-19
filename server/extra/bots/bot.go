@@ -2,14 +2,13 @@ package bots
 
 import (
 	"encoding/json"
-	"errors"
 )
 
 const BotNameSuffix = "_bot"
 
 type Handler interface {
 	// Init initializes the bot.
-	Init(jsonconf string) error
+	Init() error
 
 	// IsReady сhecks if the bot is initialized.
 	IsReady() bool
@@ -40,18 +39,10 @@ func Register(name string, bot Handler) {
 }
 
 // Init initializes registered handlers.
-func Init(jsconfig string) error {
-	var config []configType
-
-	if err := json.Unmarshal([]byte(jsconfig), &config); err != nil {
-		return errors.New("failed to parse config: " + err.Error())
-	}
-
-	for _, cc := range config {
-		if bot := handlers[cc.Name]; bot != nil {
-			if err := bot.Init(string(cc.Config)); err != nil {
-				return err
-			}
+func Init() error {
+	for _, bot := range handlers {
+		if err := bot.Init(); err != nil {
+			return err
 		}
 	}
 
