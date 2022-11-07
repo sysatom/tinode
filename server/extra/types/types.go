@@ -193,6 +193,13 @@ func Convert(payloads []MsgPayload) ([]map[string]interface{}, []interface{}) {
 		case TextMsg:
 			heads = append(heads, nil)
 			contents = append(contents, v.Text)
+		case LinkMsg:
+			builder := MsgBuilder{}
+			builder.AppendText(v.Url, TextOption{IsLink: true})
+
+			head, content := builder.Message.Content()
+			heads = append(heads, head)
+			contents = append(contents, content)
 		}
 	}
 	return heads, contents

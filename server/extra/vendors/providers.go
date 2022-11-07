@@ -40,7 +40,7 @@ type OAuthProvider interface {
 }
 
 func NewOAuthProvider(category, url string) OAuthProvider {
-	redirectURI := fmt.Sprintf("%s/oauth/%s", url, category)
+	redirectURI := fmt.Sprintf("%s/extra/oauth/%s", url, category)
 	var provider OAuthProvider
 
 	switch category {
@@ -56,4 +56,9 @@ func NewOAuthProvider(category, url string) OAuthProvider {
 	}
 
 	return provider
+}
+
+func RedirectURI(category string) string {
+	url := "http://127.0.0.1:6060" // todo
+	return fmt.Sprintf("%s/extra/oauth/%s", url, category)
 }

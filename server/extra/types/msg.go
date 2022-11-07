@@ -30,7 +30,7 @@ type EntData struct {
 }
 
 type ChatMessage struct {
-	Text        string       `json:"text,omitempty"`
+	Text        string       `json:"txt,omitempty"`
 	Fmt         []FmtMessage `json:"fmt,omitempty"`
 	Ent         []EntMessage `json:"ent,omitempty"`
 	IsPlainText bool         `json:"-"`
@@ -87,7 +87,7 @@ func (c ChatMessage) GetGenericAttachment() []EntData {
 	return c.GetEntDatas("EX")
 }
 
-func (c ChatMessage) Content() (map[string]interface{}, string) {
+func (c ChatMessage) Content() (map[string]interface{}, interface{}) {
 	if c.IsPlainText {
 		return nil, c.Text
 	}
@@ -97,7 +97,7 @@ func (c ChatMessage) Content() (map[string]interface{}, string) {
 	}
 	return map[string]interface{}{
 		"mime": "text/x-drafty",
-	}, string(d)
+	}, json.RawMessage(d)
 }
 
 type MsgBuilder struct {
@@ -183,7 +183,7 @@ func (m *MsgBuilder) AppendText(text string, opt TextOption) {
 			Key: len(m.Message.Ent),
 		}
 		m.Message.Fmt = append(m.Message.Fmt, fmt)
-		mentionName := substr(strings.TrimSpace(text), 0, 1)
+		mentionName := substr(strings.TrimSpace(text), 1, len(strings.TrimSpace(text))-1)
 		ent := EntMessage{
 			Tp: "MN",
 			Data: EntData{

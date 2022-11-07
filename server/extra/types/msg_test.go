@@ -26,5 +26,7 @@ func TestMsgBuilder(t *testing.T) {
 	builder.AppendText("Male", TextOption{IsButton: true, ButtonDataName: "male", ButtonDataVal: "male"})
 	builder.AppendText("Female", TextOption{IsButton: true, ButtonDataName: "female", ButtonDataVal: "female"})
 
-	fmt.Println(builder.Message.Content())
+	head, content := builder.Message.Content()
+	fmt.Println(head)
+	fmt.Printf("%s\n", content)
 }

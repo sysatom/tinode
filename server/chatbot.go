@@ -13,6 +13,7 @@ import (
 	"net/http"
 	// bots
 	_ "github.com/tinode/chat/server/extra/bots/bark"
+	_ "github.com/tinode/chat/server/extra/bots/github"
 	_ "github.com/tinode/chat/server/extra/bots/help"
 	_ "github.com/tinode/chat/server/extra/bots/subscribe"
 
