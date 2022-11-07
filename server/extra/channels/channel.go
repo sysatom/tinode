@@ -3,7 +3,7 @@ package channels
 import (
 	"encoding/json"
 	"errors"
-	"github.com/tinode/chat/server/extra/crawler"
+	"github.com/tinode/chat/server/extra/channels/crawler"
 	"gopkg.in/yaml.v2"
 	"io/fs"
 	"os"

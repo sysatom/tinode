@@ -6,7 +6,7 @@ import (
 	"github.com/tinode/chat/server/auth"
 	"github.com/tinode/chat/server/extra/bots"
 	"github.com/tinode/chat/server/extra/channels"
-	"github.com/tinode/chat/server/extra/crawler"
+	"github.com/tinode/chat/server/extra/channels/crawler"
 	extraTypes "github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/store"
