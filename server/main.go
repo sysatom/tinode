@@ -249,6 +249,7 @@ type configType struct {
 	// Configs for subsystems
 	Cluster   json.RawMessage             `json:"cluster_config"`
 	Plugin    json.RawMessage             `json:"plugins"`
+	Bot       json.RawMessage             `json:"bots"`
 	Store     json.RawMessage             `json:"store_config"`
 	Push      json.RawMessage             `json:"push"`
 	TLS       json.RawMessage             `json:"tls"`
@@ -568,7 +569,7 @@ func main() {
 	usersInit()
 
 	// Initialize bots
-	hookBot()
+	hookBot(config.Bot)
 
 	// Initialize channels
 	hookChannel(config.Channel)

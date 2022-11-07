@@ -26,10 +26,10 @@ type configType struct {
 var publishers map[string]Publisher
 
 // Init initializes registered publishers.
-func Init(jsconfig string) error {
+func Init(jsconfig json.RawMessage) error {
 	var config configType
 
-	if err := json.Unmarshal([]byte(jsconfig), &config); err != nil {
+	if err := json.Unmarshal(jsconfig, &config); err != nil {
 		return errors.New("failed to parse config: " + err.Error())
 	}
 

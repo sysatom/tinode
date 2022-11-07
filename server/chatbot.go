@@ -36,9 +36,9 @@ func hookStore() {
 	}
 }
 
-func hookBot() {
+func hookBot(jsconfig json.RawMessage) {
 	// init bots
-	err := bots.Init()
+	err := bots.Init(jsconfig)
 	if err != nil {
 		logs.Err.Fatal("Failed to initialize bot:", err)
 	}
@@ -62,8 +62,8 @@ func hookBot() {
 	statsSet("BotTotal", int64(len(bots.List())))
 }
 
-func hookChannel(configString json.RawMessage) {
-	err := channels.Init(string(configString))
+func hookChannel(jsconfig json.RawMessage) {
+	err := channels.Init(jsconfig)
 	if err != nil {
 		logs.Err.Fatal("Failed to initialize channel:", err)
 	}
