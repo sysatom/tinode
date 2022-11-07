@@ -6,14 +6,14 @@ import (
 	"github.com/tinode/chat/server/extra/channels"
 	"github.com/tinode/chat/server/extra/router"
 	extraStore "github.com/tinode/chat/server/extra/store"
+	extraTypes "github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/store"
 	"github.com/tinode/chat/server/store/types"
 	"net/http"
-
 	// bots
 	_ "github.com/tinode/chat/server/extra/bots/bark"
-	_ "github.com/tinode/chat/server/extra/bots/demo"
+	_ "github.com/tinode/chat/server/extra/bots/help"
 	_ "github.com/tinode/chat/server/extra/bots/subscribe"
 
 	// push
@@ -92,6 +92,16 @@ func hookHandleBotIncomingMessage(t *Topic, msg *ClientComMessage) {
 		return
 	}
 
+	ctx := extraTypes.Context{
+		Id:        msg.Id,
+		Original:  msg.Original,
+		RcptTo:    msg.RcptTo,
+		AsUser:    types.ParseUserId(msg.AsUser),
+		AuthLvl:   msg.AuthLvl,
+		MetaWhat:  msg.MetaWhat,
+		Timestamp: msg.Timestamp,
+	}
+
 	for _, sub := range subs {
 		if !isBot(sub) {
 			continue
@@ -103,7 +113,7 @@ func hookHandleBotIncomingMessage(t *Topic, msg *ClientComMessage) {
 		if !ok {
 			continue
 		}
-		heads, contents, err := handle.Run(msg.Pub.Head, msg.Pub.Content)
+		heads, contents, err := handle.Run(ctx, msg.Pub.Head, msg.Pub.Content)
 		if err != nil {
 			logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
 			continue

@@ -3,6 +3,8 @@ package bots
 import (
 	"encoding/json"
 	"errors"
+	"github.com/tinode/chat/server/extra/command"
+	"github.com/tinode/chat/server/extra/types"
 )
 
 const BotNameSuffix = "_bot"
@@ -15,7 +17,7 @@ type Handler interface {
 	IsReady() bool
 
 	// Run return bot result
-	Run(head map[string]interface{}, content interface{}) ([]map[string]interface{}, []interface{}, error)
+	Run(ctx types.Context, head map[string]interface{}, content interface{}) ([]map[string]interface{}, []interface{}, error)
 }
 
 type configType struct {
@@ -36,6 +38,30 @@ func Register(name string, bot Handler) {
 		panic("Register: called twice for bot " + name)
 	}
 	handlers[name] = bot
+}
+
+func RunCommand(commandRules []command.Rule, ctx types.Context, _ map[string]interface{}, content interface{}) ([]map[string]interface{}, []interface{}, error) {
+	in, ok := content.(string)
+	if !ok {
+		return nil, nil, nil
+	}
+	rs := command.Ruleset(commandRules)
+	payloads, err := rs.Help(in)
+	if err != nil {
+		return nil, nil, err
+	}
+	if len(payloads) > 0 {
+		heads, contents := types.Convert(payloads)
+		return heads, contents, nil
+	}
+
+	payloads, err = rs.ProcessCommand(ctx, in)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	heads, contents := types.Convert(payloads)
+	return heads, contents, nil
 }
 
 // Init initializes registered handlers.

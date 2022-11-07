@@ -6,8 +6,11 @@ import (
 	"errors"
 	"fmt"
 	"github.com/tinode/chat/server/drafty"
+	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/push"
+	serverStore "github.com/tinode/chat/server/store"
+	"github.com/tinode/chat/server/store/types"
 	"io"
 	"net/http"
 	"os"
@@ -18,6 +21,9 @@ var handler barkPush
 
 // How much to buffer the input channel.
 const defaultBuffer = 32
+
+// BarkDeviceKey store device key
+const BarkDeviceKey = "bark_device_key"
 
 type barkPush struct {
 	initialized bool
@@ -105,14 +111,48 @@ func sendPushes(config *configType, rcpt *push.Receipt) {
 		logs.Err.Println(err)
 		return
 	}
-	err = postMessage(config, "", body, rcpt.Payload.Topic)
-	if err != nil {
-		logs.Err.Println(err)
-		return
+
+	for uid := range rcpt.To {
+		if uid.UserId() == rcpt.Payload.From {
+			continue
+		}
+
+		v, err := store.Chatbot.ConfigGet(uid, "", BarkDeviceKey)
+		if err != nil {
+			logs.Err.Println(err)
+			continue
+		}
+		config.DeviceKey, _ = v.String("value")
+
+		from := types.ParseUserId(rcpt.Payload.From)
+		if from.IsZero() {
+			from = types.ParseUid(rcpt.Payload.From)
+		}
+		fromUser, err := serverStore.Users.Get(from)
+		if err != nil {
+			logs.Err.Println(err)
+			continue
+		}
+		if fromUser != nil && fromUser.Public != nil {
+			if public, ok := fromUser.Public.(map[string]interface{}); ok {
+				name := public["fn"].(string)
+				body = fmt.Sprintf("[%s] %s", name, body)
+			}
+		}
+
+		err = postMessage(config, "", body, rcpt.Payload.Topic)
+		if err != nil {
+			logs.Err.Println(err)
+			return
+		}
 	}
 }
 
 func postMessage(config *configType, title, body, group string) error {
+	if config.DeviceKey == "" {
+		return errors.New("device key empty")
+	}
+
 	client := &http.Client{
 		Timeout: 30 * time.Second,
 	}

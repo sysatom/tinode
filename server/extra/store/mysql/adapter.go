@@ -57,18 +57,18 @@ func (a *adapter) Stats() interface{} {
 
 func (a *adapter) ConfigSet(uid types.Uid, topic, key string, value model.JSON) error {
 	var find model.Config
-	err := a.db.Where("`uid` = ? AND `topic` = ? AND `key` = ?", int64(uid), topic, key).First(&find).Error
+	err := a.db.Where("`uid` = ? AND `topic` = ? AND `key` = ?", uid.UserId(), topic, key).First(&find).Error
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return err
 	}
 	if find.ID > 0 {
 		return a.db.
 			Model(&model.Config{}).
-			Where("`uid` = ? AND `topic` = ? AND `key` = ?", int64(uid), topic, key).
+			Where("`uid` = ? AND `topic` = ? AND `key` = ?", uid.UserId(), topic, key).
 			Update("value", value).Error
 	} else {
 		return a.db.Create(&model.Config{
-			Uid:   int64(uid),
+			Uid:   uid.UserId(),
 			Topic: topic,
 			Key:   key,
 			Value: value,
@@ -78,7 +78,7 @@ func (a *adapter) ConfigSet(uid types.Uid, topic, key string, value model.JSON) 
 
 func (a *adapter) ConfigGet(uid types.Uid, topic, key string) (model.JSON, error) {
 	var find model.Config
-	err := a.db.Where("`uid` = ? AND `topic` = ? AND `key` = ?", int(uid), topic, key).First(&find).Error
+	err := a.db.Where("`uid` = ? AND `topic` = ? AND `key` = ?", uid.UserId(), topic, key).First(&find).Error
 	if err != nil {
 		return nil, err
 	}

@@ -6,7 +6,7 @@ import (
 
 type Config struct {
 	ID        uint `gorm:"primaryKey"`
-	Uid       int64
+	Uid       string
 	Topic     string
 	Key       string
 	Value     JSON `gorm:"type:json"`
@@ -20,7 +20,7 @@ func (Config) TableName() string {
 
 type OAuth struct {
 	ID        uint `gorm:"primaryKey"`
-	Uid       int64
+	Uid       string
 	Topic     string
 	Name      string
 	Type      string

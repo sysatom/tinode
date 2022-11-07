@@ -1,5 +1,10 @@
 package types
 
+import (
+	"github.com/tinode/chat/server/store/types"
+	"time"
+)
+
 type MessageType string
 
 const (
@@ -191,4 +196,21 @@ func Convert(payloads []MsgPayload) ([]map[string]interface{}, []interface{}) {
 		}
 	}
 	return heads, contents
+}
+
+type Context struct {
+	// Message ID denormalized
+	Id string `json:"-"`
+	// Un-routable (original) topic name denormalized from XXX.Topic.
+	Original string `json:"-"`
+	// Routable (expanded) topic name.
+	RcptTo string `json:"-"`
+	// Sender's UserId as string.
+	AsUser types.Uid `json:"-"`
+	// Sender's authentication level.
+	AuthLvl int `json:"-"`
+	// Denormalized 'what' field of meta messages (set, get, del).
+	MetaWhat int `json:"-"`
+	// Timestamp when this message was received by the server.
+	Timestamp time.Time `json:"-"`
 }

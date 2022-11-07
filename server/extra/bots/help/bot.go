@@ -1,16 +1,14 @@
-package demo
+package help
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"github.com/tinode/chat/server/extra/bots"
-	"github.com/tinode/chat/server/extra/command"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
 )
 
-const Name = "demo"
+const Name = "help"
 
 var handler bot
 
@@ -48,35 +46,14 @@ func (bot) IsReady() bool {
 	return handler.initialized
 }
 
-func (b bot) Run(_ map[string]interface{}, content interface{}) ([]map[string]interface{}, []interface{}, error) {
+func (b bot) Run(ctx types.Context, head map[string]interface{}, content interface{}) ([]map[string]interface{}, []interface{}, error) {
 	if !b.IsReady() {
 		// todo error message
 		logs.Info.Printf("bot %s unavailable", Name)
 		return nil, nil, nil
 	}
 
-	in, ok := content.(string)
-	if !ok {
-		return nil, nil, nil
-	}
-	ctx := context.Background()
-	rs := command.Ruleset(commandRules)
-	payloads, err := rs.Help(in)
-	if err != nil {
-		return nil, nil, err
-	}
-	if len(payloads) > 0 {
-		heads, contents := types.Convert(payloads)
-		return heads, contents, nil
-	}
-
-	payloads, err = rs.ProcessCommand(ctx, in)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	heads, contents := types.Convert(payloads)
-	return heads, contents, nil
+	return bots.RunCommand(commandRules, ctx, head, content)
 }
 
 func init() {

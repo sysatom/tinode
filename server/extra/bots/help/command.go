@@ -1,7 +1,6 @@
-package demo
+package help
 
 import (
-	"context"
 	"crypto/rand"
 	"fmt"
 	"github.com/tinode/chat/server/extra/command"
@@ -17,21 +16,21 @@ var commandRules = []command.Rule{
 	{
 		Define: "version",
 		Help:   `Version`,
-		Handler: func(ctx context.Context, tokens []*command.Token) []types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*command.Token) []types.MsgPayload {
 
-			err := store.Chatbot.ConfigSet(1, "abc", "k", map[string]interface{}{
+			err := store.Chatbot.ConfigSet(ctx.AsUser, "abc", "k", map[string]interface{}{
 				"a": "123",
 			})
 			if err != nil {
 				logs.Err.Println(err)
 			}
-			err = store.Chatbot.ConfigSet(1, "abc", "k", map[string]interface{}{
+			err = store.Chatbot.ConfigSet(ctx.AsUser, "abc", "k", map[string]interface{}{
 				"a": "abc",
 			})
 			if err != nil {
 				logs.Err.Println(err)
 			}
-			v, err := store.Chatbot.ConfigGet(1, "abc", "k")
+			v, err := store.Chatbot.ConfigGet(ctx.AsUser, "abc", "k")
 			if err != nil {
 				logs.Err.Println(err)
 			}
@@ -44,7 +43,7 @@ var commandRules = []command.Rule{
 	{
 		Define: "rand [number] [number]",
 		Help:   `Generate random numbers`,
-		Handler: func(ctx context.Context, tokens []*command.Token) []types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*command.Token) []types.MsgPayload {
 			min, _ := tokens[1].Value.Int64()
 			max, _ := tokens[2].Value.Int64()
 
@@ -61,7 +60,7 @@ var commandRules = []command.Rule{
 	{
 		Define: "id",
 		Help:   `Generate random id`,
-		Handler: func(ctx context.Context, tokens []*command.Token) []types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*command.Token) []types.MsgPayload {
 			key, err := generateRandomString(16)
 			if err != nil {
 				logs.Err.Println(err)
@@ -78,9 +77,26 @@ var commandRules = []command.Rule{
 		},
 	},
 	{
+		Define: "uid [string]",
+		Help:   `Decode UID string`,
+		Handler: func(ctx types.Context, tokens []*command.Token) []types.MsgPayload {
+			str, _ := tokens[1].Value.String()
+			var uid storeTypes.Uid
+			var result string
+			err := uid.UnmarshalText([]byte(str))
+			if err != nil {
+				result = err.Error()
+			} else {
+				result = fmt.Sprintf("%d", uid)
+			}
+
+			return []types.MsgPayload{types.TextMsg{Text: result}}
+		},
+	},
+	{
 		Define: "messages",
 		Help:   `Demo messages`,
-		Handler: func(ctx context.Context, tokens []*command.Token) []types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*command.Token) []types.MsgPayload {
 			return []types.MsgPayload{types.TextMsg{Text: "msg1"}, types.TextMsg{Text: "msg2"}}
 		},
 	},

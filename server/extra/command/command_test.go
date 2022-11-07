@@ -1,7 +1,6 @@
 package command
 
 import (
-	"context"
 	"github.com/tinode/chat/server/extra/types"
 	"strconv"
 	"testing"
@@ -15,14 +14,14 @@ func TestRegexRule(t *testing.T) {
 		{
 			Define: `test`,
 			Help:   `Test info`,
-			Handler: func(ctx context.Context, tokens []*Token) []types.MsgPayload {
+			Handler: func(ctx types.Context, tokens []*Token) []types.MsgPayload {
 				return []types.MsgPayload{types.TextMsg{Text: "test"}}
 			},
 		},
 		{
 			Define: `todo [string]`,
 			Help:   `todo something`,
-			Handler: func(ctx context.Context, tokens []*Token) []types.MsgPayload {
+			Handler: func(ctx types.Context, tokens []*Token) []types.MsgPayload {
 				text, _ := tokens[1].Value.String()
 				return []types.MsgPayload{types.TextMsg{Text: text}}
 			},
@@ -30,7 +29,7 @@ func TestRegexRule(t *testing.T) {
 		{
 			Define: `add [number] [number]`,
 			Help:   `Addition`,
-			Handler: func(ctx context.Context, tokens []*Token) []types.MsgPayload {
+			Handler: func(ctx types.Context, tokens []*Token) []types.MsgPayload {
 				tt1, _ := tokens[1].Value.Int64()
 				tt2, _ := tokens[2].Value.Int64()
 				return []types.MsgPayload{types.TextMsg{Text: strconv.Itoa(int(tt1 + tt2))}}
@@ -40,19 +39,19 @@ func TestRegexRule(t *testing.T) {
 
 	b := Ruleset(testRules)
 
-	out, err := b.ProcessCommand(context.Background(), "test")
+	out, err := b.ProcessCommand(types.Context{}, "test")
 	if err != nil {
 		t.Fatal(err)
 	}
 	require.Contains(t, out, types.TextMsg{Text: "test"})
 
-	out2, err := b.ProcessCommand(context.Background(), "add 1 2")
+	out2, err := b.ProcessCommand(types.Context{}, "add 1 2")
 	if err != nil {
 		t.Fatal(err)
 	}
 	require.Contains(t, out2, types.TextMsg{Text: "3"})
 
-	out3, err := b.ProcessCommand(context.Background(), "help")
+	out3, err := b.ProcessCommand(types.Context{}, "help")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -64,7 +63,7 @@ func TestRegexRule(t *testing.T) {
 	}
 	assert.True(t, len(help) > 0)
 
-	out4, err := b.ProcessCommand(context.Background(), `todo "a b c"`)
+	out4, err := b.ProcessCommand(types.Context{}, `todo "a b c"`)
 	if err != nil {
 		t.Fatal(err)
 	}
