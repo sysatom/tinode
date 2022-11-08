@@ -56,6 +56,10 @@ func (b bot) Run(ctx types.Context, head map[string]interface{}, content interfa
 	return bots.RunCommand(commandRules, ctx, head, content)
 }
 
+func (bot) Cron() error {
+	return nil
+}
+
 func init() {
 	bots.Register(Name, &handler)
 }

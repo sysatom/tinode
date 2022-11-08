@@ -113,6 +113,15 @@ func (a *adapter) OAuthGet(uid types.Uid, topic, t string) (model.OAuth, error) 
 	return find, nil
 }
 
+func (a *adapter) OAuthGetAvailable(t string) ([]model.OAuth, error) {
+	var find []model.OAuth
+	err := a.db.Where("`type` = ? AND `token` <> ''", t).Find(&find).Error
+	if err != nil {
+		return []model.OAuth{}, err
+	}
+	return find, nil
+}
+
 func init() {
 	store.RegisterAdapter(&adapter{})
 }

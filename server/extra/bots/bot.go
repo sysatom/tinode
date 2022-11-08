@@ -18,6 +18,9 @@ type Handler interface {
 
 	// Run return bot result
 	Run(ctx types.Context, head map[string]interface{}, content interface{}) ([]map[string]interface{}, []interface{}, error)
+
+	// Cron cron script daemon
+	Cron() error
 }
 
 type configType struct {
@@ -89,6 +92,9 @@ func Init(jsonconf json.RawMessage) error {
 			configItem = []byte(`{"enabled": true}`)
 		}
 		if err := bot.Init(configItem); err != nil {
+			return err
+		}
+		if err := bot.Cron(); err != nil {
 			return err
 		}
 	}

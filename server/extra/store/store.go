@@ -95,6 +95,7 @@ type ChatbotPersistenceInterface interface {
 	ConfigGet(uid types.Uid, topic, key string) (model.JSON, error)
 	OAuthSet(oauth model.OAuth) error
 	OAuthGet(uid types.Uid, topic, t string) (model.OAuth, error)
+	OAuthGetAvailable(t string) ([]model.OAuth, error)
 }
 
 var Chatbot ChatbotPersistenceInterface
@@ -115,6 +116,10 @@ func (c chatbotMapper) OAuthSet(oauth model.OAuth) error {
 
 func (c chatbotMapper) OAuthGet(uid types.Uid, topic, t string) (model.OAuth, error) {
 	return adp.OAuthGet(uid, topic, t)
+}
+
+func (c chatbotMapper) OAuthGetAvailable(t string) ([]model.OAuth, error) {
+	return adp.OAuthGetAvailable(t)
 }
 
 func init() {

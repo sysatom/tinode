@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/tinode/chat/server/extra/bots"
+	"github.com/tinode/chat/server/extra/cron"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
 )
@@ -56,6 +57,12 @@ func (b bot) Run(ctx types.Context, head map[string]interface{}, content interfa
 	}
 
 	return bots.RunCommand(commandRules, ctx, head, content)
+}
+
+func (bot) Cron() error {
+	ruleset := cron.NewCronRuleset(Name, cronRules)
+	ruleset.Daemon()
+	return nil
 }
 
 func init() {

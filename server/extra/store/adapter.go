@@ -29,4 +29,6 @@ type Adapter interface {
 	OAuthSet(oauth model.OAuth) error
 	// OAuthGet oauth get
 	OAuthGet(uid types.Uid, topic, t string) (model.OAuth, error)
+	// OAuthGetAvailable oauth get available
+	OAuthGetAvailable(t string) ([]model.OAuth, error)
 }
