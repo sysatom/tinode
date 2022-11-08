@@ -10,12 +10,11 @@ import (
 )
 
 type Rule struct {
-	Name    string
-	Id      string
-	Channel string
-	When    string
-	Mode    string
-	Page    struct {
+	Name string
+	Id   string
+	When string
+	Mode string
+	Page struct {
 		URL  string
 		List string
 		Item map[string]string
@@ -39,7 +38,7 @@ func (r Rule) Run() [][]byte {
 		sort.Strings(keys)
 
 		txt := bytes.Buffer{}
-		for _, k := range keys {
+		for _, k := range keys { // todo format
 			f := ParseFun(s, r.Page.Item[k])
 			v, err := f.Invoke()
 			if err != nil {
@@ -65,10 +64,10 @@ func (r Rule) Run() [][]byte {
 }
 
 type Result struct {
-	Name    string
-	Channel string
-	Mode    string
-	Result  [][]byte
+	Name   string
+	ID     string
+	Mode   string
+	Result [][]byte
 }
 
 func document(url string) (*goquery.Document, error) {

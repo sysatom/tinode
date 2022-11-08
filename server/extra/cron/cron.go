@@ -37,7 +37,7 @@ func (r *Ruleset) Daemon() {
 	// process cron
 	ctx := extraTypes.Context{}
 	for rule := range r.cronRules {
-		logs.Info.Println("cron " + r.cronRules[rule].Name + ": start...")
+		logs.Info.Printf("cron %s start...", r.cronRules[rule].Name)
 		go r.ruleWorker(ctx, r.cronRules[rule])
 	}
 
@@ -58,11 +58,11 @@ func (r *Ruleset) ruleWorker(ctx extraTypes.Context, rule Rule) {
 	}
 	for {
 		if nextTime.Format("2006-01-02 15:04") == time.Now().Format("2006-01-02 15:04") {
-			logs.Info.Println("cron " + rule.Name + ": scheduled")
+			logs.Info.Printf("cron %s scheduled", rule.Name)
 			msgs := func() []extraTypes.MsgPayload {
 				defer func() {
 					if rc := recover(); rc != nil {
-						logs.Warn.Println("ruleWorker recover " + rule.Name)
+						logs.Warn.Printf("cron %s ruleWorker recover", rule.Name)
 						if v, ok := rc.(error); ok {
 							logs.Err.Println(v)
 						}

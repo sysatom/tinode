@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"fmt"
 	"github.com/tinode/chat/server/extra/command"
-	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
 	storeTypes "github.com/tinode/chat/server/store/types"
@@ -17,26 +16,6 @@ var commandRules = []command.Rule{
 		Define: "version",
 		Help:   `Version`,
 		Handler: func(ctx types.Context, tokens []*command.Token) []types.MsgPayload {
-
-			err := store.Chatbot.ConfigSet(ctx.AsUser, "abc", "k", map[string]interface{}{
-				"a": "123",
-			})
-			if err != nil {
-				logs.Err.Println(err)
-			}
-			err = store.Chatbot.ConfigSet(ctx.AsUser, "abc", "k", map[string]interface{}{
-				"a": "abc",
-			})
-			if err != nil {
-				logs.Err.Println(err)
-			}
-			v, err := store.Chatbot.ConfigGet(ctx.AsUser, "abc", "k")
-			if err != nil {
-				logs.Err.Println(err)
-			}
-			fmt.Println(v)
-			fmt.Println(v.String("a"))
-
 			return []types.MsgPayload{types.TextMsg{Text: "V1"}}
 		},
 	},

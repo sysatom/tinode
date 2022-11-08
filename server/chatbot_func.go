@@ -315,11 +315,11 @@ func initializeCrawler() error {
 	}
 
 	c := crawler.New()
-	c.Send = func(channel, name string, out [][]byte) {
+	c.Send = func(id, name string, out [][]byte) {
 		if len(out) == 0 {
 			return
 		}
-		topic := fmt.Sprintf("grp%s", channel)
+		topic := fmt.Sprintf("grp%s", id)
 		dst, err := store.Topics.Get(topic)
 		if err != nil {
 			logs.Err.Println(err)
@@ -330,7 +330,7 @@ func initializeCrawler() error {
 		}
 		builder := extraTypes.MsgBuilder{}
 		for _, i := range out {
-			builder.AppendText(string(i), extraTypes.TextOption{})
+			builder.AppendTextLine(string(i), extraTypes.TextOption{})
 		}
 		head, content := builder.Message.Content()
 

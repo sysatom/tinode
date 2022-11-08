@@ -1,7 +1,7 @@
 package types
 
 import (
-	"fmt"
+	"github.com/tinode/chat/server/logs"
 	"testing"
 )
 
@@ -30,6 +30,6 @@ func TestMsgBuilder(t *testing.T) {
 		ButtonDataRef: "https://demo.dev/test/action"})
 
 	head, content := builder.Message.Content()
-	fmt.Println(head)
-	fmt.Printf("%s\n", content)
+	logs.Info.Println(head)
+	logs.Info.Printf("%s\n", content)
 }

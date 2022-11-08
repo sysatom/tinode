@@ -16,7 +16,7 @@ type Crawler struct {
 	jobs  map[string]Rule
 	outCh chan Result
 
-	Send func(channel, name string, out [][]byte)
+	Send func(id, name string, out [][]byte)
 }
 
 func New() *Crawler {
@@ -63,7 +63,7 @@ func (s *Crawler) Run() {
 }
 
 func (s *Crawler) ruleWorker(name string, r Rule) {
-	logs.Info.Println("crawler : crawl...", name)
+	logs.Info.Printf("crawler %s crawl...", name)
 	p, err := cron.ParseUTC(r.When)
 	if err != nil {
 		logs.Err.Println(err, name)
@@ -76,11 +76,11 @@ func (s *Crawler) ruleWorker(name string, r Rule) {
 	}
 	for {
 		if nextTime.Format("2006-01-02 15:04") == time.Now().Format("2006-01-02 15:04") {
-			logs.Info.Println("crawler : scheduled", name)
+			logs.Info.Printf("crawler %s scheduled", name)
 			result := func() [][]byte {
 				defer func() {
 					if r := recover(); r != nil {
-						logs.Warn.Println("ruleWorker recover "+name, name)
+						logs.Warn.Printf("crawler %s ruleWorker recover ", name)
 						if v, ok := r.(error); ok {
 							logs.Err.Println(v, name)
 						}
@@ -88,13 +88,12 @@ func (s *Crawler) ruleWorker(name string, r Rule) {
 				}()
 				return r.Run()
 			}()
-			logs.Info.Println("crawler: result", len(result))
 			if len(result) > 0 {
 				s.outCh <- Result{
-					Name:    name,
-					Channel: r.Channel,
-					Mode:    r.Mode,
-					Result:  result,
+					Name:   name,
+					ID:     r.Id,
+					Mode:   r.Mode,
+					Result: result,
 				}
 			}
 		}
@@ -113,7 +112,7 @@ func (s *Crawler) resultWorker() {
 		// filter
 		diff := s.filter(out.Name, out.Mode, out.Result)
 		// send
-		s.Send(out.Channel, out.Name, diff)
+		s.Send(out.ID, out.Name, diff)
 	}
 }
 
