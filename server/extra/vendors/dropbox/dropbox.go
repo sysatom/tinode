@@ -79,7 +79,7 @@ func (v *Dropbox) Redirect(req *http.Request) (string, error) {
 	return appRedirectURI, nil
 }
 
-func (v *Dropbox) StoreAccessToken(req *http.Request) (interface{}, error) {
+func (v *Dropbox) StoreAccessToken(req *http.Request) (map[string]interface{}, error) {
 	code := req.URL.Query().Get("code")
 	clientId := ""     // todo
 	clientSecret := "" // todo

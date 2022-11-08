@@ -1,10 +1,14 @@
 package github
 
 import (
+	"errors"
 	"github.com/tinode/chat/server/extra/command"
+	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/vendors"
 	"github.com/tinode/chat/server/extra/vendors/github"
+	"github.com/tinode/chat/server/logs"
+	"gorm.io/gorm"
 )
 
 var commandRules = []command.Rule{
@@ -19,13 +23,18 @@ var commandRules = []command.Rule{
 		Define: "oauth",
 		Help:   `OAuth`,
 		Handler: func(ctx types.Context, tokens []*command.Token) []types.MsgPayload {
-			redirectURI := vendors.RedirectURI(github.ID)
-			provider := github.NewGithub(config.ID, config.Secret, redirectURI, "")
-			return []types.MsgPayload{types.LinkMsg{Url: provider.AuthorizeURL()},
-				types.TextMsg{Text: ctx.AsUser.UserId()},
-				types.TextMsg{Text: ctx.RcptTo},
-				types.TextMsg{Text: ctx.Original},
+			// check oauth token
+			oauth, err := store.Chatbot.OAuthGet(ctx.AsUser, ctx.Original, Name)
+			if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+				logs.Err.Println(err)
 			}
+			if oauth.Token != "" {
+				return []types.MsgPayload{types.TextMsg{Text: "App is authorized"}}
+			}
+
+			redirectURI := vendors.RedirectURI(github.ID)
+			provider := github.NewGithub(Config.ID, Config.Secret, redirectURI, "")
+			return []types.MsgPayload{types.LinkMsg{Url: provider.AuthorizeURL()}}
 		},
 	},
 }

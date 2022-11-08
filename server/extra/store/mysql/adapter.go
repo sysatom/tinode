@@ -85,6 +85,34 @@ func (a *adapter) ConfigGet(uid types.Uid, topic, key string) (model.JSON, error
 	return find.Value, nil
 }
 
+func (a *adapter) OAuthSet(oauth model.OAuth) error {
+	var find model.OAuth
+	err := a.db.Where("`uid` = ? AND `topic` = ? AND `type` = ?", oauth.Uid, oauth.Topic, oauth.Type).First(&find).Error
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return err
+	}
+	if find.ID > 0 {
+		return a.db.
+			Model(&model.OAuth{}).
+			Where("`uid` = ? AND `topic` = ? AND `type` = ?", oauth.Uid, oauth.Topic, oauth.Type).
+			UpdateColumns(map[string]interface{}{
+				"token": oauth.Token,
+				"extra": oauth.Extra,
+			}).Error
+	} else {
+		return a.db.Create(&oauth).Error
+	}
+}
+
+func (a *adapter) OAuthGet(uid types.Uid, topic, t string) (model.OAuth, error) {
+	var find model.OAuth
+	err := a.db.Where("`uid` = ? AND `topic` = ? AND `type` = ?", uid.UserId(), topic, t).First(&find).Error
+	if err != nil {
+		return model.OAuth{}, err
+	}
+	return find, nil
+}
+
 func init() {
 	store.RegisterAdapter(&adapter{})
 }

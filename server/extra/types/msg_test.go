@@ -25,7 +25,7 @@ func TestMsgBuilder(t *testing.T) {
 	builder.AppendText("What's your gender?", TextOption{IsBold: true, IsForm: true})
 	builder.AppendText("Male", TextOption{IsButton: true, ButtonDataName: "male", ButtonDataVal: "male", ButtonDataAct: "pub"})
 	builder.AppendText("Female", TextOption{IsButton: true, ButtonDataName: "female", ButtonDataVal: "female", ButtonDataAct: "pub"})
-	// act: pub, url
+	// act: pub, url, note
 	builder.AppendText("Other", TextOption{IsButton: true, ButtonDataName: "other", ButtonDataVal: "other", ButtonDataAct: "url",
 		ButtonDataRef: "https://demo.dev/test/action"})
 

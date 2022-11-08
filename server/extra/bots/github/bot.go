@@ -11,7 +11,7 @@ import (
 const Name = "github"
 
 var handler bot
-var config configType
+var Config configType
 
 type bot struct {
 	initialized bool
@@ -30,11 +30,11 @@ func (bot) Init(jsonconf json.RawMessage) error {
 		return errors.New("already initialized")
 	}
 
-	if err := json.Unmarshal(jsonconf, &config); err != nil {
+	if err := json.Unmarshal(jsonconf, &Config); err != nil {
 		return errors.New("failed to parse config: " + err.Error())
 	}
 
-	if !config.Enabled {
+	if !Config.Enabled {
 		logs.Info.Printf("bot %s disabled", Name)
 		return nil
 	}

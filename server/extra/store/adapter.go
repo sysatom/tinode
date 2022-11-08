@@ -25,4 +25,8 @@ type Adapter interface {
 	ConfigSet(uid types.Uid, topic, key string, value model.JSON) error
 	// ConfigGet kv get
 	ConfigGet(uid types.Uid, topic, key string) (model.JSON, error)
+	// OAuthSet oauth set
+	OAuthSet(oauth model.OAuth) error
+	// OAuthGet oauth get
+	OAuthGet(uid types.Uid, topic, t string) (model.OAuth, error)
 }

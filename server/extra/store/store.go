@@ -93,6 +93,8 @@ func (s storeObj) DbStats() func() interface{} {
 type ChatbotPersistenceInterface interface {
 	ConfigSet(uid types.Uid, topic, key string, value model.JSON) error
 	ConfigGet(uid types.Uid, topic, key string) (model.JSON, error)
+	OAuthSet(oauth model.OAuth) error
+	OAuthGet(uid types.Uid, topic, t string) (model.OAuth, error)
 }
 
 var Chatbot ChatbotPersistenceInterface
@@ -105,6 +107,14 @@ func (c chatbotMapper) ConfigSet(uid types.Uid, topic, key string, value model.J
 
 func (c chatbotMapper) ConfigGet(uid types.Uid, topic, key string) (model.JSON, error) {
 	return adp.ConfigGet(uid, topic, key)
+}
+
+func (c chatbotMapper) OAuthSet(oauth model.OAuth) error {
+	return adp.OAuthSet(oauth)
+}
+
+func (c chatbotMapper) OAuthGet(uid types.Uid, topic, t string) (model.OAuth, error) {
+	return adp.OAuthGet(uid, topic, t)
 }
 
 func init() {

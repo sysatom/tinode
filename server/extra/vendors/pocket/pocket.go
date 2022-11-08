@@ -121,7 +121,7 @@ func (v *Pocket) Redirect(req *http.Request) (string, error) {
 	return appRedirectURI, nil
 }
 
-func (v *Pocket) StoreAccessToken(req *http.Request) (interface{}, error) {
+func (v *Pocket) StoreAccessToken(req *http.Request) (map[string]interface{}, error) {
 	clientId := "" // todo
 	v.clientId = clientId
 

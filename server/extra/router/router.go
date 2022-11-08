@@ -1,8 +1,14 @@
 package router
 
 import (
-	"fmt"
+	botGithub "github.com/tinode/chat/server/extra/bots/github"
+	"github.com/tinode/chat/server/extra/store"
+	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/vendors"
+	"github.com/tinode/chat/server/extra/vendors/dropbox"
+	"github.com/tinode/chat/server/extra/vendors/github"
+	"github.com/tinode/chat/server/extra/vendors/pocket"
+	"github.com/tinode/chat/server/logs"
 	"net/http"
 	"regexp"
 	"strings"
@@ -26,7 +32,7 @@ func oauthRedirect(rw http.ResponseWriter, req *http.Request) {
 	category := strings.ReplaceAll(req.URL.Path, "/extra/oauth/", "")
 	category = strings.ReplaceAll(req.URL.Path, "/redirect", "")
 	category = strings.ToLower(category)
-	provider := vendors.NewOAuthProvider(category, "")
+	provider := newProvider(category)
 	url, err := provider.Redirect(req)
 	if err != nil {
 		rw.WriteHeader(http.StatusBadRequest)
@@ -38,15 +44,58 @@ func oauthRedirect(rw http.ResponseWriter, req *http.Request) {
 }
 
 func oauth(rw http.ResponseWriter, req *http.Request) {
-	category := strings.ToLower(strings.ReplaceAll(req.URL.Path, "/extra/oauth/", ""))
-	provider := vendors.NewOAuthProvider(category, "")
+	paramsPatch := strings.ToLower(strings.ReplaceAll(req.URL.Path, "/extra/oauth/", ""))
+	params := strings.Split(paramsPatch, "/")
+	if len(params) != 3 {
+		rw.Write([]byte("path error"))
+		return
+	}
+
+	// code -> token
+	provider := newProvider(params[0])
 	tk, err := provider.StoreAccessToken(req)
 	if err != nil {
+		logs.Err.Println(err)
 		rw.WriteHeader(http.StatusBadRequest)
 		rw.Write([]byte("oauth error"))
 		return
 	}
-	// todo store
-	fmt.Println(tk)
+
+	// store
+	extra := model.JSON{}
+	_ = extra.Scan(tk["extra"])
+	err = store.Chatbot.OAuthSet(model.OAuth{
+		Uid:   params[1],
+		Topic: params[2],
+		Name:  params[0],
+		Type:  params[0],
+		Token: tk["token"].(string),
+		Extra: extra,
+	})
+	if err != nil {
+		logs.Err.Println(err)
+		rw.WriteHeader(http.StatusBadRequest)
+		rw.Write([]byte("store error"))
+		return
+	}
+
 	rw.Write([]byte("ok"))
+}
+
+func newProvider(category string) vendors.OAuthProvider {
+	var provider vendors.OAuthProvider
+
+	switch category {
+	case pocket.ID:
+		p := pocket.NewPocket("", "", "", "")
+		provider = p
+	case github.ID:
+		provider = github.NewGithub(botGithub.Config.ID, botGithub.Config.Secret, "", "")
+	case dropbox.ID:
+		provider = dropbox.NewDropbox("", "", "", "")
+	default:
+		return nil
+	}
+
+	return provider
 }

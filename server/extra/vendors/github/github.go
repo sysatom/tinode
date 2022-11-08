@@ -344,13 +344,8 @@ func (v *Github) Redirect(req *http.Request) (string, error) {
 	return appRedirectURI, nil
 }
 
-func (v *Github) StoreAccessToken(req *http.Request) (interface{}, error) {
+func (v *Github) StoreAccessToken(req *http.Request) (map[string]interface{}, error) {
 	code := req.URL.Query().Get("code")
-	clientId := ""     // todo
-	clientSecret := "" // todo
-	v.clientId = clientId
-	v.clientSecret = clientSecret
-
 	tokenResp, err := v.GetAccessToken(code)
 	if err != nil {
 		return nil, err
