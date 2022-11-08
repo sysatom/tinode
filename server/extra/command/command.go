@@ -1,10 +1,8 @@
 package command
 
 import (
-	"fmt"
 	"github.com/tinode/chat/server/extra/types"
 	"strings"
-	"unicode"
 )
 
 type Rule struct {
@@ -17,13 +15,13 @@ type Ruleset []Rule
 
 func (r Ruleset) Help(in string) ([]types.MsgPayload, error) {
 	if strings.ToLower(in) == "help" {
-		var helpMsg string
-		for _, rule := range r {
-			helpMsg = fmt.Sprintf("%s%s%s%s\n", helpMsg, rule.Define, " :: ", rule.Help)
+		table := types.TableMsg{
+			Header: []string{"Define", "Help"},
 		}
-		return []types.MsgPayload{
-			types.TextMsg{Text: strings.TrimLeftFunc(helpMsg, unicode.IsSpace)},
-		}, nil
+		for _, rule := range r {
+			table.Row = append(table.Row, []interface{}{rule.Define, rule.Help})
+		}
+		return []types.MsgPayload{table}, nil
 	}
 	return nil, nil
 }

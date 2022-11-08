@@ -234,6 +234,7 @@ func (m *MsgBuilder) AppendText(text string, opt TextOption) {
 				Name: opt.ButtonDataName,
 				Act:  opt.ButtonDataAct,
 				Val:  opt.ButtonDataVal,
+				Ref:  opt.ButtonDataRef,
 			},
 		}
 		m.Message.Ent = append(m.Message.Ent, ent)
@@ -469,6 +470,7 @@ type TextOption struct {
 	ButtonDataName string
 	ButtonDataAct  string
 	ButtonDataVal  string
+	ButtonDataRef  string
 }
 
 type ImageOption struct {

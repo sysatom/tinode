@@ -200,6 +200,34 @@ func Convert(payloads []MsgPayload) ([]map[string]interface{}, []interface{}) {
 			head, content := builder.Message.Content()
 			heads = append(heads, head)
 			contents = append(contents, content)
+		case TableMsg:
+			builder := MsgBuilder{}
+			// title
+			builder.AppendTextLine(v.Title, TextOption{})
+			// header
+			builder.AppendText(" | ", TextOption{})
+			for _, header := range v.Header {
+				builder.AppendText(header, TextOption{IsBold: true})
+				builder.AppendText(" | ", TextOption{})
+			}
+			builder.AppendText("\n", TextOption{})
+			// row
+			for _, row := range v.Row {
+				builder.AppendText(" | ", TextOption{})
+				for _, item := range row {
+					switch t := item.(type) {
+					case string:
+						builder.AppendText(t, TextOption{})
+					case int:
+					}
+					builder.AppendText(" | ", TextOption{})
+				}
+				builder.AppendText("\n", TextOption{})
+			}
+
+			head, content := builder.Message.Content()
+			heads = append(heads, head)
+			contents = append(contents, content)
 		}
 	}
 	return heads, contents

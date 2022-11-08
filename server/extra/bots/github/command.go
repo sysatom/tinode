@@ -21,7 +21,11 @@ var commandRules = []command.Rule{
 		Handler: func(ctx types.Context, tokens []*command.Token) []types.MsgPayload {
 			redirectURI := vendors.RedirectURI(github.ID)
 			provider := github.NewGithub(config.ID, config.Secret, redirectURI, "")
-			return []types.MsgPayload{types.LinkMsg{Url: provider.AuthorizeURL()}}
+			return []types.MsgPayload{types.LinkMsg{Url: provider.AuthorizeURL()},
+				types.TextMsg{Text: ctx.AsUser.UserId()},
+				types.TextMsg{Text: ctx.RcptTo},
+				types.TextMsg{Text: ctx.Original},
+			}
 		},
 	},
 }
