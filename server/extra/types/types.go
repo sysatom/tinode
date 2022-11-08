@@ -2,6 +2,7 @@ package types
 
 import (
 	"github.com/tinode/chat/server/store/types"
+	"strconv"
 	"time"
 )
 
@@ -219,6 +220,7 @@ func Convert(payloads []MsgPayload) ([]map[string]interface{}, []interface{}) {
 					case string:
 						builder.AppendText(t, TextOption{})
 					case int:
+						builder.AppendText(strconv.Itoa(t), TextOption{})
 					}
 					builder.AppendText(" | ", TextOption{})
 				}
