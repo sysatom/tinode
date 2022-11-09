@@ -2,17 +2,15 @@ package crawler
 
 import (
 	"fmt"
-	"github.com/flower-corp/rosedb"
 	"github.com/influxdata/cron"
+	"github.com/tinode/chat/server/extra/cache"
 	"github.com/tinode/chat/server/logs"
-	"path/filepath"
 	"regexp"
 	"strconv"
 	"time"
 )
 
 type Crawler struct {
-	db    *rosedb.RoseDB
 	jobs  map[string]Rule
 	outCh chan Result
 
@@ -20,15 +18,7 @@ type Crawler struct {
 }
 
 func New() *Crawler {
-	path := filepath.Join("./tmp", "rosedb")
-	opts := rosedb.DefaultOptions(path)
-	db, err := rosedb.Open(opts)
-	if err != nil {
-		logs.Err.Fatal("open rosedb err: %v", err)
-	}
-
 	return &Crawler{
-		db:    db,
 		jobs:  make(map[string]Rule),
 		outCh: make(chan Result, 10),
 	}
@@ -122,13 +112,13 @@ func (s *Crawler) filter(name, mode string, latest [][]byte) [][]byte {
 	sendTimeKey := fmt.Sprintf("crawler:%s:sendtime", name)
 
 	// sent
-	old, err := s.db.SMembers([]byte(sentKey))
+	old, err := cache.DB.SMembers([]byte(sentKey))
 	if err != nil {
 		return [][]byte{}
 	}
 
 	// to do
-	todo, err := s.db.SMembers([]byte(todoKey))
+	todo, err := cache.DB.SMembers([]byte(todoKey))
 	if err != nil {
 		return [][]byte{}
 	}
@@ -141,9 +131,9 @@ func (s *Crawler) filter(name, mode string, latest [][]byte) [][]byte {
 
 	switch mode {
 	case "instant":
-		_ = s.db.Set([]byte(sendTimeKey), []byte(strconv.FormatInt(time.Now().Unix(), 10)))
+		_ = cache.DB.Set([]byte(sendTimeKey), []byte(strconv.FormatInt(time.Now().Unix(), 10)))
 	case "daily":
-		sendString, err := s.db.Get([]byte(sendTimeKey))
+		sendString, err := cache.DB.Get([]byte(sendTimeKey))
 		if err != nil {
 			return [][]byte{}
 		}
@@ -154,7 +144,7 @@ func (s *Crawler) filter(name, mode string, latest [][]byte) [][]byte {
 
 		if time.Now().Unix()-oldSend < 24*60*60 {
 			for _, item := range diff {
-				_ = s.db.SAdd([]byte(todoKey), item)
+				_ = cache.DB.SAdd([]byte(todoKey), item)
 			}
 
 			return [][]byte{}
@@ -162,18 +152,18 @@ func (s *Crawler) filter(name, mode string, latest [][]byte) [][]byte {
 
 		diff = append(diff, todo...)
 
-		_ = s.db.Set([]byte(sendTimeKey), []byte(strconv.FormatInt(time.Now().Unix(), 10)))
+		_ = cache.DB.Set([]byte(sendTimeKey), []byte(strconv.FormatInt(time.Now().Unix(), 10)))
 	default:
 		return [][]byte{}
 	}
 
 	// add data
 	for _, item := range diff {
-		_ = s.db.SAdd([]byte(sentKey), item)
+		_ = cache.DB.SAdd([]byte(sentKey), item)
 	}
 
 	// clear to do
-	_ = s.db.Delete([]byte(todoKey))
+	_ = cache.DB.Delete([]byte(todoKey))
 
 	return diff
 }

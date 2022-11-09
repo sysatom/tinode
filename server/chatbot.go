@@ -22,6 +22,9 @@ import (
 
 	// store
 	_ "github.com/tinode/chat/server/extra/store/mysql"
+
+	// cache
+	_ "github.com/tinode/chat/server/extra/cache"
 )
 
 // hot

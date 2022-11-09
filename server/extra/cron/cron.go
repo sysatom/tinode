@@ -1,7 +1,11 @@
 package cron
 
 import (
+	"crypto/sha1"
+	"encoding/json"
+	"fmt"
 	"github.com/influxdata/cron"
+	"github.com/tinode/chat/server/extra/cache"
 	"github.com/tinode/chat/server/extra/store"
 	extraTypes "github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
@@ -24,6 +28,7 @@ type Ruleset struct {
 }
 
 type result struct {
+	name    string
 	ctx     extraTypes.Context
 	payload extraTypes.MsgPayload
 }
@@ -91,6 +96,7 @@ func (r *Ruleset) ruleWorker(rule Rule) {
 						ra := rule.Action(ctx)
 						for i := range ra {
 							res = append(res, result{
+								name:    rule.Name,
 								ctx:     ctx,
 								payload: ra[i],
 							})
@@ -103,6 +109,7 @@ func (r *Ruleset) ruleWorker(rule Rule) {
 				ra := rule.Action(extraTypes.Context{}) // fixme
 				for i := range ra {
 					res = append(res, result{
+						name:    rule.Name,
 						ctx:     extraTypes.Context{}, // fixme
 						payload: ra[i],
 					})
@@ -127,10 +134,29 @@ func (r *Ruleset) ruleWorker(rule Rule) {
 
 func (r *Ruleset) resultWorker() {
 	for out := range r.outCh {
-		// filter todo
+		// filter
+		res := r.filter(out)
 		// pipeline
-		r.pipeline(out)
+		r.pipeline(res)
 	}
+}
+
+func (r *Ruleset) filter(res result) result {
+	filterKey := []byte(fmt.Sprintf("cron:%s:filter", res.name))
+
+	// content hash
+	d, _ := json.Marshal(res.payload)
+	s := sha1.New()
+	_, _ = s.Write(d)
+	hash := s.Sum(nil)
+
+	state := cache.DB.SIsMember(filterKey, hash)
+	if state {
+		return result{}
+	}
+
+	_ = cache.DB.SAdd(filterKey, hash)
+	return res
 }
 
 func (r *Ruleset) pipeline(res result) {
