@@ -24,7 +24,7 @@ var commandRules = []command.Rule{
 			// get
 			v, err := store.Chatbot.ConfigGet(ctx.AsUser, "", bark.BarkDeviceKey)
 			if err != nil {
-				logs.Err.Println(err)
+				logs.Err.Println("bot command key", err)
 			}
 			key, _ := v.String("value")
 
@@ -40,7 +40,7 @@ var commandRules = []command.Rule{
 			// get
 			v, err := store.Chatbot.ConfigGet(ctx.AsUser, "", bark.BarkDeviceKey)
 			if err != nil {
-				logs.Err.Println(err)
+				logs.Err.Println("bot command key [string]", err)
 			}
 			old, _ := v.String("value")
 
@@ -49,7 +49,7 @@ var commandRules = []command.Rule{
 				"value": key,
 			})
 			if err != nil {
-				logs.Err.Println(err)
+				logs.Err.Println("bot command key [string]", err)
 			}
 
 			return []types.MsgPayload{types.TextMsg{Text: fmt.Sprintf("%s --> %s", old, key)}}

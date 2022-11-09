@@ -108,7 +108,7 @@ func (barkPush) Stop() {
 func sendPushes(config *configType, rcpt *push.Receipt) {
 	body, err := drafty.PlainText(rcpt.Payload.Content)
 	if err != nil {
-		logs.Err.Println(err)
+		logs.Err.Println("bark push", err)
 		return
 	}
 
@@ -119,7 +119,7 @@ func sendPushes(config *configType, rcpt *push.Receipt) {
 
 		v, err := store.Chatbot.ConfigGet(uid, "", BarkDeviceKey)
 		if err != nil {
-			logs.Err.Println(err)
+			logs.Err.Println("bark push", err)
 			continue
 		}
 		config.DeviceKey, _ = v.String("value")
@@ -130,7 +130,7 @@ func sendPushes(config *configType, rcpt *push.Receipt) {
 		}
 		fromUser, err := serverStore.Users.Get(from)
 		if err != nil {
-			logs.Err.Println(err)
+			logs.Err.Println("bark push", err)
 			continue
 		}
 		if fromUser != nil && fromUser.Public != nil {
@@ -142,7 +142,7 @@ func sendPushes(config *configType, rcpt *push.Receipt) {
 
 		err = postMessage(config, "", body, rcpt.Payload.Topic)
 		if err != nil {
-			logs.Err.Println(err)
+			logs.Err.Println("bark push", err)
 			return
 		}
 	}

@@ -4,6 +4,7 @@ import (
 	"github.com/tinode/chat/server/extra/cron"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/vendors/github"
+	"github.com/tinode/chat/server/logs"
 )
 
 var cronRules = []cron.Rule{
@@ -23,7 +24,8 @@ var cronRules = []cron.Rule{
 
 			repos, err := client.GetStarred(*user.Login)
 			if err != nil {
-				return []types.MsgPayload{types.TextMsg{Text: err.Error()}}
+				logs.Err.Println("cron github_starred", err)
+				return []types.MsgPayload{}
 			}
 			reposList := *repos
 			var r []types.MsgPayload

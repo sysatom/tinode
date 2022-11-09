@@ -59,12 +59,12 @@ func (r *Ruleset) Daemon() {
 func (r *Ruleset) ruleWorker(rule Rule) {
 	p, err := cron.ParseUTC(rule.When)
 	if err != nil {
-		logs.Err.Println(err)
+		logs.Err.Println("cron worker", rule.Name, err)
 		return
 	}
 	nextTime, err := p.Next(time.Now())
 	if err != nil {
-		logs.Err.Println(err)
+		logs.Err.Println("cron worker", rule.Name, err)
 		return
 	}
 	for {
@@ -82,7 +82,7 @@ func (r *Ruleset) ruleWorker(rule Rule) {
 
 				items, err := store.Chatbot.OAuthGetAvailable(r.Type)
 				if err != nil {
-					logs.Err.Println(err)
+					logs.Err.Println("cron worker", rule.Name, err)
 					return nil
 				}
 				if len(items) > 0 {
@@ -125,7 +125,7 @@ func (r *Ruleset) ruleWorker(rule Rule) {
 		}
 		nextTime, err = p.Next(time.Now())
 		if err != nil {
-			logs.Err.Println(err)
+			logs.Err.Println("cron worker", rule.Name, err)
 			continue
 		}
 		time.Sleep(2 * time.Second)

@@ -27,7 +27,7 @@ var commandRules = []command.Rule{
 			// check oauth token
 			oauth, err := store.Chatbot.OAuthGet(ctx.AsUser, ctx.Original, Name)
 			if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-				logs.Err.Println(err)
+				logs.Err.Println("bot command github oauth", err)
 			}
 			if oauth.Token != "" {
 				return []types.MsgPayload{types.TextMsg{Text: "App is authorized"}}
@@ -45,7 +45,7 @@ var commandRules = []command.Rule{
 			// get token
 			oauth, err := store.Chatbot.OAuthGet(ctx.AsUser, ctx.Original, Name)
 			if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-				logs.Err.Println(err)
+				logs.Err.Println("bot command github user", err)
 			}
 			if oauth.Token == "" {
 				return []types.MsgPayload{types.TextMsg{Text: "App is unauthorized"}}

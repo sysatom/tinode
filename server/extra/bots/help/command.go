@@ -28,7 +28,7 @@ var commandRules = []command.Rule{
 
 			nBing, err := rand.Int(rand.Reader, big.NewInt(max+1-min))
 			if err != nil {
-				logs.Err.Println(err)
+				logs.Err.Println("bot command rand [number] [number]", err)
 				return nil
 			}
 			t := nBing.Int64() + min
@@ -42,14 +42,14 @@ var commandRules = []command.Rule{
 		Handler: func(ctx types.Context, tokens []*command.Token) []types.MsgPayload {
 			key, err := generateRandomString(16)
 			if err != nil {
-				logs.Err.Println(err)
+				logs.Err.Println("bot command id", err)
 				return nil
 			}
 
 			uGen := storeTypes.UidGenerator{}
 			err = uGen.Init(1, []byte(key))
 			if err != nil {
-				logs.Err.Println(err)
+				logs.Err.Println("bot command id", err)
 				return nil
 			}
 			return []types.MsgPayload{types.TextMsg{Text: uGen.GetStr()}}

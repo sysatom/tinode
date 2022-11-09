@@ -54,14 +54,14 @@ func oauth(rw http.ResponseWriter, req *http.Request) {
 	}
 	ui1, err := strconv.ParseUint(params[1], 10, 64)
 	if err != nil {
-		logs.Err.Println(err)
+		logs.Err.Println("router oauth", err)
 		rw.WriteHeader(http.StatusBadRequest)
 		rw.Write([]byte("path error"))
 		return
 	}
 	ui2, err := strconv.ParseUint(params[2], 10, 64)
 	if err != nil {
-		logs.Err.Println(err)
+		logs.Err.Println("router oauth", err)
 		rw.WriteHeader(http.StatusBadRequest)
 		rw.Write([]byte("path error"))
 		return
@@ -71,7 +71,7 @@ func oauth(rw http.ResponseWriter, req *http.Request) {
 	provider := newProvider(params[0])
 	tk, err := provider.StoreAccessToken(req)
 	if err != nil {
-		logs.Err.Println(err)
+		logs.Err.Println("router oauth", err)
 		rw.WriteHeader(http.StatusBadRequest)
 		rw.Write([]byte("oauth error"))
 		return
@@ -89,7 +89,7 @@ func oauth(rw http.ResponseWriter, req *http.Request) {
 		Extra: extra,
 	})
 	if err != nil {
-		logs.Err.Println(err)
+		logs.Err.Println("router oauth", err)
 		rw.WriteHeader(http.StatusBadRequest)
 		rw.Write([]byte("store error"))
 		return

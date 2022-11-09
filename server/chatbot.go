@@ -99,7 +99,7 @@ func hookHandleBotIncomingMessage(t *Topic, msg *ClientComMessage) {
 	// check topic owner user
 	_, u2, err := types.ParseP2P(msg.Pub.Topic)
 	if err != nil {
-		logs.Err.Println(err)
+		logs.Err.Println("hook bot incoming", err)
 		return
 	}
 	if u2.Compare(types.ParseUserId(msg.AsUser)) == 0 {
@@ -108,7 +108,7 @@ func hookHandleBotIncomingMessage(t *Topic, msg *ClientComMessage) {
 
 	subs, err := store.Topics.GetUsers(msg.Pub.Topic, nil)
 	if err != nil {
-		logs.Err.Println(err)
+		logs.Err.Println("hook bot incoming", err)
 		return
 	}
 
