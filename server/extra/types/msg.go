@@ -95,9 +95,16 @@ func (c ChatMessage) Content() (map[string]interface{}, interface{}) {
 	if err != nil {
 		return nil, ""
 	}
+
+	var res map[string]interface{}
+	err = json.Unmarshal(d, &res)
+	if err != nil {
+		return nil, ""
+	}
+
 	return map[string]interface{}{
 		"mime": "text/x-drafty",
-	}, json.RawMessage(d)
+	}, res
 }
 
 type MsgBuilder struct {

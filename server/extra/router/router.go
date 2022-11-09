@@ -9,8 +9,10 @@ import (
 	"github.com/tinode/chat/server/extra/vendors/github"
 	"github.com/tinode/chat/server/extra/vendors/pocket"
 	"github.com/tinode/chat/server/logs"
+	"github.com/tinode/chat/server/store/types"
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -50,6 +52,20 @@ func oauth(rw http.ResponseWriter, req *http.Request) {
 		rw.Write([]byte("path error"))
 		return
 	}
+	ui1, err := strconv.ParseUint(params[1], 10, 64)
+	if err != nil {
+		logs.Err.Println(err)
+		rw.WriteHeader(http.StatusBadRequest)
+		rw.Write([]byte("path error"))
+		return
+	}
+	ui2, err := strconv.ParseUint(params[2], 10, 64)
+	if err != nil {
+		logs.Err.Println(err)
+		rw.WriteHeader(http.StatusBadRequest)
+		rw.Write([]byte("path error"))
+		return
+	}
 
 	// code -> token
 	provider := newProvider(params[0])
@@ -65,8 +81,8 @@ func oauth(rw http.ResponseWriter, req *http.Request) {
 	extra := model.JSON{}
 	_ = extra.Scan(tk["extra"])
 	err = store.Chatbot.OAuthSet(model.OAuth{
-		Uid:   params[1],
-		Topic: params[2],
+		Uid:   types.Uid(ui1).UserId(),
+		Topic: types.Uid(ui2).UserId(),
 		Name:  params[0],
 		Type:  params[0],
 		Token: tk["token"].(string),

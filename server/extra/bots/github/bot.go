@@ -7,6 +7,7 @@ import (
 	"github.com/tinode/chat/server/extra/cron"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
+	serverTypes "github.com/tinode/chat/server/store/types"
 )
 
 const Name = "github"
@@ -59,8 +60,9 @@ func (b bot) Run(ctx types.Context, head map[string]interface{}, content interfa
 	return bots.RunCommand(commandRules, ctx, head, content)
 }
 
-func (bot) Cron() error {
+func (bot) Cron(send func(userUid, topicUid serverTypes.Uid, out types.MsgPayload)) error {
 	ruleset := cron.NewCronRuleset(Name, cronRules)
+	ruleset.Send = send
 	ruleset.Daemon()
 	return nil
 }

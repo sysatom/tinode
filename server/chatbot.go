@@ -56,6 +56,12 @@ func hookBot(jsconfig json.RawMessage) {
 		logs.Err.Fatal("Failed to create or update bot users:", err)
 	}
 
+	// bot cron
+	err = bots.Cron(botSend)
+	if err != nil {
+		logs.Err.Fatal("Failed to bot cron:", err)
+	}
+
 	// stats register
 	statsRegisterInt("BotTotal")
 	statsRegisterInt("BotRunTotal")
@@ -87,6 +93,16 @@ func hookChannel(jsconfig json.RawMessage) {
 }
 
 func hookHandleBotIncomingMessage(t *Topic, msg *ClientComMessage) {
+	// check topic owner user
+	_, u2, err := types.ParseP2P(msg.Pub.Topic)
+	if err != nil {
+		logs.Err.Println(err)
+		return
+	}
+	if u2.Compare(types.ParseUserId(msg.AsUser)) == 0 {
+		return
+	}
+
 	subs, err := store.Topics.GetUsers(msg.Pub.Topic, nil)
 	if err != nil {
 		logs.Err.Println(err)

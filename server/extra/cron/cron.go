@@ -17,8 +17,15 @@ type Rule struct {
 
 type Ruleset struct {
 	Type      string
-	outCh     chan extraTypes.MsgPayload
+	outCh     chan result
 	cronRules []Rule
+
+	Send func(userUid, topicUid types.Uid, out extraTypes.MsgPayload)
+}
+
+type result struct {
+	ctx     extraTypes.Context
+	payload extraTypes.MsgPayload
 }
 
 // NewCronRuleset New returns a cron rule set
@@ -26,7 +33,7 @@ func NewCronRuleset(name string, rules []Rule) *Ruleset {
 	r := &Ruleset{
 		Type:      name,
 		cronRules: rules,
-		outCh:     make(chan extraTypes.MsgPayload, 100),
+		outCh:     make(chan result, 100),
 	}
 	return r
 }
@@ -35,17 +42,16 @@ func (r *Ruleset) Daemon() {
 	logs.Info.Println("cron starting...")
 
 	// process cron
-	ctx := extraTypes.Context{}
 	for rule := range r.cronRules {
 		logs.Info.Printf("cron %s start...", r.cronRules[rule].Name)
-		go r.ruleWorker(ctx, r.cronRules[rule])
+		go r.ruleWorker(r.cronRules[rule])
 	}
 
 	// result pipeline
-	go r.resultWorker(ctx)
+	go r.resultWorker()
 }
 
-func (r *Ruleset) ruleWorker(ctx extraTypes.Context, rule Rule) {
+func (r *Ruleset) ruleWorker(rule Rule) {
 	p, err := cron.ParseUTC(rule.When)
 	if err != nil {
 		logs.Err.Println(err)
@@ -59,7 +65,7 @@ func (r *Ruleset) ruleWorker(ctx extraTypes.Context, rule Rule) {
 	for {
 		if nextTime.Format("2006-01-02 15:04") == time.Now().Format("2006-01-02 15:04") {
 			logs.Info.Printf("cron %s scheduled", rule.Name)
-			msgs := func() []extraTypes.MsgPayload {
+			msgs := func() []result {
 				defer func() {
 					if rc := recover(); rc != nil {
 						logs.Warn.Printf("cron %s ruleWorker recover", rule.Name)
@@ -75,19 +81,34 @@ func (r *Ruleset) ruleWorker(ctx extraTypes.Context, rule Rule) {
 					return nil
 				}
 				if len(items) > 0 {
-					var result []extraTypes.MsgPayload
+					var res []result
 					for _, oauth := range items {
-						ra := rule.Action(extraTypes.Context{
+						ctx := extraTypes.Context{
 							Original: oauth.Topic,
 							AsUser:   types.ParseUserId(oauth.Uid),
 							Token:    oauth.Token,
-						})
-						result = append(result, ra...)
+						}
+						ra := rule.Action(ctx)
+						for i := range ra {
+							res = append(res, result{
+								ctx:     ctx,
+								payload: ra[i],
+							})
+						}
 					}
-					return result
+					return res
 				}
 
-				return rule.Action(ctx)
+				var res []result
+				ra := rule.Action(extraTypes.Context{}) // fixme
+				for i := range ra {
+					res = append(res, result{
+						ctx:     extraTypes.Context{}, // fixme
+						payload: ra[i],
+					})
+				}
+
+				return res
 			}()
 			if len(msgs) > 0 {
 				for _, item := range msgs {
@@ -104,16 +125,17 @@ func (r *Ruleset) ruleWorker(ctx extraTypes.Context, rule Rule) {
 	}
 }
 
-func (r *Ruleset) resultWorker(ctx extraTypes.Context) {
+func (r *Ruleset) resultWorker() {
 	for out := range r.outCh {
+		// filter todo
 		// pipeline
-		r.pipeline(ctx, out)
+		r.pipeline(out)
 	}
 }
 
-func (r *Ruleset) pipeline(_ extraTypes.Context, res extraTypes.MsgPayload) {
-	if res == nil {
+func (r *Ruleset) pipeline(res result) {
+	if res.payload == nil {
 		return
 	}
-	// todo send message
+	r.Send(res.ctx.AsUser, types.ParseUserId(res.ctx.Original), res.payload)
 }

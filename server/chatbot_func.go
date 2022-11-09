@@ -372,3 +372,66 @@ func initializeCrawler() error {
 	c.Run()
 	return nil
 }
+
+func botSend(userUid, topicUid types.Uid, out extraTypes.MsgPayload) {
+	if out == nil {
+		return
+	}
+
+	topic := userUid.P2PName(topicUid)
+
+	t := globals.hub.topicGet(topic)
+	if t == nil {
+		sess := &Session{
+			uid:     topicUid,
+			authLvl: auth.LevelRoot,
+			subs:    make(map[string]*Subscription),
+			send:    make(chan interface{}, sendQueueLimit+32),
+			stop:    make(chan interface{}, 1),
+			detach:  make(chan string, 64),
+		}
+		msg := &ClientComMessage{
+			Sub: &MsgClientSub{
+				Topic:   topicUid.UserId(),
+				Get:     &MsgGetQuery{},
+				Created: false,
+				Newsub:  false,
+			},
+			Original:  topicUid.UserId(),
+			RcptTo:    topicUid.P2PName(userUid),
+			AsUser:    userUid.UserId(),
+			AuthLvl:   30,
+			MetaWhat:  0,
+			Timestamp: time.Now(),
+			sess:      sess,
+			init:      true,
+		}
+		globals.hub.join <- msg
+		// wait sometime
+		time.Sleep(200 * time.Millisecond)
+
+		t = globals.hub.topicGet(topic)
+	}
+
+	if t == nil {
+		logs.Err.Printf("topic %s error, Failed to send", topic)
+		return
+	}
+
+	heads, contents := extraTypes.Convert([]extraTypes.MsgPayload{out})
+	if !(len(heads) > 0 && len(contents) > 0) {
+		logs.Err.Printf("topic %s convert error, Failed to send", topic)
+		return
+	}
+	head, content := heads[0], contents[0]
+	msg := &ClientComMessage{
+		Pub: &MsgClientPub{
+			Topic:   topic,
+			Head:    head,
+			Content: content,
+		},
+		AsUser:    topicUid.UserId(),
+		Timestamp: types.TimeNow(),
+	}
+	t.handleClientMsg(msg)
+}

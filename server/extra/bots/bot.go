@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/tinode/chat/server/extra/command"
 	"github.com/tinode/chat/server/extra/types"
+	serverTypes "github.com/tinode/chat/server/store/types"
 )
 
 const BotNameSuffix = "_bot"
@@ -20,7 +21,7 @@ type Handler interface {
 	Run(ctx types.Context, head map[string]interface{}, content interface{}) ([]map[string]interface{}, []interface{}, error)
 
 	// Cron cron script daemon
-	Cron() error
+	Cron(send func(userUid, topicUid serverTypes.Uid, out types.MsgPayload)) error
 }
 
 type configType struct {
@@ -94,11 +95,17 @@ func Init(jsonconf json.RawMessage) error {
 		if err := bot.Init(configItem); err != nil {
 			return err
 		}
-		if err := bot.Cron(); err != nil {
+	}
+
+	return nil
+}
+
+func Cron(send func(userUid, topicUid serverTypes.Uid, out types.MsgPayload)) error {
+	for _, bot := range handlers {
+		if err := bot.Cron(send); err != nil {
 			return err
 		}
 	}
-
 	return nil
 }
 

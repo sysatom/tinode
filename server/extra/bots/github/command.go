@@ -8,6 +8,7 @@ import (
 	"github.com/tinode/chat/server/extra/vendors"
 	"github.com/tinode/chat/server/extra/vendors/github"
 	"github.com/tinode/chat/server/logs"
+	serverTypes "github.com/tinode/chat/server/store/types"
 	"gorm.io/gorm"
 )
 
@@ -32,7 +33,7 @@ var commandRules = []command.Rule{
 				return []types.MsgPayload{types.TextMsg{Text: "App is authorized"}}
 			}
 
-			redirectURI := vendors.RedirectURI(github.ID)
+			redirectURI := vendors.RedirectURI(github.ID, ctx.AsUser, serverTypes.ParseUserId(ctx.Original))
 			provider := github.NewGithub(Config.ID, Config.Secret, redirectURI, "")
 			return []types.MsgPayload{types.LinkMsg{Url: provider.AuthorizeURL()}}
 		},
