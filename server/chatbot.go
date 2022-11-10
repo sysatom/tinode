@@ -27,7 +27,7 @@ import (
 	_ "github.com/tinode/chat/server/extra/cache"
 )
 
-// hot
+// hook
 
 func hookMux(mux *http.ServeMux) {
 	mux.Handle("/extra/", http.HandlerFunc(router.ServeExtra))
@@ -97,12 +97,8 @@ func hookChannel(jsconfig json.RawMessage) {
 
 func hookHandleBotIncomingMessage(t *Topic, msg *ClientComMessage) {
 	// check topic owner user
-	_, u2, err := types.ParseP2P(msg.Pub.Topic)
-	if err != nil {
-		logs.Err.Println("hook bot incoming", err)
-		return
-	}
-	if u2.Compare(types.ParseUserId(msg.AsUser)) == 0 {
+	_, u2, _ := types.ParseP2P(msg.Pub.Topic)
+	if !u2.IsZero() && u2.Compare(types.ParseUserId(msg.AsUser)) == 0 {
 		return
 	}
 
@@ -133,63 +129,73 @@ func hookHandleBotIncomingMessage(t *Topic, msg *ClientComMessage) {
 		if !ok {
 			continue
 		}
-		heads, contents, err := handle.Run(ctx, msg.Pub.Head, msg.Pub.Content)
-		if err != nil {
-			logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
+
+		var head map[string]interface{}
+		var content interface{}
+		if msg.Pub.Head == nil {
+			head, content, err = handle.Run(ctx, msg.Pub.Content)
+			if err != nil {
+				logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
+				continue
+			}
+		} else {
+			// form message
+			head, content, err = handle.Form(ctx, msg.Pub.Content)
+			if err != nil {
+				logs.Warn.Printf("topic[%s]: failed to form bot: %v", t.name, err)
+				continue
+			}
+		}
+
+		// send  message
+		if content == nil {
 			continue
 		}
-		// multiple messages
-		for i, content := range contents {
-			head := heads[i]
-			if content == nil {
-				continue
-			}
 
-			// stats
-			statsInc("BotRunTotal", 1)
+		// stats
+		statsInc("BotRunTotal", 1)
 
-			now := types.TimeNow()
-			if err := store.Messages.Save(
-				&types.Message{
-					ObjHeader: types.ObjHeader{CreatedAt: now},
-					SeqId:     t.lastID + 1,
-					Topic:     t.name,
-					From:      sub.User,
-					Head:      head,
-					Content:   content,
-				}, nil, true); err != nil {
-				logs.Warn.Printf("topic[%s]: failed to save bot message: %v", t.name, err)
-				continue
-			}
+		now := types.TimeNow()
+		if err := store.Messages.Save(
+			&types.Message{
+				ObjHeader: types.ObjHeader{CreatedAt: now},
+				SeqId:     t.lastID + 1,
+				Topic:     t.name,
+				From:      sub.User,
+				Head:      head,
+				Content:   content,
+			}, nil, true); err != nil {
+			logs.Warn.Printf("topic[%s]: failed to save bot message: %v", t.name, err)
+			continue
+		}
 
-			t.lastID++
-			t.touched = now
+		t.lastID++
+		t.touched = now
 
-			data := &ServerComMessage{
-				Data: &MsgServerData{
-					Topic:     msg.Original,
-					From:      sub.User,
-					Timestamp: now,
-					SeqId:     t.lastID,
-					Head:      head,
-					Content:   content,
-				},
-				// Internal-only values.
-				Id:        msg.Id,
-				RcptTo:    msg.RcptTo,
-				AsUser:    sub.User,
+		data := &ServerComMessage{
+			Data: &MsgServerData{
+				Topic:     msg.Original,
+				From:      sub.User,
 				Timestamp: now,
-				sess:      msg.sess,
-			}
+				SeqId:     t.lastID,
+				Head:      head,
+				Content:   content,
+			},
+			// Internal-only values.
+			Id:        msg.Id,
+			RcptTo:    msg.RcptTo,
+			AsUser:    sub.User,
+			Timestamp: now,
+			sess:      msg.sess,
+		}
 
-			t.broadcastToSessions(data)
+		t.broadcastToSessions(data)
 
-			asUid := types.ParseUid(sub.User)
+		asUid := types.ParseUid(sub.User)
 
-			// sendPush will update unread message count and send push notification.
-			if pushRcpt := t.pushForData(asUid, data.Data); pushRcpt != nil {
-				sendPush(pushRcpt)
-			}
+		// sendPush will update unread message count and send push notification.
+		if pushRcpt := t.pushForData(asUid, data.Data); pushRcpt != nil {
+			sendPush(pushRcpt)
 		}
 	}
 }

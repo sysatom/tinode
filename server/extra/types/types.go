@@ -1,41 +1,26 @@
 package types
 
 import (
+	"fmt"
 	"github.com/tinode/chat/server/store/types"
 	"strconv"
 	"time"
 )
 
-type MessageType string
-
-const (
-	MessageTypeText     MessageType = "text"
-	MessageTypeAudio    MessageType = "audio"
-	MessageTypeImage    MessageType = "image"
-	MessageTypeFile     MessageType = "file"
-	MessageTypeLocation MessageType = "location"
-	MessageTypeVideo    MessageType = "video"
-	MessageTypeLink     MessageType = "link"
-	MessageTypeScript   MessageType = "script"
-	MessageTypeAction   MessageType = "action"
-	MessageTypeForm     MessageType = "form"
-	MessageTypeTable    MessageType = "table"
-	MessageTypeDigit    MessageType = "digit"
-	MessageTypeOkr      MessageType = "okr"
-	MessageTypeInfo     MessageType = "info"
-	MessageTypeTodo     MessageType = "todo"
-)
+var commonHead = map[string]interface{}{
+	"mime": "text/x-drafty",
+}
 
 type MsgPayload interface {
-	Type() MessageType
+	Convert() (map[string]interface{}, interface{})
 }
 
 type TextMsg struct {
 	Text string `json:"text"`
 }
 
-func (t TextMsg) Type() MessageType {
-	return MessageTypeText
+func (t TextMsg) Convert() (map[string]interface{}, interface{}) {
+	return nil, t.Text
 }
 
 type ImageMsg struct {
@@ -45,8 +30,8 @@ type ImageMsg struct {
 	Alt    string `json:"alt"`
 }
 
-func (i ImageMsg) Type() MessageType {
-	return MessageTypeImage
+func (i ImageMsg) Convert() (map[string]interface{}, interface{}) {
+	return commonHead, nil //todo
 }
 
 type FileMsg struct {
@@ -54,8 +39,8 @@ type FileMsg struct {
 	Alt string `json:"alt"`
 }
 
-func (i FileMsg) Type() MessageType {
-	return MessageTypeFile
+func (i FileMsg) Convert() (map[string]interface{}, interface{}) {
+	return commonHead, nil //todo
 }
 
 type VideoMsg struct {
@@ -66,8 +51,8 @@ type VideoMsg struct {
 	Duration float64 `json:"duration"`
 }
 
-func (i VideoMsg) Type() MessageType {
-	return MessageTypeVideo
+func (i VideoMsg) Convert() (map[string]interface{}, interface{}) {
+	return commonHead, nil //todo
 }
 
 type AudioMsg struct {
@@ -76,8 +61,8 @@ type AudioMsg struct {
 	Duration float64 `json:"duration"`
 }
 
-func (i AudioMsg) Type() MessageType {
-	return MessageTypeAudio
+func (i AudioMsg) Convert() (map[string]interface{}, interface{}) {
+	return commonHead, nil //todo
 }
 
 type ScriptMsg struct {
@@ -85,8 +70,8 @@ type ScriptMsg struct {
 	Code string `json:"code"`
 }
 
-func (a ScriptMsg) Type() MessageType {
-	return MessageTypeScript
+func (a ScriptMsg) Convert() (map[string]interface{}, interface{}) {
+	return commonHead, nil //todo
 }
 
 type ActionMsg struct {
@@ -96,8 +81,8 @@ type ActionMsg struct {
 	Value  string   `json:"value"`
 }
 
-func (a ActionMsg) Type() MessageType {
-	return MessageTypeAction
+func (a ActionMsg) Convert() (map[string]interface{}, interface{}) {
+	return commonHead, nil //todo
 }
 
 type FormMsg struct {
@@ -106,18 +91,35 @@ type FormMsg struct {
 	Field []FormField `json:"field"`
 }
 
-func (a FormMsg) Type() MessageType {
-	return MessageTypeForm
+func (a FormMsg) Convert() (map[string]interface{}, interface{}) {
+	builder := MsgBuilder{}
+	builder.AppendText(a.Title, TextOption{IsBold: true, IsForm: true})
+	for _, field := range a.Field {
+		if field.Type == FormFieldButton {
+			builder.AppendText(field.Intro, TextOption{
+				IsButton:       true,
+				ButtonDataName: fmt.Sprintf("%s|%s", a.ID, field.Key),
+				ButtonDataVal:  field.Value.(string),
+				ButtonDataAct:  "pub"})
+		}
+	}
+	return builder.Message.Content()
 }
 
 type FormField struct {
-	Key      string      `json:"key"`
-	Type     string      `json:"type"`
-	Required bool        `json:"required"`
-	Value    interface{} `json:"value"`
-	Default  interface{} `json:"default"`
-	Intro    string      `json:"intro"`
+	Key      string        `json:"key"`
+	Type     FormFieldType `json:"type"`
+	Required bool          `json:"required"`
+	Value    interface{}   `json:"value"`
+	Default  interface{}   `json:"default"`
+	Intro    string        `json:"intro"`
 }
+
+type FormFieldType string
+
+const (
+	FormFieldButton FormFieldType = "button"
+)
 
 type LinkMsg struct {
 	Title string `json:"title"`
@@ -125,8 +127,11 @@ type LinkMsg struct {
 	Url   string `json:"url"`
 }
 
-func (a LinkMsg) Type() MessageType {
-	return MessageTypeLink
+func (a LinkMsg) Convert() (map[string]interface{}, interface{}) {
+	builder := MsgBuilder{}
+	builder.AppendText(a.Url, TextOption{IsLink: true})
+
+	return builder.Message.Content()
 }
 
 type LocationMsg struct {
@@ -135,8 +140,8 @@ type LocationMsg struct {
 	Address   string  `json:"address"`
 }
 
-func (a LocationMsg) Type() MessageType {
-	return MessageTypeLocation
+func (a LocationMsg) Convert() (map[string]interface{}, interface{}) {
+	return commonHead, nil //todo
 }
 
 type TableMsg struct {
@@ -145,8 +150,33 @@ type TableMsg struct {
 	Row    [][]interface{} `json:"row"`
 }
 
-func (t TableMsg) Type() MessageType {
-	return MessageTypeTable
+func (t TableMsg) Convert() (map[string]interface{}, interface{}) {
+	builder := MsgBuilder{}
+	// title
+	builder.AppendTextLine(t.Title, TextOption{})
+	// header
+	builder.AppendText(" | ", TextOption{})
+	for _, header := range t.Header {
+		builder.AppendText(header, TextOption{IsBold: true})
+		builder.AppendText(" | ", TextOption{})
+	}
+	builder.AppendText("\n", TextOption{})
+	// row
+	for _, row := range t.Row {
+		builder.AppendText(" | ", TextOption{})
+		for _, item := range row {
+			switch t := item.(type) {
+			case string:
+				builder.AppendText(t, TextOption{})
+			case int:
+				builder.AppendText(strconv.Itoa(t), TextOption{})
+			}
+			builder.AppendText(" | ", TextOption{})
+		}
+		builder.AppendText("\n", TextOption{})
+	}
+
+	return builder.Message.Content()
 }
 
 type DigitMsg struct {
@@ -154,8 +184,8 @@ type DigitMsg struct {
 	Digit int    `json:"digit"`
 }
 
-func (a DigitMsg) Type() MessageType {
-	return MessageTypeDigit
+func (a DigitMsg) Convert() (map[string]interface{}, interface{}) {
+	return commonHead, nil //todo
 }
 
 type OkrMsg struct {
@@ -164,8 +194,8 @@ type OkrMsg struct {
 	KeyResult []interface{} `json:"key_result"`
 }
 
-func (o OkrMsg) Type() MessageType {
-	return MessageTypeOkr
+func (o OkrMsg) Convert() (map[string]interface{}, interface{}) {
+	return commonHead, nil //todo
 }
 
 type InfoMsg struct {
@@ -173,8 +203,8 @@ type InfoMsg struct {
 	Model interface{} `json:"model"`
 }
 
-func (i InfoMsg) Type() MessageType {
-	return MessageTypeInfo
+func (i InfoMsg) Convert() (map[string]interface{}, interface{}) {
+	return commonHead, nil //todo
 }
 
 type TodoMsg struct {
@@ -182,55 +212,17 @@ type TodoMsg struct {
 	Todo  []interface{} `json:"todo"`
 }
 
-func (t TodoMsg) Type() MessageType {
-	return MessageTypeTodo
+func (t TodoMsg) Convert() (map[string]interface{}, interface{}) {
+	return commonHead, nil //todo
 }
 
 func Convert(payloads []MsgPayload) ([]map[string]interface{}, []interface{}) {
 	var heads []map[string]interface{}
 	var contents []interface{}
 	for _, item := range payloads {
-		switch v := item.(type) {
-		case TextMsg:
-			heads = append(heads, nil)
-			contents = append(contents, v.Text)
-		case LinkMsg:
-			builder := MsgBuilder{}
-			builder.AppendText(v.Url, TextOption{IsLink: true})
-
-			head, content := builder.Message.Content()
-			heads = append(heads, head)
-			contents = append(contents, content)
-		case TableMsg:
-			builder := MsgBuilder{}
-			// title
-			builder.AppendTextLine(v.Title, TextOption{})
-			// header
-			builder.AppendText(" | ", TextOption{})
-			for _, header := range v.Header {
-				builder.AppendText(header, TextOption{IsBold: true})
-				builder.AppendText(" | ", TextOption{})
-			}
-			builder.AppendText("\n", TextOption{})
-			// row
-			for _, row := range v.Row {
-				builder.AppendText(" | ", TextOption{})
-				for _, item := range row {
-					switch t := item.(type) {
-					case string:
-						builder.AppendText(t, TextOption{})
-					case int:
-						builder.AppendText(strconv.Itoa(t), TextOption{})
-					}
-					builder.AppendText(" | ", TextOption{})
-				}
-				builder.AppendText("\n", TextOption{})
-			}
-
-			head, content := builder.Message.Content()
-			heads = append(heads, head)
-			contents = append(contents, content)
-		}
+		head, content := item.Convert()
+		heads = append(heads, head)
+		contents = append(contents, content)
 	}
 	return heads, contents
 }
@@ -252,4 +244,8 @@ type Context struct {
 	Timestamp time.Time `json:"-"`
 	// OAuth token
 	Token string `json:"-"`
+	// form id
+	FormId string `json:"-"`
+	// seq
+	SeqId int `json:"-"`
 }

@@ -15,14 +15,14 @@ var commandRules = []command.Rule{
 	{
 		Define: "version",
 		Help:   `Version`,
-		Handler: func(ctx types.Context, tokens []*command.Token) []types.MsgPayload {
-			return []types.MsgPayload{types.TextMsg{Text: "V1"}}
+		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+			return types.TextMsg{Text: "V1"}
 		},
 	},
 	{
 		Define: "rand [number] [number]",
 		Help:   `Generate random numbers`,
-		Handler: func(ctx types.Context, tokens []*command.Token) []types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
 			min, _ := tokens[1].Value.Int64()
 			max, _ := tokens[2].Value.Int64()
 
@@ -33,13 +33,13 @@ var commandRules = []command.Rule{
 			}
 			t := nBing.Int64() + min
 
-			return []types.MsgPayload{types.TextMsg{Text: strconv.FormatInt(t, 10)}}
+			return types.TextMsg{Text: strconv.FormatInt(t, 10)}
 		},
 	},
 	{
 		Define: "id",
 		Help:   `Generate random id`,
-		Handler: func(ctx types.Context, tokens []*command.Token) []types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
 			key, err := generateRandomString(16)
 			if err != nil {
 				logs.Err.Println("bot command id", err)
@@ -52,13 +52,13 @@ var commandRules = []command.Rule{
 				logs.Err.Println("bot command id", err)
 				return nil
 			}
-			return []types.MsgPayload{types.TextMsg{Text: uGen.GetStr()}}
+			return types.TextMsg{Text: uGen.GetStr()}
 		},
 	},
 	{
 		Define: "uid [string]",
 		Help:   `Decode UID string`,
-		Handler: func(ctx types.Context, tokens []*command.Token) []types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
 			str, _ := tokens[1].Value.String()
 			var uid storeTypes.Uid
 			var result string
@@ -69,14 +69,42 @@ var commandRules = []command.Rule{
 				result = fmt.Sprintf("%d", uid)
 			}
 
-			return []types.MsgPayload{types.TextMsg{Text: result}}
+			return types.TextMsg{Text: result}
 		},
 	},
 	{
 		Define: "messages",
 		Help:   `Demo messages`,
-		Handler: func(ctx types.Context, tokens []*command.Token) []types.MsgPayload {
-			return []types.MsgPayload{types.TextMsg{Text: "msg1"}, types.TextMsg{Text: "msg2"}}
+		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+			return types.TextMsg{Text: "msg1"}
+		},
+	},
+	{
+		Define: "form",
+		Help:   `Demo form`,
+		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+			return types.FormMsg{
+				ID:    helpFormID,
+				Title: "Current Value: 1, add/reduce ?",
+				Field: []types.FormField{
+					{
+						Key:      "action",
+						Type:     types.FormFieldButton,
+						Required: false,
+						Value:    "add",
+						Default:  nil,
+						Intro:    "Add",
+					},
+					{
+						Key:      "action",
+						Type:     types.FormFieldButton,
+						Required: false,
+						Value:    "reduce",
+						Default:  nil,
+						Intro:    "Reduce",
+					},
+				},
+			}
 		},
 	},
 }

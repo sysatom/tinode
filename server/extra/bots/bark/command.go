@@ -13,14 +13,14 @@ var commandRules = []command.Rule{
 	{
 		Define: "version",
 		Help:   `Version`,
-		Handler: func(ctx types.Context, tokens []*command.Token) []types.MsgPayload {
-			return []types.MsgPayload{types.TextMsg{Text: "V1"}}
+		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+			return types.TextMsg{Text: "V1"}
 		},
 	},
 	{
 		Define: "key",
 		Help:   `get device key`,
-		Handler: func(ctx types.Context, tokens []*command.Token) []types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
 			// get
 			v, err := store.Chatbot.ConfigGet(ctx.AsUser, "", bark.BarkDeviceKey)
 			if err != nil {
@@ -28,13 +28,13 @@ var commandRules = []command.Rule{
 			}
 			key, _ := v.String("value")
 
-			return []types.MsgPayload{types.TextMsg{Text: fmt.Sprintf("key: %s", key)}}
+			return types.TextMsg{Text: fmt.Sprintf("key: %s", key)}
 		},
 	},
 	{
 		Define: "key [string]",
 		Help:   `Set device key`,
-		Handler: func(ctx types.Context, tokens []*command.Token) []types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
 			key, _ := tokens[1].Value.String()
 
 			// get
@@ -52,7 +52,7 @@ var commandRules = []command.Rule{
 				logs.Err.Println("bot command key [string]", err)
 			}
 
-			return []types.MsgPayload{types.TextMsg{Text: fmt.Sprintf("%s --> %s", old, key)}}
+			return types.TextMsg{Text: fmt.Sprintf("%s --> %s", old, key)}
 		},
 	},
 }

@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/tinode/chat/server/extra/command"
+	"github.com/tinode/chat/server/extra/form"
 	"github.com/tinode/chat/server/extra/types"
 	serverTypes "github.com/tinode/chat/server/store/types"
+	"strings"
 )
 
 const BotNameSuffix = "_bot"
@@ -18,7 +20,10 @@ type Handler interface {
 	IsReady() bool
 
 	// Run return bot result
-	Run(ctx types.Context, head map[string]interface{}, content interface{}) ([]map[string]interface{}, []interface{}, error)
+	Run(ctx types.Context, content interface{}) (map[string]interface{}, interface{}, error)
+
+	// Form return bot form result
+	Form(ctx types.Context, content interface{}) (map[string]interface{}, interface{}, error)
 
 	// Cron cron script daemon
 	Cron(send func(userUid, topicUid serverTypes.Uid, out types.MsgPayload)) error
@@ -44,27 +49,83 @@ func Register(name string, bot Handler) {
 	handlers[name] = bot
 }
 
-func RunCommand(commandRules []command.Rule, ctx types.Context, _ map[string]interface{}, content interface{}) ([]map[string]interface{}, []interface{}, error) {
+func RunCommand(commandRules []command.Rule, ctx types.Context, content interface{}) (map[string]interface{}, interface{}, error) {
 	in, ok := content.(string)
 	if !ok {
 		return nil, nil, nil
 	}
 	rs := command.Ruleset(commandRules)
-	payloads, err := rs.Help(in)
+	payload, err := rs.Help(in)
 	if err != nil {
 		return nil, nil, err
 	}
-	if len(payloads) > 0 {
-		heads, contents := types.Convert(payloads)
+	if payload != nil {
+		heads, contents := payload.Convert()
 		return heads, contents, nil
 	}
 
-	payloads, err = rs.ProcessCommand(ctx, in)
+	payload, err = rs.ProcessCommand(ctx, in)
+	if err != nil {
+		return nil, nil, err
+	}
+	if payload == nil {
+		return nil, nil, nil
+	}
+
+	heads, contents := payload.Convert()
+	return heads, contents, nil
+}
+
+func RunForm(formRules []form.Rule, ctx types.Context, content interface{}) (map[string]interface{}, interface{}, error) {
+	var msg types.ChatMessage
+	d, err := json.Marshal(content)
+	if err != nil {
+		return nil, nil, err
+	}
+	err = json.Unmarshal(d, &msg)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	heads, contents := types.Convert(payloads)
+	if len(msg.Ent) > 0 {
+		if msg.Ent[0].Tp != "EX" {
+			return nil, nil, nil
+		}
+	}
+	var seq int
+	var id string
+	values := make(map[string]interface{})
+	if m, ok := msg.Ent[0].Data.Val.(map[string]interface{}); ok {
+		if v, ok := m["seq"]; ok {
+			if vv, ok := v.(float64); ok {
+				seq = int(vv)
+			}
+		}
+		if v, ok := m["resp"]; ok {
+			if vv, ok := v.(map[string]interface{}); ok {
+				for s := range vv {
+					ss := strings.Split(s, "|")
+					if len(ss) == 2 {
+						id = ss[0]
+						values[ss[1]] = vv[s]
+					}
+				}
+			}
+		}
+	}
+
+	ctx.FormId = id
+	ctx.SeqId = seq
+	rs := form.Ruleset(formRules)
+	payload, err := rs.ProcessForm(ctx, values)
+	if err != nil {
+		return nil, nil, err
+	}
+	if payload == nil {
+		return nil, nil, nil
+	}
+
+	heads, contents := payload.Convert()
 	return heads, contents, nil
 }
 

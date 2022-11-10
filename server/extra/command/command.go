@@ -8,12 +8,12 @@ import (
 type Rule struct {
 	Define  string
 	Help    string
-	Handler func(types.Context, []*Token) []types.MsgPayload
+	Handler func(types.Context, []*Token) types.MsgPayload
 }
 
 type Ruleset []Rule
 
-func (r Ruleset) Help(in string) ([]types.MsgPayload, error) {
+func (r Ruleset) Help(in string) (types.MsgPayload, error) {
 	if strings.ToLower(in) == "help" {
 		table := types.TableMsg{
 			Header: []string{"Define", "Help"},
@@ -21,13 +21,13 @@ func (r Ruleset) Help(in string) ([]types.MsgPayload, error) {
 		for _, rule := range r {
 			table.Row = append(table.Row, []interface{}{rule.Define, rule.Help})
 		}
-		return []types.MsgPayload{table}, nil
+		return table, nil
 	}
 	return nil, nil
 }
 
-func (r Ruleset) ProcessCommand(ctx types.Context, in string) ([]types.MsgPayload, error) {
-	var result []types.MsgPayload
+func (r Ruleset) ProcessCommand(ctx types.Context, in string) (types.MsgPayload, error) {
+	var result types.MsgPayload
 	for _, rule := range r {
 		tokens, err := ParseCommand(in)
 		if err != nil {
@@ -40,10 +40,7 @@ func (r Ruleset) ProcessCommand(ctx types.Context, in string) ([]types.MsgPayloa
 		if !check {
 			continue
 		}
-
-		if ret := rule.Handler(ctx, tokens); len(ret) > 0 {
-			result = ret
-		}
+		result = rule.Handler(ctx, tokens)
 	}
 	return result, nil
 }

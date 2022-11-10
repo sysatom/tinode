@@ -47,14 +47,22 @@ func (bot) IsReady() bool {
 	return handler.initialized
 }
 
-func (b bot) Run(ctx types.Context, head map[string]interface{}, content interface{}) ([]map[string]interface{}, []interface{}, error) {
+func (b bot) Run(ctx types.Context, content interface{}) (map[string]interface{}, interface{}, error) {
 	if !b.IsReady() {
-		// todo error message
 		logs.Info.Printf("bot %s unavailable", Name)
 		return nil, nil, nil
 	}
 
-	return bots.RunCommand(commandRules, ctx, head, content)
+	return bots.RunCommand(commandRules, ctx, content)
+}
+
+func (b bot) Form(ctx types.Context, content interface{}) (map[string]interface{}, interface{}, error) {
+	if !b.IsReady() {
+		logs.Info.Printf("bot %s unavailable", Name)
+		return nil, nil, nil
+	}
+
+	return bots.RunForm(formRules, ctx, content)
 }
 
 func (bot) Cron(_ func(userUid, topicUid serverTypes.Uid, out types.MsgPayload)) error {

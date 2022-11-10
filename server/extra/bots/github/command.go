@@ -16,49 +16,49 @@ var commandRules = []command.Rule{
 	{
 		Define: "version",
 		Help:   `Version`,
-		Handler: func(ctx types.Context, tokens []*command.Token) []types.MsgPayload {
-			return []types.MsgPayload{types.TextMsg{Text: "V1"}}
+		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+			return types.TextMsg{Text: "V1"}
 		},
 	},
 	{
 		Define: "oauth",
 		Help:   `OAuth`,
-		Handler: func(ctx types.Context, tokens []*command.Token) []types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
 			// check oauth token
 			oauth, err := store.Chatbot.OAuthGet(ctx.AsUser, ctx.Original, Name)
 			if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 				logs.Err.Println("bot command github oauth", err)
 			}
 			if oauth.Token != "" {
-				return []types.MsgPayload{types.TextMsg{Text: "App is authorized"}}
+				return types.TextMsg{Text: "App is authorized"}
 			}
 
 			redirectURI := vendors.RedirectURI(github.ID, ctx.AsUser, serverTypes.ParseUserId(ctx.Original))
 			provider := github.NewGithub(Config.ID, Config.Secret, redirectURI, "")
-			return []types.MsgPayload{types.LinkMsg{Url: provider.AuthorizeURL()}}
+			return types.LinkMsg{Url: provider.AuthorizeURL()}
 		},
 	},
 	{
 		Define: "user",
 		Help:   `Get user info`,
-		Handler: func(ctx types.Context, tokens []*command.Token) []types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
 			// get token
 			oauth, err := store.Chatbot.OAuthGet(ctx.AsUser, ctx.Original, Name)
 			if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 				logs.Err.Println("bot command github user", err)
 			}
 			if oauth.Token == "" {
-				return []types.MsgPayload{types.TextMsg{Text: "App is unauthorized"}}
+				return types.TextMsg{Text: "App is unauthorized"}
 			}
 
 			provider := github.NewGithub("", "", "", oauth.Token)
 
 			user, err := provider.GetUser()
 			if err != nil {
-				return []types.MsgPayload{types.TextMsg{Text: err.Error()}}
+				return types.TextMsg{Text: err.Error()}
 			}
 			if user == nil {
-				return []types.MsgPayload{types.TextMsg{Text: "user error"}}
+				return types.TextMsg{Text: "user error"}
 			}
 			table := types.TableMsg{}
 			table.Title = "User"
@@ -75,7 +75,7 @@ var commandRules = []command.Rule{
 				*user.HTMLURL,
 			})
 
-			return []types.MsgPayload{table}
+			return table
 		},
 	},
 }
