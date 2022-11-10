@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/tinode/chat/server/extra/bots"
-	"github.com/tinode/chat/server/extra/cron"
+	"github.com/tinode/chat/server/extra/ruleset/cron"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
 	serverTypes "github.com/tinode/chat/server/store/types"

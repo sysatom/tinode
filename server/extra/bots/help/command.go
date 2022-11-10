@@ -3,7 +3,7 @@ package help
 import (
 	"crypto/rand"
 	"fmt"
-	"github.com/tinode/chat/server/extra/command"
+	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
 	storeTypes "github.com/tinode/chat/server/store/types"

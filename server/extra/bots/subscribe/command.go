@@ -1,7 +1,7 @@
 package subscribe
 
 import (
-	"github.com/tinode/chat/server/extra/command"
+	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/types"
 )
 

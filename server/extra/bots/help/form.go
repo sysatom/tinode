@@ -1,7 +1,7 @@
 package help
 
 import (
-	"github.com/tinode/chat/server/extra/form"
+	"github.com/tinode/chat/server/extra/ruleset/form"
 	"github.com/tinode/chat/server/extra/types"
 )
 

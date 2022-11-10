@@ -3,8 +3,8 @@ package bots
 import (
 	"encoding/json"
 	"errors"
-	"github.com/tinode/chat/server/extra/command"
-	"github.com/tinode/chat/server/extra/form"
+	"github.com/tinode/chat/server/extra/ruleset/command"
+	"github.com/tinode/chat/server/extra/ruleset/form"
 	"github.com/tinode/chat/server/extra/types"
 	serverTypes "github.com/tinode/chat/server/store/types"
 	"strings"

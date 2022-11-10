@@ -1,7 +1,7 @@
 package github
 
 import (
-	"github.com/tinode/chat/server/extra/cron"
+	"github.com/tinode/chat/server/extra/ruleset/cron"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/vendors/github"
 	"github.com/tinode/chat/server/logs"
