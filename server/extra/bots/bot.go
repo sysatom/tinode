@@ -5,8 +5,11 @@ import (
 	"errors"
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/ruleset/form"
+	"github.com/tinode/chat/server/extra/store"
+	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/types"
 	serverTypes "github.com/tinode/chat/server/store/types"
+	"gorm.io/gorm"
 	"strings"
 )
 
@@ -116,15 +119,32 @@ func RunForm(formRules []form.Rule, ctx types.Context, content interface{}) (map
 
 	ctx.FormId = id
 	ctx.SeqId = seq
+
+	// check form
+	exForm, err := store.Chatbot.FormGet(ctx.AsUser, ctx.Original, ctx.SeqId)
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil, err
+	}
+	if exForm.ID > 0 {
+		return nil, nil, nil
+	}
+
+	// process form
 	rs := form.Ruleset(formRules)
 	payload, err := rs.ProcessForm(ctx, values)
 	if err != nil {
 		return nil, nil, err
 	}
+
+	// store form
+	err = store.Chatbot.FormSet(ctx.AsUser, ctx.Original, ctx.SeqId, values, int(model.FormStateSuccess))
+	if err != nil {
+		return nil, nil, err
+	}
+
 	if payload == nil {
 		return nil, nil, nil
 	}
-
 	heads, contents := payload.Convert()
 	return heads, contents, nil
 }

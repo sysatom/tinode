@@ -31,4 +31,8 @@ type Adapter interface {
 	OAuthGet(uid types.Uid, topic, t string) (model.OAuth, error)
 	// OAuthGetAvailable oauth get available
 	OAuthGetAvailable(t string) ([]model.OAuth, error)
+	// FormSet form set
+	FormSet(uid types.Uid, topic string, seqId int, values map[string]interface{}, state int) error
+	// FormGet form get
+	FormGet(uid types.Uid, topic string, seqId int) (model.Form, error)
 }

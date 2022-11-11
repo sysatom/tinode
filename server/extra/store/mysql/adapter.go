@@ -122,6 +122,37 @@ func (a *adapter) OAuthGetAvailable(t string) ([]model.OAuth, error) {
 	return find, nil
 }
 
+func (a *adapter) FormSet(uid types.Uid, topic string, seqId int, values map[string]interface{}, state int) error {
+	var find model.Form
+	err := a.db.Where("`uid` = ? AND `topic` = ? AND `seqid` = ?", uid.UserId(), topic, seqId).First(&find).Error
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return err
+	}
+	if find.ID > 0 {
+		return a.db.
+			Model(&model.Form{}).
+			Where("`uid` = ? AND `topic` = ? AND `seqid` = ?", uid.UserId(), topic, seqId).
+			Updates(map[string]interface{}{"values": values, "state": state}).Error
+	} else {
+		return a.db.Create(&model.Form{
+			Uid:    uid.UserId(),
+			Topic:  topic,
+			SeqId:  seqId,
+			Values: values,
+			State:  model.FormState(state),
+		}).Error
+	}
+}
+
+func (a *adapter) FormGet(uid types.Uid, topic string, seqId int) (model.Form, error) {
+	var find model.Form
+	err := a.db.Where("`uid` = ? AND `topic` = ? AND `seqid` = ?", uid.UserId(), topic, seqId).First(&find).Error
+	if err != nil {
+		return model.Form{}, err
+	}
+	return find, nil
+}
+
 func init() {
 	store.RegisterAdapter(&adapter{})
 }

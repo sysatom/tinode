@@ -33,3 +33,26 @@ type OAuth struct {
 func (OAuth) TableName() string {
 	return "chatbot_oauth"
 }
+
+type Form struct {
+	ID        uint `gorm:"primaryKey"`
+	Uid       string
+	Topic     string
+	SeqId     int  `gorm:"column:seqid"`
+	Values    JSON `gorm:"type:json"`
+	State     FormState
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+func (Form) TableName() string {
+	return "chatbot_form"
+}
+
+type FormState int
+
+const (
+	FormStateUnknown FormState = iota
+	FormStateSuccess
+	FormStateFailed
+)
