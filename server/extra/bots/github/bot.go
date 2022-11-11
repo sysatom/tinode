@@ -17,6 +17,7 @@ var Config configType
 
 type bot struct {
 	initialized bool
+	bots.Base
 }
 
 type configType struct {
@@ -50,17 +51,8 @@ func (bot) IsReady() bool {
 	return handler.initialized
 }
 
-func (b bot) Run(ctx types.Context, content interface{}) (map[string]interface{}, interface{}, error) {
-	if !b.IsReady() {
-		logs.Info.Printf("bot %s unavailable", Name)
-		return nil, nil, nil
-	}
-
+func (b bot) Command(ctx types.Context, content interface{}) (map[string]interface{}, interface{}, error) {
 	return bots.RunCommand(commandRules, ctx, content)
-}
-
-func (b bot) Form(_ types.Context, _ interface{}) (map[string]interface{}, interface{}, error) {
-	return nil, nil, nil
 }
 
 func (bot) Cron(send func(userUid, topicUid serverTypes.Uid, out types.MsgPayload)) error {

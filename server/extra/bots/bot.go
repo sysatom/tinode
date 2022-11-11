@@ -22,14 +22,28 @@ type Handler interface {
 	// IsReady сhecks if the bot is initialized.
 	IsReady() bool
 
-	// Run return bot result
-	Run(ctx types.Context, content interface{}) (map[string]interface{}, interface{}, error)
+	// Command return bot result
+	Command(ctx types.Context, content interface{}) (map[string]interface{}, interface{}, error)
 
 	// Form return bot form result
 	Form(ctx types.Context, content interface{}) (map[string]interface{}, interface{}, error)
 
 	// Cron cron script daemon
 	Cron(send func(userUid, topicUid serverTypes.Uid, out types.MsgPayload)) error
+}
+
+type Base struct{}
+
+func (Base) Command(_ types.Context, _ interface{}) (map[string]interface{}, interface{}, error) {
+	return nil, nil, nil
+}
+
+func (Base) Form(_ types.Context, _ interface{}) (map[string]interface{}, interface{}, error) {
+	return nil, nil, nil
+}
+
+func (Base) Cron(_ func(userUid, topicUid serverTypes.Uid, out types.MsgPayload)) error {
+	return nil
 }
 
 type configType struct {
@@ -181,6 +195,7 @@ func Init(jsonconf json.RawMessage) error {
 	return nil
 }
 
+// Cron registered handlers
 func Cron(send func(userUid, topicUid serverTypes.Uid, out types.MsgPayload)) error {
 	for _, bot := range handlers {
 		if err := bot.Cron(send); err != nil {

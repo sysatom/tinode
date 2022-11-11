@@ -133,10 +133,15 @@ func hookHandleBotIncomingMessage(t *Topic, msg *ClientComMessage) {
 			continue
 		}
 
+		if !handle.IsReady() {
+			logs.Info.Printf("bot %s unavailable", t.name)
+			continue
+		}
+
 		var head map[string]interface{}
 		var content interface{}
 		if msg.Pub.Head == nil {
-			head, content, err = handle.Run(ctx, msg.Pub.Content)
+			head, content, err = handle.Command(ctx, msg.Pub.Content)
 			if err != nil {
 				logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
 				continue
