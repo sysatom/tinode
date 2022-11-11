@@ -33,7 +33,7 @@ import (
 // hook
 
 func hookMux(mux *http.ServeMux) {
-	mux.Handle("/extra/", http.HandlerFunc(router.ServeExtra))
+	mux.Handle("/extra/", router.NewRouter())
 }
 
 func hookStore() {

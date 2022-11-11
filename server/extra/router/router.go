@@ -3,31 +3,22 @@ package router
 import (
 	"github.com/go-echarts/go-echarts/v2/charts"
 	"github.com/go-echarts/go-echarts/v2/opts"
+	"github.com/gorilla/mux"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/store/types"
 	"net/http"
-	"regexp"
 	"strconv"
 	"strings"
 )
 
-var rOAuth = regexp.MustCompile(`/oauth/\w+`)
-var rOAuthRedirect = regexp.MustCompile(`/oauth/\w+/redirect`)
-var rChart = regexp.MustCompile(`/chart/\w+`)
-
-func ServeExtra(rw http.ResponseWriter, req *http.Request) {
-	switch {
-	case rOAuth.MatchString(req.URL.Path):
-		oauth(rw, req)
-	case rOAuthRedirect.MatchString(req.URL.Path):
-		oauthRedirect(rw, req)
-	case rChart.MatchString(req.URL.Path):
-		chart(rw, req)
-	default:
-		rw.Write([]byte("Unknown Pattern"))
-	}
+func NewRouter() *mux.Router {
+	r := mux.NewRouter()
+	r.HandleFunc("/extra/oauth/{key}/redirect", oauthRedirect)
+	r.HandleFunc("/extra/oauth/{category}/{uid1}/{uid2}", oauth)
+	r.HandleFunc("/extra/chart/{key}", chart)
+	return r
 }
 
 // handler
@@ -48,20 +39,16 @@ func oauthRedirect(rw http.ResponseWriter, req *http.Request) {
 }
 
 func oauth(rw http.ResponseWriter, req *http.Request) {
-	paramsPatch := strings.ToLower(strings.ReplaceAll(req.URL.Path, "/extra/oauth/", ""))
-	params := strings.Split(paramsPatch, "/")
-	if len(params) != 3 {
-		rw.Write([]byte("path error"))
-		return
-	}
-	ui1, err := strconv.ParseUint(params[1], 10, 64)
+	vars := mux.Vars(req)
+	category := vars["category"]
+	ui1, err := strconv.ParseUint(vars["uid1"], 10, 64)
 	if err != nil {
 		logs.Err.Println("router oauth", err)
 		rw.WriteHeader(http.StatusBadRequest)
 		rw.Write([]byte("path error"))
 		return
 	}
-	ui2, err := strconv.ParseUint(params[2], 10, 64)
+	ui2, err := strconv.ParseUint(vars["uid1"], 10, 64)
 	if err != nil {
 		logs.Err.Println("router oauth", err)
 		rw.WriteHeader(http.StatusBadRequest)
@@ -70,7 +57,7 @@ func oauth(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	// code -> token
-	provider := newProvider(params[0])
+	provider := newProvider(category)
 	tk, err := provider.StoreAccessToken(req)
 	if err != nil {
 		logs.Err.Println("router oauth", err)
@@ -85,8 +72,8 @@ func oauth(rw http.ResponseWriter, req *http.Request) {
 	err = store.Chatbot.OAuthSet(model.OAuth{
 		Uid:   types.Uid(ui1).UserId(),
 		Topic: types.Uid(ui2).UserId(),
-		Name:  params[0],
-		Type:  params[0],
+		Name:  category,
+		Type:  category,
 		Token: tk["token"].(string),
 		Extra: extra,
 	})
