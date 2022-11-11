@@ -48,7 +48,7 @@ func oauth(rw http.ResponseWriter, req *http.Request) {
 		rw.Write([]byte("path error"))
 		return
 	}
-	ui2, err := strconv.ParseUint(vars["uid1"], 10, 64)
+	ui2, err := strconv.ParseUint(vars["uid2"], 10, 64)
 	if err != nil {
 		logs.Err.Println("router oauth", err)
 		rw.WriteHeader(http.StatusBadRequest)
