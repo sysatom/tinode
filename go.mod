@@ -10,6 +10,7 @@ require (
 	github.com/aws/aws-sdk-go v1.29.29
 	github.com/felixge/httpsnoop v1.0.3 // indirect
 	github.com/flower-corp/rosedb v1.1.1
+	github.com/go-echarts/go-echarts/v2 v2.2.4
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
@@ -36,7 +37,7 @@ require (
 	google.golang.org/grpc v1.46.2
 	google.golang.org/protobuf v1.28.0
 	gopkg.in/rethinkdb/rethinkdb-go.v6 v6.2.1
-	gopkg.in/yaml.v2 v2.4.0 // indirect
+	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/driver/mysql v1.4.1
 	gorm.io/gorm v1.24.0
 )

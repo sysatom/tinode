@@ -16,7 +16,8 @@ var cronRules = []cron.Rule{
 			client := github.NewGithub("", "", "", ctx.Token)
 			user, err := client.GetUser()
 			if err != nil {
-				return []types.MsgPayload{types.TextMsg{Text: err.Error()}}
+				logs.Err.Println("cron github_starred", err)
+				return []types.MsgPayload{}
 			}
 			if *user.Login == "" {
 				return []types.MsgPayload{}
