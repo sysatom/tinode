@@ -1,4 +1,4 @@
-package subscribe
+package finance
 
 import (
 	"github.com/tinode/chat/server/extra/ruleset/command"
@@ -14,8 +14,15 @@ var commandRules = []command.Rule{
 		},
 	},
 	{
-		Define: "subs list",
-		Help:   `List subscribe`,
+		Define: `fund [string]`,
+		Help:   `Get fund`,
+		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+			return types.TextMsg{Text: "V1"}
+		},
+	},
+	{
+		Define: `stock [string]`,
+		Help:   `Get stock`,
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
 			return types.TextMsg{Text: "V1"}
 		},

@@ -1,4 +1,4 @@
-package subscribe
+package webhook
 
 import (
 	"github.com/tinode/chat/server/extra/ruleset/command"
@@ -14,8 +14,22 @@ var commandRules = []command.Rule{
 		},
 	},
 	{
-		Define: "subs list",
-		Help:   `List subscribe`,
+		Define: `webhook list`,
+		Help:   `List webhook`,
+		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+			return types.TextMsg{Text: "V1"}
+		},
+	},
+	{
+		Define: `webhook create`,
+		Help:   `create webhook`,
+		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+			return types.TextMsg{Text: "V1"}
+		},
+	},
+	{
+		Define: `webhook del [number]`,
+		Help:   `delete webhook`,
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
 			return types.TextMsg{Text: "V1"}
 		},

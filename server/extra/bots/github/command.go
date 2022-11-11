@@ -78,4 +78,18 @@ var commandRules = []command.Rule{
 			return table
 		},
 	},
+	{
+		Define: "issue [string]",
+		Help:   `create issue`,
+		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+			return types.TextMsg{Text: "V1"}
+		},
+	},
+	{
+		Define: "card [string]",
+		Help:   `create project card`,
+		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+			return types.TextMsg{Text: "V1"}
+		},
+	},
 }

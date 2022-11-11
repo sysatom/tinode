@@ -80,6 +80,20 @@ var commandRules = []command.Rule{
 		},
 	},
 	{
+		Define: `qr [string]`,
+		Help:   `Generate QR code`,
+		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+			return types.TextMsg{Text: "msg1"}
+		},
+	},
+	{
+		Define: `pinyin [string]`,
+		Help:   "chinese pinyin conversion",
+		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+			return types.TextMsg{Text: "msg1"}
+		},
+	},
+	{
 		Define: "form",
 		Help:   `Demo form`,
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
