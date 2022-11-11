@@ -1,9 +1,12 @@
 package router
 
 import (
+	"fmt"
 	"github.com/go-echarts/go-echarts/v2/charts"
 	"github.com/go-echarts/go-echarts/v2/opts"
 	"github.com/gorilla/mux"
+	"github.com/maxence-charriere/go-app/v9/pkg/app"
+	"github.com/tinode/chat/server/extra/router/page"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/logs"
@@ -18,6 +21,7 @@ func NewRouter() *mux.Router {
 	r.HandleFunc("/extra/oauth/{key}/redirect", oauthRedirect)
 	r.HandleFunc("/extra/oauth/{category}/{uid1}/{uid2}", oauth)
 	r.HandleFunc("/extra/chart/{key}", chart)
+	r.HandleFunc("/extra/form", form)
 	return r
 }
 
@@ -102,4 +106,25 @@ func chart(rw http.ResponseWriter, _ *http.Request) {
 		AddSeries("Category B", generateBarItems())
 
 	bar.Render(rw)
+}
+
+func form(rw http.ResponseWriter, _ *http.Request) {
+	html := `
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Page</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+     	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.15.12/dist/css/uikit.min.css" />
+		<script src="https://cdn.jsdelivr.net/npm/uikit@3.15.12/dist/js/uikit.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/uikit@3.15.12/dist/js/uikit-icons.min.js"></script>
+    </head>
+
+    <body>
+        <div id="app" style="padding: 20px">%s</div>
+    </body>
+</html>
+`
+	rw.Write([]byte(fmt.Sprintf(html, app.HTMLString(&page.Form{}))))
 }
