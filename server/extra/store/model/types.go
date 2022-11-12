@@ -36,9 +36,10 @@ func (OAuth) TableName() string {
 
 type Form struct {
 	ID        uint `gorm:"primaryKey"`
+	FormId    string
 	Uid       string
 	Topic     string
-	SeqId     int  `gorm:"column:seqid"`
+	Schema    JSON `gorm:"type:json"`
 	Values    JSON `gorm:"type:json"`
 	State     FormState
 	CreatedAt time.Time
@@ -53,6 +54,30 @@ type FormState int
 
 const (
 	FormStateUnknown FormState = iota
-	FormStateSuccess
-	FormStateFailed
+	FormStateCreated
+	FormStateSubmitSuccess
+	FormStateSubmitFailed
+)
+
+type Page struct {
+	ID        uint `gorm:"primaryKey"`
+	PageId    string
+	Uid       string
+	Topic     string
+	Type      PageType
+	Schema    JSON `gorm:"type:json"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+func (Page) TableName() string {
+	return "chatbot_page"
+}
+
+type PageType string
+
+const (
+	PageForm  PageType = "form"
+	PageChart PageType = "chart"
+	PageTable PageType = "table"
 )

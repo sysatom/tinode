@@ -1,8 +1,10 @@
 package types
 
 import (
-	"fmt"
+	"crypto/rand"
+	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/store/types"
+	"math/big"
 	"strconv"
 	"time"
 )
@@ -84,42 +86,6 @@ type ActionMsg struct {
 func (a ActionMsg) Convert() (map[string]interface{}, interface{}) {
 	return commonHead, nil //todo
 }
-
-type FormMsg struct {
-	ID    string      `json:"id"`
-	Title string      `json:"title"`
-	Field []FormField `json:"field"`
-}
-
-func (a FormMsg) Convert() (map[string]interface{}, interface{}) {
-	builder := MsgBuilder{}
-	builder.AppendText(a.Title, TextOption{IsBold: true, IsForm: true})
-	for _, field := range a.Field {
-		if field.Type == FormFieldButton {
-			builder.AppendText(field.Intro, TextOption{
-				IsButton:       true,
-				ButtonDataName: fmt.Sprintf("%s|%s", a.ID, field.Key),
-				ButtonDataVal:  field.Value.(string),
-				ButtonDataAct:  "pub"})
-		}
-	}
-	return builder.Message.Content()
-}
-
-type FormField struct {
-	Key      string        `json:"key"`
-	Type     FormFieldType `json:"type"`
-	Required bool          `json:"required"`
-	Value    interface{}   `json:"value"`
-	Default  interface{}   `json:"default"`
-	Intro    string        `json:"intro"`
-}
-
-type FormFieldType string
-
-const (
-	FormFieldButton FormFieldType = "button"
-)
 
 type LinkMsg struct {
 	Title string `json:"title"`
@@ -252,4 +218,35 @@ type Context struct {
 	FormId string `json:"-"`
 	// seq
 	SeqId int `json:"-"`
+}
+
+func Id() string {
+	key, err := generateRandomString(16)
+	if err != nil {
+		logs.Err.Println("bot command id", err)
+		return ""
+	}
+
+	uGen := types.UidGenerator{}
+	err = uGen.Init(1, []byte(key))
+	if err != nil {
+		logs.Err.Println("bot command id", err)
+		return ""
+	}
+
+	return uGen.GetStr()
+}
+
+func generateRandomString(n int) (string, error) {
+	const letters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-"
+	ret := make([]byte, n)
+	for i := 0; i < n; i++ {
+		num, err := rand.Int(rand.Reader, big.NewInt(int64(len(letters))))
+		if err != nil {
+			return "", err
+		}
+		ret[i] = letters[num.Int64()]
+	}
+
+	return string(ret), nil
 }

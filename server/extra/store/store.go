@@ -96,8 +96,10 @@ type ChatbotPersistenceInterface interface {
 	OAuthSet(oauth model.OAuth) error
 	OAuthGet(uid types.Uid, topic, t string) (model.OAuth, error)
 	OAuthGetAvailable(t string) ([]model.OAuth, error)
-	FormSet(uid types.Uid, topic string, seqId int, values map[string]interface{}, state int) error
-	FormGet(uid types.Uid, topic string, seqId int) (model.Form, error)
+	FormSet(formId string, form model.Form) error
+	FormGet(formId string) (model.Form, error)
+	PageSet(pageId string, page model.Page) error
+	PageGet(pageId string) (model.Page, error)
 }
 
 var Chatbot ChatbotPersistenceInterface
@@ -124,12 +126,20 @@ func (c chatbotMapper) OAuthGetAvailable(t string) ([]model.OAuth, error) {
 	return adp.OAuthGetAvailable(t)
 }
 
-func (c chatbotMapper) FormSet(uid types.Uid, topic string, seqId int, values map[string]interface{}, state int) error {
-	return adp.FormSet(uid, topic, seqId, values, state)
+func (c chatbotMapper) FormSet(formId string, form model.Form) error {
+	return adp.FormSet(formId, form)
 }
 
-func (c chatbotMapper) FormGet(uid types.Uid, topic string, seqId int) (model.Form, error) {
-	return adp.FormGet(uid, topic, seqId)
+func (c chatbotMapper) FormGet(formId string) (model.Form, error) {
+	return adp.FormGet(formId)
+}
+
+func (c chatbotMapper) PageSet(pageId string, page model.Page) error {
+	return adp.PageSet(pageId, page)
+}
+
+func (c chatbotMapper) PageGet(pageId string) (model.Page, error) {
+	return adp.PageGet(pageId)
 }
 
 func init() {

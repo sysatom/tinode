@@ -17,6 +17,27 @@ func (h *Form) Render() app.UI {
 						app.Input().
 							Class("uk-input").
 							Type("text").
+							Name("a").
+							Placeholder("Please input name").Required(true),
+					),
+				),
+				app.Div().Class("uk-margin").Body(
+					app.Label().Class("uk-form-label").Text("title"),
+					app.Div().Class("uk-form-controls").Body(
+						app.Input().
+							Class("uk-input").
+							Type("text").
+							Name("b").
+							Placeholder("Please input name").Required(true),
+					),
+				),
+				app.Div().Class("uk-margin").Body(
+					app.Label().Class("uk-form-label").Text("title"),
+					app.Div().Class("uk-form-controls").Body(
+						app.Input().
+							Class("uk-input").
+							Type("text").
+							Name("c").
 							Placeholder("Please input name").Required(true),
 					),
 				),

@@ -3,11 +3,13 @@ package bots
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/ruleset/form"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/types"
+	"github.com/tinode/chat/server/logs"
 	serverTypes "github.com/tinode/chat/server/store/types"
 	"gorm.io/gorm"
 	"strings"
@@ -109,15 +111,10 @@ func RunForm(formRules []form.Rule, ctx types.Context, content interface{}) (map
 			return nil, nil, nil
 		}
 	}
-	var seq int
+
 	var id string
 	values := make(map[string]interface{})
 	if m, ok := msg.Ent[0].Data.Val.(map[string]interface{}); ok {
-		if v, ok := m["seq"]; ok {
-			if vv, ok := v.(float64); ok {
-				seq = int(vv)
-			}
-		}
 		if v, ok := m["resp"]; ok {
 			if vv, ok := v.(map[string]interface{}); ok {
 				for s := range vv {
@@ -132,10 +129,9 @@ func RunForm(formRules []form.Rule, ctx types.Context, content interface{}) (map
 	}
 
 	ctx.FormId = id
-	ctx.SeqId = seq
 
 	// check form
-	exForm, err := store.Chatbot.FormGet(ctx.AsUser, ctx.Original, ctx.SeqId)
+	exForm, err := store.Chatbot.FormGet(ctx.FormId)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil, err
 	}
@@ -151,7 +147,7 @@ func RunForm(formRules []form.Rule, ctx types.Context, content interface{}) (map
 	}
 
 	// store form
-	err = store.Chatbot.FormSet(ctx.AsUser, ctx.Original, ctx.SeqId, values, int(model.FormStateSuccess))
+	err = store.Chatbot.FormSet(ctx.FormId, model.Form{Values: values, State: model.FormStateSubmitSuccess})
 	if err != nil {
 		return nil, nil, err
 	}
@@ -161,6 +157,60 @@ func RunForm(formRules []form.Rule, ctx types.Context, content interface{}) (map
 	}
 	heads, contents := payload.Convert()
 	return heads, contents, nil
+}
+
+func StoreForm(ctx types.Context, payload types.MsgPayload) types.MsgPayload {
+	formId := types.Id()
+	d, err := json.Marshal(payload)
+	if err != nil {
+		logs.Err.Println(err)
+		return types.TextMsg{Text: "store form error"}
+	}
+	schema := model.JSON{}
+	err = schema.Scan(d)
+	if err != nil {
+		logs.Err.Println(err)
+		return types.TextMsg{Text: "store form error"}
+	}
+
+	var values model.JSON = make(map[string]interface{})
+	if v, ok := payload.(types.FormMsg); ok {
+		for _, field := range v.Field {
+			values[field.Key] = nil
+		}
+	}
+
+	// store form
+	err = store.Chatbot.FormSet(formId, model.Form{
+		FormId: formId,
+		Uid:    ctx.AsUser.UserId(),
+		Topic:  ctx.Original,
+		Schema: schema,
+		Values: values,
+		State:  model.FormStateCreated,
+	})
+	if err != nil {
+		logs.Err.Println(err)
+		return types.TextMsg{Text: "store form error"}
+	}
+
+	// store page
+	err = store.Chatbot.PageSet(formId, model.Page{
+		PageId: formId,
+		Uid:    ctx.AsUser.UserId(),
+		Topic:  ctx.Original,
+		Type:   model.PageForm,
+		Schema: schema,
+	})
+	if err != nil {
+		logs.Err.Println(err)
+		return types.TextMsg{Text: "store form error"}
+	}
+
+	return types.LinkMsg{
+		Title: fmt.Sprintf("Form [%s]", formId),
+		Url:   fmt.Sprintf("http://127.0.0.1:6060/extra/page/%s", formId), // fixme
+	}
 }
 
 // Init initializes registered handlers.

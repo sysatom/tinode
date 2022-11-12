@@ -6,7 +6,6 @@ import (
 	"github.com/go-echarts/go-echarts/v2/opts"
 	"github.com/gorilla/mux"
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
-	"github.com/tinode/chat/server/extra/router/component"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/logs"
@@ -18,10 +17,10 @@ import (
 
 func NewRouter() *mux.Router {
 	r := mux.NewRouter()
-	r.HandleFunc("/extra/oauth/{key}/redirect", oauthRedirect)
+	r.HandleFunc("/extra/oauth/{id}/redirect", oauthRedirect)
 	r.HandleFunc("/extra/oauth/{category}/{uid1}/{uid2}", oauth)
-	r.HandleFunc("/extra/chart/{key}", chart)
-	r.HandleFunc("/extra/page", page)
+	r.HandleFunc("/extra/chart/{id}", chart)
+	r.HandleFunc("/extra/page/{id}", page)
 	return r
 }
 
@@ -35,7 +34,7 @@ func oauthRedirect(rw http.ResponseWriter, req *http.Request) {
 	url, err := provider.Redirect(req)
 	if err != nil {
 		rw.WriteHeader(http.StatusBadRequest)
-		rw.Write([]byte("oauth redirect error"))
+		_, _ = rw.Write([]byte("oauth redirect error"))
 		return
 	}
 	rw.Header().Set("Location", url)
@@ -49,14 +48,14 @@ func oauth(rw http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		logs.Err.Println("router oauth", err)
 		rw.WriteHeader(http.StatusBadRequest)
-		rw.Write([]byte("path error"))
+		_, _ = rw.Write([]byte("path error"))
 		return
 	}
 	ui2, err := strconv.ParseUint(vars["uid2"], 10, 64)
 	if err != nil {
 		logs.Err.Println("router oauth", err)
 		rw.WriteHeader(http.StatusBadRequest)
-		rw.Write([]byte("path error"))
+		_, _ = rw.Write([]byte("path error"))
 		return
 	}
 
@@ -66,7 +65,7 @@ func oauth(rw http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		logs.Err.Println("router oauth", err)
 		rw.WriteHeader(http.StatusBadRequest)
-		rw.Write([]byte("oauth error"))
+		_, _ = rw.Write([]byte("oauth error"))
 		return
 	}
 
@@ -84,11 +83,11 @@ func oauth(rw http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		logs.Err.Println("router oauth", err)
 		rw.WriteHeader(http.StatusBadRequest)
-		rw.Write([]byte("store error"))
+		_, _ = rw.Write([]byte("store error"))
 		return
 	}
 
-	rw.Write([]byte("ok"))
+	_, _ = rw.Write([]byte("ok"))
 }
 
 func chart(rw http.ResponseWriter, _ *http.Request) {
@@ -105,26 +104,34 @@ func chart(rw http.ResponseWriter, _ *http.Request) {
 		AddSeries("Category A", generateBarItems()).
 		AddSeries("Category B", generateBarItems())
 
-	bar.Render(rw)
+	_ = bar.Render(rw)
 }
 
-func page(rw http.ResponseWriter, _ *http.Request) {
-	html := `
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Page</title>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-     	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.15.12/dist/css/uikit.min.css" />
-		<script src="https://cdn.jsdelivr.net/npm/uikit@3.15.12/dist/js/uikit.min.js"></script>
-		<script src="https://cdn.jsdelivr.net/npm/uikit@3.15.12/dist/js/uikit-icons.min.js"></script>
-    </head>
+func page(rw http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	id := vars["id"]
 
-    <body>
-        <div id="app" style="padding: 20px">%s</div>
-    </body>
-</html>
-`
-	rw.Write([]byte(fmt.Sprintf(html, app.HTMLString(&component.Form{}))))
+	p, err := store.Chatbot.PageGet(id)
+	if err != nil {
+		logs.Err.Println(err)
+		rw.WriteHeader(http.StatusBadRequest)
+		_, _ = rw.Write([]byte("page error"))
+		return
+	}
+
+	var comp app.UI
+	switch p.Type {
+	case model.PageForm:
+		comp = renderForm(p)
+	case model.PageChart:
+		comp = renderChart(p)
+	case model.PageTable:
+		comp = renderTable(p)
+	default:
+		rw.WriteHeader(http.StatusBadRequest)
+		_, _ = rw.Write([]byte("page error"))
+		return
+	}
+
+	_, _ = rw.Write([]byte(fmt.Sprintf(layout, app.HTMLString(comp))))
 }

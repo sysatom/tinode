@@ -32,7 +32,11 @@ type Adapter interface {
 	// OAuthGetAvailable oauth get available
 	OAuthGetAvailable(t string) ([]model.OAuth, error)
 	// FormSet form set
-	FormSet(uid types.Uid, topic string, seqId int, values map[string]interface{}, state int) error
+	FormSet(formId string, form model.Form) error
 	// FormGet form get
-	FormGet(uid types.Uid, topic string, seqId int) (model.Form, error)
+	FormGet(formId string) (model.Form, error)
+	// PageSet page set
+	PageSet(pageId string, page model.Page) error
+	// PageGet page get
+	PageGet(pageId string) (model.Page, error)
 }

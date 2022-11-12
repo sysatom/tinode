@@ -122,33 +122,64 @@ func (a *adapter) OAuthGetAvailable(t string) ([]model.OAuth, error) {
 	return find, nil
 }
 
-func (a *adapter) FormSet(uid types.Uid, topic string, seqId int, values map[string]interface{}, state int) error {
+func (a *adapter) FormSet(formId string, form model.Form) error {
 	var find model.Form
-	err := a.db.Where("`uid` = ? AND `topic` = ? AND `seqid` = ?", uid.UserId(), topic, seqId).First(&find).Error
+	err := a.db.Where("`form_id` = ?", formId).First(&find).Error
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return err
 	}
 	if find.ID > 0 {
 		return a.db.
 			Model(&model.Form{}).
-			Where("`uid` = ? AND `topic` = ? AND `seqid` = ?", uid.UserId(), topic, seqId).
-			Updates(map[string]interface{}{"values": values, "state": state}).Error
+			Where("`form_id` = ?", formId).
+			Updates(map[string]interface{}{
+				"values": form.Values,
+				"state":  form.State,
+			}).Error
 	} else {
 		return a.db.Create(&model.Form{
-			Uid:    uid.UserId(),
-			Topic:  topic,
-			SeqId:  seqId,
-			Values: values,
-			State:  model.FormState(state),
+			FormId: formId,
+			Uid:    form.Uid,
+			Topic:  form.Topic,
+			Schema: form.Schema,
+			Values: form.Values,
+			State:  form.State,
 		}).Error
 	}
 }
 
-func (a *adapter) FormGet(uid types.Uid, topic string, seqId int) (model.Form, error) {
+func (a *adapter) FormGet(formId string) (model.Form, error) {
 	var find model.Form
-	err := a.db.Where("`uid` = ? AND `topic` = ? AND `seqid` = ?", uid.UserId(), topic, seqId).First(&find).Error
+	err := a.db.Where("`form_id` = ?", formId).First(&find).Error
 	if err != nil {
 		return model.Form{}, err
+	}
+	return find, nil
+}
+
+func (a *adapter) PageSet(pageId string, page model.Page) error {
+	var find model.Page
+	err := a.db.Where("`page_id` = ?", pageId).First(&find).Error
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return err
+	}
+	if find.ID > 0 {
+		return a.db.
+			Model(&model.Page{}).
+			Where("`form_id` = ?", pageId).
+			Updates(map[string]interface{}{
+				"schema": page.Schema,
+			}).Error
+	} else {
+		return a.db.Create(&page).Error
+	}
+}
+
+func (a *adapter) PageGet(pageId string) (model.Page, error) {
+	var find model.Page
+	err := a.db.Where("`page_id` = ?", pageId).First(&find).Error
+	if err != nil {
+		return model.Page{}, err
 	}
 	return find, nil
 }
