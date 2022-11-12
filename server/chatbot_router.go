@@ -140,6 +140,9 @@ func postForm(rw http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		return
 	}
+	if form.State == model.FormStateSubmitSuccess || form.State == model.FormStateSubmitFailed {
+		return
+	}
 
 	subs, err := serverStore.Topics.GetUsers(topic, nil)
 	if err != nil {
@@ -231,7 +234,7 @@ func postForm(rw http.ResponseWriter, req *http.Request) {
 			continue
 		}
 
-		// send  message
+		// send message
 		if payload == nil {
 			continue
 		}

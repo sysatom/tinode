@@ -66,6 +66,7 @@ type Page struct {
 	Topic     string
 	Type      PageType
 	Schema    JSON `gorm:"type:json"`
+	State     PageState
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
@@ -80,4 +81,13 @@ const (
 	PageForm  PageType = "form"
 	PageChart PageType = "chart"
 	PageTable PageType = "table"
+)
+
+type PageState int
+
+const (
+	PageStateUnknown PageState = iota
+	PageStateCreated
+	PageStateProcessedSuccess
+	PageStateProcessedFailed
 )

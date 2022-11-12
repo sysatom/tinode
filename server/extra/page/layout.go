@@ -31,17 +31,15 @@ func RenderForm(page model.Page) app.UI {
 	if err != nil {
 		return nil
 	}
-	var f types.FormMsg
-	err = json.Unmarshal(d, &f)
+	var formMsg types.FormMsg
+	err = json.Unmarshal(d, &formMsg)
 	if err != nil {
 		return nil
 	}
 
 	comp := &component.Form{
-		FormId: page.PageId,
-		Uid:    page.Uid,
-		Topic:  page.Topic,
-		Schema: f,
+		Page:   page,
+		Schema: formMsg,
 	}
 	return comp
 }

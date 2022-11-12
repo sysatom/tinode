@@ -115,6 +115,12 @@ func RunForm(formRules []form.Rule, ctx types.Context, values map[string]interfa
 		return nil, err
 	}
 
+	// store page state
+	err = store.Chatbot.PageSet(ctx.FormId, model.Page{State: model.PageStateProcessedSuccess})
+	if err != nil {
+		return nil, err
+	}
+
 	return payload, nil
 }
 
@@ -160,6 +166,7 @@ func StoreForm(ctx types.Context, payload types.MsgPayload) types.MsgPayload {
 		Topic:  ctx.Original,
 		Type:   model.PageForm,
 		Schema: schema,
+		State:  model.PageStateCreated,
 	})
 	if err != nil {
 		logs.Err.Println(err)

@@ -166,9 +166,9 @@ func (a *adapter) PageSet(pageId string, page model.Page) error {
 	if find.ID > 0 {
 		return a.db.
 			Model(&model.Page{}).
-			Where("`form_id` = ?", pageId).
+			Where("`page_id` = ?", pageId).
 			Updates(map[string]interface{}{
-				"schema": page.Schema,
+				"state": page.State,
 			}).Error
 	} else {
 		return a.db.Create(&page).Error

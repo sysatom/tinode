@@ -3,25 +3,34 @@ package component
 import (
 	"fmt"
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
+	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/types"
 )
 
 type Form struct {
 	app.Compo
-	FormId string
-	Uid    string
-	Topic  string
+	Page   model.Page
 	Schema types.FormMsg
 }
 
 func (c *Form) Render() app.UI {
 	var fields []app.UI
 
+	var alert app.UI
+	switch c.Page.State {
+	case model.PageStateProcessedSuccess:
+		alert = app.Div().Class("uk-alert-success").Body(
+			app.P().Style("padding", "20px").Text(fmt.Sprintf("Form [%s] processed success, %s", c.Page.PageId, c.Page.UpdatedAt)))
+	case model.PageStateProcessedFailed:
+		alert = app.Div().Class("uk-alert-danger").Body(
+			app.P().Style("padding", "20px").Text(fmt.Sprintf("Form [%s] processed failed, %s", c.Page.PageId, c.Page.UpdatedAt)))
+	}
+
 	// hidden
 	fields = append(fields, app.Input().Hidden(true).Type("text").Name("x-csrf-token").Value(types.Id()))
-	fields = append(fields, app.Input().Hidden(true).Type("text").Name("x-form_id").Value(c.FormId))
-	fields = append(fields, app.Input().Hidden(true).Type("text").Name("x-uid").Value(c.Uid))
-	fields = append(fields, app.Input().Hidden(true).Type("text").Name("x-topic").Value(c.Topic))
+	fields = append(fields, app.Input().Hidden(true).Type("text").Name("x-form_id").Value(c.Page.PageId))
+	fields = append(fields, app.Input().Hidden(true).Type("text").Name("x-uid").Value(c.Page.Uid))
+	fields = append(fields, app.Input().Hidden(true).Type("text").Name("x-topic").Value(c.Page.Topic))
 
 	for _, field := range c.Schema.Field {
 		switch field.Type {
@@ -85,12 +94,15 @@ func (c *Form) Render() app.UI {
 	}
 
 	// button
-	fields = append(fields, app.Div().Class("uk-margin").Body(
-		app.Button().Class("uk-button uk-button-primary").Text("Submit").Type("submit"),
-		app.Button().Class("uk-button uk-button-default").Text("Cancel"),
-	))
+	if c.Page.State == model.PageStateCreated {
+		fields = append(fields, app.Div().Class("uk-margin").Body(
+			app.Button().Class("uk-button uk-button-primary").Text("Submit").Type("submit"),
+			app.Button().Class("uk-button uk-button-default").Text("Cancel"),
+		))
+	}
 
 	return app.Div().Body(
+		alert,
 		app.H1().Class(".uk-heading-small").Text(c.Schema.Title),
 		app.Form().Class("uk-form-stacked").Method("POST").Action("/extra/form").
 			Body(fields...),
