@@ -129,7 +129,11 @@ type LinkMsg struct {
 
 func (a LinkMsg) Convert() (map[string]interface{}, interface{}) {
 	builder := MsgBuilder{}
-	builder.AppendText(a.Url, TextOption{IsLink: true})
+	if a.Title != "" {
+		builder.AppendText(a.Title, TextOption{IsButton: true, ButtonDataAct: "url", ButtonDataRef: a.Url})
+	} else {
+		builder.AppendText(a.Url, TextOption{IsLink: true})
+	}
 
 	return builder.Message.Content()
 }

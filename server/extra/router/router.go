@@ -6,7 +6,7 @@ import (
 	"github.com/go-echarts/go-echarts/v2/opts"
 	"github.com/gorilla/mux"
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
-	"github.com/tinode/chat/server/extra/router/page"
+	"github.com/tinode/chat/server/extra/router/component"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/logs"
@@ -21,7 +21,7 @@ func NewRouter() *mux.Router {
 	r.HandleFunc("/extra/oauth/{key}/redirect", oauthRedirect)
 	r.HandleFunc("/extra/oauth/{category}/{uid1}/{uid2}", oauth)
 	r.HandleFunc("/extra/chart/{key}", chart)
-	r.HandleFunc("/extra/form", form)
+	r.HandleFunc("/extra/page", page)
 	return r
 }
 
@@ -108,7 +108,7 @@ func chart(rw http.ResponseWriter, _ *http.Request) {
 	bar.Render(rw)
 }
 
-func form(rw http.ResponseWriter, _ *http.Request) {
+func page(rw http.ResponseWriter, _ *http.Request) {
 	html := `
 <!DOCTYPE html>
 <html>
@@ -126,5 +126,5 @@ func form(rw http.ResponseWriter, _ *http.Request) {
     </body>
 </html>
 `
-	rw.Write([]byte(fmt.Sprintf(html, app.HTMLString(&page.Form{}))))
+	rw.Write([]byte(fmt.Sprintf(html, app.HTMLString(&component.Form{}))))
 }
