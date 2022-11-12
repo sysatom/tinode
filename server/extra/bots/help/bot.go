@@ -47,12 +47,12 @@ func (bot) IsReady() bool {
 	return handler.initialized
 }
 
-func (b bot) Command(ctx types.Context, content interface{}) (map[string]interface{}, interface{}, error) {
+func (b bot) Command(ctx types.Context, content interface{}) (types.MsgPayload, error) {
 	return bots.RunCommand(commandRules, ctx, content)
 }
 
-func (b bot) Form(ctx types.Context, content interface{}) (map[string]interface{}, interface{}, error) {
-	return bots.RunForm(formRules, ctx, content)
+func (b bot) Form(ctx types.Context, values map[string]interface{}) (types.MsgPayload, error) {
+	return bots.RunForm(formRules, ctx, values)
 }
 
 func init() {

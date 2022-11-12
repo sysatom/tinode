@@ -1,12 +1,14 @@
-package router
+package page
 
 import (
+	"encoding/json"
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
-	"github.com/tinode/chat/server/extra/router/component"
+	"github.com/tinode/chat/server/extra/page/component"
 	"github.com/tinode/chat/server/extra/store/model"
+	"github.com/tinode/chat/server/extra/types"
 )
 
-const layout = `
+const Layout = `
 <!DOCTYPE html>
 <html>
     <head>
@@ -24,14 +26,30 @@ const layout = `
 </html>
 `
 
-func renderForm(page model.Page) app.UI {
-	return &component.Form{}
+func RenderForm(page model.Page) app.UI {
+	d, err := json.Marshal(page.Schema)
+	if err != nil {
+		return nil
+	}
+	var f types.FormMsg
+	err = json.Unmarshal(d, &f)
+	if err != nil {
+		return nil
+	}
+
+	comp := &component.Form{
+		FormId: page.PageId,
+		Uid:    page.Uid,
+		Topic:  page.Topic,
+		Schema: f,
+	}
+	return comp
 }
 
-func renderChart(page model.Page) app.UI {
+func RenderChart(page model.Page) app.UI {
 	return nil
 }
 
-func renderTable(page model.Page) app.UI {
+func RenderTable(page model.Page) app.UI {
 	return nil
 }

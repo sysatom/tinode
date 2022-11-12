@@ -216,8 +216,8 @@ type Context struct {
 	Token string `json:"-"`
 	// form id
 	FormId string `json:"-"`
-	// seq
-	SeqId int `json:"-"`
+	// form Rule id
+	FormRuleId string `json:"-"`
 }
 
 func Id() string {

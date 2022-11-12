@@ -29,6 +29,7 @@ type FormField struct {
 	Value       interface{}        `json:"value"`
 	ValueType   FormFieldValueType `json:"value_type"`
 	Required    bool               `json:"required"`
+	Label       string             `json:"label"`
 	Placeholder string             `json:"placeholder"`
 	Option      interface{}        `json:"option"`
 }

@@ -12,7 +12,6 @@ import (
 	"github.com/tinode/chat/server/logs"
 	serverTypes "github.com/tinode/chat/server/store/types"
 	"gorm.io/gorm"
-	"strings"
 )
 
 const BotNameSuffix = "_bot"
@@ -25,10 +24,10 @@ type Handler interface {
 	IsReady() bool
 
 	// Command return bot result
-	Command(ctx types.Context, content interface{}) (map[string]interface{}, interface{}, error)
+	Command(ctx types.Context, content interface{}) (types.MsgPayload, error)
 
 	// Form return bot form result
-	Form(ctx types.Context, content interface{}) (map[string]interface{}, interface{}, error)
+	Form(ctx types.Context, values map[string]interface{}) (types.MsgPayload, error)
 
 	// Cron cron script daemon
 	Cron(send func(userUid, topicUid serverTypes.Uid, out types.MsgPayload)) error
@@ -36,12 +35,12 @@ type Handler interface {
 
 type Base struct{}
 
-func (Base) Command(_ types.Context, _ interface{}) (map[string]interface{}, interface{}, error) {
-	return nil, nil, nil
+func (Base) Command(_ types.Context, _ interface{}) (types.MsgPayload, error) {
+	return nil, nil
 }
 
-func (Base) Form(_ types.Context, _ interface{}) (map[string]interface{}, interface{}, error) {
-	return nil, nil, nil
+func (Base) Form(_ types.Context, _ map[string]interface{}) (types.MsgPayload, error) {
+	return nil, nil
 }
 
 func (Base) Cron(_ func(userUid, topicUid serverTypes.Uid, out types.MsgPayload)) error {
@@ -68,95 +67,55 @@ func Register(name string, bot Handler) {
 	handlers[name] = bot
 }
 
-func RunCommand(commandRules []command.Rule, ctx types.Context, content interface{}) (map[string]interface{}, interface{}, error) {
+func RunCommand(commandRules []command.Rule, ctx types.Context, content interface{}) (types.MsgPayload, error) {
 	in, ok := content.(string)
 	if !ok {
-		return nil, nil, nil
+		return nil, nil
 	}
 	rs := command.Ruleset(commandRules)
 	payload, err := rs.Help(in)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	if payload != nil {
-		heads, contents := payload.Convert()
-		return heads, contents, nil
+		return payload, nil
 	}
 
 	payload, err = rs.ProcessCommand(ctx, in)
 	if err != nil {
-		return nil, nil, err
-	}
-	if payload == nil {
-		return nil, nil, nil
+		return nil, err
 	}
 
-	heads, contents := payload.Convert()
-	return heads, contents, nil
+	return payload, nil
 }
 
-func RunForm(formRules []form.Rule, ctx types.Context, content interface{}) (map[string]interface{}, interface{}, error) {
-	var msg types.ChatMessage
-	d, err := json.Marshal(content)
-	if err != nil {
-		return nil, nil, err
-	}
-	err = json.Unmarshal(d, &msg)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	if len(msg.Ent) > 0 {
-		if msg.Ent[0].Tp != "EX" {
-			return nil, nil, nil
-		}
-	}
-
-	var id string
-	values := make(map[string]interface{})
-	if m, ok := msg.Ent[0].Data.Val.(map[string]interface{}); ok {
-		if v, ok := m["resp"]; ok {
-			if vv, ok := v.(map[string]interface{}); ok {
-				for s := range vv {
-					ss := strings.Split(s, "|")
-					if len(ss) == 2 {
-						id = ss[0]
-						values[ss[1]] = vv[s]
-					}
-				}
-			}
-		}
-	}
-
-	ctx.FormId = id
-
+func RunForm(formRules []form.Rule, ctx types.Context, values map[string]interface{}) (types.MsgPayload, error) {
 	// check form
 	exForm, err := store.Chatbot.FormGet(ctx.FormId)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, nil, err
+		return nil, err
 	}
-	if exForm.ID > 0 {
-		return nil, nil, nil
+	if exForm.ID == 0 {
+		return nil, nil
+	}
+	if exForm.State > model.FormStateCreated {
+		return nil, nil
 	}
 
 	// process form
 	rs := form.Ruleset(formRules)
 	payload, err := rs.ProcessForm(ctx, values)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	// store form
 	err = store.Chatbot.FormSet(ctx.FormId, model.Form{Values: values, State: model.FormStateSubmitSuccess})
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	if payload == nil {
-		return nil, nil, nil
-	}
-	heads, contents := payload.Convert()
-	return heads, contents, nil
+	return payload, nil
 }
 
 func StoreForm(ctx types.Context, payload types.MsgPayload) types.MsgPayload {

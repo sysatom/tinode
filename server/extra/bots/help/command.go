@@ -95,6 +95,7 @@ var commandRules = []command.Rule{
 						Type:        types.FormFieldText,
 						ValueType:   types.FormFieldValueString,
 						Value:       "add",
+						Label:       "Add",
 						Placeholder: "Add",
 					},
 					{
@@ -102,6 +103,7 @@ var commandRules = []command.Rule{
 						Type:        types.FormFieldText,
 						ValueType:   types.FormFieldValueString,
 						Value:       "reduce",
+						Label:       "Reduce",
 						Placeholder: "Reduce",
 					},
 				},

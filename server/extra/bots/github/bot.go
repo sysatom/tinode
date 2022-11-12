@@ -51,7 +51,7 @@ func (bot) IsReady() bool {
 	return handler.initialized
 }
 
-func (b bot) Command(ctx types.Context, content interface{}) (map[string]interface{}, interface{}, error) {
+func (b bot) Command(ctx types.Context, content interface{}) (types.MsgPayload, error) {
 	return bots.RunCommand(commandRules, ctx, content)
 }
 

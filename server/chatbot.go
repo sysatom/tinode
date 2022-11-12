@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"github.com/tinode/chat/server/extra/bots"
 	"github.com/tinode/chat/server/extra/channels"
-	"github.com/tinode/chat/server/extra/router"
 	extraStore "github.com/tinode/chat/server/extra/store"
 	extraTypes "github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
@@ -33,7 +32,7 @@ import (
 // hook
 
 func hookMux(mux *http.ServeMux) {
-	mux.Handle("/extra/", router.NewRouter())
+	mux.Handle("/extra/", newRouter())
 }
 
 func hookStore() {
@@ -141,18 +140,12 @@ func hookHandleBotIncomingMessage(t *Topic, msg *ClientComMessage) {
 		var head map[string]interface{}
 		var content interface{}
 		if msg.Pub.Head == nil {
-			head, content, err = handle.Command(ctx, msg.Pub.Content)
+			payload, err := handle.Command(ctx, msg.Pub.Content)
 			if err != nil {
 				logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
 				continue
 			}
-		} else {
-			// form message
-			head, content, err = handle.Form(ctx, msg.Pub.Content)
-			if err != nil {
-				logs.Warn.Printf("topic[%s]: failed to form bot: %v", t.name, err)
-				continue
-			}
+			head, content = payload.Convert()
 		}
 
 		// send  message
