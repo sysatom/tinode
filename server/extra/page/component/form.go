@@ -1,6 +1,7 @@
 package component
 
 import (
+	"fmt"
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 	"github.com/tinode/chat/server/extra/types"
 )
@@ -40,6 +41,20 @@ func (c *Form) Render() app.UI {
 				),
 			))
 		case types.FormFieldRadio, types.FormFieldCheckbox:
+			var options []app.UI
+			for _, option := range field.Option {
+				options = append(options, app.Label().Body(
+					app.Input().Class(fmt.Sprintf("uk-%s", field.Type)).
+						Type(string(field.Type)).
+						Name(field.Key).
+						Value(option),
+					app.Text(option)),
+				)
+			}
+			fields = append(fields, app.Div().Class("uk-margin").Body(
+				app.Label().Class("uk-form-label").Text(field.Label),
+				app.Div().Class("uk-form-controls").Body(options...),
+			))
 		case types.FormFieldTextarea:
 			// textarea
 			fields = append(fields, app.Div().Class("uk-margin").Body(
@@ -54,13 +69,16 @@ func (c *Form) Render() app.UI {
 			))
 		case types.FormFieldSelect:
 			// select
+			var options []app.UI
+			for _, option := range field.Option {
+				options = append(options, app.Option().Value(option).Text(option))
+			}
 			fields = append(fields, app.Div().Class("uk-margin").Body(
 				app.Label().Class("uk-form-label").Text(field.Label),
 				app.Div().Class("uk-form-controls").Body(
-					app.Select().Class("uk-select").Name("D").Required(false).Body(
-						app.Option().Text("F"),
-						app.Option().Text("M"),
-					),
+					app.Select().Class("uk-select").
+						Name(field.Key).
+						Required(field.Required).Body(options...),
 				),
 			))
 		}

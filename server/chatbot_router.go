@@ -190,7 +190,7 @@ func postForm(rw http.ResponseWriter, req *http.Request) {
 					values[field.Key] = true
 				}
 				if value == "false" {
-					values[field.Key] = true
+					values[field.Key] = false
 				}
 			case extraTypes.FormFieldValueInt64:
 				values[field.Key], _ = strconv.ParseInt(value, 10, 64)
