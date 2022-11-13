@@ -1,7 +1,6 @@
 package okr
 
 import (
-	"context"
 	"fmt"
 	"github.com/tinode/chat/server/extra/bots"
 	"github.com/tinode/chat/server/extra/ruleset/command"
@@ -23,7 +22,7 @@ var commandRules = []command.Rule{
 		Define: `obj list`,
 		Help:   `List objectives`,
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
-			items, err := store.Chatbot.ListObjectives(context.Background(), 1) // todo
+			items, err := store.Chatbot.ListObjectives(1) // todo
 			if err != nil {
 				logs.Err.Println(err)
 				return nil
@@ -50,13 +49,13 @@ var commandRules = []command.Rule{
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
 			sequence, _ := tokens[1].Value.Int64()
 
-			objective, err := store.Chatbot.GetObjectiveBySequence(context.Background(), 1, sequence) //todo
+			objective, err := store.Chatbot.GetObjectiveBySequence(1, sequence) //todo
 			if err != nil {
 				logs.Err.Println(err)
 				return nil
 			}
 
-			keyResult, err := store.Chatbot.ListKeyResultsByObjectiveId(context.Background(), objective.Id)
+			keyResult, err := store.Chatbot.ListKeyResultsByObjectiveId(objective.Id)
 			if err != nil {
 				logs.Err.Println(err)
 				return nil
@@ -75,7 +74,7 @@ var commandRules = []command.Rule{
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
 			sequence, _ := tokens[2].Value.Int64()
 
-			err := store.Chatbot.DeleteObjectiveBySequence(context.Background(), 1, sequence) //todo
+			err := store.Chatbot.DeleteObjectiveBySequence(1, sequence) //todo
 			if err != nil {
 				logs.Err.Println(err)
 				return types.TextMsg{Text: "failed"}
@@ -90,7 +89,7 @@ var commandRules = []command.Rule{
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
 			sequence, _ := tokens[2].Value.Int64()
 
-			item, err := store.Chatbot.GetObjectiveBySequence(context.Background(), 1, sequence)
+			item, err := store.Chatbot.GetObjectiveBySequence(1, sequence)
 			if err != nil {
 				return nil
 			}
@@ -219,7 +218,7 @@ var commandRules = []command.Rule{
 		Define: `kr list`,
 		Help:   `List KeyResult`,
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
-			items, err := store.Chatbot.ListKeyResults(context.Background(), 1) //todo
+			items, err := store.Chatbot.ListKeyResults(1) //todo
 			if err != nil {
 				return nil
 			}
@@ -295,7 +294,7 @@ var commandRules = []command.Rule{
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
 			sequence, _ := tokens[1].Value.Int64()
 
-			item, err := store.Chatbot.GetKeyResultBySequence(context.Background(), 1, sequence) // todo
+			item, err := store.Chatbot.GetKeyResultBySequence(1, sequence) // todo
 			if err != nil {
 				return nil
 			}
@@ -312,7 +311,7 @@ var commandRules = []command.Rule{
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
 			sequence, _ := tokens[1].Value.Int64()
 
-			err := store.Chatbot.DeleteKeyResultBySequence(context.Background(), 1, sequence) // todo
+			err := store.Chatbot.DeleteKeyResultBySequence(1, sequence) // todo
 			if err != nil {
 				logs.Err.Println(err)
 				return types.TextMsg{Text: "failed"}
@@ -327,7 +326,7 @@ var commandRules = []command.Rule{
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
 			sequence, _ := tokens[1].Value.Int64()
 
-			item, err := store.Chatbot.GetKeyResultBySequence(context.Background(), 1, sequence) // todo
+			item, err := store.Chatbot.GetKeyResultBySequence(1, sequence) // todo
 			if err != nil {
 				return nil
 			}
@@ -413,12 +412,12 @@ var commandRules = []command.Rule{
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
 			sequence, _ := tokens[2].Value.Int64()
 
-			keyResult, err := store.Chatbot.GetKeyResultBySequence(context.Background(), 1, sequence) //todo
+			keyResult, err := store.Chatbot.GetKeyResultBySequence(1, sequence) //todo
 			if err != nil {
 				return nil
 			}
 
-			items, err := store.Chatbot.GetKeyResultValues(context.Background(), keyResult.Id)
+			items, err := store.Chatbot.GetKeyResultValues(keyResult.Id)
 			if err != nil {
 				return nil
 			}

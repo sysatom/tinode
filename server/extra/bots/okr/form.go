@@ -1,7 +1,6 @@
 package okr
 
 import (
-	"context"
 	"fmt"
 	"github.com/tinode/chat/server/extra/ruleset/form"
 	"github.com/tinode/chat/server/extra/store"
@@ -36,7 +35,7 @@ var formRules = []form.Rule{
 				}
 			}
 
-			_, err := store.Chatbot.CreateObjective(context.Background(), &objective)
+			_, err := store.Chatbot.CreateObjective(&objective)
 			if err != nil {
 				logs.Err.Println(err)
 				return types.TextMsg{Text: fmt.Sprintf("failed, form [%s]", ctx.FormId)}
@@ -64,7 +63,7 @@ var formRules = []form.Rule{
 				}
 			}
 
-			err := store.Chatbot.UpdateObjective(context.Background(), &objective)
+			err := store.Chatbot.UpdateObjective(&objective)
 			if err != nil {
 				logs.Err.Println(err)
 				return types.TextMsg{Text: fmt.Sprintf("failed, form [%s]", ctx.FormId)}
@@ -95,7 +94,7 @@ var formRules = []form.Rule{
 				}
 			}
 
-			objective, err := store.Chatbot.GetObjectiveBySequence(context.Background(), 1, objectiveSequence) // todo
+			objective, err := store.Chatbot.GetObjectiveBySequence(1, objectiveSequence) // todo
 			if err != nil {
 				return nil
 			}
@@ -116,13 +115,13 @@ var formRules = []form.Rule{
 				keyResult.CurrentValue = keyResult.InitialValue
 			}
 			keyResult.ObjectiveId = objective.Id
-			_, err = store.Chatbot.CreateKeyResult(context.Background(), &keyResult)
+			_, err = store.Chatbot.CreateKeyResult(&keyResult)
 			if err != nil {
 				return nil
 			}
 
 			// aggregate
-			err = store.Chatbot.AggregateObjectiveValue(context.Background(), objective.Id)
+			err = store.Chatbot.AggregateObjectiveValue(objective.Id)
 			if err != nil {
 				return nil
 			}
@@ -163,17 +162,17 @@ var formRules = []form.Rule{
 			}
 
 			keyResult.UserId = 1 // todo
-			err := store.Chatbot.UpdateKeyResult(context.Background(), &keyResult)
+			err := store.Chatbot.UpdateKeyResult(&keyResult)
 			if err != nil {
 				return nil
 			}
 
 			// update value
-			reply, err := store.Chatbot.GetKeyResultBySequence(context.Background(), 1, keyResult.Sequence)
+			reply, err := store.Chatbot.GetKeyResultBySequence(1, keyResult.Sequence)
 			if err != nil {
 				return nil
 			}
-			err = store.Chatbot.AggregateKeyResultValue(context.Background(), reply.Id)
+			err = store.Chatbot.AggregateKeyResultValue(reply.Id)
 			if err != nil {
 				return nil
 			}
@@ -187,19 +186,19 @@ var formRules = []form.Rule{
 			keyResultSequence := values["key_result_sequence"].(int64)
 			value := int32(values["value"].(int64))
 
-			keyResult, err := store.Chatbot.GetKeyResultBySequence(context.Background(), 1, keyResultSequence) // todo
+			keyResult, err := store.Chatbot.GetKeyResultBySequence(1, keyResultSequence) // todo
 			if err != nil {
 				return nil
 			}
-			_, err = store.Chatbot.CreateKeyResultValue(context.Background(), &model.KeyResultValue{Value: value, KeyResultId: keyResult.Id})
+			_, err = store.Chatbot.CreateKeyResultValue(&model.KeyResultValue{Value: value, KeyResultId: keyResult.Id})
 			if err != nil {
 				return nil
 			}
-			err = store.Chatbot.AggregateKeyResultValue(context.Background(), keyResult.Id)
+			err = store.Chatbot.AggregateKeyResultValue(keyResult.Id)
 			if err != nil {
 				return nil
 			}
-			err = store.Chatbot.AggregateObjectiveValue(context.Background(), keyResult.ObjectiveId)
+			err = store.Chatbot.AggregateObjectiveValue(keyResult.ObjectiveId)
 			if err != nil {
 				return nil
 			}

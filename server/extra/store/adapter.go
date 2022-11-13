@@ -1,7 +1,6 @@
 package store
 
 import (
-	"context"
 	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/store/types"
 )
@@ -45,24 +44,24 @@ type Adapter interface {
 	// PageGet page get
 	PageGet(pageId string) (model.Page, error)
 
-	GetObjectiveByID(ctx context.Context, id int64) (*model.Objective, error)
-	GetObjectiveBySequence(ctx context.Context, userId, sequence int64) (*model.Objective, error)
-	ListObjectives(ctx context.Context, userId int64) ([]*model.Objective, error)
-	CreateObjective(ctx context.Context, objective *model.Objective) (int64, error)
-	UpdateObjective(ctx context.Context, objective *model.Objective) error
-	DeleteObjective(ctx context.Context, id int64) error
-	DeleteObjectiveBySequence(ctx context.Context, userId, sequence int64) error
-	GetKeyResultByID(ctx context.Context, id int64) (*model.KeyResult, error)
-	GetKeyResultBySequence(ctx context.Context, userId, sequence int64) (*model.KeyResult, error)
-	ListKeyResults(ctx context.Context, userId int64) ([]*model.KeyResult, error)
-	ListKeyResultsById(ctx context.Context, id []int64) ([]*model.KeyResult, error)
-	ListKeyResultsByObjectiveId(ctx context.Context, objectiveId int64) ([]*model.KeyResult, error)
-	CreateKeyResult(ctx context.Context, keyResult *model.KeyResult) (int64, error)
-	UpdateKeyResult(ctx context.Context, keyResult *model.KeyResult) error
-	DeleteKeyResult(ctx context.Context, id int64) error
-	DeleteKeyResultBySequence(ctx context.Context, userId, sequence int64) error
-	AggregateObjectiveValue(ctx context.Context, id int64) error
-	AggregateKeyResultValue(ctx context.Context, id int64) error
-	CreateKeyResultValue(ctx context.Context, keyResultValue *model.KeyResultValue) (int64, error)
-	GetKeyResultValues(ctx context.Context, keyResultId int64) ([]*model.KeyResultValue, error)
+	GetObjectiveByID(id int64) (*model.Objective, error)
+	GetObjectiveBySequence(userId, sequence int64) (*model.Objective, error)
+	ListObjectives(userId int64) ([]*model.Objective, error)
+	CreateObjective(objective *model.Objective) (int64, error)
+	UpdateObjective(objective *model.Objective) error
+	DeleteObjective(id int64) error
+	DeleteObjectiveBySequence(userId, sequence int64) error
+	GetKeyResultByID(id int64) (*model.KeyResult, error)
+	GetKeyResultBySequence(userId, sequence int64) (*model.KeyResult, error)
+	ListKeyResults(userId int64) ([]*model.KeyResult, error)
+	ListKeyResultsById(id []int64) ([]*model.KeyResult, error)
+	ListKeyResultsByObjectiveId(objectiveId int64) ([]*model.KeyResult, error)
+	CreateKeyResult(keyResult *model.KeyResult) (int64, error)
+	UpdateKeyResult(keyResult *model.KeyResult) error
+	DeleteKeyResult(id int64) error
+	DeleteKeyResultBySequence(userId, sequence int64) error
+	AggregateObjectiveValue(id int64) error
+	AggregateKeyResultValue(id int64) error
+	CreateKeyResultValue(keyResultValue *model.KeyResultValue) (int64, error)
+	GetKeyResultValues(keyResultId int64) ([]*model.KeyResultValue, error)
 }
