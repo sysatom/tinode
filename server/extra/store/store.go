@@ -104,21 +104,21 @@ type ChatbotPersistenceInterface interface {
 	PageGet(pageId string) (model.Page, error)
 
 	GetObjectiveByID(id int64) (*model.Objective, error)
-	GetObjectiveBySequence(userId, sequence int64) (*model.Objective, error)
-	ListObjectives(userId int64) ([]*model.Objective, error)
+	GetObjectiveBySequence(uid types.Uid, topic string, sequence int64) (*model.Objective, error)
+	ListObjectives(uid types.Uid, topic string) ([]*model.Objective, error)
 	CreateObjective(objective *model.Objective) (int64, error)
 	UpdateObjective(objective *model.Objective) error
 	DeleteObjective(id int64) error
-	DeleteObjectiveBySequence(userId, sequence int64) error
+	DeleteObjectiveBySequence(uid types.Uid, topic string, sequence int64) error
 	GetKeyResultByID(id int64) (*model.KeyResult, error)
-	GetKeyResultBySequence(userId, sequence int64) (*model.KeyResult, error)
-	ListKeyResults(userId int64) ([]*model.KeyResult, error)
+	GetKeyResultBySequence(uid types.Uid, topic string, sequence int64) (*model.KeyResult, error)
+	ListKeyResults(uid types.Uid, topic string) ([]*model.KeyResult, error)
 	ListKeyResultsById(id []int64) ([]*model.KeyResult, error)
 	ListKeyResultsByObjectiveId(objectiveId int64) ([]*model.KeyResult, error)
 	CreateKeyResult(keyResult *model.KeyResult) (int64, error)
 	UpdateKeyResult(keyResult *model.KeyResult) error
 	DeleteKeyResult(id int64) error
-	DeleteKeyResultBySequence(userId, sequence int64) error
+	DeleteKeyResultBySequence(uid types.Uid, topic string, sequence int64) error
 	AggregateObjectiveValue(id int64) error
 	AggregateKeyResultValue(id int64) error
 	CreateKeyResultValue(keyResultValue *model.KeyResultValue) (int64, error)
@@ -177,12 +177,12 @@ func (c chatbotMapper) GetObjectiveByID(id int64) (*model.Objective, error) {
 	return adp.GetObjectiveByID(id)
 }
 
-func (c chatbotMapper) GetObjectiveBySequence(userId, sequence int64) (*model.Objective, error) {
-	return adp.GetObjectiveBySequence(userId, sequence)
+func (c chatbotMapper) GetObjectiveBySequence(uid types.Uid, topic string, sequence int64) (*model.Objective, error) {
+	return adp.GetObjectiveBySequence(uid, topic, sequence)
 }
 
-func (c chatbotMapper) ListObjectives(userId int64) ([]*model.Objective, error) {
-	return adp.ListObjectives(userId)
+func (c chatbotMapper) ListObjectives(uid types.Uid, topic string) ([]*model.Objective, error) {
+	return adp.ListObjectives(uid, topic)
 }
 
 func (c chatbotMapper) CreateObjective(objective *model.Objective) (int64, error) {
@@ -197,20 +197,20 @@ func (c chatbotMapper) DeleteObjective(id int64) error {
 	return adp.DeleteObjective(id)
 }
 
-func (c chatbotMapper) DeleteObjectiveBySequence(userId, sequence int64) error {
-	return adp.DeleteObjectiveBySequence(userId, sequence)
+func (c chatbotMapper) DeleteObjectiveBySequence(uid types.Uid, topic string, sequence int64) error {
+	return adp.DeleteObjectiveBySequence(uid, topic, sequence)
 }
 
 func (c chatbotMapper) GetKeyResultByID(id int64) (*model.KeyResult, error) {
 	return adp.GetKeyResultByID(id)
 }
 
-func (c chatbotMapper) GetKeyResultBySequence(userId, sequence int64) (*model.KeyResult, error) {
-	return adp.GetKeyResultBySequence(userId, sequence)
+func (c chatbotMapper) GetKeyResultBySequence(uid types.Uid, topic string, sequence int64) (*model.KeyResult, error) {
+	return adp.GetKeyResultBySequence(uid, topic, sequence)
 }
 
-func (c chatbotMapper) ListKeyResults(userId int64) ([]*model.KeyResult, error) {
-	return adp.ListKeyResults(userId)
+func (c chatbotMapper) ListKeyResults(uid types.Uid, topic string) ([]*model.KeyResult, error) {
+	return adp.ListKeyResults(uid, topic)
 }
 
 func (c chatbotMapper) ListKeyResultsById(id []int64) ([]*model.KeyResult, error) {
@@ -233,8 +233,8 @@ func (c chatbotMapper) DeleteKeyResult(id int64) error {
 	return adp.DeleteKeyResult(id)
 }
 
-func (c chatbotMapper) DeleteKeyResultBySequence(userId, sequence int64) error {
-	return adp.DeleteKeyResultBySequence(userId, sequence)
+func (c chatbotMapper) DeleteKeyResultBySequence(uid types.Uid, topic string, sequence int64) error {
+	return adp.DeleteKeyResultBySequence(uid, topic, sequence)
 }
 
 func (c chatbotMapper) AggregateObjectiveValue(id int64) error {

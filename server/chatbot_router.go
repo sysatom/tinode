@@ -204,7 +204,8 @@ func postForm(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	ctx := extraTypes.Context{
-		Original:   topic,
+		Original:   topicUid.UserId(),
+		RcptTo:     topic,
 		AsUser:     types.ParseUserId(uid),
 		FormId:     form.FormId,
 		FormRuleId: formMsg.ID,

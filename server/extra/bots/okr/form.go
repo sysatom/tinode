@@ -35,6 +35,8 @@ var formRules = []form.Rule{
 				}
 			}
 
+			objective.Uid = ctx.AsUser.UserId()
+			objective.Topic = ctx.Original
 			_, err := store.Chatbot.CreateObjective(&objective)
 			if err != nil {
 				logs.Err.Println(err)
@@ -94,7 +96,7 @@ var formRules = []form.Rule{
 				}
 			}
 
-			objective, err := store.Chatbot.GetObjectiveBySequence(1, objectiveSequence) // todo
+			objective, err := store.Chatbot.GetObjectiveBySequence(ctx.AsUser, ctx.Original, objectiveSequence)
 			if err != nil {
 				return nil
 			}
@@ -115,6 +117,8 @@ var formRules = []form.Rule{
 				keyResult.CurrentValue = keyResult.InitialValue
 			}
 			keyResult.ObjectiveId = objective.Id
+			keyResult.Uid = ctx.AsUser.UserId()
+			keyResult.Topic = ctx.Original
 			_, err = store.Chatbot.CreateKeyResult(&keyResult)
 			if err != nil {
 				return nil
@@ -161,14 +165,15 @@ var formRules = []form.Rule{
 				return nil
 			}
 
-			keyResult.UserId = 1 // todo
+			keyResult.Uid = ctx.AsUser.UserId()
+			keyResult.Topic = ctx.Original
 			err := store.Chatbot.UpdateKeyResult(&keyResult)
 			if err != nil {
 				return nil
 			}
 
 			// update value
-			reply, err := store.Chatbot.GetKeyResultBySequence(1, keyResult.Sequence)
+			reply, err := store.Chatbot.GetKeyResultBySequence(ctx.AsUser, ctx.Original, keyResult.Sequence)
 			if err != nil {
 				return nil
 			}
@@ -186,7 +191,7 @@ var formRules = []form.Rule{
 			keyResultSequence := values["key_result_sequence"].(int64)
 			value := int32(values["value"].(int64))
 
-			keyResult, err := store.Chatbot.GetKeyResultBySequence(1, keyResultSequence) // todo
+			keyResult, err := store.Chatbot.GetKeyResultBySequence(ctx.AsUser, ctx.Original, keyResultSequence)
 			if err != nil {
 				return nil
 			}

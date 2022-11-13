@@ -22,7 +22,7 @@ var commandRules = []command.Rule{
 		Define: `obj list`,
 		Help:   `List objectives`,
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
-			items, err := store.Chatbot.ListObjectives(1) // todo
+			items, err := store.Chatbot.ListObjectives(ctx.AsUser, ctx.Original)
 			if err != nil {
 				logs.Err.Println(err)
 				return nil
@@ -49,7 +49,7 @@ var commandRules = []command.Rule{
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
 			sequence, _ := tokens[1].Value.Int64()
 
-			objective, err := store.Chatbot.GetObjectiveBySequence(1, sequence) //todo
+			objective, err := store.Chatbot.GetObjectiveBySequence(ctx.AsUser, ctx.Original, sequence)
 			if err != nil {
 				logs.Err.Println(err)
 				return nil
@@ -74,7 +74,7 @@ var commandRules = []command.Rule{
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
 			sequence, _ := tokens[2].Value.Int64()
 
-			err := store.Chatbot.DeleteObjectiveBySequence(1, sequence) //todo
+			err := store.Chatbot.DeleteObjectiveBySequence(ctx.AsUser, ctx.Original, sequence)
 			if err != nil {
 				logs.Err.Println(err)
 				return types.TextMsg{Text: "failed"}
@@ -89,7 +89,7 @@ var commandRules = []command.Rule{
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
 			sequence, _ := tokens[2].Value.Int64()
 
-			item, err := store.Chatbot.GetObjectiveBySequence(1, sequence)
+			item, err := store.Chatbot.GetObjectiveBySequence(ctx.AsUser, ctx.Original, sequence)
 			if err != nil {
 				return nil
 			}
@@ -218,7 +218,7 @@ var commandRules = []command.Rule{
 		Define: `kr list`,
 		Help:   `List KeyResult`,
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
-			items, err := store.Chatbot.ListKeyResults(1) //todo
+			items, err := store.Chatbot.ListKeyResults(ctx.AsUser, ctx.Original)
 			if err != nil {
 				return nil
 			}
@@ -294,7 +294,7 @@ var commandRules = []command.Rule{
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
 			sequence, _ := tokens[1].Value.Int64()
 
-			item, err := store.Chatbot.GetKeyResultBySequence(1, sequence) // todo
+			item, err := store.Chatbot.GetKeyResultBySequence(ctx.AsUser, ctx.Original, sequence)
 			if err != nil {
 				return nil
 			}
@@ -311,7 +311,7 @@ var commandRules = []command.Rule{
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
 			sequence, _ := tokens[1].Value.Int64()
 
-			err := store.Chatbot.DeleteKeyResultBySequence(1, sequence) // todo
+			err := store.Chatbot.DeleteKeyResultBySequence(ctx.AsUser, ctx.Original, sequence)
 			if err != nil {
 				logs.Err.Println(err)
 				return types.TextMsg{Text: "failed"}
@@ -326,7 +326,7 @@ var commandRules = []command.Rule{
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
 			sequence, _ := tokens[1].Value.Int64()
 
-			item, err := store.Chatbot.GetKeyResultBySequence(1, sequence) // todo
+			item, err := store.Chatbot.GetKeyResultBySequence(ctx.AsUser, ctx.Original, sequence)
 			if err != nil {
 				return nil
 			}
@@ -412,7 +412,7 @@ var commandRules = []command.Rule{
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
 			sequence, _ := tokens[2].Value.Int64()
 
-			keyResult, err := store.Chatbot.GetKeyResultBySequence(1, sequence) //todo
+			keyResult, err := store.Chatbot.GetKeyResultBySequence(ctx.AsUser, ctx.Original, sequence)
 			if err != nil {
 				return nil
 			}

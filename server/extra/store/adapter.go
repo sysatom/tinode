@@ -45,21 +45,21 @@ type Adapter interface {
 	PageGet(pageId string) (model.Page, error)
 
 	GetObjectiveByID(id int64) (*model.Objective, error)
-	GetObjectiveBySequence(userId, sequence int64) (*model.Objective, error)
-	ListObjectives(userId int64) ([]*model.Objective, error)
+	GetObjectiveBySequence(uid types.Uid, topic string, sequence int64) (*model.Objective, error)
+	ListObjectives(uid types.Uid, topic string) ([]*model.Objective, error)
 	CreateObjective(objective *model.Objective) (int64, error)
 	UpdateObjective(objective *model.Objective) error
 	DeleteObjective(id int64) error
-	DeleteObjectiveBySequence(userId, sequence int64) error
+	DeleteObjectiveBySequence(uid types.Uid, topic string, sequence int64) error
 	GetKeyResultByID(id int64) (*model.KeyResult, error)
-	GetKeyResultBySequence(userId, sequence int64) (*model.KeyResult, error)
-	ListKeyResults(userId int64) ([]*model.KeyResult, error)
+	GetKeyResultBySequence(uid types.Uid, topic string, sequence int64) (*model.KeyResult, error)
+	ListKeyResults(uid types.Uid, topic string) ([]*model.KeyResult, error)
 	ListKeyResultsById(id []int64) ([]*model.KeyResult, error)
 	ListKeyResultsByObjectiveId(objectiveId int64) ([]*model.KeyResult, error)
 	CreateKeyResult(keyResult *model.KeyResult) (int64, error)
 	UpdateKeyResult(keyResult *model.KeyResult) error
 	DeleteKeyResult(id int64) error
-	DeleteKeyResultBySequence(userId, sequence int64) error
+	DeleteKeyResultBySequence(uid types.Uid, topic string, sequence int64) error
 	AggregateObjectiveValue(id int64) error
 	AggregateKeyResultValue(id int64) error
 	CreateKeyResultValue(keyResultValue *model.KeyResultValue) (int64, error)

@@ -145,6 +145,13 @@ func hookHandleBotIncomingMessage(t *Topic, msg *ClientComMessage) {
 				logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
 				continue
 			}
+
+			// stats
+			statsInc("BotRunTotal", 1)
+
+			if payload == nil {
+				continue
+			}
 			head, content = payload.Convert()
 		}
 
@@ -152,9 +159,6 @@ func hookHandleBotIncomingMessage(t *Topic, msg *ClientComMessage) {
 		if content == nil {
 			continue
 		}
-
-		// stats
-		statsInc("BotRunTotal", 1)
 
 		now := types.TimeNow()
 		if err := store.Messages.Save(

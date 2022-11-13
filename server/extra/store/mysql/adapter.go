@@ -13,7 +13,7 @@ import (
 	"github.com/tinode/chat/server/store/types"
 	mysqlDriver "gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"time"
+	"strconv"
 )
 
 const adapterName = "mysql"
@@ -226,18 +226,18 @@ func (a *adapter) GetObjectiveByID(id int64) (*model.Objective, error) {
 	return &objective, nil
 }
 
-func (a *adapter) GetObjectiveBySequence(userId, sequence int64) (*model.Objective, error) {
+func (a *adapter) GetObjectiveBySequence(uid types.Uid, topic string, sequence int64) (*model.Objective, error) {
 	var objective model.Objective
-	err := a.db.Where("user_id = ? AND sequence = ?", userId, sequence).First(&objective).Error
+	err := a.db.Where("`uid` = ? AND `topic` = ? AND sequence = ?", uid.UserId(), topic, sequence).First(&objective).Error
 	if err != nil {
 		return nil, err
 	}
 	return &objective, nil
 }
 
-func (a *adapter) ListObjectives(userId int64) ([]*model.Objective, error) {
+func (a *adapter) ListObjectives(uid types.Uid, topic string) ([]*model.Objective, error) {
 	var objectives []*model.Objective
-	err := a.db.Where("user_id = ?", userId).Order("id DESC").Find(&objectives).Error
+	err := a.db.Where("`uid` = ? AND `topic` = ?", uid.UserId(), topic).Order("id DESC").Find(&objectives).Error
 	if err != nil {
 		return nil, err
 	}
@@ -251,7 +251,7 @@ func (a *adapter) CreateObjective(objective *model.Objective) (int64, error) {
 	// sequence
 	sequence := int64(0)
 	var max model.Objective
-	err := a.db.Where("user_id = ?", objective.UserId).Order("sequence DESC").Take(&max).Error
+	err := a.db.Where("`uid` = ? AND `topic` = ?", objective.Uid, objective.Topic).Order("sequence DESC").Take(&max).Error
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return 0, err
 	}
@@ -261,8 +261,6 @@ func (a *adapter) CreateObjective(objective *model.Objective) (int64, error) {
 	sequence += 1
 
 	objective.Sequence = sequence
-	objective.CreatedAt = time.Now().Unix()
-	objective.UpdatedAt = time.Now().Unix()
 	err = a.db.Create(&objective).Error
 	if err != nil {
 		return 0, err
@@ -272,7 +270,7 @@ func (a *adapter) CreateObjective(objective *model.Objective) (int64, error) {
 
 func (a *adapter) UpdateObjective(objective *model.Objective) error {
 	return a.db.Model(&model.Objective{}).
-		Where("user_id = ? AND sequence = ?", objective.UserId, objective.Sequence).
+		Where("`uid` = ? AND `topic` = ? AND sequence = ?", objective.Uid, objective.Topic, objective.Sequence).
 		UpdateColumns(map[string]interface{}{
 			"title":       objective.Title,
 			"memo":        objective.Memo,
@@ -281,7 +279,6 @@ func (a *adapter) UpdateObjective(objective *model.Objective) error {
 			"is_plan":     objective.IsPlan,
 			"plan_start":  objective.PlanStart,
 			"plan_end":    objective.PlanEnd,
-			"updated_at":  time.Now().Unix(),
 		}).Error
 }
 
@@ -289,8 +286,8 @@ func (a *adapter) DeleteObjective(id int64) error {
 	return a.db.Where("id = ?", id).Delete(&model.Objective{}).Error
 }
 
-func (a *adapter) DeleteObjectiveBySequence(userId, sequence int64) error {
-	return a.db.Where("user_id = ? AND sequence = ?", userId, sequence).Delete(&model.Objective{}).Error
+func (a *adapter) DeleteObjectiveBySequence(uid types.Uid, topic string, sequence int64) error {
+	return a.db.Where("`uid` = ? AND `topic` = ? AND sequence = ?", uid.UserId(), topic, sequence).Delete(&model.Objective{}).Error
 }
 
 func (a *adapter) GetKeyResultByID(id int64) (*model.KeyResult, error) {
@@ -302,18 +299,18 @@ func (a *adapter) GetKeyResultByID(id int64) (*model.KeyResult, error) {
 	return &keyResult, nil
 }
 
-func (a *adapter) GetKeyResultBySequence(userId, sequence int64) (*model.KeyResult, error) {
+func (a *adapter) GetKeyResultBySequence(uid types.Uid, topic string, sequence int64) (*model.KeyResult, error) {
 	var keyResult model.KeyResult
-	err := a.db.Where("user_id = ? AND sequence = ?", userId, sequence).First(&keyResult).Error
+	err := a.db.Where("`uid` = ? AND `topic` = ? AND sequence = ?", uid.UserId(), topic, sequence).First(&keyResult).Error
 	if err != nil {
 		return nil, err
 	}
 	return &keyResult, nil
 }
 
-func (a *adapter) ListKeyResults(userId int64) ([]*model.KeyResult, error) {
+func (a *adapter) ListKeyResults(uid types.Uid, topic string) ([]*model.KeyResult, error) {
 	var keyResult []*model.KeyResult
-	err := a.db.Where("user_id = ?", userId).Order("id DESC").Find(&keyResult).Error
+	err := a.db.Where("`uid` = ? AND `topic` = ?", uid.UserId(), topic).Order("id DESC").Find(&keyResult).Error
 	if err != nil {
 		return nil, err
 	}
@@ -345,7 +342,7 @@ func (a *adapter) CreateKeyResult(keyResult *model.KeyResult) (int64, error) {
 	// sequence
 	sequence := int64(0)
 	var max model.KeyResult
-	err := a.db.Where("user_id = ?", keyResult.UserId).Order("sequence DESC").Take(&max).Error
+	err := a.db.Where("`uid` = ? AND `topic` = ?", keyResult.Uid, keyResult.Topic).Order("sequence DESC").Take(&max).Error
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return 0, err
 	}
@@ -355,8 +352,6 @@ func (a *adapter) CreateKeyResult(keyResult *model.KeyResult) (int64, error) {
 	sequence += 1
 
 	keyResult.Sequence = sequence
-	keyResult.CreatedAt = time.Now().Unix()
-	keyResult.UpdatedAt = time.Now().Unix()
 	err = a.db.Create(&keyResult).Error
 	if err != nil {
 		return 0, err
@@ -367,7 +362,6 @@ func (a *adapter) CreateKeyResult(keyResult *model.KeyResult) (int64, error) {
 		err = a.db.Create(&model.KeyResultValue{
 			KeyResultId: keyResult.Id,
 			Value:       keyResult.CurrentValue,
-			CreatedAt:   time.Now().Unix(),
 		}).Error
 		if err != nil {
 			return 0, err
@@ -379,13 +373,12 @@ func (a *adapter) CreateKeyResult(keyResult *model.KeyResult) (int64, error) {
 
 func (a *adapter) UpdateKeyResult(keyResult *model.KeyResult) error {
 	return a.db.Model(&model.KeyResult{}).
-		Where("user_id = ? AND sequence = ?", keyResult.UserId, keyResult.Sequence).
+		Where("`uid` = ? AND `topic` = ? AND sequence = ?", keyResult.Uid, keyResult.Topic, keyResult.Sequence).
 		UpdateColumns(map[string]interface{}{
 			"title":        keyResult.Title,
 			"memo":         keyResult.Memo,
 			"target_value": keyResult.TargetValue,
 			"value_mode":   keyResult.ValueMode,
-			"updated_at":   time.Now().Unix(),
 		}).Error
 }
 
@@ -393,8 +386,8 @@ func (a *adapter) DeleteKeyResult(id int64) error {
 	return a.db.Where("id = ?", id).Delete(&model.KeyResult{}).Error
 }
 
-func (a *adapter) DeleteKeyResultBySequence(userId, sequence int64) error {
-	return a.db.Where("user_id = ? AND sequence = ?", userId, sequence).Delete(&model.KeyResult{}).Error
+func (a *adapter) DeleteKeyResultBySequence(uid types.Uid, topic string, sequence int64) error {
+	return a.db.Where("`uid` = ? AND `topic` = ? AND sequence = ?", uid.UserId(), topic, sequence).Delete(&model.KeyResult{}).Error
 }
 
 func (a *adapter) AggregateObjectiveValue(id int64) error {
@@ -407,7 +400,6 @@ func (a *adapter) AggregateObjectiveValue(id int64) error {
 	return a.db.Model(&model.Objective{}).Where("id = ?", id).UpdateColumns(map[string]interface{}{
 		"current_value": result.CurrentValue,
 		"total_value":   result.TargetValue,
-		"updated_at":    time.Now().Unix(),
 	}).Error
 }
 
@@ -416,33 +408,32 @@ func (a *adapter) AggregateKeyResultValue(id int64) error {
 	if err != nil {
 		return err
 	}
-	var value sql.NullInt64
+	var value sql.NullString // fixme
 	switch keyResult.ValueMode {
 	case model.ValueSumMode:
 		err = a.db.Model(&model.KeyResultValue{}).Where("key_result_id = ?", id).
-			Select("SUM(value) as value").Pluck("value", &value).Error
+			Select("SUM(`value`) as `value`").Pluck("value", &value).Error
 	case model.ValueLastMode:
 		err = a.db.Model(&model.KeyResultValue{}).Where("key_result_id = ?", id).
 			Order("created_at DESC").Limit(1).Pluck("value", &value).Error
 	case model.ValueAvgMode:
 		err = a.db.Model(&model.KeyResultValue{}).Where("key_result_id = ?", id).
-			Select("AVG(value) as value").Pluck("value", &value).Error
+			Select("AVG(`value`) as `value`").Pluck("value", &value).Error
 	case model.ValueMaxMode:
 		err = a.db.Model(&model.KeyResultValue{}).Where("key_result_id = ?", id).
-			Select("MAX(value) as value").Pluck("value", &value).Error
+			Select("MAX(`value`) as `value`").Pluck("value", &value).Error
 	}
 	if err != nil {
 		return err
 	}
 
+	currentValue, _ := strconv.ParseInt(value.String, 10, 64)
 	return a.db.Model(&model.KeyResult{}).Where("id = ?", id).UpdateColumns(map[string]interface{}{
-		"current_value": value.Int64,
-		"updated_at":    time.Now().Unix(),
+		"current_value": currentValue,
 	}).Error
 }
 
 func (a *adapter) CreateKeyResultValue(keyResultValue *model.KeyResultValue) (int64, error) {
-	keyResultValue.CreatedAt = time.Now().Unix()
 	err := a.db.Create(&keyResultValue).Error
 	if err != nil {
 		return 0, err
