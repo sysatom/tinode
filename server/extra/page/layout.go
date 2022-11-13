@@ -51,3 +51,21 @@ func RenderChart(page model.Page) app.UI {
 func RenderTable(page model.Page) app.UI {
 	return nil
 }
+
+func RenderOkr(page model.Page) app.UI {
+	d, err := json.Marshal(page.Schema)
+	if err != nil {
+		return nil
+	}
+	var okrMsg types.OkrMsg
+	err = json.Unmarshal(d, &okrMsg)
+	if err != nil {
+		return nil
+	}
+
+	comp := &component.Okr{
+		Page:   page,
+		Schema: okrMsg,
+	}
+	return comp
+}

@@ -95,6 +95,10 @@ func getPage(rw http.ResponseWriter, req *http.Request) {
 	switch p.Type {
 	case model.PageForm:
 		comp = page.RenderForm(p)
+	case model.PageOkr:
+		comp = page.RenderOkr(p)
+	case model.PageTable:
+		comp = page.RenderTable(p)
 	case model.PageChart:
 		comp = page.RenderChart(p)
 
@@ -113,8 +117,6 @@ func getPage(rw http.ResponseWriter, req *http.Request) {
 
 		_ = bar.Render(rw)
 		return
-	case model.PageTable:
-		comp = page.RenderTable(p)
 	default:
 		rw.WriteHeader(http.StatusBadRequest)
 		_, _ = rw.Write([]byte("page error"))

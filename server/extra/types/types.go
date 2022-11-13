@@ -4,9 +4,11 @@ import (
 	"crypto/rand"
 	"encoding/json"
 	"fmt"
+	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/store/types"
 	"math/big"
+	"sort"
 	"strconv"
 	"time"
 )
@@ -161,13 +163,13 @@ func (a DigitMsg) Convert() (map[string]interface{}, interface{}) {
 }
 
 type OkrMsg struct {
-	Title     string      `json:"title"`
-	Objective interface{} `json:"objective"`
-	KeyResult interface{} `json:"key_result"` // todo
+	Title     string             `json:"title"`
+	Objective *model.Objective   `json:"objective"`
+	KeyResult []*model.KeyResult `json:"key_result"`
 }
 
 func (o OkrMsg) Convert() (map[string]interface{}, interface{}) {
-	return commonHead, nil //todo
+	return nil, nil
 }
 
 type InfoMsg struct {
@@ -183,9 +185,17 @@ func (i InfoMsg) Convert() (map[string]interface{}, interface{}) {
 	d, _ := json.Marshal(i.Model)
 	var m map[string]interface{}
 	_ = json.Unmarshal(d, &m)
-	for k, v := range m {
+
+	// sort keys
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	for _, k := range keys {
 		builder.AppendText(fmt.Sprintf("%s: ", k), TextOption{IsBold: true})
-		builder.AppendText(toString(v), TextOption{})
+		builder.AppendText(toString(m[k]), TextOption{})
 		builder.AppendText("\n", TextOption{})
 	}
 
