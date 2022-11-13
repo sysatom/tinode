@@ -2,6 +2,8 @@ package types
 
 import (
 	"crypto/rand"
+	"encoding/json"
+	"fmt"
 	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/store/types"
 	"math/big"
@@ -174,7 +176,20 @@ type InfoMsg struct {
 }
 
 func (i InfoMsg) Convert() (map[string]interface{}, interface{}) {
-	return commonHead, nil //todo
+	builder := MsgBuilder{}
+	// title
+	builder.AppendTextLine(i.Title, TextOption{})
+	// model
+	d, _ := json.Marshal(i.Model)
+	var m map[string]interface{}
+	_ = json.Unmarshal(d, &m)
+	for k, v := range m {
+		builder.AppendText(fmt.Sprintf("%s: ", k), TextOption{IsBold: true})
+		builder.AppendText(toString(v), TextOption{})
+		builder.AppendText("\n", TextOption{})
+	}
+
+	return builder.Message.Content()
 }
 
 type TodoMsg struct {
@@ -249,4 +264,29 @@ func generateRandomString(n int) (string, error) {
 	}
 
 	return string(ret), nil
+}
+
+func toString(v interface{}) string {
+	switch v := v.(type) {
+	case string:
+		return v
+
+	case []byte:
+		return string(v)
+
+	case int:
+		return strconv.Itoa(v)
+
+	case float64:
+		return strconv.FormatFloat(v, 'f', 4, 64)
+
+	case bool:
+		return strconv.FormatBool(v)
+
+	case nil:
+		return ""
+
+	default:
+		return fmt.Sprint(v)
+	}
 }

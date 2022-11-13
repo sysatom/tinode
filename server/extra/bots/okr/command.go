@@ -61,11 +61,11 @@ var commandRules = []command.Rule{
 				return nil
 			}
 
-			return types.OkrMsg{
+			return bots.StoreOkr(ctx, types.OkrMsg{
 				Title:     fmt.Sprintf("Objective #%d", objective.Sequence),
 				Objective: objective,
 				KeyResult: keyResult,
-			}
+			})
 		},
 	},
 	{
@@ -132,28 +132,6 @@ var commandRules = []command.Rule{
 						ValueType: types.FormFieldValueString,
 						Value:     item.Feasibility,
 						Label:     "Feasibility",
-					},
-					{
-						Key:       "is_plan",
-						Type:      types.FormFieldRadio,
-						ValueType: types.FormFieldValueBool,
-						Value:     item.IsPlan,
-						Label:     "IsPlan",
-						Option:    []string{"true", "false"},
-					},
-					{
-						Key:       "plan_start",
-						Type:      types.FormFieldText,
-						ValueType: types.FormFieldValueString,
-						Value:     item.PlanStart,
-						Label:     "PlanStart",
-					},
-					{
-						Key:       "plan_end",
-						Type:      types.FormFieldText,
-						ValueType: types.FormFieldValueString,
-						Value:     item.PlanEnd,
-						Label:     "PlanEnd",
 					},
 				},
 			})
@@ -309,7 +287,7 @@ var commandRules = []command.Rule{
 		Define: `kr del [number]`,
 		Help:   `Delete KeyResult`,
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
-			sequence, _ := tokens[1].Value.Int64()
+			sequence, _ := tokens[2].Value.Int64()
 
 			err := store.Chatbot.DeleteKeyResultBySequence(ctx.AsUser, ctx.Original, sequence)
 			if err != nil {
@@ -324,14 +302,14 @@ var commandRules = []command.Rule{
 		Define: `kr update [number]`,
 		Help:   `Update KeyResult`,
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
-			sequence, _ := tokens[1].Value.Int64()
+			sequence, _ := tokens[2].Value.Int64()
 
 			item, err := store.Chatbot.GetKeyResultBySequence(ctx.AsUser, ctx.Original, sequence)
 			if err != nil {
 				return nil
 			}
 
-			return types.FormMsg{
+			return bots.StoreForm(ctx, types.FormMsg{
 				ID:    UpdateKeyResultFormID,
 				Title: fmt.Sprintf("Update KeyResult #%d", sequence),
 				Field: []types.FormField{
@@ -357,13 +335,6 @@ var commandRules = []command.Rule{
 						Value:     item.Memo,
 					},
 					{
-						Key:       "initial_value",
-						Type:      types.FormFieldNumber,
-						ValueType: types.FormFieldValueInt64,
-						Label:     "initial value",
-						Value:     item.InitialValue,
-					},
-					{
 						Key:       "target_value",
 						Type:      types.FormFieldNumber,
 						ValueType: types.FormFieldValueInt64,
@@ -379,7 +350,7 @@ var commandRules = []command.Rule{
 						Value:     item.ValueMode,
 					},
 				},
-			}
+			})
 		},
 	},
 	{

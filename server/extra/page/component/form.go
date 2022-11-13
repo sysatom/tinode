@@ -33,6 +33,12 @@ func (c *Form) Render() app.UI {
 	fields = append(fields, app.Input().Hidden(true).Type("text").Name("x-topic").Value(c.Page.Topic))
 
 	for _, field := range c.Schema.Field {
+		if field.ValueType == types.FormFieldValueInt64 {
+			switch v := field.Value.(type) {
+			case float64:
+				field.Value = int64(v)
+			}
+		}
 		switch field.Type {
 		case types.FormFieldText, types.FormFieldPassword, types.FormFieldNumber, types.FormFieldColor,
 			types.FormFieldFile, types.FormFieldMonth, types.FormFieldDate, types.FormFieldTime, types.FormFieldEmail,
@@ -46,6 +52,7 @@ func (c *Form) Render() app.UI {
 						Type(string(field.Type)).
 						Name(field.Key).
 						Placeholder(field.Placeholder).
+						Value(field.Value).
 						Required(field.Required),
 				),
 			))
@@ -56,6 +63,7 @@ func (c *Form) Render() app.UI {
 					app.Input().Class(fmt.Sprintf("uk-%s", field.Type)).
 						Type(string(field.Type)).
 						Name(field.Key).
+						Checked(option == field.Value).
 						Value(option),
 					app.Text(option)),
 				)
@@ -73,6 +81,7 @@ func (c *Form) Render() app.UI {
 						Class("uk-textarea").
 						Name(field.Key).
 						Placeholder(field.Placeholder).
+						Text(field.Value).
 						Required(field.Required),
 				),
 			))
@@ -80,7 +89,7 @@ func (c *Form) Render() app.UI {
 			// select
 			var options []app.UI
 			for _, option := range field.Option {
-				options = append(options, app.Option().Value(option).Text(option))
+				options = append(options, app.Option().Selected(option == field.Value).Value(option).Text(option))
 			}
 			fields = append(fields, app.Div().Class("uk-margin").Body(
 				app.Label().Class("uk-form-label").Text(field.Label),

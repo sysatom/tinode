@@ -65,6 +65,8 @@ var formRules = []form.Rule{
 				}
 			}
 
+			objective.Uid = ctx.AsUser.UserId()
+			objective.Topic = ctx.Original
 			err := store.Chatbot.UpdateObjective(&objective)
 			if err != nil {
 				logs.Err.Println(err)
@@ -145,8 +147,6 @@ var formRules = []form.Rule{
 					keyResult.Title = value.(string)
 				case "memo":
 					keyResult.Memo = value.(string)
-				case "initial_value":
-					keyResult.InitialValue = int32(value.(int64))
 				case "target_value":
 					keyResult.TargetValue = int32(value.(int64))
 				case "value_mode":

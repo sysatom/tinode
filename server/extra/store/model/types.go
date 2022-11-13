@@ -81,6 +81,7 @@ const (
 	PageForm  PageType = "form"
 	PageChart PageType = "chart"
 	PageTable PageType = "table"
+	PageOkr   PageType = "okr"
 )
 
 type PageState int

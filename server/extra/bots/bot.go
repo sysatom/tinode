@@ -179,6 +179,40 @@ func StoreForm(ctx types.Context, payload types.MsgPayload) types.MsgPayload {
 	}
 }
 
+func StoreOkr(ctx types.Context, payload types.MsgPayload) types.MsgPayload {
+	pageId := types.Id()
+	d, err := json.Marshal(payload)
+	if err != nil {
+		logs.Err.Println(err)
+		return types.TextMsg{Text: "store form error"}
+	}
+	schema := model.JSON{}
+	err = schema.Scan(d)
+	if err != nil {
+		logs.Err.Println(err)
+		return types.TextMsg{Text: "store form error"}
+	}
+
+	// store page
+	err = store.Chatbot.PageSet(pageId, model.Page{
+		PageId: pageId,
+		Uid:    ctx.AsUser.UserId(),
+		Topic:  ctx.Original,
+		Type:   model.PageOkr,
+		Schema: schema,
+		State:  model.PageStateCreated,
+	})
+	if err != nil {
+		logs.Err.Println(err)
+		return types.TextMsg{Text: "store form error"}
+	}
+
+	return types.LinkMsg{
+		Title: fmt.Sprintf("OKR [%s]", pageId),
+		Url:   fmt.Sprintf("http://127.0.0.1:6060/extra/page/%s", pageId), // fixme
+	}
+}
+
 // Init initializes registered handlers.
 func Init(jsonconf json.RawMessage) error {
 	var config []json.RawMessage

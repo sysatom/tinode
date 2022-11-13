@@ -1,7 +1,5 @@
 package types
 
-import "fmt"
-
 type FormMsg struct {
 	ID    string      `json:"id"`
 	Title string      `json:"title"`
@@ -9,18 +7,7 @@ type FormMsg struct {
 }
 
 func (a FormMsg) Convert() (map[string]interface{}, interface{}) {
-	builder := MsgBuilder{}
-	builder.AppendText(a.Title, TextOption{IsBold: true, IsForm: true})
-	for _, field := range a.Field {
-		if field.Type == FormFieldText {
-			builder.AppendText(field.Placeholder, TextOption{
-				IsButton:       true,
-				ButtonDataName: fmt.Sprintf("%s|%s", a.ID, field.Key),
-				ButtonDataVal:  field.Value.(string),
-				ButtonDataAct:  "pub"})
-		}
-	}
-	return builder.Message.Content()
+	return nil, nil
 }
 
 type FormField struct {
