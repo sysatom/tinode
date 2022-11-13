@@ -91,3 +91,17 @@ const (
 	PageStateProcessedSuccess
 	PageStateProcessedFailed
 )
+
+type Data struct {
+	ID        uint `gorm:"primaryKey"`
+	Uid       string
+	Topic     string
+	Key       string
+	Value     JSON `gorm:"type:json"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+func (Data) TableName() string {
+	return "chatbot_data"
+}

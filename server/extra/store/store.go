@@ -1,6 +1,7 @@
 package store
 
 import (
+	"context"
 	"errors"
 	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/store/types"
@@ -91,6 +92,8 @@ func (s storeObj) DbStats() func() interface{} {
 }
 
 type ChatbotPersistenceInterface interface {
+	DataSet(uid types.Uid, topic, key string, value model.JSON) error
+	DataGet(uid types.Uid, topic, key string) (model.JSON, error)
 	ConfigSet(uid types.Uid, topic, key string, value model.JSON) error
 	ConfigGet(uid types.Uid, topic, key string) (model.JSON, error)
 	OAuthSet(oauth model.OAuth) error
@@ -100,6 +103,27 @@ type ChatbotPersistenceInterface interface {
 	FormGet(formId string) (model.Form, error)
 	PageSet(pageId string, page model.Page) error
 	PageGet(pageId string) (model.Page, error)
+
+	GetObjectiveByID(ctx context.Context, id int64) (*model.Objective, error)
+	GetObjectiveBySequence(ctx context.Context, userId, sequence int64) (*model.Objective, error)
+	ListObjectives(ctx context.Context, userId int64) ([]*model.Objective, error)
+	CreateObjective(ctx context.Context, objective *model.Objective) (int64, error)
+	UpdateObjective(ctx context.Context, objective *model.Objective) error
+	DeleteObjective(ctx context.Context, id int64) error
+	DeleteObjectiveBySequence(ctx context.Context, userId, sequence int64) error
+	GetKeyResultByID(ctx context.Context, id int64) (*model.KeyResult, error)
+	GetKeyResultBySequence(ctx context.Context, userId, sequence int64) (*model.KeyResult, error)
+	ListKeyResults(ctx context.Context, userId int64) ([]*model.KeyResult, error)
+	ListKeyResultsById(ctx context.Context, id []int64) ([]*model.KeyResult, error)
+	ListKeyResultsByObjectiveId(ctx context.Context, objectiveId int64) ([]*model.KeyResult, error)
+	CreateKeyResult(ctx context.Context, keyResult *model.KeyResult) (int64, error)
+	UpdateKeyResult(ctx context.Context, keyResult *model.KeyResult) error
+	DeleteKeyResult(ctx context.Context, id int64) error
+	DeleteKeyResultBySequence(ctx context.Context, userId, sequence int64) error
+	AggregateObjectiveValue(ctx context.Context, id int64) error
+	AggregateKeyResultValue(ctx context.Context, id int64) error
+	CreateKeyResultValue(ctx context.Context, keyResultValue *model.KeyResultValue) (int64, error)
+	GetKeyResultValues(ctx context.Context, keyResultId int64) ([]*model.KeyResultValue, error)
 }
 
 var Chatbot ChatbotPersistenceInterface
@@ -140,6 +164,94 @@ func (c chatbotMapper) PageSet(pageId string, page model.Page) error {
 
 func (c chatbotMapper) PageGet(pageId string) (model.Page, error) {
 	return adp.PageGet(pageId)
+}
+
+func (c chatbotMapper) DataSet(uid types.Uid, topic, key string, value model.JSON) error {
+	return adp.DataSet(uid, topic, key, value)
+}
+
+func (c chatbotMapper) DataGet(uid types.Uid, topic, key string) (model.JSON, error) {
+	return adp.DataGet(uid, topic, key)
+}
+
+func (c chatbotMapper) GetObjectiveByID(ctx context.Context, id int64) (*model.Objective, error) {
+	return adp.GetObjectiveByID(ctx, id)
+}
+
+func (c chatbotMapper) GetObjectiveBySequence(ctx context.Context, userId, sequence int64) (*model.Objective, error) {
+	return adp.GetObjectiveBySequence(ctx, userId, sequence)
+}
+
+func (c chatbotMapper) ListObjectives(ctx context.Context, userId int64) ([]*model.Objective, error) {
+	return adp.ListObjectives(ctx, userId)
+}
+
+func (c chatbotMapper) CreateObjective(ctx context.Context, objective *model.Objective) (int64, error) {
+	return adp.CreateObjective(ctx, objective)
+}
+
+func (c chatbotMapper) UpdateObjective(ctx context.Context, objective *model.Objective) error {
+	return adp.UpdateObjective(ctx, objective)
+}
+
+func (c chatbotMapper) DeleteObjective(ctx context.Context, id int64) error {
+	return adp.DeleteObjective(ctx, id)
+}
+
+func (c chatbotMapper) DeleteObjectiveBySequence(ctx context.Context, userId, sequence int64) error {
+	return adp.DeleteObjectiveBySequence(ctx, userId, sequence)
+}
+
+func (c chatbotMapper) GetKeyResultByID(ctx context.Context, id int64) (*model.KeyResult, error) {
+	return adp.GetKeyResultByID(ctx, id)
+}
+
+func (c chatbotMapper) GetKeyResultBySequence(ctx context.Context, userId, sequence int64) (*model.KeyResult, error) {
+	return adp.GetKeyResultBySequence(ctx, userId, sequence)
+}
+
+func (c chatbotMapper) ListKeyResults(ctx context.Context, userId int64) ([]*model.KeyResult, error) {
+	return adp.ListKeyResults(ctx, userId)
+}
+
+func (c chatbotMapper) ListKeyResultsById(ctx context.Context, id []int64) ([]*model.KeyResult, error) {
+	return adp.ListKeyResultsById(ctx, id)
+}
+
+func (c chatbotMapper) ListKeyResultsByObjectiveId(ctx context.Context, objectiveId int64) ([]*model.KeyResult, error) {
+	return adp.ListKeyResultsByObjectiveId(ctx, objectiveId)
+}
+
+func (c chatbotMapper) CreateKeyResult(ctx context.Context, keyResult *model.KeyResult) (int64, error) {
+	return adp.CreateKeyResult(ctx, keyResult)
+}
+
+func (c chatbotMapper) UpdateKeyResult(ctx context.Context, keyResult *model.KeyResult) error {
+	return adp.UpdateKeyResult(ctx, keyResult)
+}
+
+func (c chatbotMapper) DeleteKeyResult(ctx context.Context, id int64) error {
+	return adp.DeleteKeyResult(ctx, id)
+}
+
+func (c chatbotMapper) DeleteKeyResultBySequence(ctx context.Context, userId, sequence int64) error {
+	return adp.DeleteKeyResultBySequence(ctx, userId, sequence)
+}
+
+func (c chatbotMapper) AggregateObjectiveValue(ctx context.Context, id int64) error {
+	return adp.AggregateObjectiveValue(ctx, id)
+}
+
+func (c chatbotMapper) AggregateKeyResultValue(ctx context.Context, id int64) error {
+	return adp.AggregateKeyResultValue(ctx, id)
+}
+
+func (c chatbotMapper) CreateKeyResultValue(ctx context.Context, keyResultValue *model.KeyResultValue) (int64, error) {
+	return adp.CreateKeyResultValue(ctx, keyResultValue)
+}
+
+func (c chatbotMapper) GetKeyResultValues(ctx context.Context, keyResultId int64) ([]*model.KeyResultValue, error) {
+	return adp.GetKeyResultValues(ctx, keyResultId)
 }
 
 func init() {

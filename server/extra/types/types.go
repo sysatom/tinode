@@ -159,9 +159,9 @@ func (a DigitMsg) Convert() (map[string]interface{}, interface{}) {
 }
 
 type OkrMsg struct {
-	Title     string        `json:"title"`
-	Objective interface{}   `json:"objective"`
-	KeyResult []interface{} `json:"key_result"`
+	Title     string      `json:"title"`
+	Objective interface{} `json:"objective"`
+	KeyResult interface{} `json:"key_result"` // todo
 }
 
 func (o OkrMsg) Convert() (map[string]interface{}, interface{}) {

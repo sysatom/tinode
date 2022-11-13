@@ -51,6 +51,10 @@ func (b bot) Command(ctx types.Context, content interface{}) (types.MsgPayload, 
 	return bots.RunCommand(commandRules, ctx, content)
 }
 
+func (b bot) Form(ctx types.Context, values map[string]interface{}) (types.MsgPayload, error) {
+	return bots.RunForm(formRules, ctx, values)
+}
+
 func init() {
 	bots.Register(Name, &handler)
 }
