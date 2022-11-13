@@ -179,7 +179,7 @@ func StoreForm(ctx types.Context, payload types.MsgPayload) types.MsgPayload {
 	}
 }
 
-func StoreOkr(ctx types.Context, payload types.MsgPayload) types.MsgPayload {
+func StorePage(ctx types.Context, category model.PageType, payload types.MsgPayload) types.MsgPayload {
 	pageId := types.Id()
 	d, err := json.Marshal(payload)
 	if err != nil {
@@ -198,7 +198,7 @@ func StoreOkr(ctx types.Context, payload types.MsgPayload) types.MsgPayload {
 		PageId: pageId,
 		Uid:    ctx.AsUser.UserId(),
 		Topic:  ctx.Original,
-		Type:   model.PageOkr,
+		Type:   category,
 		Schema: schema,
 		State:  model.PageStateCreated,
 	})
@@ -208,7 +208,7 @@ func StoreOkr(ctx types.Context, payload types.MsgPayload) types.MsgPayload {
 	}
 
 	return types.LinkMsg{
-		Title: fmt.Sprintf("OKR [%s]", pageId),
+		Title: fmt.Sprintf("%s [%s]", category, pageId),
 		Url:   fmt.Sprintf("http://127.0.0.1:6060/extra/page/%s", pageId), // fixme
 	}
 }

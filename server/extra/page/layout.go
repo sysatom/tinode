@@ -31,15 +31,15 @@ func RenderForm(page model.Page) app.UI {
 	if err != nil {
 		return nil
 	}
-	var formMsg types.FormMsg
-	err = json.Unmarshal(d, &formMsg)
+	var msg types.FormMsg
+	err = json.Unmarshal(d, &msg)
 	if err != nil {
 		return nil
 	}
 
 	comp := &component.Form{
 		Page:   page,
-		Schema: formMsg,
+		Schema: msg,
 	}
 	return comp
 }
@@ -49,7 +49,21 @@ func RenderChart(page model.Page) app.UI {
 }
 
 func RenderTable(page model.Page) app.UI {
-	return nil
+	d, err := json.Marshal(page.Schema)
+	if err != nil {
+		return nil
+	}
+	var msg types.TableMsg
+	err = json.Unmarshal(d, &msg)
+	if err != nil {
+		return nil
+	}
+
+	comp := &component.Table{
+		Page:   page,
+		Schema: msg,
+	}
+	return comp
 }
 
 func RenderOkr(page model.Page) app.UI {
@@ -57,15 +71,15 @@ func RenderOkr(page model.Page) app.UI {
 	if err != nil {
 		return nil
 	}
-	var okrMsg types.OkrMsg
-	err = json.Unmarshal(d, &okrMsg)
+	var msg types.OkrMsg
+	err = json.Unmarshal(d, &msg)
 	if err != nil {
 		return nil
 	}
 
 	comp := &component.Okr{
 		Page:   page,
-		Schema: okrMsg,
+		Schema: msg,
 	}
 	return comp
 }

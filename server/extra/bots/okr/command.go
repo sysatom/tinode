@@ -5,6 +5,7 @@ import (
 	"github.com/tinode/chat/server/extra/bots"
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/store"
+	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
 	"strconv"
@@ -40,7 +41,7 @@ var commandRules = []command.Rule{
 				return types.TextMsg{Text: "Empty"}
 			}
 
-			return types.TableMsg{Title: "Objectives", Header: header, Row: row}
+			return bots.StorePage(ctx, model.PageTable, types.TableMsg{Title: "Objectives", Header: header, Row: row})
 		},
 	},
 	{
@@ -61,7 +62,7 @@ var commandRules = []command.Rule{
 				return nil
 			}
 
-			return bots.StoreOkr(ctx, types.OkrMsg{
+			return bots.StorePage(ctx, model.PageOkr, types.OkrMsg{
 				Title:     fmt.Sprintf("Objective #%d", objective.Sequence),
 				Objective: objective,
 				KeyResult: keyResult,
@@ -210,11 +211,11 @@ var commandRules = []command.Rule{
 				}
 			}
 
-			return types.TableMsg{
+			return bots.StorePage(ctx, model.PageTable, types.TableMsg{
 				Title:  "KeyResult",
 				Header: header,
 				Row:    row,
-			}
+			})
 		},
 	},
 	{
@@ -402,11 +403,11 @@ var commandRules = []command.Rule{
 				}
 			}
 
-			return types.TableMsg{
+			return bots.StorePage(ctx, model.PageTable, types.TableMsg{
 				Title:  fmt.Sprintf("KeyResult #%d Values", sequence),
 				Header: header,
 				Row:    row,
-			}
+			})
 		},
 	},
 	{

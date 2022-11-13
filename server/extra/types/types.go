@@ -150,7 +150,7 @@ func (t TableMsg) Convert() (map[string]interface{}, interface{}) {
 		builder.AppendText("\n", TextOption{})
 	}
 
-	return builder.Message.Content()
+	return nil, nil
 }
 
 type DigitMsg struct {
@@ -182,9 +182,14 @@ func (i InfoMsg) Convert() (map[string]interface{}, interface{}) {
 	// title
 	builder.AppendTextLine(i.Title, TextOption{})
 	// model
-	d, _ := json.Marshal(i.Model)
 	var m map[string]interface{}
-	_ = json.Unmarshal(d, &m)
+	switch v := i.Model.(type) {
+	case map[string]interface{}:
+		m = v
+	default:
+		d, _ := json.Marshal(i.Model)
+		_ = json.Unmarshal(d, &m)
+	}
 
 	// sort keys
 	keys := make([]string, 0, len(m))

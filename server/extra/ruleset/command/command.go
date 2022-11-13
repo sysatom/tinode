@@ -15,13 +15,15 @@ type Ruleset []Rule
 
 func (r Ruleset) Help(in string) (types.MsgPayload, error) {
 	if strings.ToLower(in) == "help" {
-		table := types.TableMsg{
-			Header: []string{"Define", "Help"},
-		}
+		m := make(map[string]interface{})
 		for _, rule := range r {
-			table.Row = append(table.Row, []interface{}{rule.Define, rule.Help})
+			m[rule.Define] = rule.Help
 		}
-		return table, nil
+
+		return types.InfoMsg{
+			Title: "Help",
+			Model: m,
+		}, nil
 	}
 	return nil, nil
 }
