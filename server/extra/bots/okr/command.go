@@ -92,6 +92,7 @@ var commandRules = []command.Rule{
 
 			item, err := store.Chatbot.GetObjectiveBySequence(ctx.AsUser, ctx.Original, sequence)
 			if err != nil {
+				logs.Err.Println(err)
 				return nil
 			}
 
@@ -199,6 +200,7 @@ var commandRules = []command.Rule{
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
 			items, err := store.Chatbot.ListKeyResults(ctx.AsUser, ctx.Original)
 			if err != nil {
+				logs.Err.Println(err)
 				return nil
 			}
 
@@ -275,6 +277,7 @@ var commandRules = []command.Rule{
 
 			item, err := store.Chatbot.GetKeyResultBySequence(ctx.AsUser, ctx.Original, sequence)
 			if err != nil {
+				logs.Err.Println(err)
 				return nil
 			}
 
@@ -307,6 +310,7 @@ var commandRules = []command.Rule{
 
 			item, err := store.Chatbot.GetKeyResultBySequence(ctx.AsUser, ctx.Original, sequence)
 			if err != nil {
+				logs.Err.Println(err)
 				return nil
 			}
 
@@ -386,11 +390,13 @@ var commandRules = []command.Rule{
 
 			keyResult, err := store.Chatbot.GetKeyResultBySequence(ctx.AsUser, ctx.Original, sequence)
 			if err != nil {
+				logs.Err.Println(err)
 				return nil
 			}
 
 			items, err := store.Chatbot.GetKeyResultValues(keyResult.Id)
 			if err != nil {
+				logs.Err.Println(err)
 				return nil
 			}
 
@@ -414,28 +420,121 @@ var commandRules = []command.Rule{
 		Define: `todo list`,
 		Help:   `List todo`,
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
-			return types.TextMsg{Text: "V1"}
+			items, err := store.Chatbot.ListTodos(ctx.AsUser, ctx.Original)
+			if err != nil {
+				logs.Err.Println(err)
+				return nil
+			}
+
+			return types.TodoMsg{
+				Title: "Todo",
+				Todo:  items,
+			}
 		},
 	},
 	{
 		Define: `todo create`,
 		Help:   "Create Todo something",
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
-			return types.TextMsg{Text: "V1"}
+			return bots.StoreForm(ctx, types.FormMsg{
+				ID:    CreateTodoFormID,
+				Title: "Create todo",
+				Field: []types.FormField{
+					{
+						Key:       "content",
+						Type:      types.FormFieldText,
+						ValueType: types.FormFieldValueString,
+						Label:     "Content",
+					},
+					{
+						Key:       "category",
+						Type:      types.FormFieldText,
+						ValueType: types.FormFieldValueString,
+						Label:     "Category",
+					},
+					{
+						Key:       "remark",
+						Type:      types.FormFieldText,
+						ValueType: types.FormFieldValueString,
+						Label:     "Remark",
+					},
+					{
+						Key:       "priority",
+						Type:      types.FormFieldNumber,
+						ValueType: types.FormFieldValueInt64,
+						Label:     "Priority",
+					},
+				},
+			})
 		},
 	},
 	{
 		Define: `todo update [number]`,
 		Help:   "Update Todo something",
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
-			return types.TextMsg{Text: "V1"}
+			sequence, _ := tokens[2].Value.Int64()
+
+			item, err := store.Chatbot.GetTodoBySequence(ctx.AsUser, ctx.Original, sequence)
+			if err != nil {
+				logs.Err.Println(err)
+				return nil
+			}
+
+			return bots.StoreForm(ctx, types.FormMsg{
+				ID:    UpdateTodoFormID,
+				Title: fmt.Sprintf("Update Todo #%d", sequence),
+				Field: []types.FormField{
+					{
+						Key:       "sequence",
+						Type:      types.FormFieldNumber,
+						ValueType: types.FormFieldValueInt64,
+						Label:     "Sequence",
+						Value:     item.Sequence,
+					},
+					{
+						Key:       "content",
+						Type:      types.FormFieldText,
+						ValueType: types.FormFieldValueString,
+						Label:     "Content",
+						Value:     item.Content,
+					},
+					{
+						Key:       "category",
+						Type:      types.FormFieldText,
+						ValueType: types.FormFieldValueString,
+						Label:     "Category",
+						Value:     item.Category,
+					},
+					{
+						Key:       "remark",
+						Type:      types.FormFieldText,
+						ValueType: types.FormFieldValueString,
+						Label:     "Remark",
+						Value:     item.Remark,
+					},
+					{
+						Key:       "priority",
+						Type:      types.FormFieldNumber,
+						ValueType: types.FormFieldValueInt64,
+						Label:     "Priority",
+						Value:     item.Priority,
+					},
+				},
+			})
 		},
 	},
 	{
 		Define: `todo complete [number]`,
 		Help:   "Complete Todo",
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
-			return types.TextMsg{Text: "V1"}
+			sequence, _ := tokens[2].Value.Int64()
+			err := store.Chatbot.CompleteTodoBySequence(ctx.AsUser, ctx.Original, sequence)
+			if err != nil {
+				logs.Err.Println(err)
+				return types.TextMsg{Text: "failed"}
+			}
+
+			return types.TextMsg{Text: "ok"}
 		},
 	},
 	{

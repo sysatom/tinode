@@ -450,6 +450,108 @@ func (a *adapter) GetKeyResultValues(keyResultId int64) ([]*model.KeyResultValue
 	return values, nil
 }
 
+func (a *adapter) CreateTodo(todo *model.Todo) (int64, error) {
+	locker.Mux.Lock()
+	defer locker.Mux.Unlock()
+
+	// sequence
+	sequence := int64(0)
+	var max model.Todo
+	err := a.db.Where("`uid` = ? AND `topic` = ?", todo.Uid, todo.Topic).Order("sequence DESC").Take(&max).Error
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return 0, err
+	}
+	if max.Sequence > 0 {
+		sequence = max.Sequence
+	}
+	sequence += 1
+
+	todo.Sequence = sequence
+	err = a.db.Create(&todo).Error
+	if err != nil {
+		return 0, nil
+	}
+	return todo.Id, nil
+}
+
+func (a *adapter) ListTodos(uid types.Uid, topic string) ([]*model.Todo, error) {
+	var items []*model.Todo
+	err := a.db.
+		Where("`uid` = ? AND `topic` = ?", uid.UserId(), topic).
+		Order("priority DESC").
+		Order("created_at DESC").Find(&items).Error
+	if err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+func (a *adapter) ListRemindTodos(uid types.Uid, topic string) ([]*model.Todo, error) {
+	var items []*model.Todo
+	err := a.db.
+		Where("`uid` = ? AND `topic` = ?", uid.UserId(), topic).
+		Where("complete <> ?", 1).
+		Where("is_remind_at_time = ?", 1).
+		Order("priority DESC").Find(&items).Error
+	if err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+func (a *adapter) GetTodo(id int64) (*model.Todo, error) {
+	var find model.Todo
+	err := a.db.Where("id = ?", id).First(&find).Error
+	if err != nil {
+		return nil, err
+	}
+	return &find, nil
+}
+
+func (a *adapter) GetTodoBySequence(uid types.Uid, topic string, sequence int64) (*model.Todo, error) {
+	var find model.Todo
+	err := a.db.
+		Where("`uid` = ? AND `topic` = ? AND sequence = ?", uid.UserId(), topic, sequence).
+		First(&find).Error
+	if err != nil {
+		return nil, err
+	}
+	return &find, nil
+}
+
+func (a *adapter) CompleteTodo(id int64) error {
+	return a.db.Model(&model.Todo{}).
+		Where("id = ?", id).
+		Update("complete", true).Error
+}
+
+func (a *adapter) CompleteTodoBySequence(uid types.Uid, topic string, sequence int64) error {
+	return a.db.Model(&model.Todo{}).
+		Where("`uid` = ? AND `topic` = ? AND sequence = ?", uid.UserId(), topic, sequence).
+		Update("complete", true).Error
+}
+
+func (a *adapter) UpdateTodo(todo *model.Todo) error {
+	return a.db.Model(&model.Todo{}).
+		Where("`uid` = ? AND `topic` = ? AND sequence = ?", todo.Uid, todo.Topic, todo.Sequence).
+		UpdateColumns(map[string]interface{}{
+			"content":  todo.Content,
+			"category": todo.Category,
+			"remark":   todo.Remark,
+			"priority": todo.Priority,
+		}).Error
+}
+
+func (a *adapter) DeleteTodo(id int64) error {
+	return a.db.Where("id = ?", id).Delete(&model.Todo{}).Error
+}
+
+func (a *adapter) DeleteTodoBySequence(uid types.Uid, topic string, sequence int64) error {
+	return a.db.
+		Where("`uid` = ? AND `topic` = ? AND sequence = ?", uid.UserId(), topic, sequence).
+		Delete(&model.Todo{}).Error
+}
+
 func init() {
 	store.RegisterAdapter(&adapter{})
 }

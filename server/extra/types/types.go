@@ -209,11 +209,19 @@ func (i InfoMsg) Convert() (map[string]interface{}, interface{}) {
 
 type TodoMsg struct {
 	Title string        `json:"title"`
-	Todo  []interface{} `json:"todo"`
+	Todo  []*model.Todo `json:"todo"`
 }
 
 func (t TodoMsg) Convert() (map[string]interface{}, interface{}) {
-	return commonHead, nil //todo
+	if len(t.Todo) == 0 {
+		return nil, "empty"
+	}
+	builder := MsgBuilder{}
+	builder.AppendTextLine("Todo", TextOption{IsBold: true})
+	for i, todo := range t.Todo {
+		builder.AppendTextLine(fmt.Sprintf("%d: %s", i+1, todo.Content), TextOption{})
+	}
+	return builder.Message.Content()
 }
 
 func Convert(payloads []MsgPayload) ([]map[string]interface{}, []interface{}) {

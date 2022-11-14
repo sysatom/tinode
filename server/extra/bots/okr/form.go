@@ -15,6 +15,8 @@ const (
 	CreateKeyResultFormID      = "create_key_result"
 	UpdateKeyResultFormID      = "Update_key_result"
 	CreateKeyResultValueFormID = "create_key_result_value"
+	CreateTodoFormID           = "create_todo"
+	UpdateTodoFormID           = "update_todo"
 )
 
 var formRules = []form.Rule{
@@ -205,6 +207,63 @@ var formRules = []form.Rule{
 			}
 			err = store.Chatbot.AggregateObjectiveValue(keyResult.ObjectiveId)
 			if err != nil {
+				return nil
+			}
+
+			return types.TextMsg{Text: fmt.Sprintf("ok, form [%s]", ctx.FormId)}
+		},
+	},
+	{
+		Id: CreateTodoFormID,
+		Handler: func(ctx types.Context, values map[string]interface{}) types.MsgPayload {
+			var todo model.Todo
+			for key, value := range values {
+				switch key {
+				case "content":
+					todo.Content = value.(string)
+				case "category":
+					todo.Category = value.(string)
+				case "remark":
+					todo.Remark = value.(string)
+				case "priority":
+					todo.Priority = value.(int64)
+				}
+			}
+
+			todo.Uid = ctx.AsUser.UserId()
+			todo.Topic = ctx.Original
+			_, err := store.Chatbot.CreateTodo(&todo)
+			if err != nil {
+				logs.Err.Println(err)
+				return nil
+			}
+
+			return types.TextMsg{Text: fmt.Sprintf("ok, form [%s]", ctx.FormId)}
+		},
+	},
+	{
+		Id: UpdateTodoFormID,
+		Handler: func(ctx types.Context, values map[string]interface{}) types.MsgPayload {
+			var todo model.Todo
+			for key, value := range values {
+				switch key {
+				case "sequence":
+					todo.Sequence = value.(int64)
+				case "content":
+					todo.Content = value.(string)
+				case "category":
+					todo.Category = value.(string)
+				case "remark":
+					todo.Remark = value.(string)
+				case "priority":
+					todo.Priority = value.(int64)
+				}
+			}
+			todo.Uid = ctx.AsUser.UserId()
+			todo.Topic = ctx.Original
+			err := store.Chatbot.UpdateTodo(&todo)
+			if err != nil {
+				logs.Err.Println(err)
 				return nil
 			}
 

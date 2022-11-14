@@ -123,6 +123,17 @@ type ChatbotPersistenceInterface interface {
 	AggregateKeyResultValue(id int64) error
 	CreateKeyResultValue(keyResultValue *model.KeyResultValue) (int64, error)
 	GetKeyResultValues(keyResultId int64) ([]*model.KeyResultValue, error)
+
+	CreateTodo(todo *model.Todo) (int64, error)
+	ListTodos(uid types.Uid, topic string) ([]*model.Todo, error)
+	ListRemindTodos(uid types.Uid, topic string) ([]*model.Todo, error)
+	GetTodo(id int64) (*model.Todo, error)
+	GetTodoBySequence(uid types.Uid, topic string, sequence int64) (*model.Todo, error)
+	CompleteTodo(id int64) error
+	CompleteTodoBySequence(uid types.Uid, topic string, sequence int64) error
+	UpdateTodo(todo *model.Todo) error
+	DeleteTodo(id int64) error
+	DeleteTodoBySequence(uid types.Uid, topic string, sequence int64) error
 }
 
 var Chatbot ChatbotPersistenceInterface
@@ -251,6 +262,46 @@ func (c chatbotMapper) CreateKeyResultValue(keyResultValue *model.KeyResultValue
 
 func (c chatbotMapper) GetKeyResultValues(keyResultId int64) ([]*model.KeyResultValue, error) {
 	return adp.GetKeyResultValues(keyResultId)
+}
+
+func (c chatbotMapper) CreateTodo(todo *model.Todo) (int64, error) {
+	return adp.CreateTodo(todo)
+}
+
+func (c chatbotMapper) ListTodos(uid types.Uid, topic string) ([]*model.Todo, error) {
+	return adp.ListTodos(uid, topic)
+}
+
+func (c chatbotMapper) ListRemindTodos(uid types.Uid, topic string) ([]*model.Todo, error) {
+	return adp.ListRemindTodos(uid, topic)
+}
+
+func (c chatbotMapper) GetTodo(id int64) (*model.Todo, error) {
+	return adp.GetTodo(id)
+}
+
+func (c chatbotMapper) GetTodoBySequence(uid types.Uid, topic string, sequence int64) (*model.Todo, error) {
+	return adp.GetTodoBySequence(uid, topic, sequence)
+}
+
+func (c chatbotMapper) CompleteTodo(id int64) error {
+	return adp.CompleteTodo(id)
+}
+
+func (c chatbotMapper) CompleteTodoBySequence(uid types.Uid, topic string, sequence int64) error {
+	return adp.CompleteTodoBySequence(uid, topic, sequence)
+}
+
+func (c chatbotMapper) UpdateTodo(todo *model.Todo) error {
+	return adp.UpdateTodo(todo)
+}
+
+func (c chatbotMapper) DeleteTodo(id int64) error {
+	return adp.DeleteTodo(id)
+}
+
+func (c chatbotMapper) DeleteTodoBySequence(uid types.Uid, topic string, sequence int64) error {
+	return adp.DeleteTodoBySequence(uid, topic, sequence)
 }
 
 func init() {

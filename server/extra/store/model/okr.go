@@ -66,3 +66,26 @@ type KeyResultValue struct {
 func (KeyResultValue) TableName() string {
 	return "chatbot_key_result_values"
 }
+
+type Todo struct {
+	Id             int64     `json:"id,omitempty" gorm:"primaryKey"`
+	Uid            string    `json:"uid,omitempty" `
+	Topic          string    `json:"topic,omitempty" `
+	Sequence       int64     `json:"sequence,omitempty" `
+	Content        string    `json:"content,omitempty" `
+	Category       string    `json:"category,omitempty" `
+	Remark         string    `json:"remark,omitempty" `
+	Priority       int64     `json:"priority,omitempty" `
+	IsRemindAtTime bool      `json:"is_remind_at_time,omitempty" `
+	RemindAt       int64     `json:"remind_at,omitempty" `
+	RepeatMethod   string    `json:"repeat_method,omitempty" `
+	RepeatRule     string    `json:"repeat_rule,omitempty" `
+	RepeatEndAt    int64     `json:"repeat_end_at,omitempty" `
+	Complete       bool      `json:"complete" `
+	CreatedAt      time.Time `json:"created_at,omitempty" `
+	UpdatedAt      time.Time `json:"updated_at,omitempty" `
+}
+
+func (Todo) TableName() string {
+	return "chatbot_todos"
+}

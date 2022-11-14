@@ -64,4 +64,15 @@ type Adapter interface {
 	AggregateKeyResultValue(id int64) error
 	CreateKeyResultValue(keyResultValue *model.KeyResultValue) (int64, error)
 	GetKeyResultValues(keyResultId int64) ([]*model.KeyResultValue, error)
+
+	CreateTodo(todo *model.Todo) (int64, error)
+	ListTodos(uid types.Uid, topic string) ([]*model.Todo, error)
+	ListRemindTodos(uid types.Uid, topic string) ([]*model.Todo, error)
+	GetTodo(id int64) (*model.Todo, error)
+	GetTodoBySequence(uid types.Uid, topic string, sequence int64) (*model.Todo, error)
+	CompleteTodo(id int64) error
+	CompleteTodoBySequence(uid types.Uid, topic string, sequence int64) error
+	UpdateTodo(todo *model.Todo) error
+	DeleteTodo(id int64) error
+	DeleteTodoBySequence(uid types.Uid, topic string, sequence int64) error
 }
