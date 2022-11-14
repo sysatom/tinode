@@ -12,6 +12,8 @@ import (
 
 const Name = "github"
 
+const RepoKey = "repo"
+
 var handler bot
 var Config configType
 
