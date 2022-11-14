@@ -226,6 +226,17 @@ func (t TodoMsg) Convert() (map[string]interface{}, interface{}) {
 	return builder.Message.Content()
 }
 
+type ChartMsg struct {
+	Title    string    `json:"title"`
+	SubTitle string    `json:"sub_title"`
+	XAxis    []string  `json:"x_axis"`
+	Series   []float64 `json:"series"`
+}
+
+func (t ChartMsg) Convert() (map[string]interface{}, interface{}) {
+	return nil, nil
+}
+
 func Convert(payloads []MsgPayload) ([]map[string]interface{}, []interface{}) {
 	var heads []map[string]interface{}
 	var contents []interface{}

@@ -44,10 +44,6 @@ func RenderForm(page model.Page) app.UI {
 	return comp
 }
 
-func RenderChart(page model.Page) app.UI {
-	return nil
-}
-
 func RenderTable(page model.Page) app.UI {
 	d, err := json.Marshal(page.Schema)
 	if err != nil {
