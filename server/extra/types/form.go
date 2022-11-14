@@ -19,6 +19,7 @@ type FormField struct {
 	Label       string             `json:"label"`
 	Placeholder string             `json:"placeholder"`
 	Option      []string           `json:"option"`
+	Hidden      bool               `json:"hidden"`
 }
 
 type FormFieldType string

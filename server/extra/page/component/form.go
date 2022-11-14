@@ -31,14 +31,19 @@ func (c *Form) Render() app.UI {
 	fields = append(fields, app.Input().Hidden(true).Type("text").Name("x-form_id").Value(c.Page.PageId))
 	fields = append(fields, app.Input().Hidden(true).Type("text").Name("x-uid").Value(c.Page.Uid))
 	fields = append(fields, app.Input().Hidden(true).Type("text").Name("x-topic").Value(c.Page.Topic))
-
 	for _, field := range c.Schema.Field {
-		if field.ValueType == types.FormFieldValueInt64 {
-			switch v := field.Value.(type) {
-			case float64:
-				field.Value = int64(v)
-			}
+		if field.Hidden {
+			field.Value = fixInt64Value(field.ValueType, field.Value)
+			fields = append(fields, app.Input().Hidden(true).Type("text").Name(field.Key).Value(field.Value))
 		}
+	}
+
+	// fields
+	for _, field := range c.Schema.Field {
+		if field.Hidden {
+			continue
+		}
+		field.Value = fixInt64Value(field.ValueType, field.Value)
 		switch field.Type {
 		case types.FormFieldText, types.FormFieldPassword, types.FormFieldNumber, types.FormFieldColor,
 			types.FormFieldFile, types.FormFieldMonth, types.FormFieldDate, types.FormFieldTime, types.FormFieldEmail,
@@ -106,7 +111,6 @@ func (c *Form) Render() app.UI {
 	if c.Page.State == model.PageStateCreated {
 		fields = append(fields, app.Div().Class("uk-margin").Body(
 			app.Button().Class("uk-button uk-button-primary").Text("Submit").Type("submit"),
-			app.Button().Class("uk-button uk-button-default").Text("Cancel"),
 		))
 	}
 
@@ -116,4 +120,14 @@ func (c *Form) Render() app.UI {
 		app.Form().Class("uk-form-stacked").Method("POST").Action("/extra/form").
 			Body(fields...),
 	)
+}
+
+func fixInt64Value(t types.FormFieldValueType, v interface{}) interface{} {
+	if t == types.FormFieldValueInt64 {
+		switch v := v.(type) {
+		case float64:
+			return int64(v)
+		}
+	}
+	return v
 }

@@ -64,6 +64,10 @@ func (bot) Cron(send func(userUid, topicUid serverTypes.Uid, out types.MsgPayloa
 	return nil
 }
 
+func (b bot) Form(ctx types.Context, values map[string]interface{}) (types.MsgPayload, error) {
+	return bots.RunForm(formRules, ctx, values)
+}
+
 func init() {
 	bots.Register(Name, &handler)
 }

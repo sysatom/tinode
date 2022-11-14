@@ -14,25 +14,25 @@ func TestRegexRule(t *testing.T) {
 		{
 			Define: `test`,
 			Help:   `Test info`,
-			Handler: func(ctx types.Context, tokens []*Token) []types.MsgPayload {
-				return []types.MsgPayload{types.TextMsg{Text: "test"}}
+			Handler: func(ctx types.Context, tokens []*Token) types.MsgPayload {
+				return types.TextMsg{Text: "test"}
 			},
 		},
 		{
 			Define: `todo [string]`,
 			Help:   `todo something`,
-			Handler: func(ctx types.Context, tokens []*Token) []types.MsgPayload {
+			Handler: func(ctx types.Context, tokens []*Token) types.MsgPayload {
 				text, _ := tokens[1].Value.String()
-				return []types.MsgPayload{types.TextMsg{Text: text}}
+				return types.TextMsg{Text: text}
 			},
 		},
 		{
 			Define: `add [number] [number]`,
 			Help:   `Addition`,
-			Handler: func(ctx types.Context, tokens []*Token) []types.MsgPayload {
+			Handler: func(ctx types.Context, tokens []*Token) types.MsgPayload {
 				tt1, _ := tokens[1].Value.Int64()
 				tt2, _ := tokens[2].Value.Int64()
-				return []types.MsgPayload{types.TextMsg{Text: strconv.Itoa(int(tt1 + tt2))}}
+				return types.TextMsg{Text: strconv.Itoa(int(tt1 + tt2))}
 			},
 		},
 	}
@@ -43,29 +43,29 @@ func TestRegexRule(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	require.Contains(t, out, types.TextMsg{Text: "test"})
+	require.Equal(t, out, types.TextMsg{Text: "test"})
 
 	out2, err := b.ProcessCommand(types.Context{}, "add 1 2")
 	if err != nil {
 		t.Fatal(err)
 	}
-	require.Contains(t, out2, types.TextMsg{Text: "3"})
+	require.Equal(t, out2, types.TextMsg{Text: "3"})
 
 	out3, err := b.ProcessCommand(types.Context{}, "help")
 	if err != nil {
 		t.Fatal(err)
 	}
-	require.Len(t, out3, 0)
+	assert.True(t, out3 == nil)
 
 	help, err := b.Help("help")
 	if err != nil {
 		t.Fatal(err)
 	}
-	assert.True(t, len(help) > 0)
+	assert.True(t, help != nil)
 
 	out4, err := b.ProcessCommand(types.Context{}, `todo "a b c"`)
 	if err != nil {
 		t.Fatal(err)
 	}
-	require.Contains(t, out4, types.TextMsg{Text: "a b c"})
+	require.Equal(t, out4, types.TextMsg{Text: "a b c"})
 }

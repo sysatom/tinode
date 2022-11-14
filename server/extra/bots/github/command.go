@@ -24,6 +24,29 @@ var commandRules = []command.Rule{
 		},
 	},
 	{
+		Define: "config",
+		Help:   `Config`,
+		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+			j, _ := store.Chatbot.ConfigGet(ctx.AsUser, ctx.Original, RepoKey)
+			repoValue, _ := j.String("value")
+
+			return bots.StoreForm(ctx, types.FormMsg{
+				ID:    configFormID,
+				Title: "Config",
+				Field: []types.FormField{
+					{
+						Type:        types.FormFieldText,
+						Key:         "repo",
+						Value:       repoValue,
+						ValueType:   types.FormFieldValueString,
+						Label:       "Repo",
+						Placeholder: "Input repo",
+					},
+				},
+			})
+		},
+	},
+	{
 		Define: "oauth",
 		Help:   `OAuth`,
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
@@ -79,39 +102,6 @@ var commandRules = []command.Rule{
 			})
 
 			return bots.StorePage(ctx, model.PageTable, table)
-		},
-	},
-	{
-		Define: "set repo [string]",
-		Help:   `Set main repo`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
-			repo, _ := tokens[2].Value.String()
-
-			err := store.Chatbot.ConfigSet(ctx.AsUser, ctx.Original, RepoKey, map[string]interface{}{
-				"value": repo,
-			})
-			if err != nil {
-				logs.Err.Println(err)
-				return types.TextMsg{Text: "failed"}
-			}
-
-			return types.TextMsg{Text: "ok"}
-		},
-	},
-	{
-		Define: "get [string]",
-		Help:   `get config`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
-			key, _ := tokens[1].Value.String()
-
-			j, err := store.Chatbot.ConfigGet(ctx.AsUser, ctx.Original, key)
-			if err != nil {
-				logs.Err.Println(err)
-				return types.TextMsg{Text: "failed"}
-			}
-			value, _ := j.String("value")
-
-			return types.TextMsg{Text: fmt.Sprintf("Config %s: %s", key, value)}
 		},
 	},
 	{

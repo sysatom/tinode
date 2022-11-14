@@ -14,6 +14,6 @@ func init() {
 	var err error
 	DB, err = rosedb.Open(opts)
 	if err != nil {
-		logs.Err.Fatal("open rosedb err: %v", err)
+		logs.Err.Fatalf("open rosedb err: %v", err)
 	}
 }
