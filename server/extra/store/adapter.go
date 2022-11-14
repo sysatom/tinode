@@ -25,6 +25,10 @@ type Adapter interface {
 	DataSet(uid types.Uid, topic, key string, value model.JSON) error
 	// DataGet data get
 	DataGet(uid types.Uid, topic, key string) (model.JSON, error)
+	// DataList data list
+	DataList(uid types.Uid, topic, prefix string) ([]*model.Data, error)
+	// DataDelete data delete
+	DataDelete(uid types.Uid, topic, key string) error
 	// ConfigSet config set
 	ConfigSet(uid types.Uid, topic, key string, value model.JSON) error
 	// ConfigGet config get

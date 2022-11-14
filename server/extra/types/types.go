@@ -271,21 +271,21 @@ type Context struct {
 	FormRuleId string `json:"-"`
 }
 
-func Id() string {
+func Id() types.Uid {
 	key, err := generateRandomString(16)
 	if err != nil {
 		logs.Err.Println("bot command id", err)
-		return ""
+		return 0
 	}
 
 	uGen := types.UidGenerator{}
 	err = uGen.Init(1, []byte(key))
 	if err != nil {
 		logs.Err.Println("bot command id", err)
-		return ""
+		return 0
 	}
 
-	return uGen.GetStr()
+	return uGen.Get()
 }
 
 func generateRandomString(n int) (string, error) {

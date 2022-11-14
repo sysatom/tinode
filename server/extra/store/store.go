@@ -93,6 +93,8 @@ func (s storeObj) DbStats() func() interface{} {
 type ChatbotPersistenceInterface interface {
 	DataSet(uid types.Uid, topic, key string, value model.JSON) error
 	DataGet(uid types.Uid, topic, key string) (model.JSON, error)
+	DataList(uid types.Uid, topic, prefix string) ([]*model.Data, error)
+	DataDelete(uid types.Uid, topic, key string) error
 	ConfigSet(uid types.Uid, topic, key string, value model.JSON) error
 	ConfigGet(uid types.Uid, topic, key string) (model.JSON, error)
 	OAuthSet(oauth model.OAuth) error
@@ -189,6 +191,14 @@ func (c chatbotMapper) DataSet(uid types.Uid, topic, key string, value model.JSO
 
 func (c chatbotMapper) DataGet(uid types.Uid, topic, key string) (model.JSON, error) {
 	return adp.DataGet(uid, topic, key)
+}
+
+func (c chatbotMapper) DataList(uid types.Uid, topic, prefix string) ([]*model.Data, error) {
+	return adp.DataList(uid, topic, prefix)
+}
+
+func (c chatbotMapper) DataDelete(uid types.Uid, topic, key string) error {
+	return adp.DataDelete(uid, topic, key)
 }
 
 func (c chatbotMapper) GetObjectiveByID(id int64) (*model.Objective, error) {

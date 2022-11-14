@@ -41,7 +41,7 @@ var commandRules = []command.Rule{
 		Define: "id",
 		Help:   `Generate random id`,
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
-			return types.TextMsg{Text: types.Id()}
+			return types.TextMsg{Text: types.Id().String()}
 		},
 	},
 	{

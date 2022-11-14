@@ -132,7 +132,7 @@ func RunForm(formRules []form.Rule, ctx types.Context, values map[string]interfa
 }
 
 func StoreForm(ctx types.Context, payload types.MsgPayload) types.MsgPayload {
-	formId := types.Id()
+	formId := types.Id().String()
 	d, err := json.Marshal(payload)
 	if err != nil {
 		logs.Err.Println(err)
@@ -187,7 +187,7 @@ func StoreForm(ctx types.Context, payload types.MsgPayload) types.MsgPayload {
 }
 
 func StorePage(ctx types.Context, category model.PageType, payload types.MsgPayload) types.MsgPayload {
-	pageId := types.Id()
+	pageId := types.Id().String()
 	d, err := json.Marshal(payload)
 	if err != nil {
 		logs.Err.Println(err)

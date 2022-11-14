@@ -6,6 +6,7 @@ package mysql
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"github.com/tinode/chat/server/db/mysql"
 	"github.com/tinode/chat/server/extra/locker"
 	"github.com/tinode/chat/server/extra/store"
@@ -68,11 +69,11 @@ func (a *adapter) DataSet(uid types.Uid, topic, key string, value model.JSON) er
 	}
 	if find.ID > 0 {
 		return a.db.
-			Model(&model.Config{}).
+			Model(&model.Data{}).
 			Where("`uid` = ? AND `topic` = ? AND `key` = ?", uid.UserId(), topic, key).
 			Update("value", value).Error
 	} else {
-		return a.db.Create(&model.Config{
+		return a.db.Create(&model.Data{
 			Uid:   uid.UserId(),
 			Topic: topic,
 			Key:   key,
@@ -88,6 +89,27 @@ func (a *adapter) DataGet(uid types.Uid, topic, key string) (model.JSON, error) 
 		return nil, err
 	}
 	return find.Value, nil
+}
+
+func (a *adapter) DataList(uid types.Uid, topic, prefix string) ([]*model.Data, error) {
+	var list []*model.Data
+	if prefix == "" {
+		err := a.db.Where("`uid` = ? AND `topic` = ?", uid.UserId(), topic).Find(&list).Error
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		err := a.db.Where("`uid` = ? AND `topic` = ? AND `key` LIKE ?", uid.UserId(), topic, fmt.Sprintf("%s%%", prefix)).Find(&list).Error
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return list, nil
+}
+
+func (a *adapter) DataDelete(uid types.Uid, topic string, key string) error {
+	return a.db.Where("`uid` = ? AND `topic` = ? AND `key` = ?", uid.UserId(), topic, key).Delete(&model.Data{}).Error
 }
 
 func (a *adapter) ConfigSet(uid types.Uid, topic, key string, value model.JSON) error {
