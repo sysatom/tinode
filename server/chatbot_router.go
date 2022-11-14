@@ -15,6 +15,7 @@ import (
 	"github.com/tinode/chat/server/logs"
 	serverStore "github.com/tinode/chat/server/store"
 	"github.com/tinode/chat/server/store/types"
+	"io"
 	"net/http"
 	"strconv"
 )
@@ -25,6 +26,7 @@ func newRouter() *mux.Router {
 	s.HandleFunc("/oauth/{category}/{uid1}/{uid2}", storeOAuth)
 	s.HandleFunc("/page/{id}", getPage)
 	s.HandleFunc("/form", postForm).Methods(http.MethodPost)
+	s.HandleFunc("/webhook/{uid1}/{uid2}/{uid3}", webhook).Methods(http.MethodPost)
 	return s
 }
 
@@ -33,16 +35,9 @@ func newRouter() *mux.Router {
 func storeOAuth(rw http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	category := vars["category"]
-	ui1, err := strconv.ParseUint(vars["uid1"], 10, 64)
-	if err != nil {
-		logs.Err.Println("router oauth", err)
-		rw.WriteHeader(http.StatusBadRequest)
-		_, _ = rw.Write([]byte("path error"))
-		return
-	}
-	ui2, err := strconv.ParseUint(vars["uid2"], 10, 64)
-	if err != nil {
-		logs.Err.Println("router oauth", err)
+	ui1, _ := strconv.ParseUint(vars["uid1"], 10, 64)
+	ui2, _ := strconv.ParseUint(vars["uid2"], 10, 64)
+	if ui1 == 0 || ui2 == 0 {
 		rw.WriteHeader(http.StatusBadRequest)
 		_, _ = rw.Write([]byte("path error"))
 		return
@@ -254,4 +249,39 @@ func postForm(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	_, _ = rw.Write([]byte("ok"))
+}
+
+func webhook(rw http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+
+	ui1, _ := strconv.ParseUint(vars["uid1"], 10, 64)
+	ui2, _ := strconv.ParseUint(vars["uid2"], 10, 64)
+	ui3, _ := strconv.ParseUint(vars["uid3"], 10, 64)
+
+	uid1 := types.Uid(ui1)
+	uid2 := types.Uid(ui2)
+	uid3 := types.Uid(ui3)
+
+	value, err := store.Chatbot.DataGet(uid1, uid2.UserId(), fmt.Sprintf("webhook:%s", uid3.String()))
+	if err != nil {
+		rw.WriteHeader(http.StatusBadRequest)
+		_, _ = rw.Write([]byte("webhook error"))
+		return
+	}
+	_, ok := value.String("value")
+	if !ok {
+		rw.WriteHeader(http.StatusBadRequest)
+		_, _ = rw.Write([]byte("webhook error"))
+		return
+	}
+
+	d, _ := io.ReadAll(req.Body)
+
+	if len(d) > 1000 {
+		botSend(uid1, uid2, extraTypes.TextMsg{Text: fmt.Sprintf("[webhook:%s] body too long", uid3.String())})
+	} else {
+		botSend(uid1, uid2, extraTypes.TextMsg{Text: fmt.Sprintf("[webhook:%s] %s", uid3.String(), string(d))})
+	}
+
+	rw.Write([]byte("ok"))
 }
