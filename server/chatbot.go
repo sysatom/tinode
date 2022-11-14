@@ -137,19 +137,28 @@ func hookHandleBotIncomingMessage(t *Topic, msg *ClientComMessage) {
 			continue
 		}
 
+		// command
 		var head map[string]interface{}
 		var content interface{}
 		if msg.Pub.Head == nil {
 			payload, err := handle.Command(ctx, msg.Pub.Content)
 			if err != nil {
 				logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
-				continue
 			}
 
 			// stats
 			statsInc("BotRunTotal", 1)
 
-			if payload == nil {
+			if err == nil && payload != nil {
+				head, content = payload.Convert()
+			}
+		}
+
+		// input
+		if content == nil {
+			payload, err := handle.Input(ctx, msg.Pub.Head, msg.Pub.Content)
+			if err != nil {
+				logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
 				continue
 			}
 			head, content = payload.Convert()

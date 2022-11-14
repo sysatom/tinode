@@ -23,6 +23,9 @@ type Handler interface {
 	// IsReady сhecks if the bot is initialized.
 	IsReady() bool
 
+	// Input return input result
+	Input(_ types.Context, _ map[string]interface{}, _ interface{}) (types.MsgPayload, error)
+
 	// Command return bot result
 	Command(ctx types.Context, content interface{}) (types.MsgPayload, error)
 
@@ -34,6 +37,10 @@ type Handler interface {
 }
 
 type Base struct{}
+
+func (Base) Input(_ types.Context, _ map[string]interface{}, _ interface{}) (types.MsgPayload, error) {
+	return nil, nil
+}
 
 func (Base) Command(_ types.Context, _ interface{}) (types.MsgPayload, error) {
 	return nil, nil
