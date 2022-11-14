@@ -89,3 +89,18 @@ type Todo struct {
 func (Todo) TableName() string {
 	return "chatbot_todos"
 }
+
+type Counter struct {
+	Id        int64     `json:"id,omitempty" gorm:"primaryKey"`
+	Uid       string    `json:"uid,omitempty" `
+	Topic     string    `json:"topic,omitempty" `
+	Flag      string    `json:"flag,omitempty"`
+	Digit     int64     `json:"digit,omitempty"`
+	Status    int32     `json:"status,omitempty"`
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
+}
+
+func (Counter) TableName() string {
+	return "chatbot_counters"
+}

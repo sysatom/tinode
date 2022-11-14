@@ -10,10 +10,12 @@ import (
 	"github.com/tinode/chat/server/extra/locker"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/store/model"
+	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/store/types"
 	mysqlDriver "gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"strconv"
+	"time"
 )
 
 const adapterName = "mysql"
@@ -550,6 +552,73 @@ func (a *adapter) DeleteTodoBySequence(uid types.Uid, topic string, sequence int
 	return a.db.
 		Where("`uid` = ? AND `topic` = ? AND sequence = ?", uid.UserId(), topic, sequence).
 		Delete(&model.Todo{}).Error
+}
+
+func (a *adapter) CreateCounter(counter *model.Counter) (int64, error) {
+	err := a.db.Create(&counter)
+	if err != nil {
+		return 0, nil
+	}
+	a.record(counter.Id, counter.Digit)
+	return counter.Id, nil
+}
+
+func (a *adapter) IncreaseCounter(id, amount int64) error {
+	err := a.db.Model(&model.Counter{}).
+		Where("id = ?", id).
+		Update("digit", gorm.Expr("digit + ?", amount)).Error
+	if err != nil {
+		return err
+	}
+	a.record(id, amount)
+	return nil
+}
+
+func (a *adapter) DecreaseCounter(id, amount int64) error {
+	err := a.db.Model(&model.Counter{}).
+		Where("id = ?", id).
+		Update("digit", gorm.Expr("digit - ?", amount)).Error
+	if err != nil {
+		return err
+	}
+	a.record(id, -amount)
+	return nil
+}
+
+func (a *adapter) ListCounter(uid types.Uid, topic string) ([]*model.Counter, error) {
+	var items []*model.Counter
+	err := a.db.Where("`uid` = ? AND `topic` = ?", uid.UserId(), topic).
+		Order("updated_at DESC").Find(&items).Error
+	if err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+func (a *adapter) record(id, digit int64) {
+	err := a.db.Exec("INSERT INTO `chatbot_counter_records` ( `counter_id`, `digit`, `created_at`) VALUES (?, ?, ?)",
+		id, digit, time.Now()).Error
+	if err != nil {
+		logs.Err.Println(err)
+	}
+}
+
+func (a *adapter) GetCounter(id int64) (model.Counter, error) {
+	var find model.Counter
+	err := a.db.Where("id = ?", id).First(&find).Error
+	if err != nil {
+		return model.Counter{}, err
+	}
+	return find, nil
+}
+
+func (a *adapter) GetCounterByFlag(uid types.Uid, topic string, flag string) (model.Counter, error) {
+	var find model.Counter
+	err := a.db.Where("`uid` = ? AND `topic` = ? AND flag = ?", uid.UserId(), topic, flag).First(&find).Error
+	if err != nil {
+		return model.Counter{}, err
+	}
+	return find, nil
 }
 
 func init() {

@@ -159,7 +159,9 @@ type DigitMsg struct {
 }
 
 func (a DigitMsg) Convert() (map[string]interface{}, interface{}) {
-	return commonHead, nil //todo
+	builder := MsgBuilder{}
+	builder.AppendText(fmt.Sprintf("Counter %s : %d", a.Title, a.Digit), TextOption{})
+	return builder.Message.Content()
 }
 
 type OkrMsg struct {

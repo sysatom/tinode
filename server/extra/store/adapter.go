@@ -75,4 +75,11 @@ type Adapter interface {
 	UpdateTodo(todo *model.Todo) error
 	DeleteTodo(id int64) error
 	DeleteTodoBySequence(uid types.Uid, topic string, sequence int64) error
+
+	CreateCounter(counter *model.Counter) (int64, error)
+	IncreaseCounter(id, amount int64) error
+	DecreaseCounter(id, amount int64) error
+	ListCounter(uid types.Uid, topic string) ([]*model.Counter, error)
+	GetCounter(id int64) (model.Counter, error)
+	GetCounterByFlag(uid types.Uid, topic string, flag string) (model.Counter, error)
 }

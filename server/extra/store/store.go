@@ -134,6 +134,13 @@ type ChatbotPersistenceInterface interface {
 	UpdateTodo(todo *model.Todo) error
 	DeleteTodo(id int64) error
 	DeleteTodoBySequence(uid types.Uid, topic string, sequence int64) error
+
+	CreateCounter(counter *model.Counter) (int64, error)
+	IncreaseCounter(id, amount int64) error
+	DecreaseCounter(id, amount int64) error
+	ListCounter(uid types.Uid, topic string) ([]*model.Counter, error)
+	GetCounter(id int64) (model.Counter, error)
+	GetCounterByFlag(uid types.Uid, topic string, flag string) (model.Counter, error)
 }
 
 var Chatbot ChatbotPersistenceInterface
@@ -302,6 +309,30 @@ func (c chatbotMapper) DeleteTodo(id int64) error {
 
 func (c chatbotMapper) DeleteTodoBySequence(uid types.Uid, topic string, sequence int64) error {
 	return adp.DeleteTodoBySequence(uid, topic, sequence)
+}
+
+func (c chatbotMapper) CreateCounter(counter *model.Counter) (int64, error) {
+	return adp.CreateCounter(counter)
+}
+
+func (c chatbotMapper) IncreaseCounter(id, amount int64) error {
+	return adp.IncreaseCounter(id, amount)
+}
+
+func (c chatbotMapper) DecreaseCounter(id, amount int64) error {
+	return adp.DecreaseCounter(id, amount)
+}
+
+func (c chatbotMapper) ListCounter(uid types.Uid, topic string) ([]*model.Counter, error) {
+	return adp.ListCounter(uid, topic)
+}
+
+func (c chatbotMapper) GetCounter(id int64) (model.Counter, error) {
+	return adp.GetCounter(id)
+}
+
+func (c chatbotMapper) GetCounterByFlag(uid types.Uid, topic string, flag string) (model.Counter, error) {
+	return adp.GetCounterByFlag(uid, topic, flag)
 }
 
 func init() {

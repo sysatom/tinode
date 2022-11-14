@@ -1,6 +1,7 @@
 package okr
 
 import (
+	"errors"
 	"fmt"
 	"github.com/tinode/chat/server/extra/bots"
 	"github.com/tinode/chat/server/extra/ruleset/command"
@@ -8,6 +9,7 @@ import (
 	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
+	"gorm.io/gorm"
 	"strconv"
 )
 
@@ -541,49 +543,117 @@ var commandRules = []command.Rule{
 		Define: `counters`,
 		Help:   `List Counter`,
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
-			return types.TextMsg{Text: "V1"}
+			items, err := store.Chatbot.ListCounter(ctx.AsUser, ctx.Original)
+			if err != nil {
+				return nil
+			}
+
+			var header []string
+			var row [][]interface{}
+			if len(items) > 0 {
+				header = []string{"No", "Title", "Digit"}
+				for i, item := range items {
+					row = append(row, []interface{}{i + 1, item.Flag, item.Digit})
+				}
+			}
+
+			return bots.StorePage(ctx, model.PageTable, types.TableMsg{
+				Title:  "Counter",
+				Header: header,
+				Row:    row,
+			})
 		},
 	},
 	{
 		Define: "counter [string]",
 		Help:   `Count things`,
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
-			return types.TextMsg{Text: "V1"}
+			flag, _ := tokens[1].Value.String()
+
+			item, err := store.Chatbot.GetCounterByFlag(ctx.AsUser, ctx.Original, flag)
+			if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+				return nil
+			}
+
+			if item.Id > 0 {
+				return types.DigitMsg{
+					Title: item.Flag,
+					Digit: int(item.Digit),
+				}
+			}
+
+			_, err = store.Chatbot.CreateCounter(&model.Counter{
+				Uid:    ctx.AsUser.UserId(),
+				Topic:  ctx.Original,
+				Flag:   flag,
+				Digit:  1,
+				Status: 0,
+			})
+			if err != nil {
+				return nil
+			}
+
+			return types.DigitMsg{
+				Title: flag,
+				Digit: 1,
+			}
 		},
 	},
 	{
 		Define: "increase [string]",
 		Help:   `Increase Counter`,
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
-			return types.TextMsg{Text: "V1"}
+			flag, _ := tokens[1].Value.String()
+
+			item, err := store.Chatbot.GetCounterByFlag(ctx.AsUser, ctx.Original, flag)
+			if err != nil {
+				return nil
+			}
+
+			err = store.Chatbot.IncreaseCounter(item.Id, 1)
+			if err != nil {
+				return nil
+			}
+
+			return types.TextMsg{Text: "ok"}
 		},
 	},
 	{
 		Define: "decrease [string]",
 		Help:   `Decrease Counter`,
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
-			return types.TextMsg{Text: "V1"}
+			flag, _ := tokens[1].Value.String()
+
+			item, err := store.Chatbot.GetCounterByFlag(ctx.AsUser, ctx.Original, flag)
+			if err != nil {
+				return nil
+			}
+
+			err = store.Chatbot.DecreaseCounter(item.Id, 1)
+			if err != nil {
+				return nil
+			}
+
+			return types.TextMsg{Text: "ok"}
 		},
 	},
 	{
 		Define: "reset [string]",
 		Help:   `Reset Counter`,
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
-			return types.TextMsg{Text: "V1"}
-		},
-	},
-	{
-		Define: "tags",
-		Help:   `List Tag`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
-			return types.TextMsg{Text: "V1"}
-		},
-	},
-	{
-		Define: "tag [string]",
-		Help:   `Get Model tags`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
-			return types.TextMsg{Text: "V1"}
+			flag, _ := tokens[1].Value.String()
+
+			item, err := store.Chatbot.GetCounterByFlag(ctx.AsUser, ctx.Original, flag)
+			if err != nil {
+				return nil
+			}
+
+			err = store.Chatbot.IncreaseCounter(item.Id, 1-item.Digit)
+			if err != nil {
+				return nil
+			}
+
+			return types.TextMsg{Text: "ok"}
 		},
 	},
 }

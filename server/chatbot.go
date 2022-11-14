@@ -161,7 +161,9 @@ func hookHandleBotIncomingMessage(t *Topic, msg *ClientComMessage) {
 				logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
 				continue
 			}
-			head, content = payload.Convert()
+			if payload != nil {
+				head, content = payload.Convert()
+			}
 		}
 
 		// send  message
