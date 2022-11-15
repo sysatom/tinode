@@ -40,8 +40,9 @@ var commandRules = []command.Rule{
 					series = reply.NetWorthDataUnit
 				}
 
-				return bots.StorePage(ctx, model.PageChart, types.ChartMsg{
-					Title:    fmt.Sprintf("Fund %s (%s)", reply.Name, reply.Code),
+				title := fmt.Sprintf("Fund %s (%s)", reply.Name, reply.Code)
+				return bots.StorePage(ctx, model.PageChart, title, types.ChartMsg{
+					Title:    title,
 					SubTitle: "Data for the last 90 days",
 					XAxis:    xAxis,
 					Series:   series,

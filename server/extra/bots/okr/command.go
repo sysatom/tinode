@@ -43,7 +43,7 @@ var commandRules = []command.Rule{
 				return types.TextMsg{Text: "Empty"}
 			}
 
-			return bots.StorePage(ctx, model.PageTable, types.TableMsg{Title: "Objectives", Header: header, Row: row})
+			return bots.StorePage(ctx, model.PageTable, "Objectives", types.TableMsg{Title: "Objectives", Header: header, Row: row})
 		},
 	},
 	{
@@ -64,8 +64,9 @@ var commandRules = []command.Rule{
 				return nil
 			}
 
-			return bots.StorePage(ctx, model.PageOkr, types.OkrMsg{
-				Title:     fmt.Sprintf("Objective #%d", objective.Sequence),
+			title := fmt.Sprintf("Objective #%d", objective.Sequence)
+			return bots.StorePage(ctx, model.PageOkr, title, types.OkrMsg{
+				Title:     title,
 				Objective: objective,
 				KeyResult: keyResult,
 			})
@@ -216,8 +217,8 @@ var commandRules = []command.Rule{
 				}
 			}
 
-			return bots.StorePage(ctx, model.PageTable, types.TableMsg{
-				Title:  "KeyResult",
+			return bots.StorePage(ctx, model.PageTable, "KeyResults", types.TableMsg{
+				Title:  "KeyResults",
 				Header: header,
 				Row:    row,
 			})
@@ -413,8 +414,9 @@ var commandRules = []command.Rule{
 				}
 			}
 
-			return bots.StorePage(ctx, model.PageTable, types.TableMsg{
-				Title:  fmt.Sprintf("KeyResult #%d Values", sequence),
+			title := fmt.Sprintf("KeyResult #%d Values", sequence)
+			return bots.StorePage(ctx, model.PageTable, title, types.TableMsg{
+				Title:  title,
 				Header: header,
 				Row:    row,
 			})
@@ -560,8 +562,8 @@ var commandRules = []command.Rule{
 				}
 			}
 
-			return bots.StorePage(ctx, model.PageTable, types.TableMsg{
-				Title:  "Counter",
+			return bots.StorePage(ctx, model.PageTable, "Counters", types.TableMsg{
+				Title:  "Counters",
 				Header: header,
 				Row:    row,
 			})

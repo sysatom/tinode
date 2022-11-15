@@ -101,7 +101,7 @@ var commandRules = []command.Rule{
 				*user.HTMLURL,
 			})
 
-			return bots.StorePage(ctx, model.PageTable, table)
+			return bots.StorePage(ctx, model.PageTable, "User", table)
 		},
 	},
 	{
