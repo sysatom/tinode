@@ -19,7 +19,7 @@ var commandRules = []command.Rule{
 		},
 	},
 	{
-		Define: `webhook list`,
+		Define: `list`,
 		Help:   `List webhook`,
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
 			items, err := store.Chatbot.DataList(ctx.AsUser, ctx.Original, "webhook:")
@@ -43,7 +43,7 @@ var commandRules = []command.Rule{
 		},
 	},
 	{
-		Define: `webhook create`,
+		Define: `create`,
 		Help:   `create webhook`,
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
 			id := types.Id()
@@ -62,10 +62,10 @@ var commandRules = []command.Rule{
 		},
 	},
 	{
-		Define: `webhook del [string]`,
+		Define: `del [string]`,
 		Help:   `delete webhook`,
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
-			flag, _ := tokens[2].Value.String()
+			flag, _ := tokens[1].Value.String()
 
 			err := store.Chatbot.DataDelete(ctx.AsUser, ctx.Original, fmt.Sprintf("webhook:%s", flag))
 			if err != nil {

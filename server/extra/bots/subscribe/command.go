@@ -15,7 +15,7 @@ var commandRules = []command.Rule{
 		},
 	},
 	{
-		Define: "subs list",
+		Define: "list",
 		Help:   `List subscribe`,
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
 			return types.InfoMsg{
