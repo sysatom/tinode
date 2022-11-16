@@ -1,0 +1,62 @@
+name: App
+
+on:
+  push:
+    branches:
+      - '*'
+  pull_request:
+
+jobs:
+  dev:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          path: tinode
+
+      - name: Checkout tools repo
+        uses: actions/checkout@v3
+        with:
+          repository: sysatom/tinode-webapp
+          path: tinode-webapp
+
+      - name: Set up Go 1.x
+        uses: actions/setup-go@v3
+        with:
+          go-version: ^1.19
+          cache: true
+
+      - name: Use Node.js 16
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          cache: 'npm'
+
+      - name: Build go
+        run: cd tinode && go build -tags mysql -o dist github.com/tinode/chat/server
+
+      - name: Build js
+        run: cd tinode-webapp && npm install && npm run build
+
+      - name: Copy files
+        run: |
+          mkdir tinode-webapp/static
+          cp -R tinode-webapp/audio/ tinode-webapp/static/
+          cp -R tinode-webapp/css/ tinode-webapp/static/
+          cp -R tinode-webapp/img/ tinode-webapp/static/
+          cp -R tinode-webapp/umd/ tinode-webapp/static/
+          cp tinode-webapp/firebase-init.js tinode-webapp/static/
+          cp tinode-webapp/index.html tinode-webapp/static/
+          cp tinode-webapp/index-dev.html tinode-webapp/static/
+          cp tinode-webapp/manifest.json tinode-webapp/static/
+          cp tinode-webapp/service-worker.js tinode-webapp/static/
+          cp tinode-webapp/version.js tinode-webapp/static/
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: tinode
+          path: |
+            tinode/dist/server
+            tinode-webapp/static/
