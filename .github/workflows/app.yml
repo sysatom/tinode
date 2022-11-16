@@ -40,6 +40,7 @@ jobs:
 
       - name: Copy files
         run: |
+          mkdir app
           mkdir tinode-webapp/static
           cp -R tinode-webapp/audio/ tinode-webapp/static/
           cp -R tinode-webapp/css/ tinode-webapp/static/
@@ -51,6 +52,8 @@ jobs:
           cp tinode-webapp/manifest.json tinode-webapp/static/
           cp tinode-webapp/service-worker.js tinode-webapp/static/
           cp tinode-webapp/version.js tinode-webapp/static/
+          cp tinode/dist/server app/
+          cp -R tinode-webapp/static/ app/
 
       - name: Display structure
         run: |
@@ -61,6 +64,4 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: tinode
-          path: |
-            ./tinode/dist/server
-            ./tinode-webapp/static/
+          path: app
