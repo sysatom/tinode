@@ -38,13 +38,6 @@ jobs:
       - name: Build js
         run: cd tinode-webapp && npm install && npm run build
 
-      - name: Display structure
-        run: |
-          ls
-          ls -R ./tinode/dist/
-          ls ./tinode/
-          ls ./tinode-webapp
-
       - name: Copy files
         run: |
           mkdir tinode-webapp/static
