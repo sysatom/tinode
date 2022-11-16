@@ -40,7 +40,8 @@ jobs:
 
       - name: Copy files
         run: |
-          mkdir tinode-webapp/static
+          mkdir app/
+          mkdir tinode-webapp/static/
           cp -R tinode-webapp/audio/ tinode-webapp/static/
           cp -R tinode-webapp/css/ tinode-webapp/static/
           cp -R tinode-webapp/img/ tinode-webapp/static/
