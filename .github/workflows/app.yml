@@ -58,7 +58,8 @@ jobs:
       - name: Display structure
         run: |
           ls
-          ls ./tinode
+          ls -R ./tinode/dist/
+          ls ./tinode/
           ls ./tinode-webapp
 
       - uses: actions/upload-artifact@v3
