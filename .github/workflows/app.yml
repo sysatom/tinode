@@ -51,8 +51,9 @@ jobs:
           cp tinode-webapp/manifest.json tinode-webapp/static/
           cp tinode-webapp/service-worker.js tinode-webapp/static/
           cp tinode-webapp/version.js tinode-webapp/static/
-          cp tinode/app app/server
+          cp tinode/app app/
           cp -R tinode-webapp/static/ app/
+          mv app/app app/server
 
       - uses: actions/upload-artifact@v3
         with:
