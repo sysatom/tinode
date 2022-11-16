@@ -38,6 +38,13 @@ jobs:
       - name: Build js
         run: cd tinode-webapp && npm install && npm run build
 
+      - name: Display structure
+        run: |
+          ls
+          ls -R ./tinode/dist/
+          ls ./tinode/
+          ls ./tinode-webapp
+
       - name: Copy files
         run: |
           mkdir app
@@ -54,13 +61,6 @@ jobs:
           cp tinode-webapp/version.js tinode-webapp/static/
           cp tinode/dist/server app/
           cp -R tinode-webapp/static/ app/
-
-      - name: Display structure
-        run: |
-          ls
-          ls -R ./tinode/dist/
-          ls ./tinode/
-          ls ./tinode-webapp
 
       - uses: actions/upload-artifact@v3
         with:
