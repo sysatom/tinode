@@ -11,12 +11,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout server repo
         uses: actions/checkout@v3
         with:
           path: tinode
 
-      - name: Checkout tools repo
+      - name: Checkout web repo
         uses: actions/checkout@v3
         with:
           repository: sysatom/tinode-webapp
@@ -26,13 +26,11 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version: ^1.19
-          cache: true
 
       - name: Use Node.js 16
         uses: actions/setup-node@v3
         with:
           node-version: 16
-          cache: 'npm'
 
       - name: Build go
         run: cd tinode && go build -tags mysql -o dist github.com/tinode/chat/server
