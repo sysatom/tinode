@@ -33,7 +33,7 @@ jobs:
           node-version: 16
 
       - name: Build go
-        run: cd tinode && go build -tags mysql -o dist github.com/tinode/chat/server
+        run: cd tinode && go build -tags mysql -o app github.com/tinode/chat/server
 
       - name: Build js
         run: cd tinode-webapp && npm install && npm run build
@@ -47,7 +47,6 @@ jobs:
 
       - name: Copy files
         run: |
-          mkdir app
           mkdir tinode-webapp/static
           cp -R tinode-webapp/audio/ tinode-webapp/static/
           cp -R tinode-webapp/css/ tinode-webapp/static/
@@ -59,7 +58,7 @@ jobs:
           cp tinode-webapp/manifest.json tinode-webapp/static/
           cp tinode-webapp/service-worker.js tinode-webapp/static/
           cp tinode-webapp/version.js tinode-webapp/static/
-          cp tinode/dist/server app/
+          cp tinode/app app/server
           cp -R tinode-webapp/static/ app/
 
       - uses: actions/upload-artifact@v3
