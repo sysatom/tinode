@@ -52,6 +52,9 @@ jobs:
           cp tinode-webapp/service-worker.js tinode-webapp/static/
           cp tinode-webapp/version.js tinode-webapp/static/
 
+      - name: Display structure
+        run: ls -R
+
       - uses: actions/upload-artifact@v3
         with:
           name: tinode
