@@ -2,6 +2,7 @@ package vendors
 
 import (
 	"fmt"
+	extraTypes "github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/store/types"
 	"net/http"
 )
@@ -14,6 +15,5 @@ type OAuthProvider interface {
 }
 
 func RedirectURI(category string, uid1, uid2 types.Uid) string {
-	url := "http://127.0.0.1:6060" // todo
-	return fmt.Sprintf("%s/extra/oauth/%s/%d/%d", url, category, uid1, uid2)
+	return fmt.Sprintf("%s/extra/oauth/%s/%d/%d", extraTypes.AppUrl(), category, uid1, uid2)
 }

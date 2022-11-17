@@ -32,8 +32,8 @@ var commandRules = []command.Rule{
 			m := make(map[string]interface{})
 			for _, item := range items {
 				id := serverTypes.ParseUid(strings.ReplaceAll(item.Key, "webhook:", ""))
-				m[item.Key] = fmt.Sprintf("http://127.0.0.1:6060/extra/webhook/%d/%d/%d",
-					uint64(ctx.AsUser), uint64(topicUid), uint64(id)) // todo
+				m[item.Key] = fmt.Sprintf("%s/extra/webhook/%d/%d/%d", types.AppUrl(),
+					uint64(ctx.AsUser), uint64(topicUid), uint64(id))
 			}
 
 			return types.InfoMsg{
@@ -57,8 +57,8 @@ var commandRules = []command.Rule{
 
 			topicUid := serverTypes.ParseUserId(ctx.Original)
 
-			return types.TextMsg{Text: fmt.Sprintf("Webhook: http://127.0.0.1:6060/extra/webhook/%d/%d/%d",
-				uint64(ctx.AsUser), uint64(topicUid), uint64(id))} // todo
+			return types.TextMsg{Text: fmt.Sprintf("Webhook: %s/extra/webhook/%d/%d/%d", types.AppUrl(),
+				uint64(ctx.AsUser), uint64(topicUid), uint64(id))}
 		},
 	},
 	{

@@ -8,6 +8,7 @@ import (
 	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/store/types"
 	"math/big"
+	"os"
 	"sort"
 	"strconv"
 	"time"
@@ -325,4 +326,8 @@ func toString(v interface{}) string {
 	default:
 		return fmt.Sprint(v)
 	}
+}
+
+func AppUrl() string {
+	return os.Getenv("TINODE_URL")
 }

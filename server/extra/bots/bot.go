@@ -182,7 +182,7 @@ func StoreForm(ctx types.Context, payload types.MsgPayload) types.MsgPayload {
 
 	return types.LinkMsg{
 		Title: fmt.Sprintf("Form [%s]", formId),
-		Url:   fmt.Sprintf("http://127.0.0.1:6060/extra/page/%s", formId), // fixme
+		Url:   fmt.Sprintf("%s/extra/page/%s", types.AppUrl(), formId),
 	}
 }
 
@@ -216,7 +216,7 @@ func StorePage(ctx types.Context, category model.PageType, title string, payload
 
 	return types.LinkMsg{
 		Title: fmt.Sprintf("%s %s", category, title),
-		Url:   fmt.Sprintf("http://127.0.0.1:6060/extra/page/%s", pageId), // fixme
+		Url:   fmt.Sprintf("%s/extra/page/%s", types.AppUrl(), pageId),
 	}
 }
 
