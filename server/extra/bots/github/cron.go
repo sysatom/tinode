@@ -32,21 +32,15 @@ var cronRules = []cron.Rule{
 			var r []types.MsgPayload
 			for i := range reposList {
 				item := reposList[i]
-				r = append(r, types.TableMsg{
-					Title: "",
-					Header: []string{
-						"Name",
-						"Owner",
-						"Repo",
-						"URL",
-					},
-					Row: [][]interface{}{
-						{
-							*item.FullName,
-							*item.Owner.Login,
-							*item.Name,
-							*item.HTMLURL,
-						},
+				r = append(r, types.InfoMsg{
+					Title: *item.FullName,
+					Model: map[string]interface{}{
+						"Owner":      *item.Owner.Login,
+						"Name":       *item.Name,
+						"Url":        *item.HTMLURL,
+						"Stargazers": *item.StargazersCount,
+						"Forks":      *item.ForksCount,
+						"Watchers":   *item.WatchersCount,
 					},
 				})
 			}

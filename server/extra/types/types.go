@@ -126,31 +126,6 @@ type TableMsg struct {
 }
 
 func (t TableMsg) Convert() (map[string]interface{}, interface{}) {
-	builder := MsgBuilder{}
-	// title
-	builder.AppendTextLine(t.Title, TextOption{})
-	// header
-	builder.AppendText(" | ", TextOption{})
-	for _, header := range t.Header {
-		builder.AppendText(header, TextOption{IsBold: true})
-		builder.AppendText(" | ", TextOption{})
-	}
-	builder.AppendText("\n", TextOption{})
-	// row
-	for _, row := range t.Row {
-		builder.AppendText(" | ", TextOption{})
-		for _, item := range row {
-			switch t := item.(type) {
-			case string:
-				builder.AppendText(t, TextOption{})
-			case int:
-				builder.AppendText(strconv.Itoa(t), TextOption{})
-			}
-			builder.AppendText(" | ", TextOption{})
-		}
-		builder.AppendText("\n", TextOption{})
-	}
-
 	return nil, nil
 }
 
