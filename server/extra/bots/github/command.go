@@ -6,7 +6,6 @@ import (
 	"github.com/tinode/chat/server/extra/bots"
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/store"
-	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/vendors"
 	"github.com/tinode/chat/server/extra/vendors/github"
@@ -86,22 +85,16 @@ var commandRules = []command.Rule{
 			if user == nil {
 				return types.TextMsg{Text: "user error"}
 			}
-			table := types.TableMsg{}
-			table.Title = "User"
-			table.Header = []string{
-				"Login",
-				"Followers",
-				"Following",
-				"URL",
-			}
-			table.Row = append(table.Row, []interface{}{
-				*user.Login,
-				*user.Followers,
-				*user.Following,
-				*user.HTMLURL,
-			})
 
-			return bots.StorePage(ctx, model.PageTable, "User", table)
+			return types.InfoMsg{
+				Title: "User",
+				Model: map[string]interface{}{
+					"Login":     *user.Login,
+					"Followers": *user.Followers,
+					"Following": *user.Following,
+					"URL":       *user.HTMLURL,
+				},
+			}
 		},
 	},
 	{
