@@ -7,6 +7,7 @@ import (
 	"github.com/tinode/chat/server/auth"
 	"github.com/tinode/chat/server/extra/bots"
 	botGithub "github.com/tinode/chat/server/extra/bots/github"
+	botPocket "github.com/tinode/chat/server/extra/bots/pocket"
 	"github.com/tinode/chat/server/extra/channels"
 	"github.com/tinode/chat/server/extra/channels/crawler"
 	extraTypes "github.com/tinode/chat/server/extra/types"
@@ -448,8 +449,7 @@ func newProvider(category string) vendors.OAuthProvider {
 
 	switch category {
 	case pocket.ID:
-		p := pocket.NewPocket("", "", "", "")
-		provider = p
+		provider = pocket.NewPocket(botPocket.Config.ConsumerKey, "", "", "")
 	case github.ID:
 		provider = github.NewGithub(botGithub.Config.ID, botGithub.Config.Secret, "", "")
 	case dropbox.ID:

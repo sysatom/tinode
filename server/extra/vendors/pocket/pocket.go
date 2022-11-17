@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-resty/resty/v2"
+	"github.com/tinode/chat/server/extra/cache"
 	"net/http"
 	"time"
 )
@@ -82,6 +83,9 @@ func (v *Pocket) GetCode(state string) (*CodeResponse, error) {
 	if resp.StatusCode() == http.StatusOK {
 		result := resp.Result().(*CodeResponse)
 		v.code = result.Code
+
+		_ = cache.DB.Set([]byte("pocket:code"), []byte(v.code)) // todo
+
 		return result, nil
 	} else {
 		return nil, fmt.Errorf("%d, %s (%s)", resp.StatusCode(), resp.Header().Get("X-Error-Code"), resp.Header().Get("X-Error"))
@@ -111,22 +115,20 @@ func (v *Pocket) GetAccessToken(code string) (interface{}, error) {
 	}
 }
 
-func (v *Pocket) Redirect(req *http.Request) (string, error) {
-	clientId := "" // todo
-	v.clientId = clientId
-
-	// v.rdb.Set(context.Background(), "pocket:code", v.code, time.Hour)
+func (v *Pocket) Redirect(_ *http.Request) (string, error) {
+	_ = cache.DB.Set([]byte("pocket:code"), []byte(v.code)) // todo
 
 	appRedirectURI := v.AuthorizeURL()
 	return appRedirectURI, nil
 }
 
-func (v *Pocket) StoreAccessToken(req *http.Request) (map[string]interface{}, error) {
-	clientId := "" // todo
-	v.clientId = clientId
+func (v *Pocket) StoreAccessToken(_ *http.Request) (map[string]interface{}, error) {
+	data, err := cache.DB.Get([]byte("pocket:code")) // todo
+	if err != nil {
+		return nil, err
+	}
+	code := string(data)
 
-	// code, err := v.rdb.Get(context.Background(), "pocket:code").Result()
-	code := "test"
 	if code != "" {
 		tokenResp, err := v.GetAccessToken(code)
 		if err != nil {

@@ -12,10 +12,12 @@ import (
 	"net/http"
 	// bots
 	_ "github.com/tinode/chat/server/extra/bots/bark"
+	_ "github.com/tinode/chat/server/extra/bots/cloudflare"
 	_ "github.com/tinode/chat/server/extra/bots/finance"
 	_ "github.com/tinode/chat/server/extra/bots/github"
 	_ "github.com/tinode/chat/server/extra/bots/help"
 	_ "github.com/tinode/chat/server/extra/bots/okr"
+	_ "github.com/tinode/chat/server/extra/bots/pocket"
 	_ "github.com/tinode/chat/server/extra/bots/subscribe"
 	_ "github.com/tinode/chat/server/extra/bots/webhook"
 
