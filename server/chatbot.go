@@ -16,6 +16,7 @@ import (
 	_ "github.com/tinode/chat/server/extra/bots/finance"
 	_ "github.com/tinode/chat/server/extra/bots/github"
 	_ "github.com/tinode/chat/server/extra/bots/help"
+	_ "github.com/tinode/chat/server/extra/bots/notion"
 	_ "github.com/tinode/chat/server/extra/bots/okr"
 	_ "github.com/tinode/chat/server/extra/bots/pocket"
 	_ "github.com/tinode/chat/server/extra/bots/subscribe"
