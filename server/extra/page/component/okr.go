@@ -24,7 +24,10 @@ func (c *Okr) Render() app.UI {
 			app.P().Style("padding", "20px").Text(fmt.Sprintf("Okr [%s] processed failed, %s", c.Page.PageId, c.Page.UpdatedAt)))
 	}
 
-	ratio := c.Schema.Objective.CurrentValue / c.Schema.Objective.TotalValue * 100 // todo float
+	ratio := float64(0)
+	if c.Schema.Objective.TotalValue != 0 {
+		ratio = float64(c.Schema.Objective.CurrentValue) / float64(c.Schema.Objective.TotalValue) * 100
+	}
 
 	return app.Div().Body(
 		app.Raw(`
