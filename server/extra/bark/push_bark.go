@@ -73,7 +73,7 @@ func (barkPush) Init(jsonconf json.RawMessage) (bool, error) {
 			case msg := <-handler.input:
 				sendPushes(&config, msg)
 			case msg := <-handler.channel:
-				fmt.Fprintln(os.Stdout, msg)
+				_, _ = fmt.Fprintln(os.Stdout, msg)
 			case <-handler.stop:
 				return
 			}
@@ -186,11 +186,11 @@ func postMessage(config *configType, title, body, group string) error {
 	if err != nil {
 		return err
 	}
-	b, err := io.ReadAll(resp.Body)
+	_, err = io.ReadAll(resp.Body)
 	if err != nil {
+		logs.Err.Println(err)
 		return err
 	}
-	logs.Info.Println(string(b))
 
 	return nil
 }
