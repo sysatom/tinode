@@ -2,7 +2,6 @@ package cron
 
 import (
 	"crypto/sha1"
-	"encoding/json"
 	"fmt"
 	"github.com/influxdata/cron"
 	"github.com/tinode/chat/server/extra/cache"
@@ -145,7 +144,7 @@ func (r *Ruleset) filter(res result) result {
 	filterKey := []byte(fmt.Sprintf("cron:%s:filter", res.name))
 
 	// content hash
-	d, _ := json.Marshal(res.payload)
+	d := un(res.payload)
 	s := sha1.New()
 	_, _ = s.Write(d)
 	hash := s.Sum(nil)
@@ -164,4 +163,12 @@ func (r *Ruleset) pipeline(res result) {
 		return
 	}
 	r.Send(res.ctx.AsUser, types.ParseUserId(res.ctx.Original), res.payload)
+}
+
+func un(payload extraTypes.MsgPayload) []byte {
+	switch v := payload.(type) {
+	case extraTypes.InfoMsg:
+		return []byte(v.Title)
+	}
+	return nil
 }
