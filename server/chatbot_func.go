@@ -30,7 +30,7 @@ func initializeBotFather() error {
 		Acc: &MsgClientAcc{
 			User:      "new",
 			State:     "ok",
-			AuthLevel: "",
+			AuthLevel: "auth",
 			Token:     nil,
 			Scheme:    "basic",
 			Secret:    []byte(fmt.Sprintf("%s:170953280278461931", BotFather)),
@@ -47,6 +47,7 @@ func initializeBotFather() error {
 				Private: nil,
 			},
 		},
+		AuthLvl: int(auth.LevelRoot),
 	}
 
 	authhdl := store.Store.GetLogicalAuthHandler("basic")
@@ -133,7 +134,7 @@ func initializeBotUsers() error {
 					Private: nil,
 				},
 			},
-			Id: "1",
+			AuthLvl: int(auth.LevelRoot),
 		})
 	}
 
@@ -264,7 +265,7 @@ func initializeChannels() error {
 	}
 	sess := &Session{
 		uid:     uid,
-		authLvl: auth.LevelRoot,
+		authLvl: auth.LevelAuth,
 		subs:    make(map[string]*Subscription),
 		send:    make(chan interface{}, sendQueueLimit+32),
 		stop:    make(chan interface{}, 1),
@@ -392,7 +393,7 @@ func botSend(userUid, topicUid types.Uid, out extraTypes.MsgPayload) {
 	if t == nil {
 		sess := &Session{
 			uid:     topicUid,
-			authLvl: auth.LevelRoot,
+			authLvl: auth.LevelAuth,
 			subs:    make(map[string]*Subscription),
 			send:    make(chan interface{}, sendQueueLimit+32),
 			stop:    make(chan interface{}, 1),
@@ -408,7 +409,7 @@ func botSend(userUid, topicUid types.Uid, out extraTypes.MsgPayload) {
 			Original:  topicUid.UserId(),
 			RcptTo:    topicUid.P2PName(userUid),
 			AsUser:    userUid.UserId(),
-			AuthLvl:   30,
+			AuthLvl:   int(auth.LevelAuth),
 			MetaWhat:  0,
 			Timestamp: time.Now(),
 			sess:      sess,
