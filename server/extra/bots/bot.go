@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/tinode/chat/server/auth"
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/ruleset/form"
 	"github.com/tinode/chat/server/extra/store"
@@ -23,6 +24,8 @@ type Handler interface {
 	// IsReady сhecks if the bot is initialized.
 	IsReady() bool
 
+	AuthLevel() auth.Level
+
 	// Input return input result
 	Input(_ types.Context, _ map[string]interface{}, _ interface{}) (types.MsgPayload, error)
 
@@ -37,6 +40,10 @@ type Handler interface {
 }
 
 type Base struct{}
+
+func (Base) AuthLevel() auth.Level {
+	return auth.LevelAuth
+}
 
 func (Base) Input(_ types.Context, _ map[string]interface{}, _ interface{}) (types.MsgPayload, error) {
 	return nil, nil

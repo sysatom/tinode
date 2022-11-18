@@ -116,22 +116,18 @@ func initializeBotUsers() error {
 		msgs = append(msgs, &ClientComMessage{
 			Acc: &MsgClientAcc{
 				User:      "new",
-				State:     "ok",
-				AuthLevel: "",
-				Token:     nil,
+				AuthLevel: "auth",
 				Scheme:    "basic",
-				Secret:    []byte(fmt.Sprintf("%s%s:170953280278461931", name, bots.BotNameSuffix)),
+				Secret:    []byte(fmt.Sprintf("%s%s:%d", name, bots.BotNameSuffix, time.Now().Unix())),
 				Login:     false,
 				Tags:      []string{"bot"},
 				Desc: &MsgSetDesc{
-					DefaultAcs: nil,
 					Public: map[string]interface{}{
 						"fn": fmt.Sprintf("%s%s", name, bots.BotNameSuffix),
 					},
 					Trusted: map[string]interface{}{
 						"verified": true,
 					},
-					Private: nil,
 				},
 			},
 			AuthLvl: int(auth.LevelRoot),
@@ -149,13 +145,11 @@ func initializeBotUsers() error {
 		var user types.User
 		var private interface{}
 
-		if msg.Acc.State != "" {
-			state, err := types.NewObjState(msg.Acc.State)
-			if err != nil {
-				return err
-			}
-			user.State = state
+		state, err := types.NewObjState("ok")
+		if err != nil {
+			return err
 		}
+		user.State = state
 
 		// Ensure tags are unique and not restricted.
 		if tags := normalizeTags(msg.Acc.Tags); tags != nil {
@@ -190,7 +184,7 @@ func initializeBotUsers() error {
 		}
 
 		// Add authentication record. The authhdl.AddRecord may change tags.
-		_, err := authhdl.AddRecord(&auth.Rec{Uid: user.Uid(), Tags: user.Tags}, msg.Acc.Secret, "")
+		_, err = authhdl.AddRecord(&auth.Rec{Uid: user.Uid(), Tags: user.Tags}, msg.Acc.Secret, "")
 		if err != nil {
 			return fmt.Errorf("create bot user: add auth record failed, %s", err)
 		}

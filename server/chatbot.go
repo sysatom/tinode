@@ -10,6 +10,7 @@ import (
 	"github.com/tinode/chat/server/store"
 	"github.com/tinode/chat/server/store/types"
 	"net/http"
+
 	// bots
 	_ "github.com/tinode/chat/server/extra/bots/bark"
 	_ "github.com/tinode/chat/server/extra/bots/cloudflare"
@@ -19,6 +20,7 @@ import (
 	_ "github.com/tinode/chat/server/extra/bots/notion"
 	_ "github.com/tinode/chat/server/extra/bots/okr"
 	_ "github.com/tinode/chat/server/extra/bots/pocket"
+	_ "github.com/tinode/chat/server/extra/bots/server"
 	_ "github.com/tinode/chat/server/extra/bots/subscribe"
 	_ "github.com/tinode/chat/server/extra/bots/webhook"
 
