@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/go-echarts/go-echarts/v2/opts"
 	"github.com/tinode/chat/server/auth"
 	"github.com/tinode/chat/server/extra/bots"
 	botGithub "github.com/tinode/chat/server/extra/bots/github"
@@ -18,7 +17,6 @@ import (
 	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/store"
 	"github.com/tinode/chat/server/store/types"
-	"math/rand"
 	"strings"
 	"time"
 )
@@ -337,6 +335,9 @@ func initializeCrawler() error {
 		}
 		head, content := builder.Message.Content()
 
+		// stats inc
+		statsInc("ChannelPublishTotal", 1)
+
 		msg := &ClientComMessage{
 			Pub: &MsgClientPub{
 				Topic:   topic,
@@ -454,13 +455,4 @@ func newProvider(category string) vendors.OAuthProvider {
 	}
 
 	return provider
-}
-
-// generate random data for bar chart
-func generateBarItems() []opts.BarData {
-	items := make([]opts.BarData, 0)
-	for i := 0; i < 7; i++ {
-		items = append(items, opts.BarData{Value: rand.Intn(300)})
-	}
-	return items
 }
