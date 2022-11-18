@@ -4,10 +4,12 @@ import (
 	"crypto/sha1"
 	"fmt"
 	"github.com/influxdata/cron"
+	"github.com/tinode/chat/server/auth"
 	"github.com/tinode/chat/server/extra/cache"
 	"github.com/tinode/chat/server/extra/store"
 	extraTypes "github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
+	serverStore "github.com/tinode/chat/server/store"
 	"github.com/tinode/chat/server/store/types"
 	"time"
 )
@@ -20,6 +22,7 @@ type Rule struct {
 
 type Ruleset struct {
 	Type      string
+	AuthLevel auth.Level
 	outCh     chan result
 	cronRules []Rule
 
@@ -33,9 +36,10 @@ type result struct {
 }
 
 // NewCronRuleset New returns a cron rule set
-func NewCronRuleset(name string, rules []Rule) *Ruleset {
+func NewCronRuleset(name string, authLevel auth.Level, rules []Rule) *Ruleset {
 	r := &Ruleset{
 		Type:      name,
+		AuthLevel: authLevel,
 		cronRules: rules,
 		outCh:     make(chan result, 100),
 	}
@@ -141,7 +145,16 @@ func (r *Ruleset) resultWorker() {
 }
 
 func (r *Ruleset) filter(res result) result {
-	filterKey := []byte(fmt.Sprintf("cron:%s:filter", res.name))
+	// user auth record
+	_, authLvl, _, _, _ := serverStore.Users.GetAuthRecord(res.ctx.AsUser, "basic")
+	switch r.AuthLevel {
+	case auth.LevelRoot:
+		if authLvl != auth.LevelRoot {
+			return result{}
+		}
+	}
+
+	filterKey := []byte(fmt.Sprintf("cron:%s:%s:filter", res.name, res.ctx.AsUser.UserId()))
 
 	// content hash
 	d := un(res.payload)

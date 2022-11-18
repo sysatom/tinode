@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/tinode/chat/server/auth"
 	"github.com/tinode/chat/server/extra/bots"
 	"github.com/tinode/chat/server/extra/channels"
 	extraStore "github.com/tinode/chat/server/extra/store"
@@ -115,16 +116,21 @@ func hookHandleBotIncomingMessage(t *Topic, msg *ClientComMessage) {
 		return
 	}
 
+	uid := types.ParseUserId(msg.AsUser)
 	ctx := extraTypes.Context{
 		Id:        msg.Id,
 		Original:  msg.Original,
 		RcptTo:    msg.RcptTo,
-		AsUser:    types.ParseUserId(msg.AsUser),
+		AsUser:    uid,
 		AuthLvl:   msg.AuthLvl,
 		MetaWhat:  msg.MetaWhat,
 		Timestamp: msg.Timestamp,
 	}
 
+	// user auth record
+	_, authLvl, _, _, _ := store.Users.GetAuthRecord(uid, "basic")
+
+	// bot
 	for _, sub := range subs {
 		if !isBot(sub) {
 			continue
@@ -142,38 +148,49 @@ func hookHandleBotIncomingMessage(t *Topic, msg *ClientComMessage) {
 			continue
 		}
 
-		// command
 		var head map[string]interface{}
 		var content interface{}
-		if msg.Pub.Head == nil {
-			payload, err := handle.Command(ctx, msg.Pub.Content)
-			if err != nil {
-				logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
-			}
 
-			// stats
-			statsInc("BotRunTotal", 1)
-
-			if err == nil && payload != nil {
-				head, content = payload.Convert()
+		switch handle.AuthLevel() {
+		case auth.LevelRoot:
+			if authLvl != auth.LevelRoot {
+				content = "Unauthorized"
 			}
 		}
 
-		// input
+		// auth
 		if content == nil {
-			payload, err := handle.Input(ctx, msg.Pub.Head, msg.Pub.Content)
-			if err != nil {
-				logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
+			// command
+			if msg.Pub.Head == nil {
+				payload, err := handle.Command(ctx, msg.Pub.Content)
+				if err != nil {
+					logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
+				}
+
+				// stats
+				statsInc("BotRunTotal", 1)
+
+				if err == nil && payload != nil {
+					head, content = payload.Convert()
+				}
+			}
+
+			// input
+			if content == nil {
+				payload, err := handle.Input(ctx, msg.Pub.Head, msg.Pub.Content)
+				if err != nil {
+					logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
+					continue
+				}
+				if payload != nil {
+					head, content = payload.Convert()
+				}
+			}
+
+			// send  message
+			if content == nil {
 				continue
 			}
-			if payload != nil {
-				head, content = payload.Convert()
-			}
-		}
-
-		// send  message
-		if content == nil {
-			continue
 		}
 
 		now := types.TimeNow()

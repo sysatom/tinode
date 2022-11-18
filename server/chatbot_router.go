@@ -7,6 +7,7 @@ import (
 	"github.com/go-echarts/go-echarts/v2/opts"
 	"github.com/gorilla/mux"
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
+	"github.com/tinode/chat/server/auth"
 	"github.com/tinode/chat/server/extra/bots"
 	"github.com/tinode/chat/server/extra/page"
 	"github.com/tinode/chat/server/extra/store"
@@ -216,6 +217,9 @@ func postForm(rw http.ResponseWriter, req *http.Request) {
 		FormRuleId: formMsg.ID,
 	}
 
+	// user auth record
+	_, authLvl, _, _, _ := serverStore.Users.GetAuthRecord(userUid, "basic")
+
 	for _, sub := range subs {
 		if !isBot(sub) {
 			continue
@@ -231,6 +235,14 @@ func postForm(rw http.ResponseWriter, req *http.Request) {
 		if !handle.IsReady() {
 			logs.Info.Printf("bot %s unavailable", topic)
 			continue
+		}
+
+		switch handle.AuthLevel() {
+		case auth.LevelRoot:
+			if authLvl != auth.LevelRoot {
+				// Unauthorized
+				continue
+			}
 		}
 
 		// form message

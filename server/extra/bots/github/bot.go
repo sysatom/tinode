@@ -57,8 +57,8 @@ func (b bot) Command(ctx types.Context, content interface{}) (types.MsgPayload, 
 	return bots.RunCommand(commandRules, ctx, content)
 }
 
-func (bot) Cron(send func(userUid, topicUid serverTypes.Uid, out types.MsgPayload)) error {
-	ruleset := cron.NewCronRuleset(Name, cronRules)
+func (b bot) Cron(send func(userUid, topicUid serverTypes.Uid, out types.MsgPayload)) error {
+	ruleset := cron.NewCronRuleset(Name, b.AuthLevel(), cronRules)
 	ruleset.Send = send
 	ruleset.Daemon()
 	return nil
