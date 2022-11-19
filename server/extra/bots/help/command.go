@@ -162,4 +162,12 @@ var commandRules = []command.Rule{
 			})
 		},
 	},
+	{
+		Define: "echo [any]",
+		Help:   "print",
+		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+			val := tokens[1].Value.Source
+			return types.TextMsg{Text: fmt.Sprintf("%v", val)}
+		},
+	},
 }
