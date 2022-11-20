@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/tinode/chat/server/auth"
 	"github.com/tinode/chat/server/extra/ruleset/command"
+	"github.com/tinode/chat/server/extra/ruleset/condition"
 	"github.com/tinode/chat/server/extra/ruleset/form"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/store/model"
@@ -37,6 +38,9 @@ type Handler interface {
 
 	// Cron cron script daemon
 	Cron(send func(userUid, topicUid serverTypes.Uid, out types.MsgPayload)) error
+
+	// Condition run conditional process
+	Condition(ctx types.Context, forwarded types.MsgPayload) (types.MsgPayload, error)
 }
 
 type Base struct{}
@@ -59,6 +63,10 @@ func (Base) Form(_ types.Context, _ map[string]interface{}) (types.MsgPayload, e
 
 func (Base) Cron(_ func(userUid, topicUid serverTypes.Uid, out types.MsgPayload)) error {
 	return nil
+}
+
+func (Base) Condition(_ types.Context, _ types.MsgPayload) (types.MsgPayload, error) {
+	return nil, nil
 }
 
 type configType struct {
@@ -136,6 +144,11 @@ func RunForm(formRules []form.Rule, ctx types.Context, values map[string]interfa
 	}
 
 	return payload, nil
+}
+
+func RunCondition(conditionRules []condition.Rule, ctx types.Context, forwarded types.MsgPayload) (types.MsgPayload, error) {
+	rs := condition.Ruleset(conditionRules)
+	return rs.ProcessCondition(ctx, forwarded)
 }
 
 func StoreForm(ctx types.Context, payload types.MsgPayload) types.MsgPayload {

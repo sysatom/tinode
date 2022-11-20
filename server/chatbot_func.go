@@ -329,11 +329,11 @@ func initializeCrawler() error {
 		if dst == nil {
 			return
 		}
-		builder := extraTypes.MsgBuilder{}
+		builder := extraTypes.MsgBuilder{} // fixme style format
 		for _, i := range out {
 			builder.AppendTextLine(string(i), extraTypes.TextOption{})
 		}
-		head, content := builder.Message.Content()
+		head, content := builder.Content()
 
 		// stats inc
 		statsInc("ChannelPublishTotal", 1)

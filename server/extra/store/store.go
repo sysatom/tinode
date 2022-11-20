@@ -91,6 +91,8 @@ func (s storeObj) DbStats() func() interface{} {
 }
 
 type ChatbotPersistenceInterface interface {
+	GetMessage(topic string, seqId int) (model.Message, error)
+
 	DataSet(uid types.Uid, topic, key string, value model.JSON) error
 	DataGet(uid types.Uid, topic, key string) (model.JSON, error)
 	DataList(uid types.Uid, topic, prefix string) ([]*model.Data, error)
@@ -148,6 +150,10 @@ type ChatbotPersistenceInterface interface {
 var Chatbot ChatbotPersistenceInterface
 
 type chatbotMapper struct{}
+
+func (c chatbotMapper) GetMessage(topic string, seqId int) (model.Message, error) {
+	return adp.GetMessage(topic, seqId)
+}
 
 func (c chatbotMapper) ConfigSet(uid types.Uid, topic, key string, value model.JSON) error {
 	return adp.ConfigSet(uid, topic, key, value)

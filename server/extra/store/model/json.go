@@ -46,6 +46,15 @@ func (j JSON) Int64(key string) (int64, bool) {
 	return 0, false
 }
 
+func (j JSON) Map(key string) (map[string]interface{}, bool) {
+	if v, ok := j.get(key); ok {
+		if t, ok := v.(map[string]interface{}); ok {
+			return t, ok
+		}
+	}
+	return nil, false
+}
+
 func (j JSON) get(key string) (interface{}, bool) {
 	v, ok := j[key]
 	return v, ok

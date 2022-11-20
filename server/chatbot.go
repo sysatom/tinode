@@ -11,6 +11,8 @@ import (
 	"github.com/tinode/chat/server/store"
 	"github.com/tinode/chat/server/store/types"
 	"net/http"
+	"strconv"
+	"strings"
 
 	// bots
 	_ "github.com/tinode/chat/server/extra/bots/bark"
@@ -175,22 +177,63 @@ func hookHandleBotIncomingMessage(t *Topic, msg *ClientComMessage) {
 				}
 			}
 
-			// input
 			if content == nil {
-				payload, err := handle.Input(ctx, msg.Pub.Head, msg.Pub.Content)
-				if err != nil {
-					logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
-					continue
-				}
-				if payload != nil {
-					head, content = payload.Convert()
-				}
-			}
+				// condition
+				if msg.Pub.Head != nil {
+					fUid := ""
+					fSeq := int64(0)
+					if v, ok := msg.Pub.Head["forwarded"]; ok {
+						if s, ok := v.(string); ok {
+							f := strings.Split(s, ":")
+							if len(f) == 2 {
+								fUid = f[0]
+								fSeq, _ = strconv.ParseInt(f[1], 10, 64)
+							}
+						}
+					}
 
-			// send  message
-			if content == nil {
-				continue
+					if fUid != "" && fSeq > 0 {
+						uid2 := types.ParseUserId(fUid)
+						topic := uid.P2PName(uid2)
+						message, err := extraStore.Chatbot.GetMessage(topic, int(fSeq))
+						if err != nil {
+							logs.Err.Println(err)
+						}
+
+						if message.ID > 0 {
+							src, _ := message.Content.Map("src")
+							tye, _ := message.Content.String("tye")
+							d, _ := json.Marshal(src)
+							pl := extraTypes.ToPayload(tye, d)
+							ctx.Condition = tye
+							payload, err := handle.Condition(ctx, pl)
+							if err != nil {
+								logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
+							}
+							if payload != nil {
+								head, content = payload.Convert()
+							}
+						}
+					}
+				}
+
+				// input
+				if content == nil {
+					payload, err := handle.Input(ctx, msg.Pub.Head, msg.Pub.Content)
+					if err != nil {
+						logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
+						continue
+					}
+					if payload != nil {
+						head, content = payload.Convert()
+					}
+				}
 			}
+		}
+
+		// send  message
+		if content == nil {
+			continue
 		}
 
 		now := types.TimeNow()

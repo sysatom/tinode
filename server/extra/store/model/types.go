@@ -4,6 +4,23 @@ import (
 	"time"
 )
 
+type Message struct {
+	ID        uint `gorm:"primaryKey"`
+	DelId     int  `gorm:"column:delid"`
+	SeqId     int  `gorm:"column:seqid"`
+	Topic     string
+	From      int64
+	Head      JSON      `gorm:"type:json"`
+	Content   JSON      `gorm:"type:json"`
+	CreatedAt time.Time `gorm:"column:createdat"`
+	UpdatedAt time.Time `gorm:"column:updatedat"`
+	DeletedAt time.Time `gorm:"column:deletedat"`
+}
+
+func (Message) TableName() string {
+	return "messages"
+}
+
 type Config struct {
 	ID        uint `gorm:"primaryKey"`
 	Uid       string

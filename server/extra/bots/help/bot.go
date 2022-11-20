@@ -59,6 +59,10 @@ func (b bot) Form(ctx types.Context, values map[string]interface{}) (types.MsgPa
 	return bots.RunForm(formRules, ctx, values)
 }
 
+func (b bot) Condition(ctx types.Context, forwarded types.MsgPayload) (types.MsgPayload, error) {
+	return bots.RunCondition(conditionRules, ctx, forwarded)
+}
+
 func init() {
 	bots.Register(Name, &handler)
 }

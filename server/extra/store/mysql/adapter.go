@@ -75,6 +75,15 @@ func (a *adapter) Stats() interface{} {
 	return rawDB.Stats()
 }
 
+func (a *adapter) GetMessage(topic string, seqId int) (model.Message, error) {
+	var find model.Message
+	err := a.db.Where("`topic` = ? AND `seqid` = ?", topic, seqId).First(&find).Error
+	if err != nil {
+		return model.Message{}, err
+	}
+	return find, nil
+}
+
 func (a *adapter) DataSet(uid types.Uid, topic, key string, value model.JSON) error {
 	var find model.Data
 	err := a.db.Where("`uid` = ? AND `topic` = ? AND `key` = ?", uid.UserId(), topic, key).First(&find).Error

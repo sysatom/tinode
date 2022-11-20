@@ -99,14 +99,14 @@ type LinkMsg struct {
 }
 
 func (a LinkMsg) Convert() (map[string]interface{}, interface{}) {
-	builder := MsgBuilder{}
+	builder := MsgBuilder{Payload: a}
 	if a.Title != "" {
 		builder.AppendText(a.Title, TextOption{IsButton: true, ButtonDataAct: "url", ButtonDataRef: a.Url})
 	} else {
 		builder.AppendText(a.Url, TextOption{IsLink: true})
 	}
 
-	return builder.Message.Content()
+	return builder.Content()
 }
 
 type LocationMsg struct {
@@ -135,9 +135,9 @@ type DigitMsg struct {
 }
 
 func (a DigitMsg) Convert() (map[string]interface{}, interface{}) {
-	builder := MsgBuilder{}
+	builder := MsgBuilder{Payload: a}
 	builder.AppendText(fmt.Sprintf("Counter %s : %d", a.Title, a.Digit), TextOption{})
-	return builder.Message.Content()
+	return builder.Content()
 }
 
 type OkrMsg struct {
@@ -156,7 +156,7 @@ type InfoMsg struct {
 }
 
 func (i InfoMsg) Convert() (map[string]interface{}, interface{}) {
-	builder := MsgBuilder{}
+	builder := MsgBuilder{Payload: i}
 	// title
 	builder.AppendTextLine(i.Title, TextOption{})
 	// model
@@ -182,7 +182,7 @@ func (i InfoMsg) Convert() (map[string]interface{}, interface{}) {
 		builder.AppendText("\n", TextOption{})
 	}
 
-	return builder.Message.Content()
+	return builder.Content()
 }
 
 type TodoMsg struct {
@@ -194,12 +194,12 @@ func (t TodoMsg) Convert() (map[string]interface{}, interface{}) {
 	if len(t.Todo) == 0 {
 		return nil, "empty"
 	}
-	builder := MsgBuilder{}
+	builder := MsgBuilder{Payload: t}
 	builder.AppendTextLine("Todo", TextOption{IsBold: true})
 	for i, todo := range t.Todo {
 		builder.AppendTextLine(fmt.Sprintf("%d: %s", i+1, todo.Content), TextOption{})
 	}
-	return builder.Message.Content()
+	return builder.Content()
 }
 
 type ChartMsg struct {
@@ -245,6 +245,8 @@ type Context struct {
 	FormId string `json:"-"`
 	// form Rule id
 	FormRuleId string `json:"-"`
+	// condition
+	Condition string `json:"-"`
 }
 
 func Id() types.Uid {

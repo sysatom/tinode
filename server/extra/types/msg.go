@@ -2,6 +2,7 @@ package types
 
 import (
 	"encoding/json"
+	"reflect"
 	"strings"
 )
 
@@ -35,6 +36,9 @@ type ChatMessage struct {
 	Ent         []EntMessage `json:"ent,omitempty"`
 	IsPlainText bool         `json:"-"`
 	MessageType string       `json:"-"`
+
+	Src MsgPayload `json:"src,omitempty"`
+	Tye string     `json:"tye,omitempty"`
 }
 
 // GetFormattedText Get original text message, inlude original '\n'
@@ -108,6 +112,7 @@ func (c ChatMessage) Content() (map[string]interface{}, interface{}) {
 }
 
 type MsgBuilder struct {
+	Payload MsgPayload
 	Message ChatMessage
 }
 
@@ -458,6 +463,14 @@ func (m *MsgBuilder) BuildAttachmentMessage(fileName string, text string, opt At
 	return msg
 }
 
+func (m *MsgBuilder) Content() (map[string]interface{}, interface{}) {
+	if m.Payload != nil {
+		m.Message.Tye = tye(m.Payload)
+		m.Message.Src = m.Payload
+	}
+	return m.Message.Content()
+}
+
 type ServerData struct {
 	Head    string
 	Content string
@@ -510,4 +523,23 @@ func substr(input string, start int, length int) string {
 	}
 
 	return string(asRunes[start : start+length])
+}
+
+func tye(payload MsgPayload) string {
+	t := reflect.TypeOf(payload)
+	return t.Name()
+}
+
+func ToPayload(typ string, src []byte) MsgPayload {
+	switch typ {
+	case "InfoMsg":
+		var r InfoMsg
+		_ = json.Unmarshal(src, &r)
+		return r
+	case "LinkMsg":
+		var r LinkMsg
+		_ = json.Unmarshal(src, &r)
+		return r
+	}
+	return nil
 }

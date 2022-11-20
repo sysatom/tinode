@@ -19,6 +19,8 @@ type Adapter interface {
 	// Stats DB connection stats object.
 	Stats() interface{}
 
+	GetMessage(topic string, seqId int) (model.Message, error)
+
 	// Chatbot
 
 	// DataSet data set
