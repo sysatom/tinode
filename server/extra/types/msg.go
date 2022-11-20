@@ -2,7 +2,6 @@ package types
 
 import (
 	"encoding/json"
-	"reflect"
 	"strings"
 )
 
@@ -523,23 +522,4 @@ func substr(input string, start int, length int) string {
 	}
 
 	return string(asRunes[start : start+length])
-}
-
-func tye(payload MsgPayload) string {
-	t := reflect.TypeOf(payload)
-	return t.Name()
-}
-
-func ToPayload(typ string, src []byte) MsgPayload {
-	switch typ {
-	case "InfoMsg":
-		var r InfoMsg
-		_ = json.Unmarshal(src, &r)
-		return r
-	case "LinkMsg":
-		var r LinkMsg
-		_ = json.Unmarshal(src, &r)
-		return r
-	}
-	return nil
 }

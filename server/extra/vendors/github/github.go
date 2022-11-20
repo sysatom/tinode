@@ -363,12 +363,29 @@ func (v *Github) StoreAccessToken(req *http.Request) (map[string]interface{}, er
 	}, nil
 }
 
-func (v *Github) GetUser() (*User, error) {
+func (v *Github) GetAuthenticatedUser() (*User, error) {
 	resp, err := v.c.R().
 		SetResult(&User{}).
 		SetHeader("Accept", "application/vnd.github.v3+json").
 		SetHeader("Authorization", fmt.Sprintf("token %s", v.accessToken)).
 		Get("/user")
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode() == http.StatusOK {
+		return resp.Result().(*User), nil
+	} else {
+		return nil, fmt.Errorf("%d, %s (%s)", resp.StatusCode(), resp.Header().Get("X-Error-Code"), resp.Header().Get("X-Error"))
+	}
+}
+
+func (v *Github) GetUser(username string) (*User, error) {
+	resp, err := v.c.R().
+		SetResult(&User{}).
+		SetHeader("Accept", "application/vnd.github.v3+json").
+		SetHeader("Authorization", fmt.Sprintf("token %s", v.accessToken)).
+		Get(fmt.Sprintf("/users/%s", username))
 	if err != nil {
 		return nil, err
 	}

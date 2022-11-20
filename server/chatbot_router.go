@@ -289,11 +289,12 @@ func webhook(rw http.ResponseWriter, req *http.Request) {
 
 	d, _ := io.ReadAll(req.Body)
 
+	txt := ""
 	if len(d) > 1000 {
-		botSend(uid1, uid2, extraTypes.TextMsg{Text: fmt.Sprintf("[webhook:%s] body too long", uid3.String())})
+		txt = fmt.Sprintf("[webhook:%s] body too long", uid3.String())
 	} else {
-		botSend(uid1, uid2, extraTypes.TextMsg{Text: fmt.Sprintf("[webhook:%s] %s", uid3.String(), string(d))})
+		txt = fmt.Sprintf("[webhook:%s] %s", uid3.String(), string(d))
 	}
-
+	botSend(uid1, uid2, extraTypes.TextMsg{Text: txt})
 	rw.Write([]byte("ok"))
 }

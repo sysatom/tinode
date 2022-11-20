@@ -14,7 +14,7 @@ var cronRules = []cron.Rule{
 		Action: func(ctx types.Context) []types.MsgPayload {
 			// data
 			client := github.NewGithub("", "", "", ctx.Token)
-			user, err := client.GetUser()
+			user, err := client.GetAuthenticatedUser()
 			if err != nil {
 				logs.Err.Println("cron github_starred", err)
 				return []types.MsgPayload{}
@@ -31,17 +31,30 @@ var cronRules = []cron.Rule{
 			reposList := *repos
 			var r []types.MsgPayload
 			for i := range reposList {
-				item := reposList[i]
-				r = append(r, types.InfoMsg{
-					Title: *item.FullName,
-					Model: map[string]interface{}{
-						"Owner":      *item.Owner.Login,
-						"Name":       *item.Name,
-						"Url":        *item.HTMLURL,
-						"Stargazers": *item.StargazersCount,
-						"Forks":      *item.ForksCount,
-						"Watchers":   *item.WatchersCount,
-					},
+				repo := reposList[i]
+				r = append(r, types.RepoMsg{
+					ID:               repo.ID,
+					NodeID:           repo.NodeID,
+					Name:             repo.Name,
+					FullName:         repo.FullName,
+					Description:      repo.Description,
+					Homepage:         repo.Homepage,
+					CreatedAt:        repo.CreatedAt,
+					PushedAt:         repo.PushedAt,
+					UpdatedAt:        repo.UpdatedAt,
+					HTMLURL:          repo.HTMLURL,
+					Language:         repo.Language,
+					Fork:             repo.Fork,
+					ForksCount:       repo.ForksCount,
+					NetworkCount:     repo.NetworkCount,
+					OpenIssuesCount:  repo.OpenIssuesCount,
+					StargazersCount:  repo.StargazersCount,
+					SubscribersCount: repo.SubscribersCount,
+					WatchersCount:    repo.WatchersCount,
+					Size:             repo.Size,
+					Topics:           repo.Topics,
+					Archived:         repo.Archived,
+					Disabled:         repo.Disabled,
 				})
 			}
 			return r

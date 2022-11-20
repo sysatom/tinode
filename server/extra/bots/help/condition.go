@@ -7,9 +7,10 @@ import (
 
 var conditionRules = []condition.Rule{
 	{
-		Condition: "TextMsg",
+		Condition: "RepoMsg",
 		Handler: func(ctx types.Context, forwarded types.MsgPayload) types.MsgPayload {
-			return nil
+			repo, _ := forwarded.(types.RepoMsg)
+			return types.TextMsg{Text: *repo.FullName}
 		},
 	},
 }

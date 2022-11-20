@@ -150,34 +150,29 @@ func hookHandleBotIncomingMessage(t *Topic, msg *ClientComMessage) {
 			continue
 		}
 
-		var head map[string]interface{}
-		var content interface{}
+		var payload extraTypes.MsgPayload
 
 		switch handle.AuthLevel() {
 		case auth.LevelRoot:
 			if authLvl != auth.LevelRoot {
-				content = "Unauthorized"
+				payload = extraTypes.TextMsg{Text: "Unauthorized"}
 			}
 		}
 
 		// auth
-		if content == nil {
+		if payload == nil {
 			// command
 			if msg.Pub.Head == nil {
-				payload, err := handle.Command(ctx, msg.Pub.Content)
+				payload, err = handle.Command(ctx, msg.Pub.Content)
 				if err != nil {
 					logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
 				}
 
 				// stats
 				statsInc("BotRunTotal", 1)
-
-				if err == nil && payload != nil {
-					head, content = payload.Convert()
-				}
 			}
 
-			if content == nil {
+			if payload == nil {
 				// condition
 				if msg.Pub.Head != nil {
 					fUid := ""
@@ -206,77 +201,31 @@ func hookHandleBotIncomingMessage(t *Topic, msg *ClientComMessage) {
 							d, _ := json.Marshal(src)
 							pl := extraTypes.ToPayload(tye, d)
 							ctx.Condition = tye
-							payload, err := handle.Condition(ctx, pl)
+							payload, err = handle.Condition(ctx, pl)
 							if err != nil {
 								logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
-							}
-							if payload != nil {
-								head, content = payload.Convert()
 							}
 						}
 					}
 				}
 
 				// input
-				if content == nil {
-					payload, err := handle.Input(ctx, msg.Pub.Head, msg.Pub.Content)
+				if payload == nil {
+					payload, err = handle.Input(ctx, msg.Pub.Head, msg.Pub.Content)
 					if err != nil {
 						logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
 						continue
-					}
-					if payload != nil {
-						head, content = payload.Convert()
 					}
 				}
 			}
 		}
 
 		// send  message
-		if content == nil {
+		if payload == nil {
 			continue
 		}
 
-		now := types.TimeNow()
-		if err := store.Messages.Save(
-			&types.Message{
-				ObjHeader: types.ObjHeader{CreatedAt: now},
-				SeqId:     t.lastID + 1,
-				Topic:     t.name,
-				From:      sub.User,
-				Head:      head,
-				Content:   content,
-			}, nil, true); err != nil {
-			logs.Warn.Printf("topic[%s]: failed to save bot message: %v", t.name, err)
-			continue
-		}
-
-		t.lastID++
-		t.touched = now
-
-		data := &ServerComMessage{
-			Data: &MsgServerData{
-				Topic:     msg.Original,
-				From:      sub.User,
-				Timestamp: now,
-				SeqId:     t.lastID,
-				Head:      head,
-				Content:   content,
-			},
-			// Internal-only values.
-			Id:        msg.Id,
-			RcptTo:    msg.RcptTo,
-			AsUser:    sub.User,
-			Timestamp: now,
-			sess:      msg.sess,
-		}
-
-		t.broadcastToSessions(data)
-
-		asUid := types.ParseUid(sub.User)
-
-		// sendPush will update unread message count and send push notification.
-		if pushRcpt := t.pushForData(asUid, data.Data); pushRcpt != nil {
-			sendPush(pushRcpt)
-		}
+		uid2 := types.ParseUserId(msg.Original)
+		botSend(uid, uid2, payload)
 	}
 }

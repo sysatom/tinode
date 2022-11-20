@@ -182,6 +182,8 @@ func un(payload extraTypes.MsgPayload) []byte {
 	switch v := payload.(type) {
 	case extraTypes.InfoMsg:
 		return []byte(v.Title)
+	case extraTypes.RepoMsg:
+		return []byte(*v.FullName)
 	}
 	return nil
 }

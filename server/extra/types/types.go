@@ -9,6 +9,7 @@ import (
 	"github.com/tinode/chat/server/store/types"
 	"math/big"
 	"os"
+	"reflect"
 	"sort"
 	"strconv"
 	"time"
@@ -224,6 +225,56 @@ func Convert(payloads []MsgPayload) ([]map[string]interface{}, []interface{}) {
 	return heads, contents
 }
 
+type RepoMsg struct {
+	ID               *int64     `json:"id,omitempty"`
+	NodeID           *string    `json:"node_id,omitempty"`
+	Name             *string    `json:"name,omitempty"`
+	FullName         *string    `json:"full_name,omitempty"`
+	Description      *string    `json:"description,omitempty"`
+	Homepage         *string    `json:"homepage,omitempty"`
+	CreatedAt        *time.Time `json:"created_at,omitempty"`
+	PushedAt         *time.Time `json:"pushed_at,omitempty"`
+	UpdatedAt        *time.Time `json:"updated_at,omitempty"`
+	HTMLURL          *string    `json:"html_url,omitempty"`
+	Language         *string    `json:"language,omitempty"`
+	Fork             *bool      `json:"fork,omitempty"`
+	ForksCount       *int       `json:"forks_count,omitempty"`
+	NetworkCount     *int       `json:"network_count,omitempty"`
+	OpenIssuesCount  *int       `json:"open_issues_count,omitempty"`
+	StargazersCount  *int       `json:"stargazers_count,omitempty"`
+	SubscribersCount *int       `json:"subscribers_count,omitempty"`
+	WatchersCount    *int       `json:"watchers_count,omitempty"`
+	Size             *int       `json:"size,omitempty"`
+	Topics           []string   `json:"topics,omitempty"`
+	Archived         *bool      `json:"archived,omitempty"`
+	Disabled         *bool      `json:"disabled,omitempty"`
+}
+
+func (i RepoMsg) Convert() (map[string]interface{}, interface{}) {
+	builder := MsgBuilder{Payload: i}
+	// title
+	builder.AppendTextLine(*i.FullName, TextOption{})
+
+	var m map[string]interface{}
+	d, _ := json.Marshal(i)
+	_ = json.Unmarshal(d, &m)
+
+	// sort keys
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	for _, k := range keys {
+		builder.AppendText(fmt.Sprintf("%s: ", k), TextOption{IsBold: true})
+		builder.AppendText(toString(m[k]), TextOption{})
+		builder.AppendText("\n", TextOption{})
+	}
+
+	return builder.Content()
+}
+
 type Context struct {
 	// Message ID denormalized
 	Id string `json:"-"`
@@ -307,4 +358,79 @@ func toString(v interface{}) string {
 
 func AppUrl() string {
 	return os.Getenv("TINODE_URL")
+}
+
+func tye(payload MsgPayload) string {
+	t := reflect.TypeOf(payload)
+	return t.Name()
+}
+
+func ToPayload(typ string, src []byte) MsgPayload {
+	switch typ {
+	case "TextMsg":
+		var r TextMsg
+		_ = json.Unmarshal(src, &r)
+		return r
+	case "ImageMsg":
+		var r ImageMsg
+		_ = json.Unmarshal(src, &r)
+		return r
+	case "FileMsg":
+		var r FileMsg
+		_ = json.Unmarshal(src, &r)
+		return r
+	case "VideoMsg":
+		var r VideoMsg
+		_ = json.Unmarshal(src, &r)
+		return r
+	case "AudioMsg":
+		var r AudioMsg
+		_ = json.Unmarshal(src, &r)
+		return r
+	case "ScriptMsg":
+		var r ScriptMsg
+		_ = json.Unmarshal(src, &r)
+		return r
+	case "ActionMsg":
+		var r ActionMsg
+		_ = json.Unmarshal(src, &r)
+		return r
+	case "LinkMsg":
+		var r LinkMsg
+		_ = json.Unmarshal(src, &r)
+		return r
+	case "LocationMsg":
+		var r LocationMsg
+		_ = json.Unmarshal(src, &r)
+		return r
+	case "TableMsg":
+		var r TableMsg
+		_ = json.Unmarshal(src, &r)
+		return r
+	case "DigitMsg":
+		var r DigitMsg
+		_ = json.Unmarshal(src, &r)
+		return r
+	case "OkrMsg":
+		var r OkrMsg
+		_ = json.Unmarshal(src, &r)
+		return r
+	case "InfoMsg":
+		var r InfoMsg
+		_ = json.Unmarshal(src, &r)
+		return r
+	case "TodoMsg":
+		var r TodoMsg
+		_ = json.Unmarshal(src, &r)
+		return r
+	case "ChartMsg":
+		var r ChartMsg
+		_ = json.Unmarshal(src, &r)
+		return r
+	case "RepoMsg":
+		var r RepoMsg
+		_ = json.Unmarshal(src, &r)
+		return r
+	}
+	return nil
 }

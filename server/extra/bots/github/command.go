@@ -12,6 +12,7 @@ import (
 	"github.com/tinode/chat/server/logs"
 	serverTypes "github.com/tinode/chat/server/store/types"
 	"gorm.io/gorm"
+	"strings"
 )
 
 var commandRules = []command.Rule{
@@ -65,7 +66,7 @@ var commandRules = []command.Rule{
 	},
 	{
 		Define: "user",
-		Help:   `Get user info`,
+		Help:   `Get current user info`,
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
 			// get token
 			oauth, err := store.Chatbot.OAuthGet(ctx.AsUser, ctx.Original, Name)
@@ -78,7 +79,7 @@ var commandRules = []command.Rule{
 
 			provider := github.NewGithub("", "", "", oauth.Token)
 
-			user, err := provider.GetUser()
+			user, err := provider.GetAuthenticatedUser()
 			if err != nil {
 				return types.TextMsg{Text: err.Error()}
 			}
@@ -113,7 +114,7 @@ var commandRules = []command.Rule{
 
 			// get user
 			client := github.NewGithub("", "", "", oauth.Token)
-			user, err := client.GetUser()
+			user, err := client.GetAuthenticatedUser()
 			if err != nil {
 				return nil
 			}
@@ -160,7 +161,7 @@ var commandRules = []command.Rule{
 
 			// get user
 			client := github.NewGithub("", "", "", oauth.Token)
-			user, err := client.GetUser()
+			user, err := client.GetAuthenticatedUser()
 			if err != nil {
 				return nil
 			}
@@ -199,6 +200,86 @@ var commandRules = []command.Rule{
 			}
 
 			return types.TextMsg{Text: fmt.Sprintf("Created Project Card #%d", *card.ID)}
+		},
+	},
+	{
+		Define: "repo [string]",
+		Help:   "get repo info",
+		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+			str, _ := tokens[1].Value.String()
+
+			oauth, err := store.Chatbot.OAuthGet(ctx.AsUser, ctx.Original, github.ID)
+			if err != nil {
+				return nil
+			}
+			if oauth.Token == "" {
+				return types.TextMsg{Text: "oauth error"}
+			}
+
+			client := github.NewGithub("", "", "", oauth.Token)
+
+			repoArr := strings.Split(str, "/")
+			if len(repoArr) != 2 {
+				return types.TextMsg{Text: "repo error"}
+			}
+			repo, err := client.GetRepository(repoArr[0], repoArr[1])
+			if err != nil {
+				logs.Err.Println(err)
+				return types.TextMsg{Text: "repo error"}
+			}
+
+			return types.RepoMsg{
+				ID:               repo.ID,
+				NodeID:           repo.NodeID,
+				Name:             repo.Name,
+				FullName:         repo.FullName,
+				Description:      repo.Description,
+				Homepage:         repo.Homepage,
+				CreatedAt:        repo.CreatedAt,
+				PushedAt:         repo.PushedAt,
+				UpdatedAt:        repo.UpdatedAt,
+				HTMLURL:          repo.HTMLURL,
+				Language:         repo.Language,
+				Fork:             repo.Fork,
+				ForksCount:       repo.ForksCount,
+				NetworkCount:     repo.NetworkCount,
+				OpenIssuesCount:  repo.OpenIssuesCount,
+				StargazersCount:  repo.StargazersCount,
+				SubscribersCount: repo.SubscribersCount,
+				WatchersCount:    repo.WatchersCount,
+				Size:             repo.Size,
+				Topics:           repo.Topics,
+				Archived:         repo.Archived,
+				Disabled:         repo.Disabled,
+			}
+		},
+	},
+	{
+		Define: "user [string]",
+		Help:   "get user info",
+		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+			username, _ := tokens[1].Value.String()
+
+			oauth, err := store.Chatbot.OAuthGet(ctx.AsUser, ctx.Original, github.ID)
+			if err != nil {
+				return nil
+			}
+			if oauth.Token == "" {
+				return types.TextMsg{Text: "oauth error"}
+			}
+
+			client := github.NewGithub("", "", "", oauth.Token)
+
+			user, err := client.GetUser(username)
+			if err != nil {
+				logs.Err.Println(err)
+				return types.TextMsg{Text: "user error"}
+			}
+
+			return types.InfoMsg{
+				Title: fmt.Sprintf("User %s", *user.Login),
+				Model: user,
+			}
 		},
 	},
 }
