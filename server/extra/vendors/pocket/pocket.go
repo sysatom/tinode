@@ -116,14 +116,14 @@ func (v *Pocket) GetAccessToken(code string) (interface{}, error) {
 }
 
 func (v *Pocket) Redirect(_ *http.Request) (string, error) {
-	_ = cache.DB.Set([]byte("pocket:code"), []byte(v.code)) // todo
+	_ = cache.DB.Set([]byte("pocket:code"), []byte(v.code)) // fixme uid key
 
 	appRedirectURI := v.AuthorizeURL()
 	return appRedirectURI, nil
 }
 
 func (v *Pocket) StoreAccessToken(_ *http.Request) (map[string]interface{}, error) {
-	data, err := cache.DB.Get([]byte("pocket:code")) // todo
+	data, err := cache.DB.Get([]byte("pocket:code")) // fixme uid key
 	if err != nil {
 		return nil, err
 	}

@@ -9,6 +9,7 @@ import (
 	botPocket "github.com/tinode/chat/server/extra/bots/pocket"
 	"github.com/tinode/chat/server/extra/channels"
 	"github.com/tinode/chat/server/extra/channels/crawler"
+	"github.com/tinode/chat/server/extra/store/model"
 	extraTypes "github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/vendors"
 	"github.com/tinode/chat/server/extra/vendors/dropbox"
@@ -17,6 +18,7 @@ import (
 	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/store"
 	"github.com/tinode/chat/server/store/types"
+	"sort"
 	"strings"
 	"time"
 )
@@ -316,7 +318,7 @@ func initializeCrawler() error {
 	}
 
 	c := crawler.New()
-	c.Send = func(id, name string, out [][]byte) {
+	c.Send = func(id, name string, out []map[string]string) {
 		if len(out) == 0 {
 			return
 		}
@@ -329,11 +331,51 @@ func initializeCrawler() error {
 		if dst == nil {
 			return
 		}
-		builder := extraTypes.MsgBuilder{} // fixme style format
-		for _, i := range out {
-			builder.AppendTextLine(string(i), extraTypes.TextOption{})
+
+		keys := []string{"No"}
+		for k := range out[0] {
+			keys = append(keys, k)
 		}
-		head, content := builder.Content()
+		var head map[string]interface{}
+		var content interface{}
+		if len(out) <= 10 {
+			sort.Strings(keys)
+			builder := extraTypes.MsgBuilder{}
+			for index, item := range out {
+				builder.AppendTextLine(fmt.Sprintf("--- %d ---", index+1), extraTypes.TextOption{})
+				for _, k := range keys {
+					if k == "No" {
+						continue
+					}
+					builder.AppendText(fmt.Sprintf("%s: ", k), extraTypes.TextOption{IsBold: true})
+					builder.AppendText(fmt.Sprintf("%v \n", item[k]), extraTypes.TextOption{})
+				}
+			}
+			head, content = builder.Content()
+		} else {
+			var row [][]interface{}
+			for index, item := range out {
+				var tmp []interface{}
+				for _, k := range keys {
+					if k == "No" {
+						tmp = append(tmp, index+1)
+						continue
+					}
+					tmp = append(tmp, item[k])
+				}
+				row = append(row, tmp)
+			}
+			title := fmt.Sprintf("Channel %s (%d)", name, len(out))
+			res := bots.StorePage(extraTypes.Context{}, model.PageTable, title, extraTypes.TableMsg{
+				Title:  title,
+				Header: keys,
+				Row:    row,
+			})
+			head, content = res.Convert()
+		}
+		if content == nil {
+			return
+		}
 
 		// stats inc
 		statsInc("ChannelPublishTotal", 1)

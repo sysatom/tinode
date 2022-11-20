@@ -10,11 +10,6 @@ import (
 	"path/filepath"
 )
 
-const (
-	Instant = "instant"
-	Daily   = "daily"
-)
-
 const ChannelNameSuffix = "_channel"
 
 type Publisher *crawler.Rule

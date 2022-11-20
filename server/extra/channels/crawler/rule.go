@@ -1,9 +1,7 @@
 package crawler
 
 import (
-	"bytes"
 	"net/http"
-	"sort"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
@@ -21,8 +19,8 @@ type Rule struct {
 	}
 }
 
-func (r Rule) Run() [][]byte {
-	var result [][]byte
+func (r Rule) Run() []map[string]string {
+	var result []map[string]string
 
 	doc, err := document(r.Page.URL)
 	if err != nil {
@@ -30,15 +28,13 @@ func (r Rule) Run() [][]byte {
 	}
 
 	doc.Find(r.Page.List).Each(func(i int, s *goquery.Selection) {
-		// sort keys
 		keys := make([]string, 0, len(r.Page.Item))
 		for k := range r.Page.Item {
 			keys = append(keys, k)
 		}
-		sort.Strings(keys)
 
-		txt := bytes.Buffer{}
-		for _, k := range keys { // todo format
+		tmp := make(map[string]string)
+		for _, k := range keys {
 			f := ParseFun(s, r.Page.Item[k])
 			v, err := f.Invoke()
 			if err != nil {
@@ -50,15 +46,12 @@ func (r Rule) Run() [][]byte {
 			if v == "" {
 				continue
 			}
-			txt.WriteString(k)
-			txt.WriteString(": ")
-			txt.WriteString(v)
-			txt.WriteString("\n")
+			tmp[k] = v
 		}
-		if txt.Len() == 0 {
+		if len(tmp) == 0 {
 			return
 		}
-		result = append(result, txt.Bytes())
+		result = append(result, tmp)
 	})
 	return result
 }
@@ -67,7 +60,7 @@ type Result struct {
 	Name   string
 	ID     string
 	Mode   string
-	Result [][]byte
+	Result []map[string]string
 }
 
 func document(url string) (*goquery.Document, error) {

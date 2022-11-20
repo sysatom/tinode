@@ -1,11 +1,15 @@
 package crawler
 
 import (
+	"bytes"
+	"crypto/sha1"
+	"encoding/json"
 	"fmt"
 	"github.com/influxdata/cron"
 	"github.com/tinode/chat/server/extra/cache"
 	"github.com/tinode/chat/server/logs"
 	"regexp"
+	"sort"
 	"strconv"
 	"time"
 )
@@ -14,7 +18,7 @@ type Crawler struct {
 	jobs  map[string]Rule
 	outCh chan Result
 
-	Send func(id, name string, out [][]byte)
+	Send func(id, name string, out []map[string]string)
 }
 
 func New() *Crawler {
@@ -67,7 +71,7 @@ func (s *Crawler) ruleWorker(name string, r Rule) {
 	for {
 		if nextTime.Format("2006-01-02 15:04") == time.Now().Format("2006-01-02 15:04") {
 			logs.Info.Printf("crawler %s scheduled", name)
-			result := func() [][]byte {
+			result := func() []map[string]string {
 				defer func() {
 					if r := recover(); r != nil {
 						logs.Warn.Printf("crawler %s ruleWorker recover ", name)
@@ -106,28 +110,44 @@ func (s *Crawler) resultWorker() {
 	}
 }
 
-func (s *Crawler) filter(name, mode string, latest [][]byte) [][]byte {
+func (s *Crawler) filter(name, mode string, latest []map[string]string) []map[string]string {
 	sentKey := fmt.Sprintf("crawler:%s:sent", name)
 	todoKey := fmt.Sprintf("crawler:%s:todo", name)
 	sendTimeKey := fmt.Sprintf("crawler:%s:sendtime", name)
 
 	// sent
-	old, err := cache.DB.SMembers([]byte(sentKey))
+	oldArr, err := cache.DB.SMembers([]byte(sentKey))
 	if err != nil {
-		return [][]byte{}
+		return nil
+	}
+	var old []map[string]string
+	for _, item := range oldArr {
+		var tmp map[string]string
+		_ = json.Unmarshal(item, &tmp)
+		if tmp != nil {
+			old = append(old, tmp)
+		}
 	}
 
 	// to do
-	todo, err := cache.DB.SMembers([]byte(todoKey))
+	todoArr, err := cache.DB.SMembers([]byte(todoKey))
 	if err != nil {
-		return [][]byte{}
+		return nil
+	}
+	var todo []map[string]string
+	for _, item := range todoArr {
+		var tmp map[string]string
+		_ = json.Unmarshal(item, &tmp)
+		if tmp != nil {
+			todo = append(todo, tmp)
+		}
 	}
 
 	// merge
 	old = append(old, todo...)
 
 	// diff
-	diff := StringSliceDiff(latest, old)
+	diff := stringSliceDiff(latest, old)
 
 	switch mode {
 	case "instant":
@@ -135,7 +155,7 @@ func (s *Crawler) filter(name, mode string, latest [][]byte) [][]byte {
 	case "daily":
 		sendString, err := cache.DB.Get([]byte(sendTimeKey))
 		if err != nil {
-			return [][]byte{}
+			logs.Err.Println(err)
 		}
 		oldSend := int64(0)
 		if len(sendString) != 0 {
@@ -144,22 +164,24 @@ func (s *Crawler) filter(name, mode string, latest [][]byte) [][]byte {
 
 		if time.Now().Unix()-oldSend < 24*60*60 {
 			for _, item := range diff {
-				_ = cache.DB.SAdd([]byte(todoKey), item)
+				d, _ := json.Marshal(item)
+				_ = cache.DB.SAdd([]byte(todoKey), d)
 			}
 
-			return [][]byte{}
+			return nil
 		}
 
 		diff = append(diff, todo...)
 
 		_ = cache.DB.Set([]byte(sendTimeKey), []byte(strconv.FormatInt(time.Now().Unix(), 10)))
 	default:
-		return [][]byte{}
+		return nil
 	}
 
 	// add data
 	for _, item := range diff {
-		_ = cache.DB.SAdd([]byte(sentKey), item)
+		d, _ := json.Marshal(item)
+		_ = cache.DB.SAdd([]byte(sentKey), d)
 	}
 
 	// clear to do
@@ -177,19 +199,40 @@ func IsUrl(text string) bool {
 	return re.MatchString(text)
 }
 
-func StringSliceDiff(s1, s2 [][]byte) [][]byte {
+func stringSliceDiff(s1, s2 []map[string]string) []map[string]string {
 	if len(s1) == 0 {
 		return s2
 	}
+
 	mb := make(map[string]struct{}, len(s2))
 	for _, x := range s2 {
-		mb[string(x)] = struct{}{}
+		hash := mapHash(x)
+		mb[hash] = struct{}{}
 	}
-	var diff [][]byte
+	var diff []map[string]string
 	for _, x := range s1 {
-		if _, ok := mb[string(x)]; !ok {
+		hash := mapHash(x)
+		if _, ok := mb[hash]; !ok {
 			diff = append(diff, x)
 		}
 	}
 	return diff
+}
+
+func mapHash(m map[string]string) string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	txt := bytes.Buffer{}
+	for _, key := range keys {
+		txt.WriteString(key)
+		txt.WriteString(":")
+		txt.WriteString(m[key])
+	}
+	h := sha1.New()
+	h.Write(txt.Bytes())
+	return string(h.Sum(nil))
 }
