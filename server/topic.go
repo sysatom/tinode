@@ -1075,8 +1075,8 @@ func (t *Topic) handlePubBroadcast(msg *ClientComMessage) {
 		t.handleCallInvite(msg, asUid)
 	}
 
-	// bot handle
-	hookHandleBotIncomingMessage(t, msg)
+	// chatbot message handle
+	hookHandleIncomingMessage(t, msg)
 }
 
 // handleNoteBroadcast fans out {note} -> {info} messages to recipients in a master topic.

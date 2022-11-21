@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/tinode/chat/server/auth"
@@ -9,6 +10,7 @@ import (
 	botPocket "github.com/tinode/chat/server/extra/bots/pocket"
 	"github.com/tinode/chat/server/extra/channels"
 	"github.com/tinode/chat/server/extra/channels/crawler"
+	extraStore "github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/store/model"
 	extraTypes "github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/vendors"
@@ -19,12 +21,14 @@ import (
 	"github.com/tinode/chat/server/store"
 	"github.com/tinode/chat/server/store/types"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
 
 const BotFather = "BotFather"
 
+// init base bot user
 func initializeBotFather() error {
 	msg := &ClientComMessage{
 		Acc: &MsgClientAcc{
@@ -109,6 +113,7 @@ func initializeBotFather() error {
 	return nil
 }
 
+// init bot users
 func initializeBotUsers() error {
 	var msgs []*ClientComMessage
 
@@ -190,64 +195,6 @@ func initializeBotUsers() error {
 		}
 	}
 	return nil
-}
-
-func isBot(subs types.Subscription) bool {
-	// normal bot user
-	if subs.GetState() != types.StateOK {
-		return false
-	}
-	// verified
-	trusted := subs.GetTrusted()
-	if trusted == nil {
-		return false
-	}
-	if !isVerified(trusted) {
-		return false
-	}
-	// check name
-	public := subs.GetPublic()
-	if public == nil {
-		return false
-	}
-	name := fn(public)
-	if !strings.HasSuffix(name, bots.BotNameSuffix) {
-		return false
-	}
-
-	return true
-}
-
-func isVerified(trusted interface{}) bool {
-	if v, ok := trusted.(map[string]interface{}); ok {
-		if b, ok := v["verified"]; ok {
-			if vv, ok := b.(bool); ok {
-				return vv
-			}
-		}
-	}
-	return false
-}
-
-func fn(public interface{}) string {
-	if v, ok := public.(map[string]interface{}); ok {
-		if s, ok := v["fn"]; ok {
-			if ss, ok := s.(string); ok {
-				return ss
-			}
-		}
-	}
-	return ""
-}
-
-func botName(subs types.Subscription) string {
-	public := subs.GetPublic()
-	if public == nil {
-		return ""
-	}
-	name := fn(public)
-	name = strings.ReplaceAll(name, bots.BotNameSuffix, "")
-	return name
 }
 
 // init channels
@@ -419,6 +366,64 @@ func initializeCrawler() error {
 	return nil
 }
 
+func isBot(subs types.Subscription) bool {
+	// normal bot user
+	if subs.GetState() != types.StateOK {
+		return false
+	}
+	// verified
+	trusted := subs.GetTrusted()
+	if trusted == nil {
+		return false
+	}
+	if !isVerified(trusted) {
+		return false
+	}
+	// check name
+	public := subs.GetPublic()
+	if public == nil {
+		return false
+	}
+	name := fn(public)
+	if !strings.HasSuffix(name, bots.BotNameSuffix) {
+		return false
+	}
+
+	return true
+}
+
+func isVerified(trusted interface{}) bool {
+	if v, ok := trusted.(map[string]interface{}); ok {
+		if b, ok := v["verified"]; ok {
+			if vv, ok := b.(bool); ok {
+				return vv
+			}
+		}
+	}
+	return false
+}
+
+func fn(public interface{}) string {
+	if v, ok := public.(map[string]interface{}); ok {
+		if s, ok := v["fn"]; ok {
+			if ss, ok := s.(string); ok {
+				return ss
+			}
+		}
+	}
+	return ""
+}
+
+func botName(subs types.Subscription) string {
+	public := subs.GetPublic()
+	if public == nil {
+		return ""
+	}
+	name := fn(public)
+	name = strings.ReplaceAll(name, bots.BotNameSuffix, "")
+	return name
+}
+
 func botSend(userUid, topicUid types.Uid, out extraTypes.MsgPayload) {
 	if out == nil {
 		return
@@ -497,4 +502,133 @@ func newProvider(category string) vendors.OAuthProvider {
 	}
 
 	return provider
+}
+
+func botIncomingMessage(t *Topic, msg *ClientComMessage) {
+	// check topic owner user
+	_, u2, _ := types.ParseP2P(msg.Pub.Topic)
+	if !u2.IsZero() && u2.Compare(types.ParseUserId(msg.AsUser)) == 0 {
+		return
+	}
+
+	subs, err := store.Topics.GetUsers(msg.Pub.Topic, nil)
+	if err != nil {
+		logs.Err.Println("hook bot incoming", err)
+		return
+	}
+
+	uid := types.ParseUserId(msg.AsUser)
+	ctx := extraTypes.Context{
+		Id:        msg.Id,
+		Original:  msg.Original,
+		RcptTo:    msg.RcptTo,
+		AsUser:    uid,
+		AuthLvl:   msg.AuthLvl,
+		MetaWhat:  msg.MetaWhat,
+		Timestamp: msg.Timestamp,
+	}
+
+	// user auth record
+	_, authLvl, _, _, _ := store.Users.GetAuthRecord(uid, "basic")
+
+	// bot
+	for _, sub := range subs {
+		if !isBot(sub) {
+			continue
+		}
+
+		// bot name
+		name := botName(sub)
+		handle, ok := bots.List()[name]
+		if !ok {
+			continue
+		}
+
+		if !handle.IsReady() {
+			logs.Info.Printf("bot %s unavailable", t.name)
+			continue
+		}
+
+		var payload extraTypes.MsgPayload
+
+		switch handle.AuthLevel() {
+		case auth.LevelRoot:
+			if authLvl != auth.LevelRoot {
+				payload = extraTypes.TextMsg{Text: "Unauthorized"}
+			}
+		}
+
+		// auth
+		if payload == nil {
+			// command
+			if msg.Pub.Head == nil {
+				payload, err = handle.Command(ctx, msg.Pub.Content)
+				if err != nil {
+					logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
+				}
+
+				// stats
+				statsInc("BotRunTotal", 1)
+			}
+
+			if payload == nil {
+				// condition
+				if msg.Pub.Head != nil {
+					fUid := ""
+					fSeq := int64(0)
+					if v, ok := msg.Pub.Head["forwarded"]; ok {
+						if s, ok := v.(string); ok {
+							f := strings.Split(s, ":")
+							if len(f) == 2 {
+								fUid = f[0]
+								fSeq, _ = strconv.ParseInt(f[1], 10, 64)
+							}
+						}
+					}
+
+					if fUid != "" && fSeq > 0 {
+						uid2 := types.ParseUserId(fUid)
+						topic := uid.P2PName(uid2)
+						message, err := extraStore.Chatbot.GetMessage(topic, int(fSeq))
+						if err != nil {
+							logs.Err.Println(err)
+						}
+
+						if message.ID > 0 {
+							src, _ := message.Content.Map("src")
+							tye, _ := message.Content.String("tye")
+							d, _ := json.Marshal(src)
+							pl := extraTypes.ToPayload(tye, d)
+							ctx.Condition = tye
+							payload, err = handle.Condition(ctx, pl)
+							if err != nil {
+								logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
+							}
+						}
+					}
+				}
+
+				// input
+				if payload == nil {
+					payload, err = handle.Input(ctx, msg.Pub.Head, msg.Pub.Content)
+					if err != nil {
+						logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
+						continue
+					}
+				}
+			}
+		}
+
+		// send  message
+		if payload == nil {
+			continue
+		}
+
+		uid2 := types.ParseUserId(msg.Original)
+		botSend(uid, uid2, payload)
+	}
+}
+
+func groupIncomingMessage(t *Topic, msg *ClientComMessage) {
+	fmt.Println(t, msg)
 }
