@@ -3,8 +3,9 @@ package form
 import "github.com/tinode/chat/server/extra/types"
 
 type Rule struct {
-	Id      string
-	Handler func(ctx types.Context, values map[string]interface{}) types.MsgPayload
+	Id         string
+	IsLongTerm bool
+	Handler    func(ctx types.Context, values map[string]interface{}) types.MsgPayload
 }
 
 type Ruleset []Rule

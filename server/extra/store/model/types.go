@@ -99,6 +99,7 @@ const (
 	PageChart PageType = "chart"
 	PageTable PageType = "table"
 	PageOkr   PageType = "okr"
+	PageShare PageType = "share"
 )
 
 type PageState int

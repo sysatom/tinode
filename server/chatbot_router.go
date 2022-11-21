@@ -95,6 +95,8 @@ func getPage(rw http.ResponseWriter, req *http.Request) {
 		comp = page.RenderOkr(p)
 	case model.PageTable:
 		comp = page.RenderTable(p)
+	case model.PageShare:
+		comp = page.RenderShare(p)
 	case model.PageChart:
 		d, err := json.Marshal(p.Schema)
 		if err != nil {

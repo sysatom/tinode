@@ -19,6 +19,7 @@ import (
 	_ "github.com/tinode/chat/server/extra/bots/okr"
 	_ "github.com/tinode/chat/server/extra/bots/pocket"
 	_ "github.com/tinode/chat/server/extra/bots/server"
+	_ "github.com/tinode/chat/server/extra/bots/share"
 	_ "github.com/tinode/chat/server/extra/bots/subscribe"
 	_ "github.com/tinode/chat/server/extra/bots/webhook"
 

@@ -139,16 +139,25 @@ func RunForm(formRules []form.Rule, ctx types.Context, values map[string]interfa
 		return nil, err
 	}
 
-	// store form
-	err = store.Chatbot.FormSet(ctx.FormId, model.Form{Values: values, State: model.FormStateSubmitSuccess})
-	if err != nil {
-		return nil, err
+	// is long term
+	isLongTerm := false
+	for _, rule := range rs {
+		if rule.Id == ctx.FormRuleId {
+			isLongTerm = rule.IsLongTerm
+		}
 	}
+	if !isLongTerm {
+		// store form
+		err = store.Chatbot.FormSet(ctx.FormId, model.Form{Values: values, State: model.FormStateSubmitSuccess})
+		if err != nil {
+			return nil, err
+		}
 
-	// store page state
-	err = store.Chatbot.PageSet(ctx.FormId, model.Page{State: model.PageStateProcessedSuccess})
-	if err != nil {
-		return nil, err
+		// store page state
+		err = store.Chatbot.PageSet(ctx.FormId, model.Page{State: model.PageStateProcessedSuccess})
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return payload, nil
