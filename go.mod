@@ -26,6 +26,7 @@ require (
 	github.com/prometheus/client_golang v1.12.2
 	github.com/prometheus/common v0.34.0
 	github.com/stretchr/testify v1.8.0
+	github.com/tidwall/gjson v1.14.3
 	github.com/tinode/jsonco v1.0.0
 	github.com/tinode/snowflake v1.0.0
 	go.mongodb.org/mongo-driver v1.9.1
