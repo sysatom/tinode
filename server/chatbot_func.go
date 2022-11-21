@@ -424,17 +424,15 @@ func botName(subs types.Subscription) string {
 	return name
 }
 
-func botSend(userUid, topicUid types.Uid, out extraTypes.MsgPayload) {
+func botSend(rcptTo string, uid types.Uid, out extraTypes.MsgPayload) {
 	if out == nil {
 		return
 	}
 
-	topic := userUid.P2PName(topicUid)
-
-	t := globals.hub.topicGet(topic)
+	t := globals.hub.topicGet(rcptTo)
 	if t == nil {
 		sess := &Session{
-			uid:     topicUid,
+			uid:     uid,
 			authLvl: auth.LevelAuth,
 			subs:    make(map[string]*Subscription),
 			send:    make(chan interface{}, sendQueueLimit+32),
@@ -443,14 +441,14 @@ func botSend(userUid, topicUid types.Uid, out extraTypes.MsgPayload) {
 		}
 		msg := &ClientComMessage{
 			Sub: &MsgClientSub{
-				Topic:   topicUid.UserId(),
+				Topic:   uid.UserId(),
 				Get:     &MsgGetQuery{},
 				Created: false,
 				Newsub:  false,
 			},
-			Original:  topicUid.UserId(),
-			RcptTo:    topicUid.P2PName(userUid),
-			AsUser:    userUid.UserId(),
+			Original:  uid.UserId(),
+			RcptTo:    rcptTo,
+			AsUser:    uid.UserId(),
 			AuthLvl:   int(auth.LevelAuth),
 			MetaWhat:  0,
 			Timestamp: time.Now(),
@@ -461,28 +459,32 @@ func botSend(userUid, topicUid types.Uid, out extraTypes.MsgPayload) {
 		// wait sometime
 		time.Sleep(200 * time.Millisecond)
 
-		t = globals.hub.topicGet(topic)
+		t = globals.hub.topicGet(rcptTo)
 	}
 
 	if t == nil {
-		logs.Err.Printf("topic %s error, Failed to send", topic)
+		logs.Err.Printf("topic %s error, Failed to send", rcptTo)
 		return
 	}
 
 	heads, contents := extraTypes.Convert([]extraTypes.MsgPayload{out})
 	if !(len(heads) > 0 && len(contents) > 0) {
-		logs.Err.Printf("topic %s convert error, Failed to send", topic)
+		logs.Err.Printf("topic %s convert error, Failed to send", rcptTo)
 		return
 	}
 	head, content := heads[0], contents[0]
 	msg := &ClientComMessage{
 		Pub: &MsgClientPub{
-			Topic:   topic,
+			Topic:   rcptTo,
 			Head:    head,
 			Content: content,
 		},
-		AsUser:    topicUid.UserId(),
+		AsUser:    uid.UserId(),
 		Timestamp: types.TimeNow(),
+	}
+	if strings.HasPrefix(rcptTo, "grp") {
+		msg.Original = rcptTo
+		msg.RcptTo = rcptTo
 	}
 	t.handleClientMsg(msg)
 }
@@ -624,11 +626,84 @@ func botIncomingMessage(t *Topic, msg *ClientComMessage) {
 			continue
 		}
 
-		uid2 := types.ParseUserId(msg.Original)
-		botSend(uid, uid2, payload)
+		botUid := types.ParseUserId(msg.Original)
+		botSend(msg.RcptTo, botUid, payload)
 	}
 }
 
 func groupIncomingMessage(t *Topic, msg *ClientComMessage) {
-	fmt.Println(t, msg)
+	subs, err := store.Topics.GetUsers(msg.Pub.Topic, nil)
+	if err != nil {
+		logs.Err.Println("hook bot incoming", err)
+		return
+	}
+	// check bot user incoming
+	for _, sub := range subs {
+		if !isBot(sub) {
+			continue
+		}
+		if strings.TrimPrefix(msg.AsUser, "usr") == sub.User {
+			return
+		}
+	}
+
+	uid := types.ParseUserId(msg.AsUser)
+	ctx := extraTypes.Context{
+		Id:        msg.Id,
+		Original:  msg.Original,
+		RcptTo:    msg.RcptTo,
+		AsUser:    uid,
+		AuthLvl:   msg.AuthLvl,
+		MetaWhat:  msg.MetaWhat,
+		Timestamp: msg.Timestamp,
+	}
+
+	// user auth record
+	_, authLvl, _, _, _ := store.Users.GetAuthRecord(uid, "basic")
+
+	// bot
+	for _, sub := range subs {
+		if !isBot(sub) {
+			continue
+		}
+
+		// bot name
+		name := botName(sub)
+		handle, ok := bots.List()[name]
+		if !ok {
+			continue
+		}
+
+		if !handle.IsReady() {
+			logs.Info.Printf("bot %s unavailable", t.name)
+			continue
+		}
+
+		var payload extraTypes.MsgPayload
+
+		switch handle.AuthLevel() {
+		case auth.LevelRoot:
+			if authLvl != auth.LevelRoot {
+				payload = extraTypes.TextMsg{Text: "Unauthorized"}
+			}
+		}
+
+		// auth
+		if payload == nil {
+			// group
+			payload, err = handle.Group(ctx, msg.Pub.Head, msg.Pub.Content)
+			if err != nil {
+				logs.Warn.Printf("topic[%s]: failed to run group bot: %v", t.name, err)
+				continue
+			}
+		}
+
+		// send  message
+		if payload == nil {
+			continue
+		}
+
+		botUid := types.ParseUid(sub.User)
+		botSend(msg.RcptTo, botUid, payload)
+	}
 }

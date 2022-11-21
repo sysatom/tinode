@@ -1,0 +1,19 @@
+package help
+
+import (
+	"github.com/tinode/chat/server/extra/ruleset/cron"
+	"github.com/tinode/chat/server/extra/types"
+	"time"
+)
+
+var cronRules = []cron.Rule{
+	{
+		Name: "help_demo",
+		When: "0 */1 * * *",
+		Action: func(types.Context) []types.MsgPayload {
+			return []types.MsgPayload{
+				types.TextMsg{Text: time.Now().String()},
+			}
+		},
+	},
+}

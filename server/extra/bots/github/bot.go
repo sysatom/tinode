@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/tinode/chat/server/extra/bots"
-	"github.com/tinode/chat/server/extra/ruleset/cron"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
 	serverTypes "github.com/tinode/chat/server/store/types"
@@ -57,11 +56,8 @@ func (b bot) Command(ctx types.Context, content interface{}) (types.MsgPayload, 
 	return bots.RunCommand(commandRules, ctx, content)
 }
 
-func (b bot) Cron(send func(userUid, topicUid serverTypes.Uid, out types.MsgPayload)) error {
-	ruleset := cron.NewCronRuleset(Name, b.AuthLevel(), cronRules)
-	ruleset.Send = send
-	ruleset.Daemon()
-	return nil
+func (b bot) Cron(send func(rcptTo string, uid serverTypes.Uid, out types.MsgPayload)) error {
+	return bots.RunCron(cronRules, Name, b.AuthLevel(), send)
 }
 
 func (b bot) Form(ctx types.Context, values map[string]interface{}) (types.MsgPayload, error) {

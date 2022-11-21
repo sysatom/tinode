@@ -257,7 +257,7 @@ func postForm(rw http.ResponseWriter, req *http.Request) {
 			continue
 		}
 
-		botSend(userUid, topicUid, payload)
+		botSend(topic, topicUid, payload)
 	}
 
 	_, _ = rw.Write([]byte("ok"))
@@ -273,6 +273,7 @@ func webhook(rw http.ResponseWriter, req *http.Request) {
 	uid1 := types.Uid(ui1)
 	uid2 := types.Uid(ui2)
 	uid3 := types.Uid(ui3)
+	topic := uid1.P2PName(uid2)
 
 	value, err := store.Chatbot.DataGet(uid1, uid2.UserId(), fmt.Sprintf("webhook:%s", uid3.String()))
 	if err != nil {
@@ -295,6 +296,6 @@ func webhook(rw http.ResponseWriter, req *http.Request) {
 	} else {
 		txt = fmt.Sprintf("[webhook:%s] %s", uid3.String(), string(d))
 	}
-	botSend(uid1, uid2, extraTypes.TextMsg{Text: txt})
+	botSend(topic, uid2, extraTypes.TextMsg{Text: txt})
 	rw.Write([]byte("ok"))
 }

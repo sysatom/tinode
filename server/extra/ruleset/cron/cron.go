@@ -26,7 +26,7 @@ type Ruleset struct {
 	outCh     chan result
 	cronRules []Rule
 
-	Send func(userUid, topicUid types.Uid, out extraTypes.MsgPayload)
+	Send func(rcptTo string, uid types.Uid, out extraTypes.MsgPayload)
 }
 
 type result struct {
@@ -175,7 +175,7 @@ func (r *Ruleset) pipeline(res result) {
 	if res.payload == nil {
 		return
 	}
-	r.Send(res.ctx.AsUser, types.ParseUserId(res.ctx.Original), res.payload)
+	r.Send(res.ctx.RcptTo, types.ParseUserId(res.ctx.Original), res.payload)
 }
 
 func un(payload extraTypes.MsgPayload) []byte {

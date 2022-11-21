@@ -101,7 +101,7 @@ func hookChannel(jsconfig json.RawMessage) {
 }
 
 func hookHandleIncomingMessage(t *Topic, msg *ClientComMessage) {
-	if strings.HasSuffix(msg.Pub.Topic, "grp") {
+	if strings.HasPrefix(msg.Pub.Topic, "grp") {
 		groupIncomingMessage(t, msg)
 	} else {
 		botIncomingMessage(t, msg)

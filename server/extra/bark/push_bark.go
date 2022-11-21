@@ -11,6 +11,7 @@ import (
 	"github.com/tinode/chat/server/push"
 	serverStore "github.com/tinode/chat/server/store"
 	"github.com/tinode/chat/server/store/types"
+	"gorm.io/gorm"
 	"io"
 	"net/http"
 	"os"
@@ -118,7 +119,7 @@ func sendPushes(config *configType, rcpt *push.Receipt) {
 		}
 
 		v, err := store.Chatbot.ConfigGet(uid, "", BarkDeviceKey)
-		if err != nil {
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 			logs.Err.Println("bark push", err)
 			continue
 		}
@@ -150,7 +151,7 @@ func sendPushes(config *configType, rcpt *push.Receipt) {
 
 func postMessage(config *configType, title, body, group string) error {
 	if config.DeviceKey == "" {
-		return errors.New("device key empty")
+		return nil
 	}
 
 	client := &http.Client{

@@ -6,6 +6,7 @@ import (
 	"github.com/tinode/chat/server/extra/bots"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
+	serverTypes "github.com/tinode/chat/server/store/types"
 )
 
 const Name = "help"
@@ -48,7 +49,7 @@ func (bot) IsReady() bool {
 }
 
 func (b bot) Input(_ types.Context, _ map[string]interface{}, _ interface{}) (types.MsgPayload, error) {
-	return types.TextMsg{Text: "Hi"}, nil
+	return types.TextMsg{Text: "Input"}, nil
 }
 
 func (b bot) Command(ctx types.Context, content interface{}) (types.MsgPayload, error) {
@@ -59,8 +60,16 @@ func (b bot) Form(ctx types.Context, values map[string]interface{}) (types.MsgPa
 	return bots.RunForm(formRules, ctx, values)
 }
 
+func (b bot) Cron(send func(rcptTo string, uid serverTypes.Uid, out types.MsgPayload)) error {
+	return bots.RunCron(cronRules, Name, b.AuthLevel(), send)
+}
+
 func (b bot) Condition(ctx types.Context, forwarded types.MsgPayload) (types.MsgPayload, error) {
 	return bots.RunCondition(conditionRules, ctx, forwarded)
+}
+
+func (b bot) Group(_ types.Context, _ map[string]interface{}, _ interface{}) (types.MsgPayload, error) {
+	return types.TextMsg{Text: "Group"}, nil
 }
 
 func init() {

@@ -7,6 +7,7 @@ import (
 	"github.com/tinode/chat/server/auth"
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/ruleset/condition"
+	"github.com/tinode/chat/server/extra/ruleset/cron"
 	"github.com/tinode/chat/server/extra/ruleset/form"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/store/model"
@@ -28,7 +29,7 @@ type Handler interface {
 	AuthLevel() auth.Level
 
 	// Input return input result
-	Input(_ types.Context, _ map[string]interface{}, _ interface{}) (types.MsgPayload, error)
+	Input(ctx types.Context, head map[string]interface{}, content interface{}) (types.MsgPayload, error)
 
 	// Command return bot result
 	Command(ctx types.Context, content interface{}) (types.MsgPayload, error)
@@ -37,10 +38,13 @@ type Handler interface {
 	Form(ctx types.Context, values map[string]interface{}) (types.MsgPayload, error)
 
 	// Cron cron script daemon
-	Cron(send func(userUid, topicUid serverTypes.Uid, out types.MsgPayload)) error
+	Cron(send func(rcptTo string, uid serverTypes.Uid, out types.MsgPayload)) error
 
 	// Condition run conditional process
 	Condition(ctx types.Context, forwarded types.MsgPayload) (types.MsgPayload, error)
+
+	// Group return group result
+	Group(ctx types.Context, head map[string]interface{}, content interface{}) (types.MsgPayload, error)
 }
 
 type Base struct{}
@@ -61,11 +65,15 @@ func (Base) Form(_ types.Context, _ map[string]interface{}) (types.MsgPayload, e
 	return nil, nil
 }
 
-func (Base) Cron(_ func(userUid, topicUid serverTypes.Uid, out types.MsgPayload)) error {
+func (Base) Cron(_ func(rcptTo string, uid serverTypes.Uid, out types.MsgPayload)) error {
 	return nil
 }
 
 func (Base) Condition(_ types.Context, _ types.MsgPayload) (types.MsgPayload, error) {
+	return nil, nil
+}
+
+func (Base) Group(_ types.Context, _ map[string]interface{}, _ interface{}) (types.MsgPayload, error) {
 	return nil, nil
 }
 
@@ -144,6 +152,13 @@ func RunForm(formRules []form.Rule, ctx types.Context, values map[string]interfa
 	}
 
 	return payload, nil
+}
+
+func RunCron(cronRules []cron.Rule, name string, level auth.Level, send func(rcptTo string, uid serverTypes.Uid, out types.MsgPayload)) error {
+	ruleset := cron.NewCronRuleset(name, level, cronRules)
+	ruleset.Send = send
+	ruleset.Daemon()
+	return nil
 }
 
 func RunCondition(conditionRules []condition.Rule, ctx types.Context, forwarded types.MsgPayload) (types.MsgPayload, error) {
@@ -273,7 +288,7 @@ func Init(jsonconf json.RawMessage) error {
 }
 
 // Cron registered handlers
-func Cron(send func(userUid, topicUid serverTypes.Uid, out types.MsgPayload)) error {
+func Cron(send func(rcptTo string, uid serverTypes.Uid, out types.MsgPayload)) error {
 	for _, bot := range handlers {
 		if err := bot.Cron(send); err != nil {
 			return err
