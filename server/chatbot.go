@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	// bots
+	_ "github.com/tinode/chat/server/extra/bots/anki"
 	_ "github.com/tinode/chat/server/extra/bots/bark"
 	_ "github.com/tinode/chat/server/extra/bots/cloudflare"
 	_ "github.com/tinode/chat/server/extra/bots/finance"

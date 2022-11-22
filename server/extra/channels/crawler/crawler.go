@@ -37,8 +37,15 @@ func (s *Crawler) Init(rules ...Rule) error {
 		if r.When == "" {
 			continue
 		}
-		if !IsUrl(r.Page.URL) {
-			continue
+		if r.Page != nil {
+			if !IsUrl(r.Page.URL) {
+				continue
+			}
+		}
+		if r.Json != nil {
+			if !IsUrl(r.Json.URL) {
+				continue
+			}
 		}
 
 		s.jobs[r.Name] = r

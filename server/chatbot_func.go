@@ -125,7 +125,7 @@ func initializeBotUsers() error {
 				Scheme:    "basic",
 				Secret:    []byte(fmt.Sprintf("%s%s:%d", name, bots.BotNameSuffix, time.Now().Unix())),
 				Login:     false,
-				Tags:      []string{"bot"},
+				Tags:      []string{"bot", name},
 				Desc: &MsgSetDesc{
 					Public: map[string]interface{}{
 						"fn": fmt.Sprintf("%s%s", name, bots.BotNameSuffix),
