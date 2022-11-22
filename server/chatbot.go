@@ -119,3 +119,8 @@ func hookHandleIncomingMessage(t *Topic, msg *ClientComMessage) {
 		botIncomingMessage(t, msg)
 	}
 }
+
+func hookMounted() {
+	// notify after reboot
+	go notifyAfterReboot()
+}

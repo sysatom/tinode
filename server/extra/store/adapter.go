@@ -20,6 +20,7 @@ type Adapter interface {
 	Stats() interface{}
 
 	GetMessage(topic string, seqId int) (model.Message, error)
+	GetCredentials() ([]*model.Credential, error)
 
 	// Chatbot
 

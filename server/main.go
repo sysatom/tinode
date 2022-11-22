@@ -591,6 +591,9 @@ func main() {
 	// Initialize channels
 	hookChannel(config.Channel)
 
+	// Mounted
+	hookMounted()
+
 	// Set up gRPC server, if one is configured
 	if *listenGrpc == "" {
 		*listenGrpc = config.GrpcListen

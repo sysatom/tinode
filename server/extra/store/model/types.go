@@ -21,6 +21,24 @@ func (Message) TableName() string {
 	return "messages"
 }
 
+type Credential struct {
+	ID        uint  `gorm:"primaryKey"`
+	UserId    int64 `gorm:"column:userid"`
+	Method    string
+	Value     string
+	Synthetic string
+	Resp      string
+	Done      bool
+	Retries   int
+	CreatedAt time.Time `gorm:"column:createdat"`
+	UpdatedAt time.Time `gorm:"column:updatedat"`
+	DeletedAt time.Time `gorm:"column:deletedat"`
+}
+
+func (Credential) TableName() string {
+	return "credentials"
+}
+
 type Config struct {
 	ID        uint `gorm:"primaryKey"`
 	Uid       string

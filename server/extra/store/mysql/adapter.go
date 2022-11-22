@@ -84,6 +84,15 @@ func (a *adapter) GetMessage(topic string, seqId int) (model.Message, error) {
 	return find, nil
 }
 
+func (a *adapter) GetCredentials() ([]*model.Credential, error) {
+	var find []*model.Credential
+	err := a.db.Find(&find).Error
+	if err != nil {
+		return nil, err
+	}
+	return find, nil
+}
+
 func (a *adapter) DataSet(uid types.Uid, topic, key string, value model.JSON) error {
 	var find model.Data
 	err := a.db.Where("`uid` = ? AND `topic` = ? AND `key` = ?", uid.UserId(), topic, key).First(&find).Error

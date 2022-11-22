@@ -716,3 +716,24 @@ func groupIncomingMessage(t *Topic, msg *ClientComMessage) {
 		botSend(msg.RcptTo, botUid, payload)
 	}
 }
+
+func notifyAfterReboot() {
+	botUid, _, _, _, err := store.Users.GetAuthUniqueRecord("basic", fmt.Sprintf("server%s", bots.BotNameSuffix))
+	if err != nil {
+		logs.Err.Println(err)
+		return
+	}
+
+	creds, err := extraStore.Chatbot.GetCredentials()
+	if err != nil {
+		logs.Err.Println(err)
+		return
+	}
+
+	for _, cred := range creds {
+		rcptTo := store.EncodeUid(cred.UserId).P2PName(botUid)
+		if rcptTo != "" {
+			botSend(rcptTo, botUid, extraTypes.TextMsg{Text: "reboot"})
+		}
+	}
+}
