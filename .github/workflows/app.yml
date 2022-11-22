@@ -33,7 +33,10 @@ jobs:
           node-version: 16
 
       - name: Build go
-        run: cd tinode && go build -tags mysql -o app github.com/tinode/chat/server
+        run: |
+          cd tinode && go build -tags mysql -o app github.com/tinode/chat/server
+          cd tinode && go build -tags mysql -o help_agent github.com/tinode/chat/server/extra/bots/help/agent
+          cd tinode && go build -tags mysql -o server_agent github.com/tinode/chat/server/extra/bots/server/agent
 
       - name: Build js
         run: cd tinode-webapp && npm install && npm run build
@@ -53,6 +56,7 @@ jobs:
           cp tinode-webapp/service-worker.js tinode-webapp/static/
           cp tinode-webapp/version.js tinode-webapp/static/
           cp tinode/app app/
+          cp tinode/*_agent app/
           cp -R tinode/server/templ/ app/
           cp -R tinode-webapp/static/ app/
           mv app/app app/server
