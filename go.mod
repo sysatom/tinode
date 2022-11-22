@@ -8,6 +8,7 @@ require (
 	firebase.google.com/go v3.13.0+incompatible
 	github.com/PuerkitoBio/goquery v1.8.0
 	github.com/aws/aws-sdk-go v1.29.29
+	github.com/elastic/go-sysinfo v1.8.1 // indirect
 	github.com/felixge/httpsnoop v1.0.3 // indirect
 	github.com/flower-corp/rosedb v1.1.1
 	github.com/go-echarts/go-echarts/v2 v2.2.4

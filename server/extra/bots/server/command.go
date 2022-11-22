@@ -2,7 +2,9 @@ package server
 
 import (
 	"fmt"
+	"github.com/tinode/chat/server/extra/bots"
 	"github.com/tinode/chat/server/extra/ruleset/command"
+	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/types"
 	"runtime"
 )
@@ -50,6 +52,28 @@ var commandRules = []command.Rule{
 					"NumGoroutine": numGoroutine,
 				},
 			}
+		},
+	},
+	{
+		Define: "server stats",
+		Help:   `Server stats`,
+		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+			data, err := store.Chatbot.DataGet(ctx.AsUser, ctx.Original, "stats")
+			if err != nil {
+				return types.TextMsg{Text: "Empty server stats"}
+			}
+
+			return types.InfoMsg{
+				Title: "Server stats",
+				Model: data,
+			}
+		},
+	},
+	{
+		Define: "agent",
+		Help:   `agent url`,
+		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+			return bots.AgentURI(ctx)
 		},
 	},
 }

@@ -10,15 +10,20 @@ import (
 type JSON map[string]interface{}
 
 func (j *JSON) Scan(value interface{}) error {
-	bytes, ok := value.([]byte)
-	if !ok {
-		return errors.New(fmt.Sprint("Failed to unmarshal JSONB value:", value))
+	if bytes, ok := value.([]byte); ok {
+		result := make(map[string]interface{})
+		err := json.Unmarshal(bytes, &result)
+		if err != nil {
+			return err
+		}
+		*j = result
+		return nil
 	}
-
-	result := make(map[string]interface{})
-	err := json.Unmarshal(bytes, &result)
-	*j = result
-	return err
+	if result, ok := value.(map[string]interface{}); ok {
+		*j = result
+		return nil
+	}
+	return errors.New(fmt.Sprint("Failed to unmarshal JSONB value:", value))
 }
 
 func (j JSON) Value() (driver.Value, error) {
