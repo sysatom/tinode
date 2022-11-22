@@ -72,6 +72,10 @@ func (b bot) Group(_ types.Context, _ map[string]interface{}, _ interface{}) (ty
 	return types.TextMsg{Text: "Group"}, nil
 }
 
+func (b bot) Agent(ctx types.Context, content interface{}) (types.MsgPayload, error) {
+	return bots.RunAgent(agentRules, ctx, content)
+}
+
 func init() {
 	bots.Register(Name, &handler)
 }

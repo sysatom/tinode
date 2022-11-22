@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/tinode/chat/server/auth"
+	"github.com/tinode/chat/server/extra/ruleset/agent"
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/ruleset/condition"
 	"github.com/tinode/chat/server/extra/ruleset/cron"
@@ -45,6 +46,9 @@ type Handler interface {
 
 	// Group return group result
 	Group(ctx types.Context, head map[string]interface{}, content interface{}) (types.MsgPayload, error)
+
+	// Agent return group result
+	Agent(ctx types.Context, content interface{}) (types.MsgPayload, error)
 }
 
 type Base struct{}
@@ -74,6 +78,10 @@ func (Base) Condition(_ types.Context, _ types.MsgPayload) (types.MsgPayload, er
 }
 
 func (Base) Group(_ types.Context, _ map[string]interface{}, _ interface{}) (types.MsgPayload, error) {
+	return nil, nil
+}
+
+func (Base) Agent(_ types.Context, _ interface{}) (types.MsgPayload, error) {
 	return nil, nil
 }
 
@@ -175,6 +183,11 @@ func RunCondition(conditionRules []condition.Rule, ctx types.Context, forwarded 
 	return rs.ProcessCondition(ctx, forwarded)
 }
 
+func RunAgent(agentRules []agent.Rule, ctx types.Context, content interface{}) (types.MsgPayload, error) {
+	rs := agent.Ruleset(agentRules)
+	return rs.ProcessCondition(ctx, content)
+}
+
 func StoreForm(ctx types.Context, payload types.MsgPayload) types.MsgPayload {
 	formId := types.Id().String()
 	d, err := json.Marshal(payload)
@@ -261,6 +274,13 @@ func StorePage(ctx types.Context, category model.PageType, title string, payload
 	return types.LinkMsg{
 		Title: fmt.Sprintf("%s %s", category, title),
 		Url:   fmt.Sprintf("%s/extra/page/%s", types.AppUrl(), pageId),
+	}
+}
+
+func AgentURI(ctx types.Context) types.MsgPayload {
+	return types.LinkMsg{
+		Title: "Agent",
+		Url:   fmt.Sprintf("%s/extra/agent/%d/%d", types.AppUrl(), ctx.AsUser, serverTypes.ParseUserId(ctx.Original)),
 	}
 }
 

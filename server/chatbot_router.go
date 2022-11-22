@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 	"github.com/tinode/chat/server/auth"
+	"github.com/tinode/chat/server/extra/agent"
 	"github.com/tinode/chat/server/extra/bots"
 	"github.com/tinode/chat/server/extra/page"
 	"github.com/tinode/chat/server/extra/store"
@@ -28,6 +29,8 @@ func newRouter() *mux.Router {
 	s.HandleFunc("/page/{id}", getPage)
 	s.HandleFunc("/form", postForm).Methods(http.MethodPost)
 	s.HandleFunc("/webhook/{uid1}/{uid2}/{uid3}", webhook).Methods(http.MethodPost)
+	s.HandleFunc("/agent/{uid1}/{uid2}", infoAgent).Methods(http.MethodGet)
+	s.HandleFunc("/agent/{uid1}/{uid2}", postAgent).Methods(http.MethodPost)
 	return s
 }
 
@@ -154,7 +157,7 @@ func postForm(rw http.ResponseWriter, req *http.Request) {
 
 	subs, err := serverStore.Topics.GetUsers(topic, nil)
 	if err != nil {
-		logs.Err.Println("hook bot incoming", err)
+		logs.Err.Printf("form %s %s", formId, err)
 		return
 	}
 
@@ -254,6 +257,9 @@ func postForm(rw http.ResponseWriter, req *http.Request) {
 			continue
 		}
 
+		// stats
+		statsInc("BotRunFormTotal", 1)
+
 		// send message
 		if payload == nil {
 			continue
@@ -299,5 +305,121 @@ func webhook(rw http.ResponseWriter, req *http.Request) {
 		txt = fmt.Sprintf("[webhook:%s] %s", uid3.String(), string(d))
 	}
 	botSend(topic, uid2, extraTypes.TextMsg{Text: txt})
-	rw.Write([]byte("ok"))
+	_, _ = rw.Write([]byte("ok"))
+}
+
+func infoAgent(rw http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	ui1, _ := strconv.ParseUint(vars["uid1"], 10, 64)
+	ui2, _ := strconv.ParseUint(vars["uid2"], 10, 64)
+	if ui1 == 0 || ui2 == 0 {
+		rw.WriteHeader(http.StatusBadRequest)
+		_, _ = rw.Write([]byte("path error"))
+		return
+	}
+
+	user, err := serverStore.Users.Get(types.Uid(ui2))
+	if err != nil {
+		return
+	}
+	if user != nil {
+		_, _ = rw.Write([]byte(fmt.Sprintf("%s's Agent\n\n%s/extra/agent/%d/%d", fn(user.Public), extraTypes.AppUrl(), ui1, ui2)))
+		return
+	}
+
+	_, _ = rw.Write([]byte("Agent error"))
+}
+
+func postAgent(rw http.ResponseWriter, req *http.Request) {
+	body, err := io.ReadAll(req.Body)
+	if err != nil {
+		logs.Err.Println(err)
+		rw.WriteHeader(http.StatusBadRequest)
+		_, _ = rw.Write([]byte("error"))
+		return
+	}
+	var data agent.Data
+	err = json.Unmarshal(body, &data)
+	if err != nil {
+		logs.Err.Println(err)
+		rw.WriteHeader(http.StatusBadRequest)
+		_, _ = rw.Write([]byte("error"))
+		return
+	}
+
+	vars := mux.Vars(req)
+	ui1, _ := strconv.ParseUint(vars["uid1"], 10, 64)
+	ui2, _ := strconv.ParseUint(vars["uid2"], 10, 64)
+	if ui1 == 0 || ui2 == 0 {
+		rw.WriteHeader(http.StatusBadRequest)
+		_, _ = rw.Write([]byte("error"))
+		return
+	}
+
+	userUid := types.Uid(ui1)
+	topicUid := types.Uid(ui2)
+	topic := userUid.P2PName(topicUid)
+
+	subs, err := serverStore.Topics.GetUsers(topic, nil)
+	if err != nil {
+		logs.Err.Printf("agent %s %s", data.Id, err)
+		rw.WriteHeader(http.StatusBadRequest)
+		_, _ = rw.Write([]byte("error"))
+		return
+	}
+
+	ctx := extraTypes.Context{
+		Original:     topicUid.UserId(),
+		RcptTo:       topic,
+		AsUser:       userUid,
+		AgentId:      data.Id,
+		AgentVersion: data.Version,
+	}
+
+	// user auth record
+	_, authLvl, _, _, _ := serverStore.Users.GetAuthRecord(userUid, "basic")
+
+	for _, sub := range subs {
+		if !isBot(sub) {
+			continue
+		}
+
+		// bot name
+		name := botName(sub)
+		handle, ok := bots.List()[name]
+		if !ok {
+			continue
+		}
+
+		if !handle.IsReady() {
+			logs.Info.Printf("bot %s unavailable", topic)
+			continue
+		}
+
+		switch handle.AuthLevel() {
+		case auth.LevelRoot:
+			if authLvl != auth.LevelRoot {
+				// Unauthorized
+				continue
+			}
+		}
+
+		payload, err := handle.Agent(ctx, data.Content)
+		if err != nil {
+			logs.Warn.Printf("topic[%s]: failed to agent bot: %v", topic, err)
+			continue
+		}
+
+		// stats
+		statsInc("BotRunAgentTotal", 1)
+
+		// send message
+		if payload == nil {
+			continue
+		}
+
+		botSend(topic, topicUid, payload)
+	}
+
+	_, _ = rw.Write([]byte("ok"))
 }

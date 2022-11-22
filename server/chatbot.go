@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"github.com/tinode/chat/server/extra/bots"
+	"github.com/tinode/chat/server/extra/cache"
 	"github.com/tinode/chat/server/extra/channels"
 	extraStore "github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/logs"
@@ -41,6 +42,9 @@ func hookMux(mux *http.ServeMux) {
 }
 
 func hookStore() {
+	// init cache
+	cache.InitCache()
+	// open database
 	err := extraStore.Store.Open()
 	if err != nil {
 		panic(err)
@@ -74,7 +78,13 @@ func hookBot(jsconfig json.RawMessage) {
 
 	// stats register
 	statsRegisterInt("BotTotal")
-	statsRegisterInt("BotRunTotal")
+	statsRegisterInt("BotRunInputTotal")
+	statsRegisterInt("BotRunGroupTotal")
+	statsRegisterInt("BotRunAgentTotal")
+	statsRegisterInt("BotRunCommandTotal")
+	statsRegisterInt("BotRunConditionTotal")
+	statsRegisterInt("BotRunCronTotal")
+	statsRegisterInt("BotRunFormTotal")
 
 	statsSet("BotTotal", int64(len(bots.List())))
 }

@@ -25,6 +25,7 @@ require (
 	github.com/nyaruka/phonenumbers v1.0.75
 	github.com/prometheus/client_golang v1.12.2
 	github.com/prometheus/common v0.34.0
+	github.com/robfig/cron/v3 v3.0.1
 	github.com/stretchr/testify v1.8.0
 	github.com/tidwall/gjson v1.14.3
 	github.com/tinode/jsonco v1.0.0

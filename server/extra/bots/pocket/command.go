@@ -41,7 +41,7 @@ var commandRules = []command.Rule{
 			if err != nil {
 				return types.TextMsg{Text: "get code error"}
 			}
-			return types.LinkMsg{Title: "OAuth URL", Url: provider.AuthorizeURL()}
+			return types.LinkMsg{Title: "OAuth", Url: provider.AuthorizeURL()}
 		},
 	},
 	{

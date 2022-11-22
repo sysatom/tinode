@@ -570,7 +570,7 @@ func botIncomingMessage(t *Topic, msg *ClientComMessage) {
 				}
 
 				// stats
-				statsInc("BotRunTotal", 1)
+				statsInc("BotRunCommandTotal", 1)
 			}
 
 			if payload == nil {
@@ -606,6 +606,9 @@ func botIncomingMessage(t *Topic, msg *ClientComMessage) {
 							if err != nil {
 								logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
 							}
+
+							// stats
+							statsInc("BotRunConditionTotal", 1)
 						}
 					}
 				}
@@ -617,6 +620,9 @@ func botIncomingMessage(t *Topic, msg *ClientComMessage) {
 						logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
 						continue
 					}
+
+					// stats
+					statsInc("BotRunInputTotal", 1)
 				}
 			}
 		}
@@ -696,6 +702,9 @@ func groupIncomingMessage(t *Topic, msg *ClientComMessage) {
 				logs.Warn.Printf("topic[%s]: failed to run group bot: %v", t.name, err)
 				continue
 			}
+
+			// stats
+			statsInc("BotRunGroupTotal", 1)
 		}
 
 		// send  message

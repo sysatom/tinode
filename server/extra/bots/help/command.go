@@ -7,7 +7,7 @@ import (
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
-	storeTypes "github.com/tinode/chat/server/store/types"
+	serverTypes "github.com/tinode/chat/server/store/types"
 	"math/big"
 	"strconv"
 )
@@ -49,7 +49,7 @@ var commandRules = []command.Rule{
 		Help:   `Decode UID string`,
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
 			str, _ := tokens[1].Value.String()
-			var uid storeTypes.Uid
+			var uid serverTypes.Uid
 			var result string
 			err := uid.UnmarshalText([]byte(str))
 			if err != nil {
@@ -168,6 +168,13 @@ var commandRules = []command.Rule{
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
 			val := tokens[1].Value.Source
 			return types.TextMsg{Text: fmt.Sprintf("%v", val)}
+		},
+	},
+	{
+		Define: "agent",
+		Help:   `agent url`,
+		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+			return bots.AgentURI(ctx)
 		},
 	},
 }

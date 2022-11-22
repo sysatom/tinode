@@ -61,7 +61,7 @@ var commandRules = []command.Rule{
 
 			redirectURI := vendors.RedirectURI(github.ID, ctx.AsUser, serverTypes.ParseUserId(ctx.Original))
 			provider := github.NewGithub(Config.ID, Config.Secret, redirectURI, "")
-			return types.LinkMsg{Title: "OAuth URL", Url: provider.AuthorizeURL()}
+			return types.LinkMsg{Title: "OAuth", Url: provider.AuthorizeURL()}
 		},
 	},
 	{

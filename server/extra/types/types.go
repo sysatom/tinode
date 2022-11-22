@@ -277,27 +277,31 @@ func (i RepoMsg) Convert() (map[string]interface{}, interface{}) {
 
 type Context struct {
 	// Message ID denormalized
-	Id string `json:"-"`
+	Id string
 	// Un-routable (original) topic name denormalized from XXX.Topic.
-	Original string `json:"-"`
+	Original string
 	// Routable (expanded) topic name.
-	RcptTo string `json:"-"`
+	RcptTo string
 	// Sender's UserId as string.
-	AsUser types.Uid `json:"-"`
+	AsUser types.Uid
 	// Sender's authentication level.
-	AuthLvl int `json:"-"`
+	AuthLvl int
 	// Denormalized 'what' field of meta messages (set, get, del).
-	MetaWhat int `json:"-"`
+	MetaWhat int
 	// Timestamp when this message was received by the server.
-	Timestamp time.Time `json:"-"`
+	Timestamp time.Time
 	// OAuth token
-	Token string `json:"-"`
+	Token string
 	// form id
-	FormId string `json:"-"`
+	FormId string
 	// form Rule id
-	FormRuleId string `json:"-"`
+	FormRuleId string
 	// condition
-	Condition string `json:"-"`
+	Condition string
+	// agent
+	AgentId string
+	// agent
+	AgentVersion int
 }
 
 func Id() types.Uid {
