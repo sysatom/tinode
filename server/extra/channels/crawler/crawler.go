@@ -77,7 +77,6 @@ func (s *Crawler) ruleWorker(name string, r Rule) {
 	}
 	for {
 		if nextTime.Format("2006-01-02 15:04") == time.Now().Format("2006-01-02 15:04") {
-			logs.Info.Printf("crawler %s scheduled", name)
 			result := func() []map[string]string {
 				defer func() {
 					if r := recover(); r != nil {

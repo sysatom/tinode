@@ -97,3 +97,21 @@ func RenderShare(page model.Page) app.UI {
 	}
 	return comp
 }
+
+func RenderJson(page model.Page) app.UI {
+	d, err := json.Marshal(page.Schema)
+	if err != nil {
+		return nil
+	}
+	var msg types.TextMsg
+	err = json.Unmarshal(d, &msg)
+	if err != nil {
+		return nil
+	}
+
+	comp := &component.Json{
+		Page:   page,
+		Schema: msg,
+	}
+	return comp
+}

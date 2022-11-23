@@ -72,7 +72,6 @@ func (r *Ruleset) ruleWorker(rule Rule) {
 	}
 	for {
 		if nextTime.Format("2006-01-02 15:04") == time.Now().Format("2006-01-02 15:04") {
-			logs.Info.Printf("cron %s scheduled", rule.Name)
 			msgs := func() []result {
 				defer func() {
 					if rc := recover(); rc != nil {
