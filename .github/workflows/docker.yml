@@ -45,6 +45,9 @@ jobs:
 
       - name: Build go
         run: |
+          go env -w GOOS=linux
+          go env -w GOARCH=amd64
+          go env
           go build -tags mysql -o tinode github.com/tinode/chat/server
           go build -tags mysql -o help_agent github.com/tinode/chat/server/extra/bots/help/agent
           go build -tags mysql -o server_agent github.com/tinode/chat/server/extra/bots/server/agent
