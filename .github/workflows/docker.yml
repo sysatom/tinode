@@ -82,8 +82,8 @@ jobs:
       - name: Build and push server
         uses: docker/build-push-action@v2
         with:
-          context: .
+          context: ./tinode
           push: true
-          file: docker/server/Dockerfile
+          file: tinode/docker/server/Dockerfile
           tags: |
             ghcr.io/sysatom/tinode:latest
