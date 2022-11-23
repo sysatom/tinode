@@ -82,7 +82,7 @@ jobs:
       - name: Build and push server
         uses: docker/build-push-action@v2
         with:
-          context: ./tinode
+          context: .
           push: true
           file: tinode/docker/server/Dockerfile
           tags: |
