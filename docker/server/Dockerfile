@@ -16,9 +16,8 @@ ADD app/static .
 ADD app/templ .
 ADD app/tinode .
 ADD docker/server/config.template ./tinode.conf
-COPY docker/server/entrypoint.sh .
-RUN chmod +x tinode && chmod +x entrypoint.sh
+RUN chmod +x tinode
 
-ENTRYPOINT ./entrypoint.sh
+CMD ["./tinode"]
 
 EXPOSE 6060
