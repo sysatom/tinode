@@ -70,7 +70,6 @@ jobs:
           cp *_agent app/
           cp -R server/templ/ app/
           cp -R webapp/static/ app/
-          mv app/tinode app/server
 
       - uses: actions/upload-artifact@v3
         with:
