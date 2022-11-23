@@ -1,4 +1,4 @@
-FROM amd64/alpine:latest
+FROM alpine:latest
 
 ARG VERSION=0.1
 ENV VERSION=$VERSION
