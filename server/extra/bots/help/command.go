@@ -181,7 +181,7 @@ var commandRules = []command.Rule{
 		Define: "demo",
 		Help:   `demo`,
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
-			return types.TextMsg{Text: "v0.0.2"}
+			return types.TextMsg{Text: "v0.0.3"}
 		},
 	},
 }
