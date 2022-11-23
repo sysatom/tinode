@@ -20,6 +20,10 @@ COPY docker/server/entrypoint.sh .
 
 RUN chmod +x tinode && chmod +x entrypoint.sh
 RUN mkdir subscribe
+RUN ls -all
+RUN pwd
+RUN stat tinode
+RUN stat entrypoint.sh
 
 ENTRYPOINT ./entrypoint.sh
 

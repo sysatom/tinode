@@ -82,5 +82,4 @@ jobs:
           context: .
           push: true
           file: docker/server/Dockerfile
-          tags: |
-            ghcr.io/sysatom/tinode:latest
+          tags: ghcr.io/sysatom/tinode:latest
