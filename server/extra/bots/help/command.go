@@ -177,4 +177,11 @@ var commandRules = []command.Rule{
 			return bots.AgentURI(ctx)
 		},
 	},
+	{
+		Define: "demo",
+		Help:   `demo`,
+		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+			return types.TextMsg{Text: "v0.0.2"}
+		},
+	},
 }
