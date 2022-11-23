@@ -1,0 +1,12 @@
+version: '3.7'
+
+services:
+  tinode:
+    image: ghcr.io/sysatom/tinode:latest
+    restart: always
+    volumes:
+      - ./tinode.conf:/opt/tinode/tinode.conf
+    ports:
+      - "6060:6060"
+    environment:
+      "TINODE_URL": ${TINODE_URL}

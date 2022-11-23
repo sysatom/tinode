@@ -6,3 +6,4 @@ tinode.conf
 /static
 /tmp
 /uploads
+/app
