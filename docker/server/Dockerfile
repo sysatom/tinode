@@ -12,12 +12,12 @@ WORKDIR /opt/tinode
 RUN apk add --no-cache bash
 
 # Fetch build from Github.
-ADD tinode/app/static .
-ADD tinode/app/templ .
-ADD tinode/app/server .
-ADD tinode/docker/server/config.template ./tinode.conf
-COPY tinode/docker/server/entrypoint.sh .
-RUN chmod +x server && chmod +x entrypoint.sh
+ADD app/static .
+ADD app/templ .
+ADD app/tinode .
+ADD docker/server/config.template ./tinode.conf
+COPY docker/server/entrypoint.sh .
+RUN chmod +x tinode && chmod +x entrypoint.sh
 
 ENTRYPOINT ./entrypoint.sh
 

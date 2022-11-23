@@ -7,4 +7,4 @@
 echo "hosts: files dns" > /etc/nsswitch.conf
 
 # App
-./server
+./tinode

@@ -13,14 +13,12 @@ jobs:
     steps:
       - name: Checkout server repo
         uses: actions/checkout@v3
-        with:
-          path: tinode
 
-      - name: Checkout web repo
+      - name: Checkout webapp repo
         uses: actions/checkout@v3
         with:
           repository: sysatom/tinode-webapp
-          path: tinode-webapp
+          path: webapp
 
       - name: Set up Go 1.x
         uses: actions/setup-go@v3
@@ -47,32 +45,32 @@ jobs:
 
       - name: Build go
         run: |
-          cd tinode && go build -tags mysql -o app github.com/tinode/chat/server
+          go build -tags mysql -o tinode github.com/tinode/chat/server
           go build -tags mysql -o help_agent github.com/tinode/chat/server/extra/bots/help/agent
           go build -tags mysql -o server_agent github.com/tinode/chat/server/extra/bots/server/agent
 
       - name: Build js
-        run: cd tinode-webapp && npm install && npm run build
+        run: cd webapp && npm install && npm run build
 
       - name: Copy files
         run: |
           mkdir app/
-          mkdir tinode-webapp/static/
-          cp -R tinode-webapp/audio/ tinode-webapp/static/
-          cp -R tinode-webapp/css/ tinode-webapp/static/
-          cp -R tinode-webapp/img/ tinode-webapp/static/
-          cp -R tinode-webapp/umd/ tinode-webapp/static/
-          cp tinode-webapp/firebase-init.js tinode-webapp/static/
-          cp tinode-webapp/index.html tinode-webapp/static/
-          cp tinode-webapp/index-dev.html tinode-webapp/static/
-          cp tinode-webapp/manifest.json tinode-webapp/static/
-          cp tinode-webapp/service-worker.js tinode-webapp/static/
-          cp tinode-webapp/version.js tinode-webapp/static/
-          cp tinode/app app/
-          cp tinode/*_agent app/
-          cp -R tinode/server/templ/ app/
-          cp -R tinode-webapp/static/ app/
-          mv app/app app/server
+          mkdir webapp/static/
+          cp -R webapp/audio/ webapp/static/
+          cp -R webapp/css/ webapp/static/
+          cp -R webapp/img/ webapp/static/
+          cp -R webapp/umd/ webapp/static/
+          cp webapp/firebase-init.js webapp/static/
+          cp webapp/index.html webapp/static/
+          cp webapp/index-dev.html webapp/static/
+          cp webapp/manifest.json webapp/static/
+          cp webapp/service-worker.js webapp/static/
+          cp webapp/version.js webapp/static/
+          cp tinode app/
+          cp *_agent app/
+          cp -R server/templ/ app/
+          cp -R webapp/static/ app/
+          mv app/tinode app/server
 
       - uses: actions/upload-artifact@v3
         with:
@@ -84,6 +82,6 @@ jobs:
         with:
           context: .
           push: true
-          file: tinode/docker/server/Dockerfile
+          file: docker/server/Dockerfile
           tags: |
             ghcr.io/sysatom/tinode:latest
