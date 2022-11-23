@@ -25,7 +25,6 @@ RUN pwd
 RUN stat tinode
 RUN stat entrypoint.sh
 
-#ENTRYPOINT ./entrypoint.sh
-CMD ["/opt/app/tinode"]
+ENTRYPOINT ./entrypoint.sh
 
 EXPOSE 6060
