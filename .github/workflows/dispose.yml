@@ -21,7 +21,4 @@ jobs:
 
       - name: Docker compose update
         run: |
-          ssh ${{ secrets.VPS_SSH_USER_AND_HOST }}
-          cd /home/www/app
-          sudo docker pull ghcr.io/sysatom/tinode:latest
-          sudo docker-compose up -d
+          ssh ${{ secrets.VPS_SSH_USER_AND_HOST }} "cd /home/www/app; sudo docker pull ghcr.io/sysatom/tinode:latest; sudo docker-compose up -d"
