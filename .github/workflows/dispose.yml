@@ -16,6 +16,9 @@ jobs:
           key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
           known_hosts: ${{ secrets.VPS_SSH_HOST }}
 
+      - name: Adding Known Hosts
+        run: ssh-keyscan -H ${{ secrets.VPS_SSH_HOST }} >> ~/.ssh/known_hosts
+
       - name: Docker compose update
         run: |
           ssh ${{ secrets.VPS_SSH_USER_AND_HOST }}
