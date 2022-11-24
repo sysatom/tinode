@@ -27,4 +27,5 @@ RUN stat entrypoint.sh
 
 ENTRYPOINT ./entrypoint.sh
 
-EXPOSE 6060
+# HTTP, gRPC, cluster ports
+EXPOSE 6060 16060 12000-12003
