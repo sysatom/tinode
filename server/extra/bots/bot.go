@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/tinode/chat/server/auth"
+	"github.com/tinode/chat/server/extra/bots/utils"
 	"github.com/tinode/chat/server/extra/ruleset/agent"
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/ruleset/condition"
@@ -271,8 +272,14 @@ func StorePage(ctx types.Context, category model.PageType, title string, payload
 		return types.TextMsg{Text: "store form error"}
 	}
 
+	// fix han compatible styles
+	title = fmt.Sprintf("%s %s", category, title)
+	if utils.HasHan(title) {
+		title = ""
+	}
+
 	return types.LinkMsg{
-		Title: fmt.Sprintf("%s %s", category, title),
+		Title: title,
 		Url:   fmt.Sprintf("%s/extra/page/%s", types.AppUrl(), pageId),
 	}
 }

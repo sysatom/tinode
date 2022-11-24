@@ -1,20 +1,74 @@
 package model
 
 import (
+	"encoding/json"
 	"time"
 )
 
+type User struct {
+	ID        uint64     `gorm:"primaryKey"`
+	State     int        `gorm:"column:state"`
+	Stateat   *time.Time `gorm:"column:stateat"`
+	UserAgent string     `gorm:"column:useragent"`
+	From      uint64
+	Access    JSON        `gorm:"type:json"`
+	Public    JSON        `gorm:"type:json"`
+	Trusted   JSON        `gorm:"type:json"`
+	Tags      interface{} `gorm:"type:json"`
+	CreatedAt time.Time   `gorm:"column:createdat"`
+	UpdatedAt time.Time   `gorm:"column:updatedat"`
+	LastSeen  *time.Time  `gorm:"column:lastseen"`
+
+	// bot
+	Fn       string `json:"fn,omitempty"`
+	Verified bool   `json:"verified,omitempty"`
+}
+
+func (User) TableName() string {
+	return "users"
+}
+
+type Topic struct {
+	ID        uint64     `gorm:"primaryKey"`
+	State     int        `gorm:"column:state"`
+	Stateat   *time.Time `gorm:"column:stateat"`
+	Name      string
+	UseBt     bool `gorm:"column:usebt"`
+	Owner     uint64
+	SeqId     int         `gorm:"column:seqid"`
+	DelId     int         `gorm:"column:delid"`
+	Access    JSON        `gorm:"type:json"`
+	Public    JSON        `gorm:"type:json"`
+	Trusted   JSON        `gorm:"type:json"`
+	Tags      interface{} `gorm:"type:json"`
+	CreatedAt time.Time   `gorm:"column:createdat"`
+	UpdatedAt time.Time   `gorm:"column:updatedat"`
+	TouchedAt time.Time   `gorm:"column:touchedat"`
+
+	Fn string `json:"fn,omitempty"`
+	// channel
+	Verified bool `json:"verified,omitempty"`
+}
+
+func (Topic) TableName() string {
+	return "topics"
+}
+
 type Message struct {
-	ID        uint `gorm:"primaryKey"`
-	DelId     int  `gorm:"column:delid"`
-	SeqId     int  `gorm:"column:seqid"`
+	ID        uint64 `gorm:"primaryKey"`
+	DelId     int    `gorm:"column:delid"`
+	SeqId     int    `gorm:"column:seqid"`
 	Topic     string
-	From      int64
+	From      uint64
 	Head      JSON      `gorm:"type:json"`
 	Content   JSON      `gorm:"type:json"`
 	CreatedAt time.Time `gorm:"column:createdat"`
 	UpdatedAt time.Time `gorm:"column:updatedat"`
 	DeletedAt time.Time `gorm:"column:deletedat"`
+
+	// search
+	Txt string          `json:"txt,omitempty"`
+	Raw json.RawMessage `json:"raw,omitempty"`
 }
 
 func (Message) TableName() string {
@@ -22,8 +76,8 @@ func (Message) TableName() string {
 }
 
 type Credential struct {
-	ID        uint  `gorm:"primaryKey"`
-	UserId    int64 `gorm:"column:userid"`
+	ID        uint64 `gorm:"primaryKey"`
+	UserId    int64  `gorm:"column:userid"`
 	Method    string
 	Value     string
 	Synthetic string
@@ -54,7 +108,7 @@ func (Config) TableName() string {
 }
 
 type OAuth struct {
-	ID        uint `gorm:"primaryKey"`
+	ID        uint64 `gorm:"primaryKey"`
 	Uid       string
 	Topic     string
 	Name      string
@@ -70,7 +124,7 @@ func (OAuth) TableName() string {
 }
 
 type Form struct {
-	ID        uint `gorm:"primaryKey"`
+	ID        uint64 `gorm:"primaryKey"`
 	FormId    string
 	Uid       string
 	Topic     string
@@ -95,7 +149,7 @@ const (
 )
 
 type Page struct {
-	ID        uint `gorm:"primaryKey"`
+	ID        uint64 `gorm:"primaryKey"`
 	PageId    string
 	Uid       string
 	Topic     string
@@ -131,7 +185,7 @@ const (
 )
 
 type Data struct {
-	ID        uint `gorm:"primaryKey"`
+	ID        uint64 `gorm:"primaryKey"`
 	Uid       string
 	Topic     string
 	Key       string

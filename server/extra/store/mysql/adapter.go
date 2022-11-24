@@ -12,6 +12,7 @@ import (
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/logs"
+	serverStore "github.com/tinode/chat/server/store"
 	"github.com/tinode/chat/server/store/types"
 	mysqlDriver "gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -73,6 +74,51 @@ func (a *adapter) Stats() interface{} {
 		return err
 	}
 	return rawDB.Stats()
+}
+
+func wildcard(str string) string {
+	return fmt.Sprintf("%%%s%%", str)
+}
+
+func (a *adapter) GetBotUsers() ([]*model.User, error) {
+	var find []*model.User
+	err := a.db.
+		Table("users").
+		Select("id, createdat, access, lastseen, useragent, public->'$.fn' AS fn, trusted->'$.verified' AS verified").
+		Where("trusted->'$.verified' = TRUE AND JSON_CONTAINS(tags, '[\"bot\"]')").
+		Find(&find).Error
+	if err != nil {
+		return nil, err
+	}
+	return find, nil
+}
+
+func (a *adapter) GetGroupTopics(owner types.Uid) ([]*model.Topic, error) {
+	var find []*model.Topic
+	err := a.db.
+		Table("topics").
+		Select("id, createdat, state, touchedat, name, owner, access, seqid, delid, public, trusted, public->'$.fn' AS fn, trusted->'$.verified' AS verified").
+		Where("`owner` = ? AND `name` LIKE 'grp%' AND `usebt` = false", serverStore.DecodeUid(owner)).
+		Find(&find).Error
+	if err != nil {
+		return nil, err
+	}
+	return find, nil
+}
+
+func (a *adapter) SearchMessages(uid types.Uid, searchTopic string, filter string) ([]*model.Message, error) {
+	var find []*model.Message
+	err := a.db.
+		Table("messages").
+		Select("id, `from`, topic, content->'$.txt' AS txt, content as raw, seqid, createdat").
+		Where("`from` = ? AND (`content` LIKE ? OR `content`->'$.txt' LIKE ?) AND `topic` <> ?", serverStore.DecodeUid(uid), wildcard(filter), wildcard(filter), searchTopic).
+		Order("createdat DESC").
+		Limit(10).
+		Find(&find).Error
+	if err != nil {
+		return nil, err
+	}
+	return find, nil
 }
 
 func (a *adapter) GetMessage(topic string, seqId int) (model.Message, error) {

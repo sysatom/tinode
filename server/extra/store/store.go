@@ -91,6 +91,9 @@ func (s storeObj) DbStats() func() interface{} {
 }
 
 type ChatbotPersistenceInterface interface {
+	GetBotUsers() ([]*model.User, error)
+	GetGroupTopics(owner types.Uid) ([]*model.Topic, error)
+	SearchMessages(uid types.Uid, searchTopic string, filter string) ([]*model.Message, error)
 	GetMessage(topic string, seqId int) (model.Message, error)
 	GetCredentials() ([]*model.Credential, error)
 
@@ -152,9 +155,22 @@ var Chatbot ChatbotPersistenceInterface
 
 type chatbotMapper struct{}
 
+func (c chatbotMapper) GetBotUsers() ([]*model.User, error) {
+	return adp.GetBotUsers()
+}
+
+func (c chatbotMapper) GetGroupTopics(owner types.Uid) ([]*model.Topic, error) {
+	return adp.GetGroupTopics(owner)
+}
+
+func (c chatbotMapper) SearchMessages(uid types.Uid, searchTopic string, filter string) ([]*model.Message, error) {
+	return adp.SearchMessages(uid, searchTopic, filter)
+}
+
 func (c chatbotMapper) GetMessage(topic string, seqId int) (model.Message, error) {
 	return adp.GetMessage(topic, seqId)
 }
+
 func (c chatbotMapper) GetCredentials() ([]*model.Credential, error) {
 	return adp.GetCredentials()
 }
