@@ -1,13 +1,12 @@
 package types
 
 import (
-	"crypto/rand"
 	"encoding/json"
 	"fmt"
 	"github.com/tinode/chat/server/extra/store/model"
+	"github.com/tinode/chat/server/extra/utils"
 	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/store/types"
-	"math/big"
 	"os"
 	"reflect"
 	"sort"
@@ -305,7 +304,7 @@ type Context struct {
 }
 
 func Id() types.Uid {
-	key, err := generateRandomString(16)
+	key, err := utils.GenerateRandomString(16)
 	if err != nil {
 		logs.Err.Println("bot command id", err)
 		return 0
@@ -319,20 +318,6 @@ func Id() types.Uid {
 	}
 
 	return uGen.Get()
-}
-
-func generateRandomString(n int) (string, error) {
-	const letters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-"
-	ret := make([]byte, n)
-	for i := 0; i < n; i++ {
-		num, err := rand.Int(rand.Reader, big.NewInt(int64(len(letters))))
-		if err != nil {
-			return "", err
-		}
-		ret[i] = letters[num.Int64()]
-	}
-
-	return string(ret), nil
 }
 
 func toString(v interface{}) string {
