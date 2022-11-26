@@ -2,524 +2,343 @@ package types
 
 import (
 	"encoding/json"
-	"strings"
+	"fmt"
+	"github.com/tinode/chat/server/extra/store/model"
+	"sort"
+	"time"
 )
 
-type FmtMessage struct {
-	At  int    `json:"at,omitempty"`
-	Len int    `json:"len,omitempty"`
-	Tp  string `json:"tp,omitempty"`
-	Key int    `json:"key,omitempty"`
+type FormFieldType string
+
+const (
+	FormFieldText     FormFieldType = "text"
+	FormFieldPassword FormFieldType = "password"
+	FormFieldNumber   FormFieldType = "number"
+	FormFieldColor    FormFieldType = "color"
+	FormFieldFile     FormFieldType = "file"
+	FormFieldMonth    FormFieldType = "month"
+	FormFieldDate     FormFieldType = "date"
+	FormFieldTime     FormFieldType = "time"
+	FormFieldEmail    FormFieldType = "email"
+	FormFieldUrl      FormFieldType = "url"
+	FormFieldRadio    FormFieldType = "radio"
+	FormFieldCheckbox FormFieldType = "checkbox"
+	FormFieldRange    FormFieldType = "range"
+	FormFieldSelect   FormFieldType = "select"
+	FormFieldTextarea FormFieldType = "textarea"
+)
+
+type FormFieldValueType string
+
+const (
+	FormFieldValueString       FormFieldValueType = "string"
+	FormFieldValueBool         FormFieldValueType = "bool"
+	FormFieldValueInt64        FormFieldValueType = "int64"
+	FormFieldValueFloat64      FormFieldValueType = "float64"
+	FormFieldValueStringSlice  FormFieldValueType = "string_slice"
+	FormFieldValueInt64Slice   FormFieldValueType = "int64_slice"
+	FormFieldValueFloat64Slice FormFieldValueType = "float64_slice"
+)
+
+type TextMsg struct {
+	Text string `json:"text"`
 }
 
-type EntMessage struct {
-	Tp   string  `json:"tp,omitempty"`
-	Data EntData `json:"data"`
+func (t TextMsg) Convert() (map[string]interface{}, interface{}) {
+	return nil, t.Text
 }
 
-type EntData struct {
-	Mime   string      `json:"mime,omitempty"`
-	Val    interface{} `json:"val,omitempty"`
-	Url    string      `json:"url,omitempty"`
-	Ref    string      `json:"ref,omitempty"`
-	Width  int         `json:"width,omitempty"`
-	Height int         `json:"height,omitempty"`
-	Name   string      `json:"name,omitempty"`
-	Size   int         `json:"size,omitempty"`
-	Act    string      `json:"act,omitempty"`
+type FormMsg struct {
+	ID    string      `json:"id"`
+	Title string      `json:"title"`
+	Field []FormField `json:"field"`
 }
 
-type ChatMessage struct {
-	Text        string       `json:"txt,omitempty"`
-	Fmt         []FmtMessage `json:"fmt,omitempty"`
-	Ent         []EntMessage `json:"ent,omitempty"`
-	IsPlainText bool         `json:"-"`
-	MessageType string       `json:"-"`
-
-	Src MsgPayload `json:"src,omitempty"`
-	Tye string     `json:"tye,omitempty"`
+func (a FormMsg) Convert() (map[string]interface{}, interface{}) {
+	return nil, nil
 }
 
-// GetFormattedText Get original text message, inlude original '\n'
-func (c ChatMessage) GetFormattedText() string {
-	if c.Text == "" {
-		return ""
-	}
-	t := []byte(c.Text)
-	for _, item := range c.Fmt {
-		if item.Tp == "BR" {
-			t[item.At] = '\n'
-		}
-	}
-	return string(t)
+type FormField struct {
+	Type        FormFieldType      `json:"type"`
+	Key         string             `json:"key"`
+	Value       interface{}        `json:"value"`
+	ValueType   FormFieldValueType `json:"value_type"`
+	Required    bool               `json:"required"`
+	Label       string             `json:"label"`
+	Placeholder string             `json:"placeholder"`
+	Option      []string           `json:"option"`
+	Hidden      bool               `json:"hidden"`
 }
 
-// GetEntDatas get entity from chat message by entity type
-func (c ChatMessage) GetEntDatas(tp string) []EntData {
-	var ret []EntData
-	for _, item := range c.Ent {
-		if item.Tp == tp {
-			ret = append(ret, item.Data)
-		}
-	}
-	return ret
+type ImageMsg struct {
+	Src    string `json:"src"`
+	Width  int    `json:"width"`
+	Height int    `json:"height"`
+	Alt    string `json:"alt"`
 }
 
-// GetMentions get mentioned users
-func (c ChatMessage) GetMentions() []EntData {
-	return c.GetEntDatas("MN")
+func (i ImageMsg) Convert() (map[string]interface{}, interface{}) {
+	return commonHead, nil //todo
 }
 
-// GetImages get images
-func (c ChatMessage) GetImages() []EntData {
-	return c.GetEntDatas("IM")
+type FileMsg struct {
+	Src string `json:"src"`
+	Alt string `json:"alt"`
 }
 
-// GetHashTags get hashtags
-func (c ChatMessage) GetHashTags() []EntData {
-	return c.GetEntDatas("HT")
+func (i FileMsg) Convert() (map[string]interface{}, interface{}) {
+	return commonHead, nil //todo
 }
 
-// GetLinks get links
-func (c ChatMessage) GetLinks() []EntData {
-	return c.GetEntDatas("LN")
+type VideoMsg struct {
+	Src      string  `json:"src"`
+	Width    int     `json:"width"`
+	Height   int     `json:"height"`
+	Alt      string  `json:"alt"`
+	Duration float64 `json:"duration"`
 }
 
-// GetGenericAttachment get generic attachment
-func (c ChatMessage) GetGenericAttachment() []EntData {
-	return c.GetEntDatas("EX")
+func (i VideoMsg) Convert() (map[string]interface{}, interface{}) {
+	return commonHead, nil //todo
 }
 
-func (c ChatMessage) Content() (map[string]interface{}, interface{}) {
-	if c.IsPlainText {
-		return nil, c.Text
-	}
-	d, err := json.Marshal(c)
-	if err != nil {
-		return nil, ""
-	}
-
-	var res map[string]interface{}
-	err = json.Unmarshal(d, &res)
-	if err != nil {
-		return nil, ""
-	}
-
-	return map[string]interface{}{
-		"mime": "text/x-drafty",
-	}, res
+type AudioMsg struct {
+	Src      string  `json:"src"`
+	Alt      string  `json:"alt"`
+	Duration float64 `json:"duration"`
 }
 
-type MsgBuilder struct {
-	Payload MsgPayload
-	Message ChatMessage
+func (i AudioMsg) Convert() (map[string]interface{}, interface{}) {
+	return commonHead, nil //todo
 }
 
-// AppendText Append text message to build message
-func (m *MsgBuilder) AppendText(text string, opt TextOption) {
-	baseLen := len(m.Message.Text)
-	m.Message.Text += text
-	if strings.Contains(text, "\n") {
-		for i := 0; i < len(text); i++ {
-			if text[i] == '\n' {
-				fmt := FmtMessage{
-					At:  baseLen + i,
-					Tp:  "BR",
-					Len: 1,
-				}
-				m.Message.Fmt = append(m.Message.Fmt, fmt)
-			}
-		}
-	}
-
-	leftLen := baseLen + (len(text) - len(strings.TrimLeft(text, "\t\n\v\f\r ")))
-	subLen := len(text) - len(strings.TrimRight(text, "\t\n\v\f\r "))
-	validLen := len(m.Message.Text) - leftLen - subLen
-
-	if opt.IsBold {
-		fmt := FmtMessage{
-			Tp:  "ST",
-			At:  leftLen,
-			Len: validLen,
-		}
-		m.Message.Fmt = append(m.Message.Fmt, fmt)
-	}
-	if opt.IsItalic {
-		fmt := FmtMessage{
-			Tp:  "EM",
-			At:  leftLen,
-			Len: validLen,
-		}
-		m.Message.Fmt = append(m.Message.Fmt, fmt)
-	}
-	if opt.IsDeleted {
-		fmt := FmtMessage{
-			Tp:  "DL",
-			At:  leftLen,
-			Len: validLen,
-		}
-		m.Message.Fmt = append(m.Message.Fmt, fmt)
-	}
-	if opt.IsCode {
-		fmt := FmtMessage{
-			Tp:  "CO",
-			At:  leftLen,
-			Len: validLen,
-		}
-		m.Message.Fmt = append(m.Message.Fmt, fmt)
-	}
-	if opt.IsLink {
-		fmt := FmtMessage{
-			At:  leftLen,
-			Len: validLen,
-			Key: len(m.Message.Ent),
-		}
-		m.Message.Fmt = append(m.Message.Fmt, fmt)
-		url := strings.ToLower(strings.TrimSpace(text))
-		if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
-			url = "http://" + strings.TrimSpace(text)
-		}
-		ent := EntMessage{
-			Tp: "LN",
-			Data: EntData{
-				Url: url,
-			},
-		}
-		m.Message.Ent = append(m.Message.Ent, ent)
-	}
-	if opt.IsMention {
-		fmt := FmtMessage{
-			At:  leftLen,
-			Len: validLen,
-			Key: len(m.Message.Ent),
-		}
-		m.Message.Fmt = append(m.Message.Fmt, fmt)
-		mentionName := substr(strings.TrimSpace(text), 1, len(strings.TrimSpace(text))-1)
-		ent := EntMessage{
-			Tp: "MN",
-			Data: EntData{
-				Val: mentionName,
-			},
-		}
-		m.Message.Ent = append(m.Message.Ent, ent)
-	}
-	if opt.IsHashTag {
-		fmt := FmtMessage{
-			At:  leftLen,
-			Len: validLen,
-			Key: len(m.Message.Ent),
-		}
-		m.Message.Fmt = append(m.Message.Fmt, fmt)
-		hashTag := strings.TrimSpace(text)
-		ent := EntMessage{
-			Tp: "HT",
-			Data: EntData{
-				Val: hashTag,
-			},
-		}
-		m.Message.Ent = append(m.Message.Ent, ent)
-	}
-	if opt.IsForm {
-		fmt := FmtMessage{
-			Tp:  "FM",
-			At:  leftLen,
-			Len: validLen,
-		}
-		m.Message.Fmt = append(m.Message.Fmt, fmt)
-	}
-	if opt.IsButton {
-		var btnName = opt.ButtonDataName
-		if btnName == "" {
-			opt.ButtonDataName = strings.ToLower(strings.TrimSpace(text))
-		}
-		fmt := FmtMessage{
-			At:  leftLen,
-			Len: validLen,
-			Key: len(m.Message.Ent),
-		}
-		m.Message.Fmt = append(m.Message.Fmt, fmt)
-		//btnText := strings.TrimSpace(text)
-		ent := EntMessage{
-			Tp: "BN",
-			Data: EntData{
-				Name: opt.ButtonDataName,
-				Act:  opt.ButtonDataAct,
-				Val:  opt.ButtonDataVal,
-				Ref:  opt.ButtonDataRef,
-			},
-		}
-		m.Message.Ent = append(m.Message.Ent, ent)
-	}
+type ScriptMsg struct {
+	Kind string `json:"kind"`
+	Code string `json:"code"`
 }
 
-// AppendTextLine Append text message and line break to build message
-func (m *MsgBuilder) AppendTextLine(text string, opt TextOption) {
-	m.AppendText(text+"\n", opt)
+func (a ScriptMsg) Convert() (map[string]interface{}, interface{}) {
+	return commonHead, nil //todo
 }
 
-// AppendImage Append image to build message
-func (m *MsgBuilder) AppendImage(imageName string, opt ImageOption) {
-	m.Message.Fmt = append(m.Message.Fmt, FmtMessage{
-		At:  len(m.Message.Text),
-		Len: 1,
-		Key: len(m.Message.Ent),
-	})
-	m.Message.Ent = append(m.Message.Ent, EntMessage{
-		Tp: "IM",
-		Data: EntData{
-			Mime:   opt.Mime,
-			Width:  opt.Width,
-			Height: opt.Height,
-			Name:   imageName,
-			Val:    opt.ImageBase64,
-		},
-	})
+type ActionMsg struct {
+	ID     string   `json:"id"`
+	Title  string   `json:"title"`
+	Option []string `json:"option"`
+	Value  string   `json:"value"`
 }
 
-// AppendFile Append file to build message
-func (m *MsgBuilder) AppendFile(fileName string, opt FileOption) {
-	m.Message.Fmt = append(m.Message.Fmt, FmtMessage{
-		At:  len(m.Message.Text),
-		Len: 0,
-		Key: len(m.Message.Ent),
-	})
-	m.Message.Ent = append(m.Message.Ent, EntMessage{
-		Tp: "EX",
-		Data: EntData{
-			Mime: opt.Mime,
-			Name: fileName,
-			Val:  opt.ContentBase64,
-		},
-	})
+func (a ActionMsg) Convert() (map[string]interface{}, interface{}) {
+	return commonHead, nil //todo
 }
 
-// AppendAttachment append a attachment file to chat message
-func (m *MsgBuilder) AppendAttachment(fileName string, opt AttachmentOption) {
-	m.Message.Fmt = append(m.Message.Fmt, FmtMessage{
-		At:  len(m.Message.Text),
-		Len: 1,
-		Key: len(m.Message.Ent),
-	})
-	m.Message.Ent = append(m.Message.Ent, EntMessage{
-		Tp: "EX",
-		Data: EntData{
-			Mime: opt.Mime,
-			Name: fileName,
-			Ref:  opt.RelativeUrl,
-			Size: opt.Size,
-		},
-	})
+type LinkMsg struct {
+	Title string `json:"title"`
+	Cover string `json:"cover"`
+	Url   string `json:"url"`
 }
 
-// Parse a raw ServerData to friendly ChatMessage
-func (m *MsgBuilder) Parse(message ServerData) (ChatMessage, error) {
-	var chatMsg ChatMessage
-	if strings.Contains(message.Head, "mime") {
-		err := json.Unmarshal([]byte(message.Content), &chatMsg)
-		if err != nil {
-			return ChatMessage{}, err
-		}
-		chatMsg.IsPlainText = false
+func (a LinkMsg) Convert() (map[string]interface{}, interface{}) {
+	builder := MsgBuilder{Payload: a}
+	if a.Title != "" {
+		builder.AppendText(a.Title, TextOption{IsButton: true, ButtonDataAct: "url", ButtonDataRef: a.Url})
 	} else {
-		err := json.Unmarshal([]byte(message.Content), &chatMsg)
-		if err != nil {
-			return ChatMessage{}, err
-		}
-		chatMsg.IsPlainText = true
-	}
-	if strings.HasPrefix(message.Topic, "usr") {
-		chatMsg.MessageType = "user"
-	}
-	if strings.HasPrefix(message.Topic, "grp") {
-		chatMsg.MessageType = "group"
-	}
-	return chatMsg, nil
-}
-
-// BuildTextMessage build text chat message with formatted
-func (m *MsgBuilder) BuildTextMessage(text string) ChatMessage {
-	msg := ChatMessage{}
-	msg.Text = text
-	msg.Ent = []EntMessage{}
-	msg.Fmt = []FmtMessage{}
-	if strings.Contains(text, "\n") {
-		for i := 0; i < len(text); i++ {
-			if text[i] == '\n' {
-				fmt := FmtMessage{
-					At:  i,
-					Tp:  "BR",
-					Len: 1,
-				}
-				msg.Fmt = append(msg.Fmt, fmt)
-			}
-		}
-	}
-	return msg
-}
-
-// BuildImageMessage build a image chat message
-func (m *MsgBuilder) BuildImageMessage(imageName string, text string, opt ImageOption) ChatMessage {
-	msg := ChatMessage{}
-	msg.Text = text
-	msg.Ent = []EntMessage{}
-	msg.Fmt = []FmtMessage{}
-	msg.Ent = append(msg.Ent, EntMessage{
-		Tp: "IM",
-		Data: EntData{
-			Mime:   opt.Mime,
-			Width:  opt.Width,
-			Height: opt.Height,
-			Name:   imageName,
-			Val:    opt.ImageBase64,
-		},
-	})
-	msg.Fmt = append(msg.Fmt, FmtMessage{
-		At:  len(text),
-		Len: 1,
-		Key: 0,
-	})
-	if strings.Contains(text, "\n") {
-		for i := 0; i < len(text); i++ {
-			if text[i] == '\n' {
-				fmt := FmtMessage{
-					At:  i,
-					Tp:  "BR",
-					Len: 1,
-				}
-				msg.Fmt = append(msg.Fmt, fmt)
-			}
-		}
-	}
-	return msg
-}
-
-// BuildFileMessage build a file chat message
-func (m *MsgBuilder) BuildFileMessage(fileName string, text string, opt FileOption) ChatMessage {
-	msg := ChatMessage{}
-	msg.Text = text
-	msg.Ent = []EntMessage{}
-	msg.Fmt = []FmtMessage{}
-	msg.Ent = append(msg.Ent, EntMessage{
-		Tp: "EX",
-		Data: EntData{
-			Mime: opt.Mime,
-			Name: fileName,
-			Val:  opt.ContentBase64,
-		},
-	})
-	msg.Fmt = append(msg.Fmt, FmtMessage{
-		At:  len(text),
-		Len: 0,
-		Key: 0,
-	})
-	if strings.Contains(text, "\n") {
-		for i := 0; i < len(text); i++ {
-			if text[i] == '\n' {
-				fmt := FmtMessage{
-					At:  i,
-					Tp:  "BR",
-					Len: 1,
-				}
-				msg.Fmt = append(msg.Fmt, fmt)
-			}
-		}
-	}
-	return msg
-}
-
-// BuildAttachmentMessage build a attachment message
-func (m *MsgBuilder) BuildAttachmentMessage(fileName string, text string, opt AttachmentOption) ChatMessage {
-	msg := ChatMessage{}
-	msg.Text = text
-	msg.Ent = []EntMessage{}
-	msg.Fmt = []FmtMessage{}
-	msg.Ent = append(msg.Ent, EntMessage{
-		Tp: "EX",
-		Data: EntData{
-			Mime: opt.Mime,
-			Name: fileName,
-			Ref:  opt.RelativeUrl,
-			Size: opt.Size,
-		},
-	})
-	msg.Fmt = append(msg.Fmt, FmtMessage{
-		At:  len(text),
-		Len: 1,
-		Key: 0,
-	})
-	if strings.Contains(text, "\n") {
-		for i := 0; i < len(text); i++ {
-			if text[i] == '\n' {
-				fmt := FmtMessage{
-					At:  i,
-					Tp:  "BR",
-					Len: 1,
-				}
-				msg.Fmt = append(msg.Fmt, fmt)
-			}
-		}
-	}
-	return msg
-}
-
-func (m *MsgBuilder) Content() (map[string]interface{}, interface{}) {
-	if m.Payload != nil {
-		m.Message.Tye = tye(m.Payload)
-		m.Message.Src = m.Payload
-	}
-	return m.Message.Content()
-}
-
-type ServerData struct {
-	Head    string
-	Content string
-	Topic   string
-}
-
-type TextOption struct {
-	IsBold         bool
-	IsItalic       bool
-	IsDeleted      bool
-	IsCode         bool
-	IsLink         bool
-	IsMention      bool
-	IsHashTag      bool
-	IsForm         bool
-	IsButton       bool
-	ButtonDataName string
-	ButtonDataAct  string
-	ButtonDataVal  string
-	ButtonDataRef  string
-}
-
-type ImageOption struct {
-	Mime        string
-	Width       int
-	Height      int
-	ImageBase64 string
-}
-
-type FileOption struct {
-	Mime          string
-	ContentBase64 string
-}
-
-type AttachmentOption struct {
-	Mime        string
-	RelativeUrl string
-	Size        int
-}
-
-func substr(input string, start int, length int) string {
-	asRunes := []rune(input)
-
-	if start >= len(asRunes) {
-		return ""
+		builder.AppendText(a.Url, TextOption{IsLink: true})
 	}
 
-	if start+length > len(asRunes) {
-		length = len(asRunes) - start
+	return builder.Content()
+}
+
+type LocationMsg struct {
+	Longitude float64 `json:"longitude"`
+	Latitude  float64 `json:"latitude"`
+	Address   string  `json:"address"`
+}
+
+func (a LocationMsg) Convert() (map[string]interface{}, interface{}) {
+	return commonHead, nil //todo
+}
+
+type TableMsg struct {
+	Title  string          `json:"title"`
+	Header []string        `json:"header"`
+	Row    [][]interface{} `json:"row"`
+}
+
+func (t TableMsg) Convert() (map[string]interface{}, interface{}) {
+	return nil, nil
+}
+
+type DigitMsg struct {
+	Title string `json:"title"`
+	Digit int    `json:"digit"`
+}
+
+func (a DigitMsg) Convert() (map[string]interface{}, interface{}) {
+	builder := MsgBuilder{Payload: a}
+	builder.AppendText(fmt.Sprintf("Counter %s : %d", a.Title, a.Digit), TextOption{})
+	return builder.Content()
+}
+
+type OkrMsg struct {
+	Title     string             `json:"title"`
+	Objective *model.Objective   `json:"objective"`
+	KeyResult []*model.KeyResult `json:"key_result"`
+}
+
+func (o OkrMsg) Convert() (map[string]interface{}, interface{}) {
+	return nil, nil
+}
+
+type InfoMsg struct {
+	Title string      `json:"title"`
+	Model interface{} `json:"model"`
+}
+
+func (i InfoMsg) Convert() (map[string]interface{}, interface{}) {
+	builder := MsgBuilder{Payload: i}
+	// title
+	builder.AppendTextLine(i.Title, TextOption{})
+	// model
+	var m map[string]interface{}
+	switch v := i.Model.(type) {
+	case map[string]interface{}:
+		m = v
+	default:
+		d, _ := json.Marshal(i.Model)
+		_ = json.Unmarshal(d, &m)
 	}
 
-	return string(asRunes[start : start+length])
+	// sort keys
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	for _, k := range keys {
+		builder.AppendText(fmt.Sprintf("%s: ", k), TextOption{IsBold: true})
+		builder.AppendText(toString(m[k]), TextOption{})
+		builder.AppendText("\n", TextOption{})
+	}
+
+	return builder.Content()
+}
+
+type TodoMsg struct {
+	Title string        `json:"title"`
+	Todo  []*model.Todo `json:"todo"`
+}
+
+func (t TodoMsg) Convert() (map[string]interface{}, interface{}) {
+	if len(t.Todo) == 0 {
+		return nil, "empty"
+	}
+	builder := MsgBuilder{Payload: t}
+	builder.AppendTextLine("Todo", TextOption{IsBold: true})
+	for i, todo := range t.Todo {
+		builder.AppendTextLine(fmt.Sprintf("%d: %s", i+1, todo.Content), TextOption{})
+	}
+	return builder.Content()
+}
+
+type ChartMsg struct {
+	Title    string    `json:"title"`
+	SubTitle string    `json:"sub_title"`
+	XAxis    []string  `json:"x_axis"`
+	Series   []float64 `json:"series"`
+}
+
+func (t ChartMsg) Convert() (map[string]interface{}, interface{}) {
+	return nil, nil
+}
+
+func Convert(payloads []MsgPayload) ([]map[string]interface{}, []interface{}) {
+	var heads []map[string]interface{}
+	var contents []interface{}
+	for _, item := range payloads {
+		head, content := item.Convert()
+		heads = append(heads, head)
+		contents = append(contents, content)
+	}
+	return heads, contents
+}
+
+type RepoMsg struct {
+	ID               *int64     `json:"id,omitempty"`
+	NodeID           *string    `json:"node_id,omitempty"`
+	Name             *string    `json:"name,omitempty"`
+	FullName         *string    `json:"full_name,omitempty"`
+	Description      *string    `json:"description,omitempty"`
+	Homepage         *string    `json:"homepage,omitempty"`
+	CreatedAt        *time.Time `json:"created_at,omitempty"`
+	PushedAt         *time.Time `json:"pushed_at,omitempty"`
+	UpdatedAt        *time.Time `json:"updated_at,omitempty"`
+	HTMLURL          *string    `json:"html_url,omitempty"`
+	Language         *string    `json:"language,omitempty"`
+	Fork             *bool      `json:"fork,omitempty"`
+	ForksCount       *int       `json:"forks_count,omitempty"`
+	NetworkCount     *int       `json:"network_count,omitempty"`
+	OpenIssuesCount  *int       `json:"open_issues_count,omitempty"`
+	StargazersCount  *int       `json:"stargazers_count,omitempty"`
+	SubscribersCount *int       `json:"subscribers_count,omitempty"`
+	WatchersCount    *int       `json:"watchers_count,omitempty"`
+	Size             *int       `json:"size,omitempty"`
+	Topics           []string   `json:"topics,omitempty"`
+	Archived         *bool      `json:"archived,omitempty"`
+	Disabled         *bool      `json:"disabled,omitempty"`
+}
+
+func (i RepoMsg) Convert() (map[string]interface{}, interface{}) {
+	builder := MsgBuilder{Payload: i}
+	// title
+	builder.AppendTextLine(*i.FullName, TextOption{})
+
+	var m map[string]interface{}
+	d, _ := json.Marshal(i)
+	_ = json.Unmarshal(d, &m)
+
+	// sort keys
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	for _, k := range keys {
+		builder.AppendText(fmt.Sprintf("%s: ", k), TextOption{IsBold: true})
+		builder.AppendText(toString(m[k]), TextOption{})
+		builder.AppendText("\n", TextOption{})
+	}
+
+	return builder.Content()
+}
+
+type CardMsg struct {
+	Name  string
+	Image string
+	URI   string
+	Text  string
+}
+
+func (c CardMsg) Convert() (map[string]interface{}, interface{}) {
+	builder := MsgBuilder{Payload: c}
+	builder.AppendText(c.Name, TextOption{IsBold: true})
+	builder.AppendText(" ", TextOption{})
+	builder.AppendText(c.URI, TextOption{IsLink: true})
+	return builder.Content()
+}
+
+type CardListMsg struct {
+	Cards []CardMsg
+}
+
+func (c CardListMsg) Convert() (map[string]interface{}, interface{}) {
+	builder := MsgBuilder{Payload: c}
+	for _, card := range c.Cards {
+		builder.AppendText(card.Name, TextOption{IsBold: true})
+		builder.AppendText(" ", TextOption{})
+		builder.AppendTextLine(card.URI, TextOption{IsLink: true})
+	}
+	return builder.Content()
 }
