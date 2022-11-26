@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/go-resty/resty/v2"
+	"log"
 	"net/http"
 	"os"
 )
@@ -12,6 +13,10 @@ type Data struct {
 	Id      string      `json:"id"`
 	Version int         `json:"version"`
 	Content interface{} `json:"content"`
+}
+
+func StartInfo() {
+	log.Println("Agent started")
 }
 
 func URI() string {

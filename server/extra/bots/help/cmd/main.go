@@ -10,6 +10,8 @@ import (
 var agentURI string
 
 func main() {
+	agent.StartInfo()
+
 	// args
 	agentURI = agent.URI()
 

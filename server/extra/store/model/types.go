@@ -173,6 +173,7 @@ const (
 	PageOkr   PageType = "okr"
 	PageShare PageType = "share"
 	PageJson  PageType = "json"
+	PageHtml  PageType = "html"
 )
 
 type PageState int

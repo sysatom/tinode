@@ -321,11 +321,11 @@ type CardMsg struct {
 	Text  string
 }
 
-func (c CardMsg) Convert() (map[string]interface{}, interface{}) {
-	builder := MsgBuilder{Payload: c}
-	builder.AppendText(c.Name, TextOption{IsBold: true})
+func (m CardMsg) Convert() (map[string]interface{}, interface{}) {
+	builder := MsgBuilder{Payload: m}
+	builder.AppendText(m.Name, TextOption{IsBold: true})
 	builder.AppendText(" ", TextOption{})
-	builder.AppendText(c.URI, TextOption{IsLink: true})
+	builder.AppendText(m.URI, TextOption{IsLink: true})
 	return builder.Content()
 }
 
@@ -333,12 +333,20 @@ type CardListMsg struct {
 	Cards []CardMsg
 }
 
-func (c CardListMsg) Convert() (map[string]interface{}, interface{}) {
-	builder := MsgBuilder{Payload: c}
-	for _, card := range c.Cards {
+func (m CardListMsg) Convert() (map[string]interface{}, interface{}) {
+	builder := MsgBuilder{Payload: m}
+	for _, card := range m.Cards {
 		builder.AppendText(card.Name, TextOption{IsBold: true})
 		builder.AppendText(" ", TextOption{})
 		builder.AppendTextLine(card.URI, TextOption{IsLink: true})
 	}
 	return builder.Content()
+}
+
+type HtmlMsg struct {
+	Raw string
+}
+
+func (m HtmlMsg) Convert() (map[string]interface{}, interface{}) {
+	return nil, nil
 }

@@ -31,8 +31,12 @@ var commandRules = []command.Rule{
 			if len(result) == 0 {
 				return types.TextMsg{Text: "empty"}
 			}
+			limit := 0
 			var cards []types.CardMsg
 			for _, card := range result {
+				if limit >= 10 {
+					break
+				}
 				name := card.PrintedName
 				if name == "" {
 					name = card.Name
@@ -41,6 +45,7 @@ var commandRules = []command.Rule{
 					Name: name,
 					URI:  card.ScryfallURI,
 				})
+				limit++
 			}
 			return types.CardListMsg{
 				Cards: cards,
