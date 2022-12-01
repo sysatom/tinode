@@ -350,3 +350,17 @@ type HtmlMsg struct {
 func (m HtmlMsg) Convert() (map[string]interface{}, interface{}) {
 	return nil, nil
 }
+
+type LinkListMsg struct {
+	Links []LinkMsg
+}
+
+func (m LinkListMsg) Convert() (map[string]interface{}, interface{}) {
+	builder := MsgBuilder{Payload: m}
+	for _, card := range m.Links {
+		builder.AppendText(card.Title, TextOption{IsBold: true})
+		builder.AppendText(" ", TextOption{})
+		builder.AppendTextLine(card.Url, TextOption{IsLink: true})
+	}
+	return builder.Content()
+}

@@ -11,7 +11,8 @@ import (
 const Name = "notion"
 
 const (
-	TokenKey = "token"
+	TokenKey        = "token"
+	ImportPageIdKey = "import_page_id"
 )
 
 var handler bot

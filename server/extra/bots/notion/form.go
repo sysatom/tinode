@@ -18,8 +18,15 @@ var formRules = []form.Rule{
 		Handler: func(ctx types.Context, values map[string]interface{}) types.MsgPayload {
 			for key, value := range values {
 				switch key {
-				case "token":
+				case TokenKey:
 					err := store.Chatbot.ConfigSet(ctx.AsUser, ctx.Original, TokenKey, map[string]interface{}{
+						"value": value.(string),
+					})
+					if err != nil {
+						logs.Err.Println(err)
+					}
+				case ImportPageIdKey:
+					err := store.Chatbot.ConfigSet(ctx.AsUser, ctx.Original, ImportPageIdKey, map[string]interface{}{
 						"value": value.(string),
 					})
 					if err != nil {

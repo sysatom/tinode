@@ -124,6 +124,9 @@ var commandRules = []command.Rule{
 
 			// repo value
 			j, err := store.Chatbot.ConfigGet(ctx.AsUser, ctx.Original, RepoKey)
+			if err != nil {
+				return nil
+			}
 			repo, _ := j.String("value")
 			if repo == "" {
 				return types.TextMsg{Text: "set repo [string]"}

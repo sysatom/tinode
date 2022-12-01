@@ -93,7 +93,8 @@ func getPage(rw http.ResponseWriter, req *http.Request) {
 	var comp app.UI
 	switch p.Type {
 	case model.PageForm:
-		comp = page.RenderForm(p)
+		f, _ := store.Chatbot.FormGet(p.PageId)
+		comp = page.RenderForm(p, f)
 	case model.PageOkr:
 		comp = page.RenderOkr(p)
 	case model.PageTable:

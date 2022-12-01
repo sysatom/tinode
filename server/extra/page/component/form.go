@@ -10,6 +10,7 @@ import (
 type Form struct {
 	app.Compo
 	Page   model.Page
+	Form   model.Form
 	Schema types.FormMsg
 }
 
@@ -111,6 +112,14 @@ func (c *Form) Render() app.UI {
 	if c.Page.State == model.PageStateCreated {
 		fields = append(fields, app.Div().Class("uk-margin").Body(
 			app.Button().Class("uk-button uk-button-primary").Text("Submit").Type("submit"),
+		))
+	}
+
+	// record value
+	if c.Page.State == model.PageStateProcessedSuccess || c.Page.State == model.PageStateProcessedFailed {
+		fields = append(fields, app.Div().Class("").Body(
+			app.H3().Text("Submit values"),
+			app.Pre().Text(c.Form.Values),
 		))
 	}
 

@@ -26,7 +26,7 @@ const Layout = `
 </html>
 `
 
-func RenderForm(page model.Page) app.UI {
+func RenderForm(page model.Page, form model.Form) app.UI {
 	d, err := json.Marshal(page.Schema)
 	if err != nil {
 		return nil
@@ -39,6 +39,7 @@ func RenderForm(page model.Page) app.UI {
 
 	comp := &component.Form{
 		Page:   page,
+		Form:   form,
 		Schema: msg,
 	}
 	return comp
