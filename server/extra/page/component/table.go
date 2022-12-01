@@ -5,6 +5,7 @@ import (
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/types"
+	"github.com/tinode/chat/server/extra/utils"
 )
 
 type Table struct {
@@ -39,7 +40,14 @@ func (c *Table) Render() app.UI {
 				app.Range(c.Schema.Row).Slice(func(i int) app.UI {
 					return app.Tr().Body(
 						app.Range(c.Schema.Row[i]).Slice(func(j int) app.UI {
-							return app.Td().Text(c.Schema.Row[i][j])
+							item := c.Schema.Row[i][j]
+							if txt, ok := item.(string); ok && utils.IsUrl(txt) {
+								return app.Td().Body(app.A().Target("_blank").Href(txt).Text(txt))
+							} else if num, ok := item.(float64); ok {
+								return app.Td().Text(int(num)) // todo check float
+							} else {
+								return app.Td().Text(c.Schema.Row[i][j])
+							}
 						}),
 					)
 				}),
