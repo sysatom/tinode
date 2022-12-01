@@ -76,8 +76,8 @@ var commandRules = []command.Rule{
 			}
 
 			now := time.Now()
-			startDate := now.AddDate(0, 0, -30).Format("2006-01-02")
-			endDate := now.Format("2006-01-02")
+			startDate := now.Add(-24 * time.Hour).Format(time.RFC3339)
+			endDate := now.Format(time.RFC3339)
 
 			provider := cloudflare.NewCloudflare(tokenValue, zoneIdValue)
 			resp, err := provider.GetAnalytics(startDate, endDate)

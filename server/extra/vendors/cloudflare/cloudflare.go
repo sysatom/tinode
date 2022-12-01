@@ -32,20 +32,27 @@ type AnalyticResponse struct {
 }
 
 type Cloudflare struct {
+	c      *resty.Client
 	token  string
 	zoneID string
 }
 
 func NewCloudflare(token string, zoneID string) *Cloudflare {
-	return &Cloudflare{token: token, zoneID: zoneID}
+	v := &Cloudflare{token: token, zoneID: zoneID}
+
+	v.c = resty.New()
+	v.c.SetBaseURL("https://api.cloudflare.com/client/v4/")
+	v.c.SetTimeout(time.Minute)
+
+	return v
 }
 
 func (v *Cloudflare) GetAnalytics(start, end string) (*AnalyticResponse, error) {
-	c := resty.New()
-	resp, err := c.R().
+	resp, err := v.c.R().
 		SetAuthToken(v.token).
 		SetResult(&AnalyticResponse{}).
-		SetBody(fmt.Sprintf(`
+		SetBody(map[string]interface{}{
+			"query": fmt.Sprintf(`
 query
 {
   viewer
@@ -69,8 +76,9 @@ query
     }
   }
 }
-`, v.zoneID, start, end)).
-		Post("https://api.cloudflare.com/client/v4/graphql")
+`, v.zoneID, start, end),
+		}).
+		Post("/graphql")
 	if err != nil {
 		return nil, err
 	}
