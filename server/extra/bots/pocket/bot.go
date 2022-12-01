@@ -3,9 +3,15 @@ package pocket
 import (
 	"encoding/json"
 	"errors"
+	"github.com/tinode/chat/server/drafty"
 	"github.com/tinode/chat/server/extra/bots"
+	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/types"
+	"github.com/tinode/chat/server/extra/utils"
+	"github.com/tinode/chat/server/extra/vendors/pocket"
 	"github.com/tinode/chat/server/logs"
+	serverTypes "github.com/tinode/chat/server/store/types"
+	"gorm.io/gorm"
 )
 
 const Name = "pocket"
@@ -50,6 +56,39 @@ func (bot) IsReady() bool {
 
 func (b bot) Command(ctx types.Context, content interface{}) (types.MsgPayload, error) {
 	return bots.RunCommand(commandRules, ctx, content)
+}
+
+func (b bot) Cron(send func(rcptTo string, uid serverTypes.Uid, out types.MsgPayload)) error {
+	return bots.RunCron(cronRules, Name, b.AuthLevel(), send)
+}
+
+func (b bot) Input(ctx types.Context, head map[string]interface{}, content interface{}) (types.MsgPayload, error) {
+	text, err := drafty.PlainText(content)
+	if err != nil {
+		return nil, err
+	}
+
+	if utils.IsUrl(text) {
+		url := text
+		oauth, err := store.Chatbot.OAuthGet(ctx.AsUser, ctx.Original, Name)
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			logs.Err.Println("bot command pocket oauth", err)
+		}
+		if oauth.Token == "" {
+			return types.TextMsg{Text: "App is unauthorized"}, nil
+		}
+
+		provider := pocket.NewPocket(Config.ConsumerKey, "", "", oauth.Token)
+		_, err = provider.Add(url)
+		if err != nil {
+			logs.Err.Println(err)
+			return types.TextMsg{Text: "Add error"}, nil
+		}
+
+		return types.TextMsg{Text: "ok"}, nil
+	}
+
+	return nil, nil
 }
 
 func init() {

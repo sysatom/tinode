@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"github.com/influxdata/cron"
 	"github.com/tinode/chat/server/extra/cache"
+	"github.com/tinode/chat/server/extra/utils"
 	"github.com/tinode/chat/server/logs"
-	"regexp"
 	"sort"
 	"strconv"
 	"time"
@@ -38,12 +38,12 @@ func (s *Crawler) Init(rules ...Rule) error {
 			continue
 		}
 		if r.Page != nil {
-			if !IsUrl(r.Page.URL) {
+			if !utils.IsUrl(r.Page.URL) {
 				continue
 			}
 		}
 		if r.Json != nil {
-			if !IsUrl(r.Json.URL) {
+			if !utils.IsUrl(r.Json.URL) {
 				continue
 			}
 		}
@@ -194,15 +194,6 @@ func (s *Crawler) filter(name, mode string, latest []map[string]string) []map[st
 	_ = cache.DB.Delete([]byte(todoKey))
 
 	return diff
-}
-
-const (
-	UrlRegex = `https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)`
-)
-
-func IsUrl(text string) bool {
-	re := regexp.MustCompile("^" + UrlRegex + "$")
-	return re.MatchString(text)
 }
 
 func stringSliceDiff(s1, s2 []map[string]string) []map[string]string {

@@ -51,6 +51,11 @@ type Item struct {
 	WordCount     string `json:"word_count"`
 }
 
+type ItemResponse struct {
+	Status int  `json:"status"`
+	Item   Item `json:"item"`
+}
+
 type Pocket struct {
 	c            *resty.Client
 	clientId     string // ConsumerKey
@@ -170,5 +175,25 @@ func (v *Pocket) Retrieve(count int) (*ListResponse, error) {
 		return resp.Result().(*ListResponse), nil
 	} else {
 		return nil, fmt.Errorf("%d, %s (%s)", resp.StatusCode(), resp.Header().Get("X-Error-Code"), resp.Header().Get("X-Error"))
+	}
+}
+
+func (v *Pocket) Add(url string) (int, error) {
+	resp, err := v.c.R().
+		SetResult(&ItemResponse{}).
+		SetBody(map[string]interface{}{
+			"consumer_key": v.clientId,
+			"access_token": v.accessToken,
+			"url":          url,
+		}).
+		Post("/v3/add")
+	if err != nil {
+		return 0, err
+	}
+
+	if resp.StatusCode() == http.StatusOK {
+		return resp.Result().(*ItemResponse).Status, nil
+	} else {
+		return 0, fmt.Errorf("%d, %s (%s)", resp.StatusCode(), resp.Header().Get("X-Error-Code"), resp.Header().Get("X-Error"))
 	}
 }
