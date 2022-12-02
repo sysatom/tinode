@@ -115,6 +115,9 @@ func hookChannel() {
 }
 
 func hookHandleIncomingMessage(t *Topic, msg *ClientComMessage) {
+	// update online status
+	onlineStatus(msg.AsUser)
+	// check grp or p2p
 	if strings.HasPrefix(msg.Pub.Topic, "grp") {
 		groupIncomingMessage(t, msg)
 	} else {

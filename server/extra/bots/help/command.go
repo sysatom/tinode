@@ -10,6 +10,7 @@ import (
 	serverTypes "github.com/tinode/chat/server/store/types"
 	"math/big"
 	"strconv"
+	"time"
 )
 
 var commandRules = []command.Rule{
@@ -59,6 +60,15 @@ var commandRules = []command.Rule{
 			}
 
 			return types.TextMsg{Text: result}
+		},
+	},
+	{
+		Define: "ts [number]",
+		Help:   `timestamp format`,
+		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+			num, _ := tokens[1].Value.Int64()
+			t := time.Unix(num, 0)
+			return types.TextMsg{Text: t.Format(time.RFC3339)}
 		},
 	},
 	{

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -8,6 +9,7 @@ import (
 	"github.com/tinode/chat/server/extra/bots"
 	botGithub "github.com/tinode/chat/server/extra/bots/github"
 	botPocket "github.com/tinode/chat/server/extra/bots/pocket"
+	"github.com/tinode/chat/server/extra/cache"
 	"github.com/tinode/chat/server/extra/channels"
 	"github.com/tinode/chat/server/extra/channels/crawler"
 	extraStore "github.com/tinode/chat/server/extra/store"
@@ -736,4 +738,8 @@ func notifyAfterReboot() {
 			botSend(rcptTo, botUid, extraTypes.TextMsg{Text: "reboot"})
 		}
 	}
+}
+
+func onlineStatus(usrStr string) {
+	cache.DB.Set(context.Background(), fmt.Sprintf("online:%s", usrStr), time.Now().Unix(), time.Hour)
 }

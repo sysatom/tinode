@@ -2,10 +2,12 @@ package bark
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/tinode/chat/server/drafty"
+	"github.com/tinode/chat/server/extra/cache"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/push"
@@ -118,6 +120,14 @@ func sendPushes(config *configType, rcpt *push.Receipt) {
 			continue
 		}
 
+		// check online
+		online := cache.DB.Get(context.Background(), fmt.Sprintf("online:%s", uid.UserId())).Val()
+		if online != "" {
+			logs.Info.Printf("uid %s online %s skip push", uid.UserId(), online)
+			continue
+		}
+
+		// get bark key
 		v, err := store.Chatbot.ConfigGet(uid, "", BarkDeviceKey)
 		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 			logs.Err.Println("bark push", err)
@@ -125,6 +135,7 @@ func sendPushes(config *configType, rcpt *push.Receipt) {
 		}
 		config.DeviceKey, _ = v.String("value")
 
+		// get sender's name
 		from := types.ParseUserId(rcpt.Payload.From)
 		if from.IsZero() {
 			from = types.ParseUid(rcpt.Payload.From)
@@ -141,6 +152,7 @@ func sendPushes(config *configType, rcpt *push.Receipt) {
 			}
 		}
 
+		// push
 		err = postMessage(config, "", body, rcpt.Payload.Topic)
 		if err != nil {
 			logs.Err.Println("bark push", err)
