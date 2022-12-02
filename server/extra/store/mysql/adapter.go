@@ -4,6 +4,7 @@
 package mysql
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -347,13 +348,18 @@ func (a *adapter) ListObjectives(uid types.Uid, topic string) ([]*model.Objectiv
 }
 
 func (a *adapter) CreateObjective(objective *model.Objective) (int64, error) {
-	locker.Mux.Lock()
-	defer locker.Mux.Unlock()
+	ctx := context.Background()
+	l := locker.NewLocker()
+	lock, err := l.Acquire(ctx, "chatbot:objective:create", 10*time.Second)
+	if err != nil {
+		return 0, err
+	}
+	defer lock.Release(ctx)
 
 	// sequence
 	sequence := int64(0)
 	var max model.Objective
-	err := a.db.Where("`uid` = ? AND `topic` = ?", objective.Uid, objective.Topic).Order("sequence DESC").Take(&max).Error
+	err = a.db.Where("`uid` = ? AND `topic` = ?", objective.Uid, objective.Topic).Order("sequence DESC").Take(&max).Error
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return 0, err
 	}
@@ -438,13 +444,18 @@ func (a *adapter) ListKeyResultsByObjectiveId(objectiveId int64) ([]*model.KeyRe
 }
 
 func (a *adapter) CreateKeyResult(keyResult *model.KeyResult) (int64, error) {
-	locker.Mux.Lock()
-	defer locker.Mux.Unlock()
+	ctx := context.Background()
+	l := locker.NewLocker()
+	lock, err := l.Acquire(ctx, "chatbot:key_result:create", 10*time.Second)
+	if err != nil {
+		return 0, err
+	}
+	defer lock.Release(ctx)
 
 	// sequence
 	sequence := int64(0)
 	var max model.KeyResult
-	err := a.db.Where("`uid` = ? AND `topic` = ?", keyResult.Uid, keyResult.Topic).Order("sequence DESC").Take(&max).Error
+	err = a.db.Where("`uid` = ? AND `topic` = ?", keyResult.Uid, keyResult.Topic).Order("sequence DESC").Take(&max).Error
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return 0, err
 	}
@@ -553,13 +564,18 @@ func (a *adapter) GetKeyResultValues(keyResultId int64) ([]*model.KeyResultValue
 }
 
 func (a *adapter) CreateTodo(todo *model.Todo) (int64, error) {
-	locker.Mux.Lock()
-	defer locker.Mux.Unlock()
+	ctx := context.Background()
+	l := locker.NewLocker()
+	lock, err := l.Acquire(ctx, "chatbot:todo:create", 10*time.Second)
+	if err != nil {
+		return 0, err
+	}
+	defer lock.Release(ctx)
 
 	// sequence
 	sequence := int64(0)
 	var max model.Todo
-	err := a.db.Where("`uid` = ? AND `topic` = ?", todo.Uid, todo.Topic).Order("sequence DESC").Take(&max).Error
+	err = a.db.Where("`uid` = ? AND `topic` = ?", todo.Uid, todo.Topic).Order("sequence DESC").Take(&max).Error
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return 0, err
 	}
