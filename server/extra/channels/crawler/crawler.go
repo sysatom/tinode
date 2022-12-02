@@ -2,9 +2,12 @@ package crawler
 
 import (
 	"bytes"
+	"context"
 	"crypto/sha1"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"github.com/go-redis/redis/v9"
 	"github.com/influxdata/cron"
 	"github.com/tinode/chat/server/extra/cache"
 	"github.com/tinode/chat/server/extra/utils"
@@ -117,33 +120,34 @@ func (s *Crawler) resultWorker() {
 }
 
 func (s *Crawler) filter(name, mode string, latest []map[string]string) []map[string]string {
+	ctx := context.Background()
 	sentKey := fmt.Sprintf("crawler:%s:sent", name)
 	todoKey := fmt.Sprintf("crawler:%s:todo", name)
 	sendTimeKey := fmt.Sprintf("crawler:%s:sendtime", name)
 
 	// sent
-	oldArr, err := cache.DB.SMembers([]byte(sentKey))
+	oldArr, err := cache.DB.SMembers(ctx, sentKey).Result()
 	if err != nil {
 		return nil
 	}
 	var old []map[string]string
 	for _, item := range oldArr {
 		var tmp map[string]string
-		_ = json.Unmarshal(item, &tmp)
+		_ = json.Unmarshal([]byte(item), &tmp)
 		if tmp != nil {
 			old = append(old, tmp)
 		}
 	}
 
 	// to do
-	todoArr, err := cache.DB.SMembers([]byte(todoKey))
+	todoArr, err := cache.DB.SMembers(ctx, todoKey).Result()
 	if err != nil {
 		return nil
 	}
 	var todo []map[string]string
 	for _, item := range todoArr {
 		var tmp map[string]string
-		_ = json.Unmarshal(item, &tmp)
+		_ = json.Unmarshal([]byte(item), &tmp)
 		if tmp != nil {
 			todo = append(todo, tmp)
 		}
@@ -157,21 +161,21 @@ func (s *Crawler) filter(name, mode string, latest []map[string]string) []map[st
 
 	switch mode {
 	case "instant":
-		_ = cache.DB.Set([]byte(sendTimeKey), []byte(strconv.FormatInt(time.Now().Unix(), 10)))
+		_ = cache.DB.Set(ctx, sendTimeKey, strconv.FormatInt(time.Now().Unix(), 10), redis.KeepTTL)
 	case "daily":
-		sendString, err := cache.DB.Get([]byte(sendTimeKey))
-		if err != nil {
+		sendString, err := cache.DB.Get(ctx, sendTimeKey).Result()
+		if err != nil && !errors.Is(err, redis.Nil) {
 			logs.Err.Println(err)
 		}
 		oldSend := int64(0)
 		if len(sendString) != 0 {
-			oldSend, _ = strconv.ParseInt(string(sendString), 10, 64)
+			oldSend, _ = strconv.ParseInt(sendString, 10, 64)
 		}
 
 		if time.Now().Unix()-oldSend < 24*60*60 {
 			for _, item := range diff {
 				d, _ := json.Marshal(item)
-				_ = cache.DB.SAdd([]byte(todoKey), d)
+				_ = cache.DB.SAdd(ctx, todoKey, d)
 			}
 
 			return nil
@@ -179,7 +183,7 @@ func (s *Crawler) filter(name, mode string, latest []map[string]string) []map[st
 
 		diff = append(diff, todo...)
 
-		_ = cache.DB.Set([]byte(sendTimeKey), []byte(strconv.FormatInt(time.Now().Unix(), 10)))
+		_ = cache.DB.Set(ctx, sendTimeKey, strconv.FormatInt(time.Now().Unix(), 10), redis.KeepTTL)
 	default:
 		return nil
 	}
@@ -187,11 +191,11 @@ func (s *Crawler) filter(name, mode string, latest []map[string]string) []map[st
 	// add data
 	for _, item := range diff {
 		d, _ := json.Marshal(item)
-		_ = cache.DB.SAdd([]byte(sentKey), d)
+		_ = cache.DB.SAdd(ctx, sentKey, d)
 	}
 
 	// clear to do
-	_ = cache.DB.Delete([]byte(todoKey))
+	_ = cache.DB.Del(ctx, todoKey)
 
 	return diff
 }

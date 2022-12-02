@@ -8,15 +8,15 @@ require (
 	firebase.google.com/go v3.13.0+incompatible
 	github.com/PuerkitoBio/goquery v1.8.0
 	github.com/aws/aws-sdk-go v1.29.29
-	github.com/elastic/go-sysinfo v1.8.1 // indirect
+	github.com/elastic/go-sysinfo v1.8.1
 	github.com/felixge/httpsnoop v1.0.3 // indirect
-	github.com/flower-corp/rosedb v1.1.1
 	github.com/go-echarts/go-echarts/v2 v2.2.4
+	github.com/go-redis/redis/v9 v9.0.0-rc.2
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/mock v1.6.0
-	github.com/google/go-cmp v0.5.8
+	github.com/google/go-cmp v0.5.9
 	github.com/gorilla/handlers v1.5.1
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/websocket v1.5.0
@@ -27,15 +27,15 @@ require (
 	github.com/prometheus/client_golang v1.12.2
 	github.com/prometheus/common v0.34.0
 	github.com/robfig/cron/v3 v3.0.1
-	github.com/stretchr/testify v1.8.0
+	github.com/stretchr/testify v1.8.1
 	github.com/tidwall/gjson v1.14.3
 	github.com/tinode/jsonco v1.0.0
 	github.com/tinode/snowflake v1.0.0
 	go.mongodb.org/mongo-driver v1.9.1
-	golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e
-	golang.org/x/net v0.0.0-20220615171555-694bf12d69de
+	golang.org/x/crypto v0.1.0
+	golang.org/x/net v0.2.0
 	golang.org/x/oauth2 v0.0.0-20220524215830-622c5d57e401
-	golang.org/x/text v0.3.7
+	golang.org/x/text v0.4.0
 	google.golang.org/api v0.81.0
 	google.golang.org/genproto v0.0.0-20220526192754-51939a95c655 // indirect
 	google.golang.org/grpc v1.46.2

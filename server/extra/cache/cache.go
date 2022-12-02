@@ -1,19 +1,26 @@
 package cache
 
 import (
-	"fmt"
-	"github.com/flower-corp/rosedb"
-	"path/filepath"
+	"context"
+	"github.com/go-redis/redis/v9"
+	"os"
 )
 
-var DB *rosedb.RoseDB
+var DB *redis.Client
 
 func InitCache() {
-	path := filepath.Join("./tmp", "rosedb")
-	opts := rosedb.DefaultOptions(path)
-	var err error
-	DB, err = rosedb.Open(opts)
+	addr := os.Getenv("REDIS_ADDR")
+	password := os.Getenv("REDIS_PASSWORD")
+	if addr == "" || password == "" {
+		panic("redis config error")
+	}
+	DB = redis.NewClient(&redis.Options{
+		Addr:     addr,
+		Password: password,
+	})
+	s := DB.Ping(context.Background())
+	_, err := s.Result()
 	if err != nil {
-		panic(fmt.Sprintf("open rosedb err: %v", err))
+		panic("redis server error")
 	}
 }

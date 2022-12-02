@@ -1,6 +1,7 @@
 package cron
 
 import (
+	"context"
 	"crypto/sha1"
 	"fmt"
 	"github.com/influxdata/cron"
@@ -153,7 +154,7 @@ func (r *Ruleset) filter(res result) result {
 		}
 	}
 
-	filterKey := []byte(fmt.Sprintf("cron:%s:%s:filter", res.name, res.ctx.AsUser.UserId()))
+	filterKey := fmt.Sprintf("cron:%s:%s:filter", res.name, res.ctx.AsUser.UserId())
 
 	// content hash
 	d := un(res.payload)
@@ -161,12 +162,13 @@ func (r *Ruleset) filter(res result) result {
 	_, _ = s.Write(d)
 	hash := s.Sum(nil)
 
-	state := cache.DB.SIsMember(filterKey, hash)
+	ctx := context.Background()
+	state := cache.DB.SIsMember(ctx, filterKey, hash).Val()
 	if state {
 		return result{}
 	}
 
-	_ = cache.DB.SAdd(filterKey, hash)
+	_ = cache.DB.SAdd(ctx, filterKey, hash)
 	return res
 }
 

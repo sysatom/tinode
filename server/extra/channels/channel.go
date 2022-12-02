@@ -1,7 +1,6 @@
 package channels
 
 import (
-	"encoding/json"
 	"errors"
 	"github.com/tinode/chat/server/extra/channels/crawler"
 	"gopkg.in/yaml.v2"
@@ -14,25 +13,20 @@ const ChannelNameSuffix = "_channel"
 
 type Publisher *crawler.Rule
 
-type configType struct {
-	Path string `json:"path"`
-}
-
 var publishers map[string]Publisher
 
 // Init initializes registered publishers.
-func Init(jsconfig json.RawMessage) error {
-	var config configType
-
-	if err := json.Unmarshal(jsconfig, &config); err != nil {
-		return errors.New("failed to parse config: " + err.Error())
+func Init() error {
+	configPath := os.Getenv("CHANNEL_PATH")
+	if configPath == "" {
+		return errors.New("channel failed to parse config env")
 	}
 
 	if publishers == nil {
 		publishers = make(map[string]Publisher)
 	}
 
-	return filepath.Walk(config.Path, func(path string, info fs.FileInfo, err error) error {
+	return filepath.Walk(configPath, func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}

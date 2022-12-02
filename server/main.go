@@ -264,7 +264,6 @@ type configType struct {
 	Store     json.RawMessage             `json:"store_config"`
 	Push      json.RawMessage             `json:"push"`
 	TLS       json.RawMessage             `json:"tls"`
-	Channel   json.RawMessage             `json:"channels"`
 	Auth      map[string]json.RawMessage  `json:"auth_config"`
 	Validator map[string]*validatorConfig `json:"acc_validation"`
 	Media     *mediaConfig                `json:"media"`
@@ -589,7 +588,7 @@ func main() {
 	hookBot(config.Bot)
 
 	// Initialize channels
-	hookChannel(config.Channel)
+	hookChannel()
 
 	// Mounted
 	hookMounted()

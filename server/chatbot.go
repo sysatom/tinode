@@ -91,8 +91,8 @@ func hookBot(jsconfig json.RawMessage) {
 	statsSet("BotTotal", int64(len(bots.List())))
 }
 
-func hookChannel(jsconfig json.RawMessage) {
-	err := channels.Init(jsconfig)
+func hookChannel() {
+	err := channels.Init()
 	if err != nil {
 		logs.Err.Fatal("Failed to initialize channel:", err)
 	}

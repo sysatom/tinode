@@ -1,7 +1,10 @@
 package anki
 
 import (
+	"context"
+	"errors"
 	"fmt"
+	"github.com/go-redis/redis/v9"
 	"github.com/tinode/chat/server/extra/cache"
 	"github.com/tinode/chat/server/extra/ruleset/cron"
 	"github.com/tinode/chat/server/extra/store"
@@ -27,19 +30,19 @@ var cronRules = []cron.Rule{
 			if num == 0 {
 				return nil
 			}
-			key := []byte(fmt.Sprintf("anki:review_remind:%d", ctx.AsUser))
+			key := fmt.Sprintf("anki:review_remind:%d", ctx.AsUser)
 
-			sendString, err := cache.DB.Get(key)
-			if err != nil {
+			sendString, err := cache.DB.Get(context.Background(), key).Result()
+			if err != nil && !errors.Is(err, redis.Nil) {
 				return nil
 			}
 			oldSend := int64(0)
 			if len(sendString) != 0 {
-				oldSend, _ = strconv.ParseInt(string(sendString), 10, 64)
+				oldSend, _ = strconv.ParseInt(sendString, 10, 64)
 			}
 
 			if time.Now().Unix()-oldSend > 24*60*60 {
-				cache.DB.Set(key, []byte(strconv.FormatInt(time.Now().Unix(), 10)))
+				_ = cache.DB.Set(context.Background(), key, strconv.FormatInt(time.Now().Unix(), 10), redis.KeepTTL)
 
 				return []types.MsgPayload{
 					types.TextMsg{Text: fmt.Sprintf("Anki review %d", num)},

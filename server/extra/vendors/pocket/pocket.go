@@ -1,9 +1,11 @@
 package pocket
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/go-redis/redis/v9"
 	"github.com/go-resty/resty/v2"
 	"github.com/tinode/chat/server/extra/cache"
 	"net/http"
@@ -89,7 +91,8 @@ func (v *Pocket) GetCode(state string) (*CodeResponse, error) {
 		result := resp.Result().(*CodeResponse)
 		v.code = result.Code
 
-		_ = cache.DB.Set([]byte("pocket:code"), []byte(v.code)) // todo
+		ctx := context.Background()
+		_ = cache.DB.Set(ctx, "pocket:code", v.code, redis.KeepTTL) // todo
 
 		return result, nil
 	} else {
@@ -121,18 +124,19 @@ func (v *Pocket) GetAccessToken(code string) (interface{}, error) {
 }
 
 func (v *Pocket) Redirect(_ *http.Request) (string, error) {
-	_ = cache.DB.Set([]byte("pocket:code"), []byte(v.code)) // fixme uid key
+	ctx := context.Background()
+	_ = cache.DB.Set(ctx, "pocket:code", v.code, redis.KeepTTL).Err() // fixme uid key
 
 	appRedirectURI := v.AuthorizeURL()
 	return appRedirectURI, nil
 }
 
 func (v *Pocket) StoreAccessToken(_ *http.Request) (map[string]interface{}, error) {
-	data, err := cache.DB.Get([]byte("pocket:code")) // fixme uid key
-	if err != nil {
+	ctx := context.Background()
+	code, err := cache.DB.Get(ctx, "pocket:code").Result() // fixme uid key
+	if err != nil && !errors.Is(err, redis.Nil) {
 		return nil, err
 	}
-	code := string(data)
 
 	if code != "" {
 		tokenResp, err := v.GetAccessToken(code)

@@ -198,9 +198,5 @@
 			"name": "pocket",
 			"consumer_key": ""
 		}
-	],
-
-	"channels": {
-		"path": "/subscribe"
-	}
+	]
 }
