@@ -3,19 +3,24 @@ package help
 import (
 	"bytes"
 	"crypto/rand"
+	_ "embed"
 	"encoding/base64"
 	"fmt"
+	"github.com/nikolaydubina/calendarheatmap/charts"
 	"github.com/tinode/chat/server/extra/bots"
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
 	serverTypes "github.com/tinode/chat/server/store/types"
+	"golang.org/x/image/font"
+	"golang.org/x/image/font/opentype"
 	"gonum.org/v1/plot"
 	"gonum.org/v1/plot/plotter"
 	"gonum.org/v1/plot/plotutil"
 	"gonum.org/v1/plot/vg"
 	"gonum.org/v1/plot/vg/draw"
 	"gonum.org/v1/plot/vg/vgimg"
+	"image/color"
 	"math/big"
 	"strconv"
 	"time"
@@ -236,7 +241,80 @@ var commandRules = []command.Rule{
 			}
 		},
 	},
+	{
+		Define: "heatmap",
+		Help:   `heatmap`,
+		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+			fontFace, err := charts.LoadFontFace(defaultFontFaceBytes, opentype.FaceOptions{
+				Size:    26,
+				DPI:     280,
+				Hinting: font.HintingNone,
+			})
+			if err != nil {
+				logs.Err.Println(err)
+				return nil
+			}
+
+			var colorscale charts.BasicColorScale
+			colorscale, err = charts.NewBasicColorscaleFromCSV(bytes.NewBuffer(defaultColorScaleBytes))
+			if err != nil {
+				logs.Err.Println(err)
+				return nil
+			}
+
+			// data
+			counts := map[string]int{
+				"2020-05-16": 8,
+				"2020-05-17": 13,
+				"2020-05-18": 5,
+				"2020-05-19": 8,
+				"2020-05-20": 5,
+			}
+
+			conf := charts.HeatmapConfig{
+				Counts:              counts,
+				ColorScale:          colorscale,
+				DrawMonthSeparator:  true,
+				DrawLabels:          true,
+				Margin:              30,
+				BoxSize:             150,
+				MonthSeparatorWidth: 5,
+				MonthLabelYOffset:   50,
+				TextWidthLeft:       300,
+				TextHeightTop:       200,
+				TextColor:           color.RGBA{100, 100, 100, 255},
+				BorderColor:         color.RGBA{200, 200, 200, 255},
+				Locale:              "en_US",
+				Format:              "png",
+				FontFace:            fontFace,
+				ShowWeekdays: map[time.Weekday]bool{
+					time.Monday:    true,
+					time.Wednesday: true,
+					time.Friday:    true,
+				},
+			}
+			w := bytes.NewBufferString("")
+			_ = charts.WriteHeatmap(conf, w)
+
+			raw := base64.StdEncoding.EncodeToString(w.Bytes())
+
+			return types.ImageMsg{
+				Width:       1858,
+				Height:      275,
+				Alt:         "Heatmap.png",
+				Mime:        "image/png",
+				Size:        w.Len(),
+				ImageBase64: raw,
+			}
+		},
+	},
 }
+
+//go:embed fonts/Sunflower-Medium.ttf
+var defaultFontFaceBytes []byte
+
+//go:embed colorscales/green-blue-9.csv
+var defaultColorScaleBytes []byte
 
 // randomPoints returns some random x, y points.
 func randomPoints(n int) plotter.XYs {

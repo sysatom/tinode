@@ -24,6 +24,7 @@ require (
 	github.com/influxdata/cron v0.0.0-20201006132531-4bb0a200dcbe
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/maxence-charriere/go-app/v9 v9.6.7
+	github.com/nikolaydubina/calendarheatmap v1.7.0
 	github.com/nyaruka/phonenumbers v1.0.75
 	github.com/prometheus/client_golang v1.12.2
 	github.com/prometheus/common v0.34.0
@@ -34,10 +35,11 @@ require (
 	github.com/tinode/snowflake v1.0.0
 	go.mongodb.org/mongo-driver v1.9.1
 	golang.org/x/crypto v0.1.0
+	golang.org/x/image v0.0.0-20220902085622-e7cb96979f69
 	golang.org/x/net v0.2.0
 	golang.org/x/oauth2 v0.0.0-20220524215830-622c5d57e401
 	golang.org/x/text v0.4.0
-	gonum.org/v1/plot v0.12.0 // indirect
+	gonum.org/v1/plot v0.12.0
 	google.golang.org/api v0.81.0
 	google.golang.org/genproto v0.0.0-20220526192754-51939a95c655 // indirect
 	google.golang.org/grpc v1.46.2
