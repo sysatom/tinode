@@ -267,8 +267,9 @@ func (m *MsgBuilder) AppendTextLine(text string, opt TextOption) {
 
 // AppendImage Append image to build message
 func (m *MsgBuilder) AppendImage(imageName string, opt ImageOption) {
+	m.Message.Text = " "
 	m.Message.Fmt = append(m.Message.Fmt, FmtMessage{
-		At:  utf8.RuneCountInString(m.Message.Text),
+		At:  0,
 		Len: 1,
 		Key: len(m.Message.Ent),
 	})
@@ -280,6 +281,7 @@ func (m *MsgBuilder) AppendImage(imageName string, opt ImageOption) {
 			Height: opt.Height,
 			Name:   imageName,
 			Val:    opt.ImageBase64,
+			Size:   opt.Size,
 		},
 	})
 }
@@ -505,6 +507,7 @@ type ImageOption struct {
 	Width       int
 	Height      int
 	ImageBase64 string
+	Size        int
 }
 
 type FileOption struct {

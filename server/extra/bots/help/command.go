@@ -1,13 +1,21 @@
 package help
 
 import (
+	"bytes"
 	"crypto/rand"
+	"encoding/base64"
 	"fmt"
 	"github.com/tinode/chat/server/extra/bots"
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
 	serverTypes "github.com/tinode/chat/server/store/types"
+	"gonum.org/v1/plot"
+	"gonum.org/v1/plot/plotter"
+	"gonum.org/v1/plot/plotutil"
+	"gonum.org/v1/plot/vg"
+	"gonum.org/v1/plot/vg/draw"
+	"gonum.org/v1/plot/vg/vgimg"
 	"math/big"
 	"strconv"
 	"time"
@@ -188,10 +196,59 @@ var commandRules = []command.Rule{
 		},
 	},
 	{
-		Define: "demo",
-		Help:   `demo`,
+		Define: "plot",
+		Help:   `plot graph`,
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
-			return types.TextMsg{Text: "v0.0.3"}
+			p := plot.New()
+
+			p.Title.Text = "Plotutil example"
+			p.X.Label.Text = "X"
+			p.Y.Label.Text = "Y"
+
+			err := plotutil.AddLinePoints(p,
+				"First", randomPoints(15),
+				"Second", randomPoints(15),
+				"Third", randomPoints(15))
+			if err != nil {
+				panic(err)
+			}
+
+			w := bytes.NewBufferString("")
+
+			c := vgimg.New(vg.Points(500), vg.Points(500))
+			dc := draw.New(c)
+			p.Draw(dc)
+
+			png := vgimg.PngCanvas{Canvas: c}
+			if _, err := png.WriteTo(w); err != nil {
+				panic(err)
+			}
+
+			raw := base64.StdEncoding.EncodeToString(w.Bytes())
+
+			return types.ImageMsg{
+				Width:       500,
+				Height:      500,
+				Alt:         "Plot.png",
+				Mime:        "image/png",
+				Size:        w.Len(),
+				ImageBase64: raw,
+			}
 		},
 	},
+}
+
+// randomPoints returns some random x, y points.
+func randomPoints(n int) plotter.XYs {
+	pts := make(plotter.XYs, n)
+	for i := range pts {
+		num, _ := rand.Int(rand.Reader, big.NewInt(100))
+		if i == 0 {
+			pts[i].X = float64(num.Int64())
+		} else {
+			pts[i].X = pts[i-1].X + float64(num.Int64())
+		}
+		pts[i].Y = pts[i].X + 10*float64(num.Int64())
+	}
+	return pts
 }

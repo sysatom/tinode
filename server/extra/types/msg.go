@@ -71,14 +71,25 @@ type FormField struct {
 }
 
 type ImageMsg struct {
-	Src    string `json:"src"`
-	Width  int    `json:"width"`
-	Height int    `json:"height"`
-	Alt    string `json:"alt"`
+	Src         string `json:"src"`
+	Width       int    `json:"width"`
+	Height      int    `json:"height"`
+	Alt         string `json:"alt"`
+	Mime        string `json:"mime"`
+	Size        int    `json:"size"`
+	ImageBase64 string `json:"-"`
 }
 
 func (i ImageMsg) Convert() (map[string]interface{}, interface{}) {
-	return commonHead, nil //todo
+	builder := MsgBuilder{Payload: i}
+	builder.AppendImage(i.Alt, ImageOption{
+		Mime:        i.Mime,
+		Width:       i.Width,
+		Height:      i.Height,
+		ImageBase64: i.ImageBase64,
+		Size:        i.Size,
+	})
+	return builder.Content()
 }
 
 type FileMsg struct {

@@ -37,6 +37,7 @@ require (
 	golang.org/x/net v0.2.0
 	golang.org/x/oauth2 v0.0.0-20220524215830-622c5d57e401
 	golang.org/x/text v0.4.0
+	gonum.org/v1/plot v0.12.0 // indirect
 	google.golang.org/api v0.81.0
 	google.golang.org/genproto v0.0.0-20220526192754-51939a95c655 // indirect
 	google.golang.org/grpc v1.46.2
