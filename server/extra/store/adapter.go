@@ -20,6 +20,7 @@ type Adapter interface {
 	Stats() interface{}
 
 	GetBotUsers() ([]*model.User, error)
+	GetNormalUsers() ([]*model.User, error)
 	GetGroupTopics(owner types.Uid) ([]*model.Topic, error)
 	SearchMessages(uid types.Uid, searchTopic string, filter string) ([]*model.Message, error)
 	GetMessage(topic string, seqId int) (model.Message, error)

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/go-redis/redis/v9"
 	"github.com/tinode/chat/server/auth"
 	"github.com/tinode/chat/server/extra/bots"
 	botGithub "github.com/tinode/chat/server/extra/bots/github"
@@ -782,5 +783,14 @@ func notifyAfterReboot() {
 }
 
 func onlineStatus(usrStr string) {
-	cache.DB.Set(context.Background(), fmt.Sprintf("online:%s", usrStr), time.Now().Unix(), time.Hour)
+	ctx := context.Background()
+	key := fmt.Sprintf("online:%s", usrStr)
+	_, err := cache.DB.Get(ctx, key).Result()
+	if err == redis.Nil {
+		cache.DB.Set(ctx, key, time.Now().Unix(), 30*time.Minute)
+	} else if err != nil {
+		return
+	} else {
+		cache.DB.Expire(ctx, key, 30*time.Minute)
+	}
 }

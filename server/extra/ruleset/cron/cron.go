@@ -3,6 +3,7 @@ package cron
 import (
 	"context"
 	"crypto/sha1"
+	"errors"
 	"fmt"
 	"github.com/influxdata/cron"
 	"github.com/tinode/chat/server/auth"
@@ -12,6 +13,7 @@ import (
 	"github.com/tinode/chat/server/logs"
 	serverStore "github.com/tinode/chat/server/store"
 	"github.com/tinode/chat/server/store/types"
+	"gorm.io/gorm"
 	"time"
 )
 
@@ -83,41 +85,53 @@ func (r *Ruleset) ruleWorker(rule Rule) {
 					}
 				}()
 
-				items, err := store.Chatbot.OAuthGetAvailable(r.Type)
+				// bot user
+				botUid, _, _, _, _ := serverStore.Users.GetAuthUniqueRecord("basic", fmt.Sprintf("%s_bot", r.Type))
+
+				// all normal users
+				users, err := store.Chatbot.GetNormalUsers()
 				if err != nil {
-					logs.Err.Println("cron worker", rule.Name, err)
+					logs.Err.Println(err)
 					return nil
-				}
-				if len(items) > 0 {
-					var res []result
-					for _, oauth := range items {
-						ctx := extraTypes.Context{
-							Original: oauth.Topic,
-							AsUser:   types.ParseUserId(oauth.Uid),
-							Token:    oauth.Token,
-						}
-						ra := rule.Action(ctx)
-						for i := range ra {
-							res = append(res, result{
-								name:    rule.Name,
-								ctx:     ctx,
-								payload: ra[i],
-							})
-						}
-					}
-					return res
 				}
 
 				var res []result
-				ra := rule.Action(extraTypes.Context{}) // fixme
-				for i := range ra {
-					res = append(res, result{
-						name:    rule.Name,
-						ctx:     extraTypes.Context{}, // fixme
-						payload: ra[i],
-					})
-				}
+				for _, user := range users {
+					// check subscription
+					uid := serverStore.EncodeUid(int64(user.ID))
+					topic := uid.P2PName(botUid)
+					sub, err := serverStore.Subs.Get(topic, uid, false)
+					if err != nil {
+						continue
+					}
+					if sub == nil || sub.Topic == "" {
+						continue
+					}
 
+					// get oauth token
+					oauth, err := store.Chatbot.OAuthGet(uid, botUid.UserId(), r.Type)
+					if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+						continue
+					}
+
+					// ctx
+					ctx := extraTypes.Context{
+						Original: botUid.UserId(),
+						AsUser:   uid,
+						Token:    oauth.Token,
+						RcptTo:   topic,
+					}
+
+					// run action
+					ra := rule.Action(ctx)
+					for i := range ra {
+						res = append(res, result{
+							name:    rule.Name,
+							ctx:     ctx,
+							payload: ra[i],
+						})
+					}
+				}
 				return res
 			}()
 			if len(msgs) > 0 {
@@ -181,6 +195,8 @@ func (r *Ruleset) pipeline(res result) {
 
 func un(payload extraTypes.MsgPayload) []byte {
 	switch v := payload.(type) {
+	case extraTypes.TextMsg:
+		return []byte(v.Text)
 	case extraTypes.InfoMsg:
 		return []byte(v.Title)
 	case extraTypes.RepoMsg:

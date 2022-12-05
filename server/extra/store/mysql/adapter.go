@@ -94,6 +94,19 @@ func (a *adapter) GetBotUsers() ([]*model.User, error) {
 	return find, nil
 }
 
+func (a *adapter) GetNormalUsers() ([]*model.User, error) {
+	var find []*model.User
+	err := a.db.
+		Table("users").
+		Select("id, createdat, access, lastseen, useragent, public->'$.fn' AS fn, trusted->'$.verified' AS verified").
+		Where("lastseen IS NOT NULL").
+		Find(&find).Error
+	if err != nil {
+		return nil, err
+	}
+	return find, nil
+}
+
 func (a *adapter) GetGroupTopics(owner types.Uid) ([]*model.Topic, error) {
 	var find []*model.Topic
 	err := a.db.

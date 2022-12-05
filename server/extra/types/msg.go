@@ -48,6 +48,18 @@ func (t TextMsg) Convert() (map[string]interface{}, interface{}) {
 	return nil, t.Text
 }
 
+type TextListMsg struct {
+	Texts []string
+}
+
+func (m TextListMsg) Convert() (map[string]interface{}, interface{}) {
+	builder := MsgBuilder{Payload: m}
+	for _, text := range m.Texts {
+		builder.AppendTextLine(text, TextOption{})
+	}
+	return builder.Content()
+}
+
 type FormMsg struct {
 	ID    string      `json:"id"`
 	Title string      `json:"title"`

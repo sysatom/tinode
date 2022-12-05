@@ -1,13 +1,20 @@
 package server
 
 import (
+	"context"
+	"errors"
 	"fmt"
+	"github.com/go-redis/redis/v9"
 	"github.com/tinode/chat/server/extra"
 	"github.com/tinode/chat/server/extra/bots"
+	"github.com/tinode/chat/server/extra/cache"
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/types"
+	"github.com/tinode/chat/server/logs"
 	"runtime"
+	"strconv"
+	"time"
 )
 
 var commandRules = []command.Rule{
@@ -68,6 +75,33 @@ var commandRules = []command.Rule{
 				Title: "Server stats",
 				Model: data,
 			}
+		},
+	},
+	{
+		Define: "online stats",
+		Help:   `Online stats`,
+		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+			ctx_ := context.Background()
+			keys, err := cache.DB.Keys(ctx_, "online:*").Result()
+			if err != nil {
+				if !errors.Is(err, redis.Nil) {
+					logs.Err.Println(err)
+				}
+				return types.TextMsg{Text: "Empty"}
+			}
+
+			var texts []string
+			texts = append(texts, fmt.Sprintf("online %d", len(keys)))
+			for _, key := range keys {
+				t, err := cache.DB.Get(ctx_, key).Result()
+				if err != nil {
+					continue
+				}
+				sec, _ := strconv.ParseInt(t, 10, 64)
+				texts = append(texts, fmt.Sprintf("%s -> %s", key, time.Unix(sec, 0).Format(time.RFC3339)))
+			}
+
+			return types.TextListMsg{Texts: texts}
 		},
 	},
 	{
