@@ -395,6 +395,27 @@ func isBot(subs types.Subscription) bool {
 	return true
 }
 
+func isBotUser(user *types.User) bool {
+	if user == nil {
+		return false
+	}
+	// normal bot user
+	if user.State != types.StateOK {
+		return false
+	}
+	// verified
+	if !isVerified(user.Trusted) {
+		return false
+	}
+	// check name
+	name := fn(user.Public)
+	if !strings.HasSuffix(name, bots.BotNameSuffix) {
+		return false
+	}
+
+	return true
+}
+
 func isVerified(trusted interface{}) bool {
 	if v, ok := trusted.(map[string]interface{}); ok {
 		if b, ok := v["verified"]; ok {
@@ -783,9 +804,18 @@ func notifyAfterReboot() {
 }
 
 func onlineStatus(usrStr string) {
+	uid := types.ParseUserId(usrStr)
+	user, err := store.Users.Get(uid)
+	if err != nil {
+		return
+	}
+	if isBotUser(user) {
+		return
+	}
+
 	ctx := context.Background()
 	key := fmt.Sprintf("online:%s", usrStr)
-	_, err := cache.DB.Get(ctx, key).Result()
+	_, err = cache.DB.Get(ctx, key).Result()
 	if err == redis.Nil {
 		cache.DB.Set(ctx, key, time.Now().Unix(), 30*time.Minute)
 	} else if err != nil {

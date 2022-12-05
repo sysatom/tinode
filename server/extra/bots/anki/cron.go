@@ -45,7 +45,7 @@ var cronRules = []cron.Rule{
 				_ = cache.DB.Set(context.Background(), key, strconv.FormatInt(time.Now().Unix(), 10), redis.KeepTTL)
 
 				return []types.MsgPayload{
-					types.TextMsg{Text: fmt.Sprintf("Anki review %d", num)},
+					types.TextMsg{Text: fmt.Sprintf("Anki review %d (%d)", num, time.Now().Unix())},
 				}
 			}
 
