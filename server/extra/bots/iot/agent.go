@@ -1,4 +1,4 @@
-package {{ .BotName }}
+package iot
 
 import (
     "github.com/tinode/chat/server/extra/ruleset/agent"
@@ -7,7 +7,7 @@ import (
 
 const (
     AgentVersion  = 1
-    ExampleAgentID = "{{ .BotName }}_example_agent"
+    ExampleAgentID = "iot_example_agent"
 )
 
 var agentRules = []agent.Rule{
