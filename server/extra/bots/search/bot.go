@@ -19,6 +19,10 @@ const Name = "search"
 
 var handler bot
 
+func init() {
+	bots.Register(Name, &handler)
+}
+
 type bot struct {
 	initialized bool
 	bots.Base
@@ -132,8 +136,4 @@ func (b bot) Input(ctx types.Context, _ map[string]interface{}, content interfac
 
 	title := fmt.Sprintf("Search \"%s\" result", filter)
 	return bots.StorePage(ctx, model.PageTable, title, types.TableMsg{Title: title, Header: header, Row: row}), nil
-}
-
-func init() {
-	bots.Register(Name, &handler)
 }

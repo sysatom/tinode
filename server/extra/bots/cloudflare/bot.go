@@ -18,6 +18,10 @@ const (
 
 var handler bot
 
+func init() {
+	bots.Register(Name, &handler)
+}
+
 type bot struct {
 	initialized bool
 	bots.Base
@@ -59,8 +63,4 @@ func (b bot) Command(ctx types.Context, content interface{}) (types.MsgPayload, 
 
 func (b bot) Form(ctx types.Context, values map[string]interface{}) (types.MsgPayload, error) {
 	return bots.RunForm(formRules, ctx, values)
-}
-
-func init() {
-	bots.Register(Name, &handler)
 }

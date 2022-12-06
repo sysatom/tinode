@@ -12,6 +12,10 @@ const Name = "mtg"
 
 var handler bot
 
+func init() {
+	bots.Register(Name, &handler)
+}
+
 type bot struct {
 	initialized bool
 	bots.Base
@@ -49,8 +53,4 @@ func (bot) IsReady() bool {
 
 func (b bot) Command(ctx types.Context, content interface{}) (types.MsgPayload, error) {
 	return bots.RunCommand(commandRules, ctx, content)
-}
-
-func init() {
-	bots.Register(Name, &handler)
 }

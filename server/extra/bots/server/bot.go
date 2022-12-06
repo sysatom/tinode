@@ -14,6 +14,10 @@ const Name = "server"
 
 var handler bot
 
+func init() {
+	bots.Register(Name, &handler)
+}
+
 type bot struct {
 	initialized bool
 	bots.Base
@@ -63,8 +67,4 @@ func (b bot) Agent(ctx types.Context, content interface{}) (types.MsgPayload, er
 
 func (b bot) Cron(send func(rcptTo string, uid serverTypes.Uid, out types.MsgPayload)) error {
 	return bots.RunCron(cronRules, Name, b.AuthLevel(), send)
-}
-
-func init() {
-	bots.Register(Name, &handler)
 }

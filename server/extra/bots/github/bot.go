@@ -16,6 +16,10 @@ const RepoKey = "repo"
 var handler bot
 var Config configType
 
+func init() {
+	bots.Register(Name, &handler)
+}
+
 type bot struct {
 	initialized bool
 	bots.Base
@@ -62,8 +66,4 @@ func (b bot) Cron(send func(rcptTo string, uid serverTypes.Uid, out types.MsgPay
 
 func (b bot) Form(ctx types.Context, values map[string]interface{}) (types.MsgPayload, error) {
 	return bots.RunForm(formRules, ctx, values)
-}
-
-func init() {
-	bots.Register(Name, &handler)
 }

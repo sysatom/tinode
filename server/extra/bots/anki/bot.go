@@ -13,6 +13,10 @@ const Name = "anki"
 
 var handler bot
 
+func init() {
+	bots.Register(Name, &handler)
+}
+
 type bot struct {
 	initialized bool
 	bots.Base
@@ -58,8 +62,4 @@ func (b bot) Cron(send func(rcptTo string, uid serverTypes.Uid, out types.MsgPay
 
 func (b bot) Agent(ctx types.Context, content interface{}) (types.MsgPayload, error) {
 	return bots.RunAgent(agentRules, ctx, content)
-}
-
-func init() {
-	bots.Register(Name, &handler)
 }

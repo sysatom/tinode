@@ -19,6 +19,10 @@ const Name = "pocket"
 var handler bot
 var Config configType
 
+func init() {
+	bots.Register(Name, &handler)
+}
+
 type bot struct {
 	initialized bool
 	bots.Base
@@ -89,8 +93,4 @@ func (b bot) Input(ctx types.Context, head map[string]interface{}, content inter
 	}
 
 	return nil, nil
-}
-
-func init() {
-	bots.Register(Name, &handler)
 }
