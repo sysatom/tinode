@@ -7,7 +7,6 @@ import (
 	"github.com/tinode/chat/server/extra/cache"
 	"github.com/tinode/chat/server/extra/ruleset/cron"
 	"github.com/tinode/chat/server/extra/types"
-	"time"
 )
 
 var cronRules = []cron.Rule{
@@ -25,9 +24,7 @@ var cronRules = []cron.Rule{
 			cache.DB.Set(ctx_, lastKey, currentCount, redis.KeepTTL)
 
 			if lastCount != currentCount {
-				return []types.MsgPayload{
-					types.TextMsg{Text: fmt.Sprintf("online change %d (%d)", currentCount-lastCount, time.Now().Unix())},
-				}
+				return nil
 			}
 			return nil
 		},
