@@ -62,14 +62,7 @@ func main() {
 
 	// schema
 	data := schema{
-		BotName:      *bot,
-		HasInput:     false,
-		HasGroup:     false,
-		HasCommand:   false,
-		HasAgent:     false,
-		HasCondition: false,
-		HasCron:      false,
-		HasForm:      false,
+		BotName: *bot,
 	}
 	parseRule(*rule, &data)
 
@@ -238,6 +231,7 @@ func parseTemplate(text string, data interface{}) []byte {
 }
 
 func parseRule(rule string, data *schema) {
+	data.HasCommand = true
 	rules := strings.Split(rule, ",")
 	for _, item := range rules {
 		switch item {
@@ -247,8 +241,6 @@ func parseRule(rule string, data *schema) {
 			data.HasGroup = true
 		case "agent":
 			data.HasAgent = true
-		case "command":
-			data.HasCommand = true
 		case "condition":
 			data.HasCondition = true
 		case "cron":
