@@ -186,6 +186,18 @@ var commandRules = []command.Rule{
 		},
 	},
 	{
+		Define: "action",
+		Help:   "Demo action",
+		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+			return types.ActionMsg{
+				ID:     helpActionID,
+				Title:  "Operate ... ?",
+				Option: []string{"do1", "do2"},
+				Value:  "",
+			}
+		},
+	},
+	{
 		Define: "echo [any]",
 		Help:   "print",
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {

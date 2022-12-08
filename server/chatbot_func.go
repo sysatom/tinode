@@ -586,15 +586,61 @@ func botIncomingMessage(t *Topic, msg *ClientComMessage) {
 
 		// auth
 		if payload == nil {
-			// command
-			if msg.Pub.Head == nil {
-				payload, err = handle.Command(ctx, msg.Pub.Content)
+			// action
+			if msg.Pub.Head != nil {
+				var cm extraTypes.ChatMessage
+				d, err := json.Marshal(msg.Pub.Content)
 				if err != nil {
-					logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
+					logs.Err.Println(err)
 				}
+				err = json.Unmarshal(d, &cm)
+				if err != nil {
+					logs.Err.Println(err)
+				}
+				var seq float64
+				var values map[string]interface{}
+				for _, ent := range cm.Ent {
+					if ent.Tp == "EX" {
+						if m, ok := ent.Data.Val.(map[string]interface{}); ok {
+							if v, ok := m["seq"]; ok {
+								seq = v.(float64)
+							}
+							if v, ok := m["resp"]; ok {
+								values = v.(map[string]interface{})
+							}
+						}
+					}
+				}
+				if seq > 0 {
+					message, err := extraStore.Chatbot.GetMessage(msg.RcptTo, int(seq))
+					if err != nil {
+						logs.Err.Println(err)
+					}
+					actionRuleId := ""
+					if src, ok := message.Content.Map("src"); ok {
+						if id, ok := src["id"]; ok {
+							actionRuleId = id.(string)
+						}
+					}
+					ctx.SeqId = int(seq)
+					ctx.ActionRuleId = actionRuleId
+					payload, err = handle.Action(ctx, values)
+					if err != nil {
+						logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
+					}
+				}
+			}
+			// command
+			if payload == nil {
+				if msg.Pub.Head == nil {
+					payload, err = handle.Command(ctx, msg.Pub.Content)
+					if err != nil {
+						logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
+					}
 
-				// stats
-				statsInc("BotRunCommandTotal", 1)
+					// stats
+					statsInc("BotRunCommandTotal", 1)
+				}
 			}
 
 			if payload == nil {

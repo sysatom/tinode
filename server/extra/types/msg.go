@@ -152,7 +152,12 @@ type ActionMsg struct {
 }
 
 func (a ActionMsg) Convert() (map[string]interface{}, interface{}) {
-	return commonHead, nil //todo
+	builder := MsgBuilder{Payload: a}
+	builder.AppendTextLine(a.Title, TextOption{IsBold: true})
+	for _, option := range a.Option {
+		builder.AppendText(option, TextOption{IsButton: true, ButtonDataAct: "pub", ButtonDataName: option, ButtonDataVal: option})
+	}
+	return builder.Content()
 }
 
 type LinkMsg struct {

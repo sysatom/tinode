@@ -33,6 +33,10 @@ type Context struct {
 	FormId string
 	// form Rule id
 	FormRuleId string
+	// seq id
+	SeqId int
+	// form Rule id
+	ActionRuleId string
 	// condition
 	Condition string
 	// agent

@@ -50,6 +50,10 @@ type Adapter interface {
 	FormSet(formId string, form model.Form) error
 	// FormGet form get
 	FormGet(formId string) (model.Form, error)
+	// ActionSet action set
+	ActionSet(topic string, seqId int, action model.Action) error
+	// ActionGet action get
+	ActionGet(topic string, seqId int) (model.Action, error)
 	// PageSet page set
 	PageSet(pageId string, page model.Page) error
 	// PageGet page get

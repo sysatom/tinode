@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/tinode/chat/server/auth"
+	"github.com/tinode/chat/server/extra/ruleset/action"
 	"github.com/tinode/chat/server/extra/ruleset/agent"
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/ruleset/condition"
@@ -39,6 +40,9 @@ type Handler interface {
 	// Form return bot form result
 	Form(ctx types.Context, values map[string]interface{}) (types.MsgPayload, error)
 
+	// Action return bot action result
+	Action(ctx types.Context, values map[string]interface{}) (types.MsgPayload, error)
+
 	// Cron cron script daemon
 	Cron(send func(rcptTo string, uid serverTypes.Uid, out types.MsgPayload)) error
 
@@ -67,6 +71,10 @@ func (Base) Command(_ types.Context, _ interface{}) (types.MsgPayload, error) {
 }
 
 func (Base) Form(_ types.Context, _ map[string]interface{}) (types.MsgPayload, error) {
+	return nil, nil
+}
+
+func (Base) Action(_ types.Context, _ map[string]interface{}) (types.MsgPayload, error) {
 	return nil, nil
 }
 
@@ -167,6 +175,45 @@ func RunForm(formRules []form.Rule, ctx types.Context, values map[string]interfa
 		if err != nil {
 			return nil, err
 		}
+	}
+
+	return payload, nil
+}
+
+func RunAction(actionRules []action.Rule, ctx types.Context, values map[string]interface{}) (types.MsgPayload, error) {
+	// check action
+	exAction, err := store.Chatbot.ActionGet(ctx.RcptTo, ctx.SeqId)
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, err
+	}
+	if exAction.ID > 0 && exAction.State > model.ActionStateLongTerm {
+		return types.TextMsg{Text: "done"}, nil
+	}
+
+	// process action
+	rs := action.Ruleset(actionRules)
+	payload, err := rs.ProcessAction(ctx, values)
+	if err != nil {
+		return nil, err
+	}
+
+	// is long term
+	isLongTerm := false
+	for _, rule := range rs {
+		if rule.Id == ctx.ActionRuleId {
+			isLongTerm = rule.IsLongTerm
+		}
+	}
+	var state model.ActionState
+	if !isLongTerm {
+		state = model.ActionStateSubmitSuccess
+	} else {
+		state = model.ActionStateLongTerm
+	}
+	// store action
+	err = store.Chatbot.ActionSet(ctx.RcptTo, ctx.SeqId, model.Action{Uid: ctx.AsUser.UserId(), Values: values, State: state})
+	if err != nil {
+		return nil, err
 	}
 
 	return payload, nil

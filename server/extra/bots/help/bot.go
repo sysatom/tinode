@@ -64,6 +64,10 @@ func (b bot) Form(ctx types.Context, values map[string]interface{}) (types.MsgPa
 	return bots.RunForm(formRules, ctx, values)
 }
 
+func (b bot) Action(ctx types.Context, values map[string]interface{}) (types.MsgPayload, error) {
+	return bots.RunAction(actionRules, ctx, values)
+}
+
 func (b bot) Cron(send func(rcptTo string, uid serverTypes.Uid, out types.MsgPayload)) error {
 	return bots.RunCron(cronRules, Name, b.AuthLevel(), send)
 }

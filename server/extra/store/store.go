@@ -109,6 +109,8 @@ type ChatbotPersistenceInterface interface {
 	OAuthGetAvailable(t string) ([]model.OAuth, error)
 	FormSet(formId string, form model.Form) error
 	FormGet(formId string) (model.Form, error)
+	ActionSet(topic string, seqId int, action model.Action) error
+	ActionGet(topic string, seqId int) (model.Action, error)
 	PageSet(pageId string, page model.Page) error
 	PageGet(pageId string) (model.Page, error)
 
@@ -206,6 +208,14 @@ func (c chatbotMapper) FormSet(formId string, form model.Form) error {
 
 func (c chatbotMapper) FormGet(formId string) (model.Form, error) {
 	return adp.FormGet(formId)
+}
+
+func (c chatbotMapper) ActionSet(topic string, seqId int, action model.Action) error {
+	return adp.ActionSet(topic, seqId, action)
+}
+
+func (c chatbotMapper) ActionGet(topic string, seqId int) (model.Action, error) {
+	return adp.ActionGet(topic, seqId)
 }
 
 func (c chatbotMapper) PageSet(pageId string, page model.Page) error {

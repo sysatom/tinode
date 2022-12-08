@@ -148,6 +148,30 @@ const (
 	FormStateSubmitFailed
 )
 
+type Action struct {
+	ID        uint64 `gorm:"primaryKey"`
+	Uid       string
+	Topic     string
+	SeqId     int  `gorm:"column:seqid"`
+	Values    JSON `gorm:"type:json"`
+	State     ActionState
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+func (Action) TableName() string {
+	return "chatbot_action"
+}
+
+type ActionState int
+
+const (
+	ActionStateUnknown ActionState = iota
+	ActionStateLongTerm
+	ActionStateSubmitSuccess
+	ActionStateSubmitFailed
+)
+
 type Page struct {
 	ID        uint64 `gorm:"primaryKey"`
 	PageId    string

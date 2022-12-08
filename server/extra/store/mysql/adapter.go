@@ -306,6 +306,40 @@ func (a *adapter) FormGet(formId string) (model.Form, error) {
 	return find, nil
 }
 
+func (a *adapter) ActionSet(topic string, seqId int, action model.Action) error {
+	var find model.Action
+	err := a.db.Where("`topic` = ? AND `seqid` = ?", topic, seqId).First(&find).Error
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return err
+	}
+	if find.ID > 0 {
+		return a.db.
+			Model(&model.Action{}).
+			Where("`topic` = ? AND `seqid` = ?", topic, seqId).
+			Updates(map[string]interface{}{
+				"values": action.Values,
+				"state":  action.State,
+			}).Error
+	} else {
+		return a.db.Create(&model.Action{
+			Uid:    action.Uid,
+			Topic:  topic,
+			SeqId:  seqId,
+			Values: action.Values,
+			State:  action.State,
+		}).Error
+	}
+}
+
+func (a *adapter) ActionGet(topic string, seqId int) (model.Action, error) {
+	var find model.Action
+	err := a.db.Where("`topic` = ? AND `seqid` = ?", topic, seqId).First(&find).Error
+	if err != nil {
+		return model.Action{}, err
+	}
+	return find, nil
+}
+
 func (a *adapter) PageSet(pageId string, page model.Page) error {
 	var find model.Page
 	err := a.db.Where("`page_id` = ?", pageId).First(&find).Error
