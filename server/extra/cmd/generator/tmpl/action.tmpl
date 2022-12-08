@@ -1,0 +1,19 @@
+package {{ .BotName }}
+
+import (
+    "github.com/tinode/chat/server/extra/ruleset/action"
+    "github.com/tinode/chat/server/extra/types"
+)
+
+const (
+    exampleActionID = "{{ .BotName }}_help_action"
+)
+
+var actionRules = []action.Rule{
+    {
+        Id: exampleActionID,
+        Handler: func(ctx types.Context, values map[string]interface{}) types.MsgPayload {
+            return nil
+        },
+    },
+}

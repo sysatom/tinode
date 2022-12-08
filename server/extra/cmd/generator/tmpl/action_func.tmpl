@@ -1,0 +1,3 @@
+func (b bot) Action(ctx types.Context, values map[string]interface{}) (types.MsgPayload, error) {
+    return bots.RunAction(actionRules, ctx, values)
+}
