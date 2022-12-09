@@ -13,9 +13,13 @@ const (
 var actionRules = []action.Rule{
 	{
 		Id: helpActionID,
-		Handler: func(ctx types.Context, values map[string]interface{}) types.MsgPayload {
-			fmt.Println(values)
-			return types.TextMsg{Text: fmt.Sprintf("ok, action [%s: %d]", ctx.ActionRuleId, ctx.SeqId)}
+		Handler: map[string]func(ctx types.Context) types.MsgPayload{
+			"do1": func(ctx types.Context) types.MsgPayload {
+				return types.TextMsg{Text: fmt.Sprintf("do 1 something, action [%s: %d]", ctx.ActionRuleId, ctx.SeqId)}
+			},
+			"do2": func(ctx types.Context) types.MsgPayload {
+				return types.TextMsg{Text: fmt.Sprintf("do 2 something, action [%s: %d]", ctx.ActionRuleId, ctx.SeqId)}
+			},
 		},
 	},
 }

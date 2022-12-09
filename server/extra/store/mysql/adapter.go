@@ -317,16 +317,16 @@ func (a *adapter) ActionSet(topic string, seqId int, action model.Action) error 
 			Model(&model.Action{}).
 			Where("`topic` = ? AND `seqid` = ?", topic, seqId).
 			Updates(map[string]interface{}{
-				"values": action.Values,
-				"state":  action.State,
+				"value": action.Value,
+				"state": action.State,
 			}).Error
 	} else {
 		return a.db.Create(&model.Action{
-			Uid:    action.Uid,
-			Topic:  topic,
-			SeqId:  seqId,
-			Values: action.Values,
-			State:  action.State,
+			Uid:   action.Uid,
+			Topic: topic,
+			SeqId: seqId,
+			Value: action.Value,
+			State: action.State,
 		}).Error
 	}
 }

@@ -1,20 +1,27 @@
 package action
 
-import "github.com/tinode/chat/server/extra/types"
+import (
+	"errors"
+	"github.com/tinode/chat/server/extra/types"
+)
 
 type Rule struct {
 	Id         string
 	IsLongTerm bool
-	Handler    func(ctx types.Context, values map[string]interface{}) types.MsgPayload
+	Handler    map[string]func(ctx types.Context) types.MsgPayload
 }
 
 type Ruleset []Rule
 
-func (r Ruleset) ProcessAction(ctx types.Context, values map[string]interface{}) (types.MsgPayload, error) {
+func (r Ruleset) ProcessAction(ctx types.Context, option string) (types.MsgPayload, error) {
 	var result types.MsgPayload
 	for _, rule := range r {
 		if rule.Id == ctx.ActionRuleId {
-			result = rule.Handler(ctx, values)
+			if handler, ok := rule.Handler[option]; ok {
+				result = handler(ctx)
+			} else {
+				return nil, errors.New("action rule: error option")
+			}
 		}
 	}
 	return result, nil

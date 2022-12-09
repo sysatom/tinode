@@ -194,7 +194,6 @@ var commandRules = []command.Rule{
 				ID:     helpActionID,
 				Title:  "Operate ... ?",
 				Option: []string{"do1", "do2"},
-				Value:  "",
 			}
 		},
 	},

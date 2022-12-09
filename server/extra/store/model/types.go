@@ -152,8 +152,8 @@ type Action struct {
 	ID        uint64 `gorm:"primaryKey"`
 	Uid       string
 	Topic     string
-	SeqId     int  `gorm:"column:seqid"`
-	Values    JSON `gorm:"type:json"`
+	SeqId     int `gorm:"column:seqid"`
+	Value     string
 	State     ActionState
 	CreatedAt time.Time
 	UpdatedAt time.Time

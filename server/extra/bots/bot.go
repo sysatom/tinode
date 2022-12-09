@@ -42,7 +42,7 @@ type Handler interface {
 	Form(ctx types.Context, values map[string]interface{}) (types.MsgPayload, error)
 
 	// Action return bot action result
-	Action(ctx types.Context, values map[string]interface{}) (types.MsgPayload, error)
+	Action(ctx types.Context, option string) (types.MsgPayload, error)
 
 	// Session return bot session result
 	Session(ctx types.Context, content interface{}) (types.MsgPayload, error)
@@ -78,7 +78,7 @@ func (Base) Form(_ types.Context, _ map[string]interface{}) (types.MsgPayload, e
 	return nil, nil
 }
 
-func (Base) Action(_ types.Context, _ map[string]interface{}) (types.MsgPayload, error) {
+func (Base) Action(_ types.Context, _ string) (types.MsgPayload, error) {
 	return nil, nil
 }
 
@@ -188,7 +188,7 @@ func RunForm(formRules []form.Rule, ctx types.Context, values map[string]interfa
 	return payload, nil
 }
 
-func RunAction(actionRules []action.Rule, ctx types.Context, values map[string]interface{}) (types.MsgPayload, error) {
+func RunAction(actionRules []action.Rule, ctx types.Context, option string) (types.MsgPayload, error) {
 	// check action
 	exAction, err := store.Chatbot.ActionGet(ctx.RcptTo, ctx.SeqId)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -200,7 +200,7 @@ func RunAction(actionRules []action.Rule, ctx types.Context, values map[string]i
 
 	// process action
 	rs := action.Ruleset(actionRules)
-	payload, err := rs.ProcessAction(ctx, values)
+	payload, err := rs.ProcessAction(ctx, option)
 	if err != nil {
 		return nil, err
 	}
@@ -219,7 +219,7 @@ func RunAction(actionRules []action.Rule, ctx types.Context, values map[string]i
 		state = model.ActionStateLongTerm
 	}
 	// store action
-	err = store.Chatbot.ActionSet(ctx.RcptTo, ctx.SeqId, model.Action{Uid: ctx.AsUser.UserId(), Values: values, State: state})
+	err = store.Chatbot.ActionSet(ctx.RcptTo, ctx.SeqId, model.Action{Uid: ctx.AsUser.UserId(), Value: option, State: state})
 	if err != nil {
 		return nil, err
 	}

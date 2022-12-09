@@ -622,7 +622,7 @@ func botIncomingMessage(t *Topic, msg *ClientComMessage) {
 						logs.Err.Println(err)
 					}
 					var seq float64
-					var values map[string]interface{}
+					var option string
 					for _, ent := range cm.Ent {
 						if ent.Tp == "EX" {
 							if m, ok := ent.Data.Val.(map[string]interface{}); ok {
@@ -630,7 +630,10 @@ func botIncomingMessage(t *Topic, msg *ClientComMessage) {
 									seq = v.(float64)
 								}
 								if v, ok := m["resp"]; ok {
-									values = v.(map[string]interface{})
+									values := v.(map[string]interface{})
+									for s := range values {
+										option = s
+									}
 								}
 							}
 						}
@@ -648,7 +651,7 @@ func botIncomingMessage(t *Topic, msg *ClientComMessage) {
 						}
 						ctx.SeqId = int(seq)
 						ctx.ActionRuleId = actionRuleId
-						payload, err = handle.Action(ctx, values)
+						payload, err = handle.Action(ctx, option)
 						if err != nil {
 							logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
 						}

@@ -64,8 +64,8 @@ func (b bot) Form(ctx types.Context, values map[string]interface{}) (types.MsgPa
 	return bots.RunForm(formRules, ctx, values)
 }
 
-func (b bot) Action(ctx types.Context, values map[string]interface{}) (types.MsgPayload, error) {
-	return bots.RunAction(actionRules, ctx, values)
+func (b bot) Action(ctx types.Context, option string) (types.MsgPayload, error) {
+	return bots.RunAction(actionRules, ctx, option)
 }
 
 func (b bot) Cron(send func(rcptTo string, uid serverTypes.Uid, out types.MsgPayload)) error {
