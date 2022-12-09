@@ -172,6 +172,31 @@ const (
 	ActionStateSubmitFailed
 )
 
+type Session struct {
+	ID        uint64 `gorm:"primaryKey"`
+	Uid       string
+	Topic     string
+	RuleId    string
+	Init      JSON `gorm:"type:json"`
+	Values    JSON `gorm:"type:json"`
+	State     SessionState
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+func (Session) TableName() string {
+	return "chatbot_session"
+}
+
+type SessionState int
+
+const (
+	SessionStateUnknown SessionState = iota
+	SessionStart
+	SessionDone
+	SessionCancel
+)
+
 type Page struct {
 	ID        uint64 `gorm:"primaryKey"`
 	PageId    string

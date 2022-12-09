@@ -340,6 +340,54 @@ func (a *adapter) ActionGet(topic string, seqId int) (model.Action, error) {
 	return find, nil
 }
 
+func (a *adapter) SessionCreate(session model.Session) error {
+	return a.db.Create(&model.Session{
+		Uid:    session.Uid,
+		Topic:  session.Topic,
+		RuleId: session.RuleId,
+		Init:   session.Init,
+		Values: session.Values,
+		State:  session.State,
+	}).Error
+}
+
+func (a *adapter) SessionSet(uid types.Uid, topic string, session model.Session) error {
+	var find model.Session
+	err := a.db.Where("`uid` = ? AND `topic` = ?", uid.UserId(), topic).Order("created_at DESC").First(&find).Error
+	if err != nil {
+		return err
+	}
+	return a.db.
+		Model(&model.Session{}).
+		Where("`id` = ?", find.ID).
+		Updates(map[string]interface{}{
+			"values": session.Values,
+		}).Error
+}
+
+func (a *adapter) SessionState(uid types.Uid, topic string, state model.SessionState) error {
+	var find model.Session
+	err := a.db.Where("`uid` = ? AND `topic` = ?", uid.UserId(), topic).Order("created_at DESC").First(&find).Error
+	if err != nil {
+		return err
+	}
+	return a.db.
+		Model(&model.Session{}).
+		Where("`id` = ?", find.ID).
+		Updates(map[string]interface{}{
+			"state": state,
+		}).Error
+}
+
+func (a *adapter) SessionGet(uid types.Uid, topic string) (model.Session, error) {
+	var find model.Session
+	err := a.db.Where("`uid` = ? AND `topic` = ?", uid.UserId(), topic).Order("created_at DESC").First(&find).Error
+	if err != nil {
+		return model.Session{}, err
+	}
+	return find, nil
+}
+
 func (a *adapter) PageSet(pageId string, page model.Page) error {
 	var find model.Page
 	err := a.db.Where("`page_id` = ?", pageId).First(&find).Error

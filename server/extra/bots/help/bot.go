@@ -83,3 +83,7 @@ func (b bot) Group(_ types.Context, _ map[string]interface{}, _ interface{}) (ty
 func (b bot) Agent(ctx types.Context, content interface{}) (types.MsgPayload, error) {
 	return bots.RunAgent(agentRules, ctx, content)
 }
+
+func (b bot) Session(ctx types.Context, content interface{}) (types.MsgPayload, error) {
+	return bots.RunSession(sessionRules, ctx, content)
+}

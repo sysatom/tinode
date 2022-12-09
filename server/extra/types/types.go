@@ -1,6 +1,7 @@
 package types
 
 import (
+	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/utils"
 	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/store/types"
@@ -43,6 +44,12 @@ type Context struct {
 	AgentId string
 	// agent
 	AgentVersion int
+	// session Rule id
+	SessionRuleId string
+	// session init values
+	SessionInitValues model.JSON
+	// session last values
+	SessionLastValues model.JSON
 }
 
 func Id() types.Uid {

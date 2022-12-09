@@ -9,6 +9,7 @@ import (
 	"github.com/nikolaydubina/calendarheatmap/charts"
 	"github.com/tinode/chat/server/extra/bots"
 	"github.com/tinode/chat/server/extra/ruleset/command"
+	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
 	serverTypes "github.com/tinode/chat/server/store/types"
@@ -195,6 +196,23 @@ var commandRules = []command.Rule{
 				Option: []string{"do1", "do2"},
 				Value:  "",
 			}
+		},
+	},
+	{
+		Define: "guess",
+		Help:   "Guess number game",
+		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+			// rand number
+			big, err := rand.Int(rand.Reader, big.NewInt(1000))
+
+			var initValue model.JSON
+			initValue = map[string]interface{}{"number": big.Int64()}
+			ctx.SessionRuleId = guessSessionID
+			err = bots.SessionStart(ctx, initValue)
+			if err != nil {
+				return types.TextMsg{Text: "session error"}
+			}
+			return types.TextMsg{Text: "Input a number?"}
 		},
 	},
 	{

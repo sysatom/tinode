@@ -11,6 +11,7 @@ import (
 	"github.com/tinode/chat/server/extra/ruleset/condition"
 	"github.com/tinode/chat/server/extra/ruleset/cron"
 	"github.com/tinode/chat/server/extra/ruleset/form"
+	"github.com/tinode/chat/server/extra/ruleset/session"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/types"
@@ -42,6 +43,9 @@ type Handler interface {
 
 	// Action return bot action result
 	Action(ctx types.Context, values map[string]interface{}) (types.MsgPayload, error)
+
+	// Session return bot session result
+	Session(ctx types.Context, content interface{}) (types.MsgPayload, error)
 
 	// Cron cron script daemon
 	Cron(send func(rcptTo string, uid serverTypes.Uid, out types.MsgPayload)) error
@@ -75,6 +79,10 @@ func (Base) Form(_ types.Context, _ map[string]interface{}) (types.MsgPayload, e
 }
 
 func (Base) Action(_ types.Context, _ map[string]interface{}) (types.MsgPayload, error) {
+	return nil, nil
+}
+
+func (Base) Session(_ types.Context, _ interface{}) (types.MsgPayload, error) {
 	return nil, nil
 }
 
@@ -236,6 +244,11 @@ func RunAgent(agentRules []agent.Rule, ctx types.Context, content interface{}) (
 	return rs.ProcessCondition(ctx, content)
 }
 
+func RunSession(sessionRules []session.Rule, ctx types.Context, content interface{}) (types.MsgPayload, error) {
+	rs := session.Ruleset(sessionRules)
+	return rs.ProcessSession(ctx, content)
+}
+
 func StoreForm(ctx types.Context, payload types.MsgPayload) types.MsgPayload {
 	formId := types.Id().String()
 	d, err := json.Marshal(payload)
@@ -329,6 +342,35 @@ func StorePage(ctx types.Context, category model.PageType, title string, payload
 		Title: title,
 		Url:   fmt.Sprintf("%s/extra/page/%s", types.AppUrl(), pageId),
 	}
+}
+
+func SessionStart(ctx types.Context, initValues model.JSON) error {
+	sess, err := store.Chatbot.SessionGet(ctx.AsUser, ctx.Original)
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return err
+	}
+	if sess.ID > 0 && sess.State == model.SessionStart {
+		return errors.New("already a session started")
+	}
+	var values model.JSON
+	values = map[string]interface{}{"val": nil}
+	_ = store.Chatbot.SessionCreate(model.Session{
+		Uid:    ctx.AsUser.UserId(),
+		Topic:  ctx.Original,
+		RuleId: ctx.SessionRuleId,
+		Init:   initValues,
+		Values: values,
+		State:  model.SessionStart,
+	})
+	return nil
+}
+
+func SessionDone(ctx types.Context) {
+	_ = store.Chatbot.SessionState(ctx.AsUser, ctx.Original, model.SessionDone)
+}
+
+func SessionCancel(ctx types.Context) {
+	_ = store.Chatbot.SessionState(ctx.AsUser, ctx.Original, model.SessionCancel)
 }
 
 func AgentURI(ctx types.Context) types.MsgPayload {

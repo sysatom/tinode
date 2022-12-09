@@ -586,47 +586,72 @@ func botIncomingMessage(t *Topic, msg *ClientComMessage) {
 
 		// auth
 		if payload == nil {
-			// action
-			if msg.Pub.Head != nil {
-				var cm extraTypes.ChatMessage
-				d, err := json.Marshal(msg.Pub.Content)
-				if err != nil {
-					logs.Err.Println(err)
-				}
-				err = json.Unmarshal(d, &cm)
-				if err != nil {
-					logs.Err.Println(err)
-				}
-				var seq float64
-				var values map[string]interface{}
-				for _, ent := range cm.Ent {
-					if ent.Tp == "EX" {
-						if m, ok := ent.Data.Val.(map[string]interface{}); ok {
-							if v, ok := m["seq"]; ok {
-								seq = v.(float64)
-							}
-							if v, ok := m["resp"]; ok {
-								values = v.(map[string]interface{})
-							}
+			// session
+			if session, ok := sessionCurrent(uid, msg.Original); ok && session.State == model.SessionStart {
+				// session cancel command
+				isCancel := false
+				if msg.Pub.Head == nil {
+					if v, ok := msg.Pub.Content.(string); ok {
+						if v == "cancel" {
+							_ = extraStore.Chatbot.SessionState(ctx.AsUser, ctx.Original, model.SessionCancel)
+							payload = extraTypes.TextMsg{Text: "session cancel"}
+							isCancel = true
 						}
 					}
 				}
-				if seq > 0 {
-					message, err := extraStore.Chatbot.GetMessage(msg.RcptTo, int(seq))
+				if !isCancel {
+					ctx.SessionRuleId = session.RuleId
+					ctx.SessionInitValues = session.Init
+					ctx.SessionLastValues = session.Values
+					payload, err = handle.Session(ctx, msg.Pub.Content)
+					if err != nil {
+						logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
+					}
+				}
+			}
+			// action
+			if payload == nil {
+				if msg.Pub.Head != nil {
+					var cm extraTypes.ChatMessage
+					d, err := json.Marshal(msg.Pub.Content)
 					if err != nil {
 						logs.Err.Println(err)
 					}
-					actionRuleId := ""
-					if src, ok := message.Content.Map("src"); ok {
-						if id, ok := src["id"]; ok {
-							actionRuleId = id.(string)
+					err = json.Unmarshal(d, &cm)
+					if err != nil {
+						logs.Err.Println(err)
+					}
+					var seq float64
+					var values map[string]interface{}
+					for _, ent := range cm.Ent {
+						if ent.Tp == "EX" {
+							if m, ok := ent.Data.Val.(map[string]interface{}); ok {
+								if v, ok := m["seq"]; ok {
+									seq = v.(float64)
+								}
+								if v, ok := m["resp"]; ok {
+									values = v.(map[string]interface{})
+								}
+							}
 						}
 					}
-					ctx.SeqId = int(seq)
-					ctx.ActionRuleId = actionRuleId
-					payload, err = handle.Action(ctx, values)
-					if err != nil {
-						logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
+					if seq > 0 {
+						message, err := extraStore.Chatbot.GetMessage(msg.RcptTo, int(seq))
+						if err != nil {
+							logs.Err.Println(err)
+						}
+						actionRuleId := ""
+						if src, ok := message.Content.Map("src"); ok {
+							if id, ok := src["id"]; ok {
+								actionRuleId = id.(string)
+							}
+						}
+						ctx.SeqId = int(seq)
+						ctx.ActionRuleId = actionRuleId
+						payload, err = handle.Action(ctx, values)
+						if err != nil {
+							logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
+						}
 					}
 				}
 			}
@@ -642,9 +667,8 @@ func botIncomingMessage(t *Topic, msg *ClientComMessage) {
 					statsInc("BotRunCommandTotal", 1)
 				}
 			}
-
+			// condition
 			if payload == nil {
-				// condition
 				if msg.Pub.Head != nil {
 					fUid := ""
 					fSeq := int64(0)
@@ -682,18 +706,17 @@ func botIncomingMessage(t *Topic, msg *ClientComMessage) {
 						}
 					}
 				}
-
-				// input
-				if payload == nil {
-					payload, err = handle.Input(ctx, msg.Pub.Head, msg.Pub.Content)
-					if err != nil {
-						logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
-						continue
-					}
-
-					// stats
-					statsInc("BotRunInputTotal", 1)
+			}
+			// input
+			if payload == nil {
+				payload, err = handle.Input(ctx, msg.Pub.Head, msg.Pub.Content)
+				if err != nil {
+					logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
+					continue
 				}
+
+				// stats
+				statsInc("BotRunInputTotal", 1)
 			}
 		}
 
@@ -869,4 +892,12 @@ func onlineStatus(usrStr string) {
 	} else {
 		cache.DB.Expire(ctx, key, 30*time.Minute)
 	}
+}
+
+func sessionCurrent(uid types.Uid, topic string) (model.Session, bool) {
+	session, err := extraStore.Chatbot.SessionGet(uid, topic)
+	if err != nil {
+		return model.Session{}, false
+	}
+	return session, true
 }

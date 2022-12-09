@@ -111,6 +111,10 @@ type ChatbotPersistenceInterface interface {
 	FormGet(formId string) (model.Form, error)
 	ActionSet(topic string, seqId int, action model.Action) error
 	ActionGet(topic string, seqId int) (model.Action, error)
+	SessionCreate(session model.Session) error
+	SessionSet(uid types.Uid, topic string, session model.Session) error
+	SessionState(uid types.Uid, topic string, state model.SessionState) error
+	SessionGet(uid types.Uid, topic string) (model.Session, error)
 	PageSet(pageId string, page model.Page) error
 	PageGet(pageId string) (model.Page, error)
 
@@ -216,6 +220,22 @@ func (c chatbotMapper) ActionSet(topic string, seqId int, action model.Action) e
 
 func (c chatbotMapper) ActionGet(topic string, seqId int) (model.Action, error) {
 	return adp.ActionGet(topic, seqId)
+}
+
+func (c chatbotMapper) SessionCreate(session model.Session) error {
+	return adp.SessionCreate(session)
+}
+
+func (c chatbotMapper) SessionSet(uid types.Uid, topic string, session model.Session) error {
+	return adp.SessionSet(uid, topic, session)
+}
+
+func (c chatbotMapper) SessionState(uid types.Uid, topic string, state model.SessionState) error {
+	return adp.SessionState(uid, topic, state)
+}
+
+func (c chatbotMapper) SessionGet(uid types.Uid, topic string) (model.Session, error) {
+	return adp.SessionGet(uid, topic)
 }
 
 func (c chatbotMapper) PageSet(pageId string, page model.Page) error {

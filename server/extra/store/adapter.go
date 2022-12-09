@@ -54,6 +54,14 @@ type Adapter interface {
 	ActionSet(topic string, seqId int, action model.Action) error
 	// ActionGet action get
 	ActionGet(topic string, seqId int) (model.Action, error)
+	// SessionCreate session create
+	SessionCreate(session model.Session) error
+	// SessionSet session set
+	SessionSet(uid types.Uid, topic string, session model.Session) error
+	// SessionState session set state
+	SessionState(uid types.Uid, topic string, state model.SessionState) error
+	// SessionGet session get
+	SessionGet(uid types.Uid, topic string) (model.Session, error)
 	// PageSet page set
 	PageSet(pageId string, page model.Page) error
 	// PageGet page get
