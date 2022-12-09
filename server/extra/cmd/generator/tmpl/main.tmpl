@@ -91,3 +91,8 @@ func (b bot) Agent(ctx types.Context, content interface{}) (types.MsgPayload, er
     return bots.RunAgent(agentRules, ctx, content)
 }
 {{end}}
+{{if .HasSession}}
+func (b bot) Session(ctx types.Context, content interface{}) (types.MsgPayload, error) {
+    return bots.RunSession(sessionRules, ctx, content)
+}
+{{end}}
