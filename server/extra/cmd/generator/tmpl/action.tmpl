@@ -12,8 +12,10 @@ const (
 var actionRules = []action.Rule{
     {
         Id: exampleActionID,
-        Handler: func(ctx types.Context, values map[string]interface{}) types.MsgPayload {
-            return nil
+        Handler: map[string]func(ctx types.Context) types.MsgPayload{
+            "option1": func(ctx types.Context) types.MsgPayload {
+                return nil
+            },
         },
     },
 }
