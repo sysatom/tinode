@@ -6,6 +6,7 @@ import (
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/types"
+	"github.com/tinode/chat/server/extra/utils"
 	"github.com/tinode/chat/server/logs"
 )
 
@@ -28,7 +29,7 @@ var commandRules = []command.Rule{
 			}
 			key, _ := v.String("value")
 
-			return types.TextMsg{Text: fmt.Sprintf("key: %s", key)}
+			return types.TextMsg{Text: fmt.Sprintf("key: %s", utils.Masker(key, 3))}
 		},
 	},
 	{

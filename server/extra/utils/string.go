@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"math/big"
 	"regexp"
+	"strings"
 	"unicode"
 )
 
@@ -37,4 +38,23 @@ const (
 func IsUrl(text string) bool {
 	re := regexp.MustCompile("^" + UrlRegex + "$")
 	return re.MatchString(text)
+}
+
+func Masker(input string, start int) string {
+	if len(input) <= start {
+		return input
+	}
+	lenStart := len(input[start:])
+	switch {
+	case lenStart <= 3:
+		return input[:start] + strings.Repeat("*", lenStart)
+	case 3 < lenStart && lenStart <= 5:
+		return input[:start+1] + strings.Repeat("*", lenStart-2) + input[lenStart+start-1:]
+	case 5 < lenStart && lenStart <= 10:
+		return input[:start+2] + strings.Repeat("*", lenStart-4) + input[lenStart+start-2:]
+	case lenStart > 10:
+		return input[:start+4] + strings.Repeat("*", lenStart-8) + input[lenStart+start-4:]
+	default:
+		return ""
+	}
 }
