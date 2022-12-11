@@ -56,6 +56,11 @@ func (b bot) Input(_ types.Context, _ map[string]interface{}, _ interface{}) (ty
     return nil, nil
 }
 {{end}}
+{{if .HasGroup}}
+    func (b bot) Group(_ types.Context, _ map[string]interface{}, _ interface{}) (types.MsgPayload, error) {
+    return nil, nil
+    }
+{{end}}
 {{if .HasCommand}}
 func (b bot) Command(ctx types.Context, content interface{}) (types.MsgPayload, error) {
     return bots.RunCommand(commandRules, ctx, content)
@@ -79,11 +84,6 @@ func (b bot) Cron(send func(rcptTo string, uid serverTypes.Uid, out types.MsgPay
 {{if .HasCondition}}
 func (b bot) Condition(ctx types.Context, forwarded types.MsgPayload) (types.MsgPayload, error) {
     return bots.RunCondition(conditionRules, ctx, forwarded)
-}
-{{end}}
-{{if .HasGroup}}
-func (b bot) Group(_ types.Context, _ map[string]interface{}, _ interface{}) (types.MsgPayload, error) {
-    return nil, nil
 }
 {{end}}
 {{if .HasAgent}}

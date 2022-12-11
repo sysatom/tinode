@@ -1,6 +1,7 @@
 package types
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"reflect"
@@ -633,4 +634,16 @@ func ToPayload(typ string, src []byte) MsgPayload {
 		return r
 	}
 	return nil
+}
+
+func ImageConvert(data []byte, name string, width, height int) ImageMsg {
+	raw := base64.StdEncoding.EncodeToString(data)
+	return ImageMsg{
+		Width:       width,
+		Height:      height,
+		Alt:         fmt.Sprintf("%s.jpg", name),
+		Mime:        "image/jpeg",
+		Size:        len(data),
+		ImageBase64: raw,
+	}
 }

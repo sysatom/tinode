@@ -33,6 +33,8 @@ require (
 	github.com/tidwall/gjson v1.14.3
 	github.com/tinode/jsonco v1.0.0
 	github.com/tinode/snowflake v1.0.0
+	github.com/yeqown/go-qrcode/v2 v2.2.1
+	github.com/yeqown/go-qrcode/writer/standard v1.2.1
 	go.mongodb.org/mongo-driver v1.9.1
 	golang.org/x/crypto v0.1.0
 	golang.org/x/image v0.0.0-20220902085622-e7cb96979f69

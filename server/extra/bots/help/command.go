@@ -16,7 +16,6 @@ import (
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
 	"gonum.org/v1/plot"
-	"gonum.org/v1/plot/plotter"
 	"gonum.org/v1/plot/plotutil"
 	"gonum.org/v1/plot/vg"
 	"gonum.org/v1/plot/vg/draw"
@@ -258,16 +257,7 @@ var commandRules = []command.Rule{
 				panic(err)
 			}
 
-			raw := base64.StdEncoding.EncodeToString(w.Bytes())
-
-			return types.ImageMsg{
-				Width:       500,
-				Height:      500,
-				Alt:         "Plot.png",
-				Mime:        "image/png",
-				Size:        w.Len(),
-				ImageBase64: raw,
-			}
+			return types.ImageConvert(w.Bytes(), "Plot", 500, 500)
 		},
 	},
 	{
@@ -337,25 +327,4 @@ var commandRules = []command.Rule{
 			}
 		},
 	},
-}
-
-//go:embed fonts/Sunflower-Medium.ttf
-var defaultFontFaceBytes []byte
-
-//go:embed colorscales/green-blue-9.csv
-var defaultColorScaleBytes []byte
-
-// randomPoints returns some random x, y points.
-func randomPoints(n int) plotter.XYs {
-	pts := make(plotter.XYs, n)
-	for i := range pts {
-		num, _ := rand.Int(rand.Reader, big.NewInt(100))
-		if i == 0 {
-			pts[i].X = float64(num.Int64())
-		} else {
-			pts[i].X = pts[i-1].X + float64(num.Int64())
-		}
-		pts[i].Y = pts[i].X + 10*float64(num.Int64())
-	}
-	return pts
 }
