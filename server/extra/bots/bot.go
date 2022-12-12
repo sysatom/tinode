@@ -19,6 +19,7 @@ import (
 	"github.com/tinode/chat/server/logs"
 	serverTypes "github.com/tinode/chat/server/store/types"
 	"gorm.io/gorm"
+	"strings"
 )
 
 const BotNameSuffix = "_bot"
@@ -378,6 +379,29 @@ func AgentURI(ctx types.Context) types.MsgPayload {
 		Title: "Agent",
 		Url:   fmt.Sprintf("%s/extra/agent/%d/%d", types.AppUrl(), ctx.AsUser, serverTypes.ParseUserId(ctx.Original)),
 	}
+}
+
+func CreateShortUrl(text string) (string, error) {
+	if utils.IsUrl(text) {
+		url, err := store.Chatbot.UrlGetByUrl(text)
+		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+			return "", err
+		}
+		if url.ID > 0 {
+			return fmt.Sprintf("%s/u/%s", types.AppUrl(), url.Flag), nil
+		}
+		flag := strings.ToLower(types.Id().String())
+		err = store.Chatbot.UrlCreate(model.Url{
+			Flag:  flag,
+			Url:   text,
+			State: model.UrlStateEnable,
+		})
+		if err != nil {
+			return "", err
+		}
+		return fmt.Sprintf("%s/u/%s", types.AppUrl(), flag), nil
+	}
+	return "", errors.New("error url")
 }
 
 // Init initializes registered handlers.

@@ -41,7 +41,11 @@ var commandRules = []command.Rule{
 			if err != nil {
 				return types.TextMsg{Text: "get code error"}
 			}
-			return types.LinkMsg{Title: "OAuth", Url: provider.AuthorizeURL()}
+			url, err := bots.CreateShortUrl(provider.AuthorizeURL())
+			if err != nil {
+				return types.TextMsg{Text: "create url error"}
+			}
+			return types.LinkMsg{Title: "OAuth", Url: url}
 		},
 	},
 	{
