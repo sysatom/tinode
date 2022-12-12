@@ -66,6 +66,16 @@ type Adapter interface {
 	PageSet(pageId string, page model.Page) error
 	// PageGet page get
 	PageGet(pageId string) (model.Page, error)
+	// UrlCreate url create
+	UrlCreate(url model.Url) error
+	// UrlGetByFlag url get by flag
+	UrlGetByFlag(flag string) (model.Url, error)
+	// UrlGetByUrl url get by url
+	UrlGetByUrl(url string) (model.Url, error)
+	// UrlState update url state
+	UrlState(flag string, state model.UrlState) error
+	// UrlViewIncrease increase url view count
+	UrlViewIncrease(flag string) error
 
 	GetObjectiveByID(id int64) (*model.Objective, error)
 	GetObjectiveBySequence(uid types.Uid, topic string, sequence int64) (*model.Objective, error)

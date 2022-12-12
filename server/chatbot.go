@@ -27,6 +27,7 @@ import (
 	_ "github.com/tinode/chat/server/extra/bots/server"
 	_ "github.com/tinode/chat/server/extra/bots/share"
 	_ "github.com/tinode/chat/server/extra/bots/subscribe"
+	_ "github.com/tinode/chat/server/extra/bots/url"
 	_ "github.com/tinode/chat/server/extra/bots/webhook"
 
 	// push
@@ -43,6 +44,7 @@ import (
 
 func hookMux(mux *http.ServeMux) {
 	mux.Handle("/extra/", newRouter())
+	mux.Handle("/u/", newUrlRouter())
 }
 
 func hookStore() {

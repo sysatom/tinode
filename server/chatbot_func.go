@@ -23,6 +23,7 @@ import (
 	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/store"
 	"github.com/tinode/chat/server/store/types"
+	"net/http"
 	"sort"
 	"strconv"
 	"strings"
@@ -532,8 +533,10 @@ func newProvider(category string) vendors.OAuthProvider {
 
 func botIncomingMessage(t *Topic, msg *ClientComMessage) {
 	// check topic owner user
-	_, u2, _ := types.ParseP2P(msg.Pub.Topic)
-	if !u2.IsZero() && u2.Compare(types.ParseUserId(msg.AsUser)) == 0 {
+	if msg.AsUser == msg.Pub.Topic {
+		return
+	}
+	if msg.Original == "" || msg.RcptTo == "" {
 		return
 	}
 
@@ -903,4 +906,9 @@ func sessionCurrent(uid types.Uid, topic string) (model.Session, bool) {
 		return model.Session{}, false
 	}
 	return session, true
+}
+
+func errorResponse(rw http.ResponseWriter, text string) {
+	rw.WriteHeader(http.StatusBadRequest)
+	_, _ = rw.Write([]byte(text))
 }

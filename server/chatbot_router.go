@@ -31,6 +31,14 @@ func newRouter() *mux.Router {
 	s.HandleFunc("/webhook/{uid1}/{uid2}/{uid3}", webhook).Methods(http.MethodPost)
 	s.HandleFunc("/agent/{uid1}/{uid2}", infoAgent).Methods(http.MethodGet)
 	s.HandleFunc("/agent/{uid1}/{uid2}", postAgent).Methods(http.MethodPost)
+
+	return s
+}
+
+func newUrlRouter() *mux.Router {
+	r := mux.NewRouter()
+	s := r.PathPrefix("/u").Subrouter()
+	s.HandleFunc("/{flag}", urlRedirect)
 	return s
 }
 
@@ -42,8 +50,7 @@ func storeOAuth(rw http.ResponseWriter, req *http.Request) {
 	ui1, _ := strconv.ParseUint(vars["uid1"], 10, 64)
 	ui2, _ := strconv.ParseUint(vars["uid2"], 10, 64)
 	if ui1 == 0 || ui2 == 0 {
-		rw.WriteHeader(http.StatusBadRequest)
-		_, _ = rw.Write([]byte("path error"))
+		errorResponse(rw, "path error")
 		return
 	}
 
@@ -52,8 +59,7 @@ func storeOAuth(rw http.ResponseWriter, req *http.Request) {
 	tk, err := provider.StoreAccessToken(req)
 	if err != nil {
 		logs.Err.Println("router oauth", err)
-		rw.WriteHeader(http.StatusBadRequest)
-		_, _ = rw.Write([]byte("oauth error"))
+		errorResponse(rw, "oauth error")
 		return
 	}
 
@@ -70,8 +76,7 @@ func storeOAuth(rw http.ResponseWriter, req *http.Request) {
 	})
 	if err != nil {
 		logs.Err.Println("router oauth", err)
-		rw.WriteHeader(http.StatusBadRequest)
-		_, _ = rw.Write([]byte("store error"))
+		errorResponse(rw, "store error")
 		return
 	}
 
@@ -85,8 +90,7 @@ func getPage(rw http.ResponseWriter, req *http.Request) {
 	p, err := store.Chatbot.PageGet(id)
 	if err != nil {
 		logs.Err.Println(err)
-		rw.WriteHeader(http.StatusBadRequest)
-		_, _ = rw.Write([]byte("page error"))
+		errorResponse(rw, "page error")
 		return
 	}
 
@@ -132,8 +136,7 @@ func getPage(rw http.ResponseWriter, req *http.Request) {
 		_ = line.Render(rw)
 		return
 	default:
-		rw.WriteHeader(http.StatusBadRequest)
-		_, _ = rw.Write([]byte("page error"))
+		errorResponse(rw, "page error")
 		return
 	}
 
@@ -290,14 +293,12 @@ func webhook(rw http.ResponseWriter, req *http.Request) {
 
 	value, err := store.Chatbot.DataGet(uid1, uid2.UserId(), fmt.Sprintf("webhook:%s", uid3.String()))
 	if err != nil {
-		rw.WriteHeader(http.StatusBadRequest)
-		_, _ = rw.Write([]byte("webhook error"))
+		errorResponse(rw, "webhook error")
 		return
 	}
 	_, ok := value.String("value")
 	if !ok {
-		rw.WriteHeader(http.StatusBadRequest)
-		_, _ = rw.Write([]byte("webhook error"))
+		errorResponse(rw, "webhook error")
 		return
 	}
 
@@ -318,8 +319,7 @@ func infoAgent(rw http.ResponseWriter, req *http.Request) {
 	ui1, _ := strconv.ParseUint(vars["uid1"], 10, 64)
 	ui2, _ := strconv.ParseUint(vars["uid2"], 10, 64)
 	if ui1 == 0 || ui2 == 0 {
-		rw.WriteHeader(http.StatusBadRequest)
-		_, _ = rw.Write([]byte("path error"))
+		errorResponse(rw, "path error")
 		return
 	}
 
@@ -339,16 +339,14 @@ func postAgent(rw http.ResponseWriter, req *http.Request) {
 	body, err := io.ReadAll(req.Body)
 	if err != nil {
 		logs.Err.Println(err)
-		rw.WriteHeader(http.StatusBadRequest)
-		_, _ = rw.Write([]byte("error"))
+		errorResponse(rw, "error")
 		return
 	}
 	var data agent.Data
 	err = json.Unmarshal(body, &data)
 	if err != nil {
 		logs.Err.Println(err)
-		rw.WriteHeader(http.StatusBadRequest)
-		_, _ = rw.Write([]byte("error"))
+		errorResponse(rw, "error")
 		return
 	}
 
@@ -356,8 +354,7 @@ func postAgent(rw http.ResponseWriter, req *http.Request) {
 	ui1, _ := strconv.ParseUint(vars["uid1"], 10, 64)
 	ui2, _ := strconv.ParseUint(vars["uid2"], 10, 64)
 	if ui1 == 0 || ui2 == 0 {
-		rw.WriteHeader(http.StatusBadRequest)
-		_, _ = rw.Write([]byte("error"))
+		errorResponse(rw, "error")
 		return
 	}
 
@@ -368,8 +365,7 @@ func postAgent(rw http.ResponseWriter, req *http.Request) {
 	subs, err := serverStore.Topics.GetUsers(topic, nil)
 	if err != nil {
 		logs.Err.Printf("agent %s %s", data.Id, err)
-		rw.WriteHeader(http.StatusBadRequest)
-		_, _ = rw.Write([]byte("error"))
+		errorResponse(rw, "error")
 		return
 	}
 
@@ -427,4 +423,26 @@ func postAgent(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	_, _ = rw.Write([]byte("ok"))
+}
+
+func urlRedirect(rw http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	flag, ok := vars["flag"]
+	if !ok {
+		errorResponse(rw, "error")
+		return
+	}
+
+	url, err := store.Chatbot.UrlGetByFlag(flag)
+	if err != nil {
+		errorResponse(rw, "error")
+		return
+	}
+
+	// view count
+	_ = store.Chatbot.UrlViewIncrease(flag)
+
+	// redirect
+	http.Redirect(rw, req, url.Url, http.StatusFound)
+	return
 }

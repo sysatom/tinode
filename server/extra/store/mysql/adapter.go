@@ -388,6 +388,48 @@ func (a *adapter) SessionGet(uid types.Uid, topic string) (model.Session, error)
 	return find, nil
 }
 
+func (a *adapter) UrlCreate(url model.Url) error {
+	return a.db.Create(&model.Url{
+		Flag:  url.Flag,
+		Url:   url.Url,
+		State: url.State,
+	}).Error
+}
+
+func (a *adapter) UrlViewIncrease(flag string) error {
+	return a.db.
+		Model(&model.Url{}).
+		Where("`flag` = ?", flag).
+		UpdateColumn("view_count", gorm.Expr("view_count + ?", 1)).Error
+}
+
+func (a *adapter) UrlState(flag string, state model.UrlState) error {
+	return a.db.
+		Model(&model.Url{}).
+		Where("`flag` = ?", flag).
+		Updates(map[string]interface{}{
+			"state": state,
+		}).Error
+}
+
+func (a *adapter) UrlGetByFlag(flag string) (model.Url, error) {
+	var find model.Url
+	err := a.db.Where("`flag` = ?", flag).First(&find).Error
+	if err != nil {
+		return model.Url{}, err
+	}
+	return find, nil
+}
+
+func (a *adapter) UrlGetByUrl(url string) (model.Url, error) {
+	var find model.Url
+	err := a.db.Where("`url` = ?", url).First(&find).Error
+	if err != nil {
+		return model.Url{}, err
+	}
+	return find, nil
+}
+
 func (a *adapter) PageSet(pageId string, page model.Page) error {
 	var find model.Page
 	err := a.db.Where("`page_id` = ?", pageId).First(&find).Error

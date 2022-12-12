@@ -117,6 +117,11 @@ type ChatbotPersistenceInterface interface {
 	SessionGet(uid types.Uid, topic string) (model.Session, error)
 	PageSet(pageId string, page model.Page) error
 	PageGet(pageId string) (model.Page, error)
+	UrlCreate(url model.Url) error
+	UrlGetByFlag(flag string) (model.Url, error)
+	UrlGetByUrl(url string) (model.Url, error)
+	UrlState(flag string, state model.UrlState) error
+	UrlViewIncrease(flag string) error
 
 	GetObjectiveByID(id int64) (*model.Objective, error)
 	GetObjectiveBySequence(uid types.Uid, topic string, sequence int64) (*model.Objective, error)
@@ -260,6 +265,26 @@ func (c chatbotMapper) DataList(uid types.Uid, topic, prefix string) ([]*model.D
 
 func (c chatbotMapper) DataDelete(uid types.Uid, topic, key string) error {
 	return adp.DataDelete(uid, topic, key)
+}
+
+func (c chatbotMapper) UrlCreate(url model.Url) error {
+	return adp.UrlCreate(url)
+}
+
+func (c chatbotMapper) UrlGetByFlag(flag string) (model.Url, error) {
+	return adp.UrlGetByFlag(flag)
+}
+
+func (c chatbotMapper) UrlGetByUrl(url string) (model.Url, error) {
+	return adp.UrlGetByUrl(url)
+}
+
+func (c chatbotMapper) UrlState(flag string, state model.UrlState) error {
+	return adp.UrlState(flag, state)
+}
+
+func (c chatbotMapper) UrlViewIncrease(flag string) error {
+	return adp.UrlViewIncrease(flag)
 }
 
 func (c chatbotMapper) GetObjectiveByID(id int64) (*model.Objective, error) {

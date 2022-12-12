@@ -247,3 +247,25 @@ type Data struct {
 func (Data) TableName() string {
 	return "chatbot_data"
 }
+
+type Url struct {
+	ID        uint64 `gorm:"primaryKey"`
+	Flag      string
+	Url       string
+	State     UrlState
+	ViewCount int
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+func (Url) TableName() string {
+	return "chatbot_url"
+}
+
+type UrlState int
+
+const (
+	UrlStateUnknown UrlState = iota
+	UrlStateEnable
+	UrlStateDisable
+)
