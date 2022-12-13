@@ -647,3 +647,17 @@ func ImageConvert(data []byte, name string, width, height int) ImageMsg {
 		ImageBase64: raw,
 	}
 }
+
+func ExtractText(content interface{}) string {
+	text := ""
+	if m, ok := content.(map[string]interface{}); ok {
+		if t, ok := m["txt"]; ok {
+			if s, ok := t.(string); ok {
+				text = s
+			}
+		}
+	} else if s, ok := content.(string); ok {
+		text = s
+	}
+	return text
+}

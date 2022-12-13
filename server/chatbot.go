@@ -14,6 +14,7 @@ import (
 	_ "github.com/tinode/chat/server/extra/bots/anki"
 	_ "github.com/tinode/chat/server/extra/bots/bark"
 	_ "github.com/tinode/chat/server/extra/bots/cloudflare"
+	_ "github.com/tinode/chat/server/extra/bots/download"
 	_ "github.com/tinode/chat/server/extra/bots/finance"
 	_ "github.com/tinode/chat/server/extra/bots/genshin"
 	_ "github.com/tinode/chat/server/extra/bots/github"
@@ -46,6 +47,7 @@ import (
 func hookMux(mux *http.ServeMux) {
 	mux.Handle("/extra/", newRouter())
 	mux.Handle("/u/", newUrlRouter())
+	mux.Handle("/d/", newDownloadRouter())
 }
 
 func hookStore() {

@@ -1,20 +1,17 @@
-package url
+package download
 
 import (
 	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/tinode/chat/server/extra/bots"
-	"github.com/tinode/chat/server/extra/store"
-	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/utils"
 	"github.com/tinode/chat/server/logs"
-	"gorm.io/gorm"
-	"strings"
+	serverTypes "github.com/tinode/chat/server/store/types"
 )
 
-const Name = "url"
+const Name = "download"
 
 var handler bot
 
@@ -60,33 +57,13 @@ func (bot) IsReady() bool {
 func (b bot) Input(_ types.Context, _ map[string]interface{}, content interface{}) (types.MsgPayload, error) {
 	text := types.ExtractText(content)
 	if utils.IsUrl(text) {
-		url, err := store.Chatbot.UrlGetByUrl(text)
-		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-			return types.TextMsg{Text: "query url error"}, nil
-		}
-		if url.ID > 0 {
-			return types.LinkMsg{Url: fmt.Sprintf("%s/u/%s", types.AppUrl(), url.Flag)}, nil
-		}
-		flag := strings.ToLower(types.Id().String())
-		err = store.Chatbot.UrlCreate(model.Url{
-			Flag:  flag,
-			Url:   text,
-			State: model.UrlStateEnable,
-		})
+		originalName, filename, err := fileDownload(text)
 		if err != nil {
-			return types.TextMsg{Text: "create error"}, nil
+			return types.TextMsg{Text: err.Error()}, nil
 		}
-		return types.LinkMsg{Url: fmt.Sprintf("%s/u/%s", types.AppUrl(), flag)}, nil
-	} else {
-		url, err := store.Chatbot.UrlGetByFlag(text)
-		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-			return types.TextMsg{Text: "query url error"}, nil
-		}
-		if url.ID > 0 {
-			return types.LinkMsg{Url: url.Url}, nil
-		}
-		return types.TextMsg{Text: "empty"}, nil
+		return types.LinkMsg{Title: originalName, Url: fmt.Sprintf("%s/d/%s", types.AppUrl(), filename)}, nil
 	}
+	return nil, nil
 }
 
 func (b bot) Group(_ types.Context, _ map[string]interface{}, _ interface{}) (types.MsgPayload, error) {
@@ -95,4 +72,8 @@ func (b bot) Group(_ types.Context, _ map[string]interface{}, _ interface{}) (ty
 
 func (b bot) Command(ctx types.Context, content interface{}) (types.MsgPayload, error) {
 	return bots.RunCommand(commandRules, ctx, content)
+}
+
+func (b bot) Cron(send func(rcptTo string, uid serverTypes.Uid, out types.MsgPayload)) error {
+	return bots.RunCron(cronRules, Name, b.AuthLevel(), send)
 }

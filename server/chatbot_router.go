@@ -19,6 +19,7 @@ import (
 	"github.com/tinode/chat/server/store/types"
 	"io"
 	"net/http"
+	"os"
 	"strconv"
 )
 
@@ -40,6 +41,13 @@ func newUrlRouter() *mux.Router {
 	s := r.PathPrefix("/u").Subrouter()
 	s.HandleFunc("/{flag}", urlRedirect)
 	return s
+}
+
+func newDownloadRouter() *mux.Router {
+	dir := os.Getenv("DOWNLOAD_PATH")
+	r := mux.NewRouter()
+	r.PathPrefix("/d").Handler(http.StripPrefix("/d/", http.FileServer(http.Dir(dir))))
+	return r
 }
 
 // handler
