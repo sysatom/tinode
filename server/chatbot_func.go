@@ -16,6 +16,7 @@ import (
 	extraStore "github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/store/model"
 	extraTypes "github.com/tinode/chat/server/extra/types"
+	"github.com/tinode/chat/server/extra/utils"
 	"github.com/tinode/chat/server/extra/vendors"
 	"github.com/tinode/chat/server/extra/vendors/dropbox"
 	"github.com/tinode/chat/server/extra/vendors/github"
@@ -299,7 +300,11 @@ func initializeCrawler() error {
 						continue
 					}
 					builder.AppendText(fmt.Sprintf("%s: ", k), extraTypes.TextOption{IsBold: true})
-					builder.AppendText(fmt.Sprintf("%v \n", item[k]), extraTypes.TextOption{})
+					if utils.IsUrl(item[k]) {
+						builder.AppendTextLine(item[k], extraTypes.TextOption{IsLink: true})
+					} else {
+						builder.AppendTextLine(item[k], extraTypes.TextOption{})
+					}
 				}
 			}
 			head, content = builder.Content()

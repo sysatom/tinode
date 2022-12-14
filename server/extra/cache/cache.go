@@ -21,6 +21,6 @@ func InitCache() {
 	s := DB.Ping(context.Background())
 	_, err := s.Result()
 	if err != nil {
-		panic("redis server error")
+		panic("redis server error " + err.Error())
 	}
 }
