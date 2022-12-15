@@ -5,6 +5,7 @@ import (
 	"github.com/tinode/chat/server/extra/bots"
 	"github.com/tinode/chat/server/extra/cache"
 	"github.com/tinode/chat/server/extra/channels"
+	"github.com/tinode/chat/server/extra/queue"
 	extraStore "github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/logs"
 	"net/http"
@@ -135,4 +136,8 @@ func hookHandleIncomingMessage(t *Topic, msg *ClientComMessage) {
 func hookMounted() {
 	// notify after reboot
 	go notifyAfterReboot()
+}
+
+func hookQueue() {
+	queue.InitMessageQueue(NewAsyncMessageConsumer())
 }

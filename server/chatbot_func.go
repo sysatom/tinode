@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/adjust/rmq/v5"
 	"github.com/go-redis/redis/v9"
 	"github.com/tinode/chat/server/auth"
 	"github.com/tinode/chat/server/extra/bots"
@@ -916,4 +917,35 @@ func sessionCurrent(uid types.Uid, topic string) (model.Session, bool) {
 func errorResponse(rw http.ResponseWriter, text string) {
 	rw.WriteHeader(http.StatusBadRequest)
 	_, _ = rw.Write([]byte(text))
+}
+
+type AsyncMessageConsumer struct {
+	name string
+}
+
+func NewAsyncMessageConsumer() *AsyncMessageConsumer {
+	return &AsyncMessageConsumer{name: "consumer"}
+}
+
+func (c *AsyncMessageConsumer) Consume(delivery rmq.Delivery) {
+	payload := delivery.Payload()
+
+	var qp extraTypes.QueuePayload
+	err := json.Unmarshal([]byte(payload), &qp)
+	if err != nil {
+		if err := delivery.Reject(); err != nil {
+			logs.Err.Printf("failed to reject %s: %s\n", payload, err)
+			return
+		}
+		return
+	}
+
+	uid := types.ParseUserId(qp.Uid)
+	msg := extraTypes.ToPayload(qp.Type, qp.Msg)
+	botSend(qp.RcptTo, uid, msg)
+
+	if err := delivery.Ack(); err != nil {
+		logs.Err.Printf("failed to ack %s: %s\n", payload, err)
+		return
+	}
 }

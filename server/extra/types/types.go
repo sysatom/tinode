@@ -1,6 +1,7 @@
 package types
 
 import (
+	"encoding/json"
 	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/utils"
 	"github.com/tinode/chat/server/logs"
@@ -71,4 +72,24 @@ func Id() types.Uid {
 
 func AppUrl() string {
 	return os.Getenv("TINODE_URL")
+}
+
+type QueuePayload struct {
+	RcptTo string          `json:"rcpt_to"`
+	Uid    string          `json:"uid"`
+	Type   string          `json:"type"`
+	Msg    json.RawMessage `json:"msg"`
+}
+
+func ConvertQueuePayload(rcptTo string, uid string, msg MsgPayload) (QueuePayload, error) {
+	data, err := json.Marshal(msg)
+	if err != nil {
+		return QueuePayload{}, err
+	}
+	return QueuePayload{
+		RcptTo: rcptTo,
+		Uid:    uid,
+		Type:   Tye(msg),
+		Msg:    data,
+	}, nil
 }

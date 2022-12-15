@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/tinode/chat/server/extra/bots"
+	"github.com/tinode/chat/server/extra/queue"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/utils"
 	"github.com/tinode/chat/server/logs"
@@ -54,14 +55,21 @@ func (bot) IsReady() bool {
 	return handler.initialized
 }
 
-func (b bot) Input(_ types.Context, _ map[string]interface{}, content interface{}) (types.MsgPayload, error) {
+func (b bot) Input(ctx types.Context, _ map[string]interface{}, content interface{}) (types.MsgPayload, error) {
 	text := types.ExtractText(content)
 	if utils.IsUrl(text) {
-		originalName, filename, err := fileDownload(text)
-		if err != nil {
-			return types.TextMsg{Text: err.Error()}, nil
-		}
-		return types.LinkMsg{Title: originalName, Url: fmt.Sprintf("%s/d/%s", types.AppUrl(), filename)}, nil
+		go func() {
+			originalName, filename, err := fileDownload(text)
+			if err != nil {
+				_ = queue.AsyncMessage(ctx.RcptTo, ctx.Original, types.TextMsg{Text: err.Error()})
+				return
+			}
+			_ = queue.AsyncMessage(ctx.RcptTo, ctx.Original, types.LinkMsg{
+				Title: originalName,
+				Url:   fmt.Sprintf("%s/d/%s", types.AppUrl(), filename),
+			})
+		}()
+		return types.TextMsg{Text: "background"}, nil
 	}
 	return nil, nil
 }

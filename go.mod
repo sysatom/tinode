@@ -7,12 +7,14 @@ require (
 	cloud.google.com/go/firestore v1.6.1 // indirect
 	firebase.google.com/go v3.13.0+incompatible
 	github.com/PuerkitoBio/goquery v1.8.0
+	github.com/adjust/rmq/v5 v5.0.1
 	github.com/aws/aws-sdk-go v1.29.29
 	github.com/bsm/redislock v0.8.2
 	github.com/cavaliergopher/grab/v3 v3.0.1
 	github.com/elastic/go-sysinfo v1.8.1
 	github.com/felixge/httpsnoop v1.0.3 // indirect
 	github.com/go-echarts/go-echarts/v2 v2.2.4
+	github.com/go-redis/redis/v8 v8.11.5
 	github.com/go-redis/redis/v9 v9.0.0-rc.2
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/go-sql-driver/mysql v1.6.0

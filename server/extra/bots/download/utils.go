@@ -20,7 +20,6 @@ func fileDownload(fullUrlFile string) (string, string, error) {
 
 	segments := strings.Split(fileUrl.Path, "/")
 	originalFileName := segments[len(segments)-1]
-	fmt.Println(originalFileName)
 	ext := filepath.Ext(originalFileName)
 	if ext == "" {
 		return "", "", errors.New("ext error")
@@ -41,6 +40,9 @@ func fileDownload(fullUrlFile string) (string, string, error) {
 
 	resp := client.Do(req)
 	if resp == nil {
+		return "", "", errors.New("download error")
+	}
+	if resp.HTTPResponse == nil {
 		return "", "", errors.New("download error")
 	}
 	if resp.HTTPResponse.StatusCode != http.StatusOK {

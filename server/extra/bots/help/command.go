@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/nikolaydubina/calendarheatmap/charts"
 	"github.com/tinode/chat/server/extra/bots"
+	"github.com/tinode/chat/server/extra/queue"
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/types"
@@ -325,6 +326,17 @@ var commandRules = []command.Rule{
 				Size:        w.Len(),
 				ImageBase64: raw,
 			}
+		},
+	},
+	{
+		Define: "queue",
+		Help:   `publish queue`,
+		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+			err := queue.AsyncMessage(ctx.RcptTo, ctx.Original, types.TextMsg{Text: time.Now().String()})
+			if err != nil {
+				return types.TextMsg{Text: err.Error()}
+			}
+			return types.TextMsg{Text: "ok"}
 		},
 	},
 }

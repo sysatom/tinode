@@ -475,7 +475,7 @@ func (m *MsgBuilder) BuildAttachmentMessage(fileName string, text string, opt At
 
 func (m *MsgBuilder) Content() (map[string]interface{}, interface{}) {
 	if m.Payload != nil {
-		m.Message.Tye = tye(m.Payload)
+		m.Message.Tye = Tye(m.Payload)
 		m.Message.Src = m.Payload
 	}
 	return m.Message.Content()
@@ -536,7 +536,7 @@ func substr(input string, start int, length int) string {
 	return string(asRunes[start : start+length])
 }
 
-func tye(payload MsgPayload) string {
+func Tye(payload MsgPayload) string {
 	t := reflect.TypeOf(payload)
 	return t.Name()
 }
