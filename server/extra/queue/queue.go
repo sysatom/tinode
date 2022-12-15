@@ -88,3 +88,17 @@ func AsyncMessage(rcptTo, original string, msg types.MsgPayload) error {
 	}
 	return MessageQueue.PublishBytes(payload)
 }
+
+func Stats() (string, error) {
+	queues, err := connection.GetOpenQueues()
+	if err != nil {
+		return "", err
+	}
+
+	stats, err := connection.CollectStats(queues)
+	if err != nil {
+		return "", err
+	}
+
+	return stats.GetHtml("", ""), nil
+}

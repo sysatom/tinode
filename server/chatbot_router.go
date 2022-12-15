@@ -11,6 +11,7 @@ import (
 	"github.com/tinode/chat/server/extra/agent"
 	"github.com/tinode/chat/server/extra/bots"
 	"github.com/tinode/chat/server/extra/page"
+	"github.com/tinode/chat/server/extra/queue"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/store/model"
 	extraTypes "github.com/tinode/chat/server/extra/types"
@@ -32,6 +33,7 @@ func newRouter() *mux.Router {
 	s.HandleFunc("/webhook/{uid1}/{uid2}/{uid3}", webhook).Methods(http.MethodPost)
 	s.HandleFunc("/agent/{uid1}/{uid2}", infoAgent).Methods(http.MethodGet)
 	s.HandleFunc("/agent/{uid1}/{uid2}", postAgent).Methods(http.MethodPost)
+	s.HandleFunc("/queue/stats", queueStats)
 
 	return s
 }
@@ -453,4 +455,13 @@ func urlRedirect(rw http.ResponseWriter, req *http.Request) {
 	// redirect
 	http.Redirect(rw, req, url.Url, http.StatusFound)
 	return
+}
+
+func queueStats(rw http.ResponseWriter, req *http.Request) {
+	html, err := queue.Stats()
+	if err != nil {
+		errorResponse(rw, "queue stats error")
+		return
+	}
+	_, _ = fmt.Fprint(rw, html)
 }
