@@ -27,6 +27,7 @@ require (
 	github.com/influxdata/cron v0.0.0-20201006132531-4bb0a200dcbe
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/maxence-charriere/go-app/v9 v9.6.7
+	github.com/mmcdole/gofeed v1.1.3 // indirect
 	github.com/nikolaydubina/calendarheatmap v1.7.0
 	github.com/nyaruka/phonenumbers v1.0.75
 	github.com/prometheus/client_golang v1.12.2

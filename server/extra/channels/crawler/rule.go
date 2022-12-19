@@ -2,12 +2,12 @@ package crawler
 
 import (
 	"encoding/json"
+	"github.com/PuerkitoBio/goquery"
+	"github.com/mmcdole/gofeed"
 	"github.com/tidwall/gjson"
 	"net/http"
 	"regexp"
 	"strings"
-
-	"github.com/PuerkitoBio/goquery"
 )
 
 type Rule struct {
@@ -25,6 +25,10 @@ type Rule struct {
 		List string
 		Item map[string]string
 	} `json:"json,omitempty"`
+	Feed *struct {
+		URL  string
+		Item map[string]string
+	} `json:"feed,omitempty"`
 }
 
 func (r Rule) Run() []map[string]string {
@@ -113,6 +117,49 @@ func (r Rule) Run() []map[string]string {
 					continue
 				}
 				tmp[k] = v
+			}
+			if len(tmp) == 0 {
+				continue
+			}
+			result = append(result, tmp)
+		}
+	}
+
+	// feed
+	if r.Feed != nil {
+		fp := gofeed.NewParser()
+		feed, err := fp.ParseURL(r.Feed.URL)
+		if err != nil {
+			return result
+		}
+
+		keys := make([]string, 0, len(r.Feed.Item))
+		for k := range r.Feed.Item {
+			keys = append(keys, k)
+		}
+
+		for _, item := range feed.Items {
+			tmp := make(map[string]string)
+			for _, k := range keys {
+				v := ""
+				switch r.Feed.Item[k] {
+				case "title":
+					v = item.Title
+				case "description":
+					v = item.Description
+				case "content":
+					v = item.Content
+				case "link":
+					v = item.Link
+				case "updated":
+					v = item.Updated
+				}
+				if v != "" {
+					v = strings.TrimSpace(v)
+					v = strings.ReplaceAll(v, "\n", "")
+					v = strings.ReplaceAll(v, "\r\n", "")
+					tmp[k] = v
+				}
 			}
 			if len(tmp) == 0 {
 				continue
