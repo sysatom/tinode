@@ -2,6 +2,7 @@ package store
 
 import (
 	"github.com/tinode/chat/server/extra/store/model"
+	extraTypes "github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/store/types"
 )
 
@@ -33,7 +34,7 @@ type Adapter interface {
 	// DataGet data get
 	DataGet(uid types.Uid, topic, key string) (model.JSON, error)
 	// DataList data list
-	DataList(uid types.Uid, topic, prefix string) ([]*model.Data, error)
+	DataList(uid types.Uid, topic string, filter extraTypes.DataFilter) ([]*model.Data, error)
 	// DataDelete data delete
 	DataDelete(uid types.Uid, topic, key string) error
 	// ConfigSet config set

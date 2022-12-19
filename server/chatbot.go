@@ -13,6 +13,7 @@ import (
 
 	// bots
 	_ "github.com/tinode/chat/server/extra/bots/anki"
+	_ "github.com/tinode/chat/server/extra/bots/attendance"
 	_ "github.com/tinode/chat/server/extra/bots/bark"
 	_ "github.com/tinode/chat/server/extra/bots/cloudflare"
 	_ "github.com/tinode/chat/server/extra/bots/download"

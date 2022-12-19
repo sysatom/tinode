@@ -7,12 +7,6 @@ import (
 	"math/big"
 )
 
-//go:embed fonts/Sunflower-Medium.ttf
-var defaultFontFaceBytes []byte
-
-//go:embed colorscales/green-blue-9.csv
-var defaultColorScaleBytes []byte
-
 // randomPoints returns some random x, y points.
 func randomPoints(n int) plotter.XYs {
 	pts := make(plotter.XYs, n)

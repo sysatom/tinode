@@ -93,3 +93,9 @@ func ConvertQueuePayload(rcptTo string, uid string, msg MsgPayload) (QueuePayloa
 		Msg:    data,
 	}, nil
 }
+
+type DataFilter struct {
+	Prefix       *string
+	CreatedStart *time.Time
+	CreatedEnd   *time.Time
+}

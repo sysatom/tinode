@@ -12,6 +12,7 @@ import (
 	"github.com/tinode/chat/server/extra/locker"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/store/model"
+	extraTypes "github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
 	serverStore "github.com/tinode/chat/server/store"
 	"github.com/tinode/chat/server/store/types"
@@ -183,20 +184,22 @@ func (a *adapter) DataGet(uid types.Uid, topic, key string) (model.JSON, error) 
 	return find.Value, nil
 }
 
-func (a *adapter) DataList(uid types.Uid, topic, prefix string) ([]*model.Data, error) {
+func (a *adapter) DataList(uid types.Uid, topic string, filter extraTypes.DataFilter) ([]*model.Data, error) {
 	var list []*model.Data
-	if prefix == "" {
-		err := a.db.Where("`uid` = ? AND `topic` = ?", uid.UserId(), topic).Find(&list).Error
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		err := a.db.Where("`uid` = ? AND `topic` = ? AND `key` LIKE ?", uid.UserId(), topic, fmt.Sprintf("%s%%", prefix)).Find(&list).Error
-		if err != nil {
-			return nil, err
-		}
+	builder := a.db.Where("`uid` = ? AND `topic` = ?", uid.UserId(), topic)
+	if filter.Prefix != nil {
+		builder = builder.Where("`key` LIKE ?", fmt.Sprintf("%s%%", *filter.Prefix))
 	}
-
+	if filter.CreatedStart != nil {
+		builder = builder.Where("created_at >= ?", filter.CreatedStart)
+	}
+	if filter.CreatedEnd != nil {
+		builder = builder.Where("created_at <= ?", filter.CreatedEnd)
+	}
+	err := builder.Find(&list).Error
+	if err != nil {
+		return nil, err
+	}
 	return list, nil
 }
 

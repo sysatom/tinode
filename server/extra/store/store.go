@@ -3,6 +3,7 @@ package store
 import (
 	"errors"
 	"github.com/tinode/chat/server/extra/store/model"
+	extraTypes "github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/store/types"
 )
 
@@ -100,7 +101,7 @@ type ChatbotPersistenceInterface interface {
 
 	DataSet(uid types.Uid, topic, key string, value model.JSON) error
 	DataGet(uid types.Uid, topic, key string) (model.JSON, error)
-	DataList(uid types.Uid, topic, prefix string) ([]*model.Data, error)
+	DataList(uid types.Uid, topic string, filter extraTypes.DataFilter) ([]*model.Data, error)
 	DataDelete(uid types.Uid, topic, key string) error
 	ConfigSet(uid types.Uid, topic, key string, value model.JSON) error
 	ConfigGet(uid types.Uid, topic, key string) (model.JSON, error)
@@ -259,8 +260,8 @@ func (c chatbotMapper) DataGet(uid types.Uid, topic, key string) (model.JSON, er
 	return adp.DataGet(uid, topic, key)
 }
 
-func (c chatbotMapper) DataList(uid types.Uid, topic, prefix string) ([]*model.Data, error) {
-	return adp.DataList(uid, topic, prefix)
+func (c chatbotMapper) DataList(uid types.Uid, topic string, filter extraTypes.DataFilter) ([]*model.Data, error) {
+	return adp.DataList(uid, topic, filter)
 }
 
 func (c chatbotMapper) DataDelete(uid types.Uid, topic, key string) error {

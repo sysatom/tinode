@@ -22,7 +22,8 @@ var commandRules = []command.Rule{
 		Define: `list`,
 		Help:   `List webhook`,
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
-			items, err := store.Chatbot.DataList(ctx.AsUser, ctx.Original, "webhook:")
+			prefix := "webhook:"
+			items, err := store.Chatbot.DataList(ctx.AsUser, ctx.Original, types.DataFilter{Prefix: &prefix})
 			if err != nil {
 				return nil
 			}
