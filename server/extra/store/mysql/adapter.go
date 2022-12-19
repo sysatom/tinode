@@ -391,6 +391,35 @@ func (a *adapter) SessionGet(uid types.Uid, topic string) (model.Session, error)
 	return find, nil
 }
 
+func (a *adapter) BehaviorSet(behavior model.Behavior) error {
+	return a.db.Create(&behavior).Error
+}
+
+func (a *adapter) BehaviorGet(uid types.Uid, flag string) (model.Behavior, error) {
+	var find model.Behavior
+	err := a.db.Where("`uid` = ? AND `flag` = ?", uid.UserId(), flag).First(&find).Error
+	if err != nil {
+		return model.Behavior{}, err
+	}
+	return find, nil
+}
+
+func (a *adapter) BehaviorList(uid types.Uid) ([]*model.Behavior, error) {
+	var list []*model.Behavior
+	err := a.db.Where("`uid` = ?", uid.UserId()).Order("id DESC").Find(&list).Error
+	if err != nil {
+		return nil, err
+	}
+	return list, nil
+}
+
+func (a *adapter) BehaviorIncrease(uid types.Uid, flag string, number int) error {
+	return a.db.
+		Model(&model.Behavior{}).
+		Where("`uid` = ? AND `flag` = ?", uid.UserId(), flag).
+		UpdateColumn("count", gorm.Expr("count + ?", number)).Error
+}
+
 func (a *adapter) UrlCreate(url model.Url) error {
 	return a.db.Create(&model.Url{
 		Flag:  url.Flag,

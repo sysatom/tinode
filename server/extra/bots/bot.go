@@ -404,6 +404,27 @@ func CreateShortUrl(text string) (string, error) {
 	return "", errors.New("error url")
 }
 
+const (
+	MessageBotIncomingBehavior   = "message_bot_incoming"
+	MessageGroupIncomingBehavior = "message_group_incoming"
+)
+
+func Behavior(uid serverTypes.Uid, flag string, number int) {
+	b, err := store.Chatbot.BehaviorGet(uid, flag)
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return
+	}
+	if b.ID > 0 {
+		_ = store.Chatbot.BehaviorIncrease(uid, flag, number)
+	} else {
+		_ = store.Chatbot.BehaviorSet(model.Behavior{
+			Uid:   uid.UserId(),
+			Flag:  flag,
+			Count: number,
+		})
+	}
+}
+
 // Init initializes registered handlers.
 func Init(jsonconf json.RawMessage) error {
 	var config []json.RawMessage

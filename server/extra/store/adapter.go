@@ -77,6 +77,14 @@ type Adapter interface {
 	UrlState(flag string, state model.UrlState) error
 	// UrlViewIncrease increase url view count
 	UrlViewIncrease(flag string) error
+	// BehaviorSet set user behavior
+	BehaviorSet(behavior model.Behavior) error
+	// BehaviorGet get user behavior
+	BehaviorGet(uid types.Uid, flag string) (model.Behavior, error)
+	// BehaviorList list user behavior
+	BehaviorList(uid types.Uid) ([]*model.Behavior, error)
+	// BehaviorIncrease increase user behavior count
+	BehaviorIncrease(uid types.Uid, flag string, number int) error
 
 	GetObjectiveByID(id int64) (*model.Objective, error)
 	GetObjectiveBySequence(uid types.Uid, topic string, sequence int64) (*model.Objective, error)

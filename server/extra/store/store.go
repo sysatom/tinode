@@ -123,6 +123,10 @@ type ChatbotPersistenceInterface interface {
 	UrlGetByUrl(url string) (model.Url, error)
 	UrlState(flag string, state model.UrlState) error
 	UrlViewIncrease(flag string) error
+	BehaviorSet(behavior model.Behavior) error
+	BehaviorGet(uid types.Uid, flag string) (model.Behavior, error)
+	BehaviorList(uid types.Uid) ([]*model.Behavior, error)
+	BehaviorIncrease(uid types.Uid, flag string, number int) error
 
 	GetObjectiveByID(id int64) (*model.Objective, error)
 	GetObjectiveBySequence(uid types.Uid, topic string, sequence int64) (*model.Objective, error)
@@ -286,6 +290,22 @@ func (c chatbotMapper) UrlState(flag string, state model.UrlState) error {
 
 func (c chatbotMapper) UrlViewIncrease(flag string) error {
 	return adp.UrlViewIncrease(flag)
+}
+
+func (c chatbotMapper) BehaviorSet(behavior model.Behavior) error {
+	return adp.BehaviorSet(behavior)
+}
+
+func (c chatbotMapper) BehaviorGet(uid types.Uid, flag string) (model.Behavior, error) {
+	return adp.BehaviorGet(uid, flag)
+}
+
+func (c chatbotMapper) BehaviorList(uid types.Uid) ([]*model.Behavior, error) {
+	return adp.BehaviorList(uid)
+}
+
+func (c chatbotMapper) BehaviorIncrease(uid types.Uid, flag string, number int) error {
+	return adp.BehaviorIncrease(uid, flag, number)
 }
 
 func (c chatbotMapper) GetObjectiveByID(id int64) (*model.Objective, error) {

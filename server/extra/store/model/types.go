@@ -269,3 +269,17 @@ const (
 	UrlStateEnable
 	UrlStateDisable
 )
+
+type Behavior struct {
+	ID        uint `gorm:"primaryKey"`
+	Uid       string
+	Flag      string
+	Count     int
+	Extra     *JSON `gorm:"type:json"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+func (Behavior) TableName() string {
+	return "chatbot_behavior"
+}

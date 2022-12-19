@@ -563,6 +563,9 @@ func botIncomingMessage(t *Topic, msg *ClientComMessage) {
 		Timestamp: msg.Timestamp,
 	}
 
+	// behavior
+	bots.Behavior(uid, bots.MessageBotIncomingBehavior, 1)
+
 	// user auth record
 	_, authLvl, _, _, _ := store.Users.GetAuthRecord(uid, "basic")
 
@@ -768,6 +771,9 @@ func groupIncomingMessage(t *Topic, msg *ClientComMessage) {
 		MetaWhat:  msg.MetaWhat,
 		Timestamp: msg.Timestamp,
 	}
+
+	// behavior
+	bots.Behavior(uid, bots.MessageGroupIncomingBehavior, 1)
 
 	// user auth record
 	_, authLvl, _, _, _ := store.Users.GetAuthRecord(uid, "basic")
