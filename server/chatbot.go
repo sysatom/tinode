@@ -71,6 +71,12 @@ func hookBot(jsconfig json.RawMessage) {
 		logs.Err.Fatal("Failed to initialize bot:", err)
 	}
 
+	// bootstrap bots
+	err = bots.Bootstrap()
+	if err != nil {
+		logs.Err.Fatal("Failed to bootstrap bot:", err)
+	}
+
 	// bot father
 	err = initializeBotFather()
 	if err != nil {

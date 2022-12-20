@@ -31,6 +31,8 @@ type Handler interface {
 	// IsReady сhecks if the bot is initialized.
 	IsReady() bool
 
+	Bootstrap() error
+
 	AuthLevel() auth.Level
 
 	// Input return input result
@@ -62,6 +64,10 @@ type Handler interface {
 }
 
 type Base struct{}
+
+func (Base) Bootstrap() error {
+	return nil
+}
 
 func (Base) AuthLevel() auth.Level {
 	return auth.LevelAuth
@@ -454,6 +460,18 @@ func Init(jsonconf json.RawMessage) error {
 		}
 	}
 
+	return nil
+}
+
+func Bootstrap() error {
+	for _, bot := range handlers {
+		if !bot.IsReady() {
+			continue
+		}
+		if err := bot.Bootstrap(); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 

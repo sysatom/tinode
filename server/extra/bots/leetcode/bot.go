@@ -44,16 +44,15 @@ func (bot) Init(jsonconf json.RawMessage) error {
 
 	handler.initialized = true
 
-	err := importProblems()
-	if err != nil {
-		logs.Err.Println(err)
-	}
-
 	return nil
 }
 
 func (bot) IsReady() bool {
 	return handler.initialized
+}
+
+func (b bot) Bootstrap() error {
+	return importProblems()
 }
 
 func (b bot) Command(ctx types.Context, content interface{}) (types.MsgPayload, error) {
