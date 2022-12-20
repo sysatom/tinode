@@ -393,3 +393,20 @@ func (m LinkListMsg) Convert() (map[string]interface{}, interface{}) {
 	}
 	return builder.Content()
 }
+
+type QuestionMsg struct {
+	Id         int
+	Title      string
+	Slug       string
+	Difficulty int
+	Source     string
+}
+
+func (m QuestionMsg) Convert() (map[string]interface{}, interface{}) {
+	builder := MsgBuilder{Payload: m}
+	builder.AppendTextLine(fmt.Sprintf("[%s:%d] %s", m.Source, m.Id, m.Title), TextOption{})
+	if m.Source == "leetcode" {
+		builder.AppendText(fmt.Sprintf("https://leetcode.com/problems/%s/", m.Slug), TextOption{IsLink: true})
+	}
+	return builder.Content()
+}

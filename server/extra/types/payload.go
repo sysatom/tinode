@@ -632,6 +632,10 @@ func ToPayload(typ string, src []byte) MsgPayload {
 		var r RepoMsg
 		_ = json.Unmarshal(src, &r)
 		return r
+	case "QuestionMsg":
+		var r QuestionMsg
+		_ = json.Unmarshal(src, &r)
+		return r
 	}
 	return nil
 }
