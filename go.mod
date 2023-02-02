@@ -6,9 +6,9 @@ require (
 	cloud.google.com/go v0.102.0 // indirect
 	cloud.google.com/go/firestore v1.6.1 // indirect
 	firebase.google.com/go v3.13.0+incompatible
+	github.com/aws/aws-sdk-go v1.33.0
 	github.com/PuerkitoBio/goquery v1.8.0
 	github.com/adjust/rmq/v5 v5.0.1
-	github.com/aws/aws-sdk-go v1.29.29
 	github.com/bsm/redislock v0.8.2
 	github.com/cavaliergopher/grab/v3 v3.0.1
 	github.com/elastic/go-sysinfo v1.8.1
