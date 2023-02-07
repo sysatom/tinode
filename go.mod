@@ -6,9 +6,9 @@ require (
 	cloud.google.com/go v0.102.0 // indirect
 	cloud.google.com/go/firestore v1.6.1 // indirect
 	firebase.google.com/go v3.13.0+incompatible
-	github.com/aws/aws-sdk-go v1.33.0
 	github.com/PuerkitoBio/goquery v1.8.0
 	github.com/adjust/rmq/v5 v5.0.1
+	github.com/aws/aws-sdk-go v1.33.0
 	github.com/bsm/redislock v0.8.2
 	github.com/cavaliergopher/grab/v3 v3.0.1
 	github.com/elastic/go-sysinfo v1.8.1
@@ -27,7 +27,7 @@ require (
 	github.com/influxdata/cron v0.0.0-20201006132531-4bb0a200dcbe
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/maxence-charriere/go-app/v9 v9.6.7
-	github.com/mmcdole/gofeed v1.1.3 // indirect
+	github.com/mmcdole/gofeed v1.1.3
 	github.com/nikolaydubina/calendarheatmap v1.7.0
 	github.com/nyaruka/phonenumbers v1.0.75
 	github.com/prometheus/client_golang v1.12.2
