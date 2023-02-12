@@ -754,6 +754,7 @@ func (s *Session) hello(msg *ClientComMessage) {
 			"maxTagLength":       maxTagLength,
 			"maxTagCount":        globals.maxTagCount,
 			"maxFileUploadSize":  globals.maxFileUploadSize,
+			"reqCred":            globals.validatorClientConfig,
 		}
 		if len(globals.iceServers) > 0 {
 			params["iceServers"] = globals.iceServers
@@ -940,7 +941,7 @@ func (s *Session) login(msg *ClientComMessage) {
 		// Check responses. Ignore invalid responses, just keep cred unvalidated.
 		if validated, _, err = validatedCreds(rec.Uid, rec.AuthLevel, msg.Login.Cred, false); err == nil {
 			// Get a list of credentials which have not been validated.
-			_, missing = stringSliceDelta(globals.authValidators[rec.AuthLevel], validated)
+			_, missing, _ = stringSliceDelta(globals.authValidators[rec.AuthLevel], validated)
 		}
 	}
 	if err != nil {
@@ -1210,7 +1211,12 @@ func (s *Session) note(msg *ClientComMessage) {
 	}
 
 	switch msg.Note.What {
-	case "kp":
+	case "data":
+		if msg.Note.Payload == nil {
+			// Payload must be present in 'data' notifications.
+			return
+		}
+	case "kp", "kpa", "kpv":
 		if msg.Note.SeqId != 0 {
 			return
 		}
