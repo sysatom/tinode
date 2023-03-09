@@ -4,11 +4,15 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/tinode/chat/server/extra/bots"
+	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/types"
+	"github.com/tinode/chat/server/extra/vendors/openai"
 	"github.com/tinode/chat/server/logs"
 )
 
 const Name = "gpt"
+
+const ApiKey = "openai_key"
 
 var handler bot
 
@@ -51,8 +55,34 @@ func (bot) IsReady() bool {
 	return handler.initialized
 }
 
-func (b bot) Input(_ types.Context, _ map[string]interface{}, _ interface{}) (types.MsgPayload, error) {
-	return nil, nil
+func (b bot) Input(ctx types.Context, _ map[string]interface{}, context interface{}) (types.MsgPayload, error) {
+	// key
+	v, err := store.Chatbot.ConfigGet(ctx.AsUser, ctx.Original, ApiKey)
+	if err != nil {
+		logs.Err.Println("bot command key", err)
+	}
+	key, _ := v.String("value")
+
+	// input
+	text := ""
+	if v, ok := context.(string); ok {
+		text = v
+	}
+	if text == "" {
+		return types.TextMsg{Text: "input error"}, nil
+	}
+
+	client := openai.NewOpenAI(key)
+	resp, err := client.Chat(text)
+	if err != nil || resp == nil {
+		return types.TextMsg{Text: "api error"}, nil
+	}
+
+	if len(resp.Choices) > 0 {
+		return types.TextMsg{Text: resp.Choices[0].Message.Content}, nil
+	}
+
+	return types.TextMsg{Text: "error"}, nil
 }
 
 func (b bot) Command(ctx types.Context, content interface{}) (types.MsgPayload, error) {
