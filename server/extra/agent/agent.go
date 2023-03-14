@@ -11,7 +11,6 @@ import (
 
 type Data struct {
 	Id      string      `json:"id"`
-	Version int         `json:"version"`
 	Content interface{} `json:"content"`
 }
 

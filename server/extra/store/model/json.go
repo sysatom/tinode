@@ -51,6 +51,15 @@ func (j JSON) Int64(key string) (int64, bool) {
 	return 0, false
 }
 
+func (j JSON) Uint64(key string) (uint64, bool) {
+	if v, ok := j.get(key); ok {
+		if t, ok := v.(float64); ok {
+			return uint64(t), ok
+		}
+	}
+	return 0, false
+}
+
 func (j JSON) Float64(key string) (float64, bool) {
 	if v, ok := j.get(key); ok {
 		if t, ok := v.(float64); ok {

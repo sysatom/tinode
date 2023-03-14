@@ -455,6 +455,7 @@ func botName(subs types.Subscription) string {
 	return name
 }
 
+// botSend bot send message, rcptTo: user uid: bot
 func botSend(rcptTo string, uid types.Uid, out extraTypes.MsgPayload) {
 	if out == nil {
 		return

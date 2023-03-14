@@ -22,6 +22,7 @@ import (
 	_ "github.com/tinode/chat/server/extra/bots/github"
 	_ "github.com/tinode/chat/server/extra/bots/gpt"
 	_ "github.com/tinode/chat/server/extra/bots/help"
+	_ "github.com/tinode/chat/server/extra/bots/helper"
 	_ "github.com/tinode/chat/server/extra/bots/iot"
 	_ "github.com/tinode/chat/server/extra/bots/leetcode"
 	_ "github.com/tinode/chat/server/extra/bots/mtg"
