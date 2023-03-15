@@ -28,6 +28,7 @@ import (
 func newRouter() *mux.Router {
 	r := mux.NewRouter()
 	s := r.PathPrefix("/extra").Subrouter()
+	s.Use(mux.CORSMethodMiddleware(r))
 	s.HandleFunc("/oauth/{category}/{uid1}/{uid2}", storeOAuth)
 	s.HandleFunc("/page/{id}", getPage)
 	s.HandleFunc("/form", postForm).Methods(http.MethodPost)
@@ -325,6 +326,11 @@ func webhook(rw http.ResponseWriter, req *http.Request) {
 }
 
 func postHelper(rw http.ResponseWriter, req *http.Request) {
+	rw.Header().Set("Access-Control-Allow-Origin", "*")
+	if req.Method == http.MethodOptions {
+		return
+	}
+
 	vars := mux.Vars(req)
 
 	ui1, _ := strconv.ParseUint(vars["uid1"], 10, 64)
@@ -439,7 +445,12 @@ func postHelper(rw http.ResponseWriter, req *http.Request) {
 			botSend(uid1.P2PName(topicUid), topicUid, payload)
 		}
 	case helper.Pull:
-
+	case helper.Info:
+		_, _ = rw.Write([]byte(`{"version": 1}`)) // todo username ...
+		return
+	case helper.Bots:
+		_, _ = rw.Write([]byte(`{"bots": [{"id": "anki", "name": "anki"}, {"id": "help", "name": "help"}]}`)) // todo
+		return
 	}
 
 	_, _ = rw.Write([]byte("ok"))

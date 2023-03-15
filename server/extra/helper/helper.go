@@ -9,6 +9,8 @@ type Data struct {
 type Action string
 
 const (
+	Info  Action = "info"
 	Pull  Action = "pull"
 	Agent Action = "agent"
+	Bots  Action = "bots"
 )
