@@ -363,7 +363,6 @@ func postHelper(rw http.ResponseWriter, req *http.Request) {
 	var data helper.Data
 	err = json.Unmarshal(body, &data)
 	if err != nil {
-		logs.Err.Println(err)
 		errorResponse(rw, "error")
 		return
 	}
@@ -446,7 +445,18 @@ func postHelper(rw http.ResponseWriter, req *http.Request) {
 		}
 	case helper.Pull:
 	case helper.Info:
-		_, _ = rw.Write([]byte(`{"version": 1}`)) // todo username ...
+		user, err := serverStore.Users.Get(uid1)
+		if err != nil {
+			errorResponse(rw, "error")
+			return
+		}
+
+		result := map[string]interface{}{
+			"version":  1,
+			"username": fn(user.Public),
+		}
+		res, _ := json.Marshal(result)
+		_, _ = rw.Write(res)
 		return
 	case helper.Bots:
 		_, _ = rw.Write([]byte(`{"bots": [{"id": "anki", "name": "anki"}, {"id": "help", "name": "help"}]}`)) // todo

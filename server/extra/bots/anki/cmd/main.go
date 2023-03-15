@@ -38,8 +38,8 @@ func stats() {
 		return
 	}
 	err = agent.PostData(agentURI, agent.Data{
-		Id:      anki.StatsAgentID,
-		Version: anki.AgentVersion,
+		Id: anki.StatsAgentID,
+		//Version: anki.AgentVersion,
 		Content: map[string]interface{}{
 			"html": html,
 		},
@@ -56,8 +56,8 @@ func review() {
 		return
 	}
 	err = agent.PostData(agentURI, agent.Data{
-		Id:      anki.ReviewAgentID,
-		Version: anki.AgentVersion,
+		Id: anki.ReviewAgentID,
+		//Version: anki.AgentVersion,
 		Content: map[string]interface{}{
 			"num": num,
 		},

@@ -26,8 +26,8 @@ func main() {
 
 func demo() {
 	err := agent.PostData(agentURI, agent.Data{
-		Id:      help.ImportAgentID,
-		Version: help.AgentVersion,
+		Id: help.ImportAgentID,
+		//Version: help.AgentVersion,
 		Content: nil,
 	})
 	if err != nil {

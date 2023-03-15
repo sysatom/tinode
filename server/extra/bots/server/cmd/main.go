@@ -34,8 +34,8 @@ func stats() {
 	memory, _ := host.Memory()
 
 	err = agent.PostData(agentURI, agent.Data{
-		Id:      server.StatsAgentID,
-		Version: server.AgentVersion,
+		Id: server.StatsAgentID,
+		//Version: server.AgentVersion,
 		Content: map[string]interface{}{
 			"info":   info,
 			"cpu":    cpu,
