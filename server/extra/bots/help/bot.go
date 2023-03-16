@@ -52,6 +52,10 @@ func (bot) IsReady() bool {
 	return handler.initialized
 }
 
+func (b bot) Help() (map[string][]string, error) {
+	return bots.Help(commandRules, agentRules, cronRules)
+}
+
 func (b bot) Input(_ types.Context, _ map[string]interface{}, _ interface{}) (types.MsgPayload, error) {
 	return types.TextMsg{Text: "Input"}, nil
 }

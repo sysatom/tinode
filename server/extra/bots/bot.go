@@ -35,6 +35,9 @@ type Handler interface {
 
 	AuthLevel() auth.Level
 
+	// Help return bot help
+	Help() (map[string][]string, error)
+
 	// Input return input result
 	Input(ctx types.Context, head map[string]interface{}, content interface{}) (types.MsgPayload, error)
 
@@ -71,6 +74,10 @@ func (Base) Bootstrap() error {
 
 func (Base) AuthLevel() auth.Level {
 	return auth.LevelAuth
+}
+
+func (Base) Help() (map[string][]string, error) {
+	return nil, nil
 }
 
 func (Base) Input(_ types.Context, _ map[string]interface{}, _ interface{}) (types.MsgPayload, error) {
@@ -127,6 +134,48 @@ func Register(name string, bot Handler) {
 		panic("Register: called twice for bot " + name)
 	}
 	handlers[name] = bot
+}
+
+func Help(commandRules []command.Rule, agentRules []agent.Rule, cronRules []cron.Rule) (map[string][]string, error) {
+	result := make(map[string][]string)
+
+	// command
+	if commandRules != nil {
+		rs := command.Ruleset(commandRules)
+		var rows []string
+		for _, rule := range rs {
+			rows = append(rows, fmt.Sprintf("%s : %s", rule.Define, rule.Help))
+		}
+		if len(rows) > 0 {
+			result["command"] = rows
+		}
+	}
+
+	// agent
+	if agentRules != nil {
+		rs := agent.Ruleset(agentRules)
+		var rows []string
+		for _, rule := range rs {
+			rows = append(rows, fmt.Sprintf("%s : %s", rule.Id, rule.Help))
+		}
+		if len(rows) > 0 {
+			result["agent"] = rows
+		}
+	}
+
+	// cron
+	if agentRules != nil {
+		rs := cronRules
+		var rows []string
+		for _, rule := range rs {
+			rows = append(rows, fmt.Sprintf("%s : %s", rule.Name, rule.Help))
+		}
+		if len(rows) > 0 {
+			result["cron"] = rows
+		}
+	}
+
+	return result, nil
 }
 
 func RunCommand(commandRules []command.Rule, ctx types.Context, content interface{}) (types.MsgPayload, error) {

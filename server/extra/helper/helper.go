@@ -13,4 +13,5 @@ const (
 	Pull  Action = "pull"
 	Agent Action = "agent"
 	Bots  Action = "bots"
+	Help  Action = "help"
 )

@@ -19,6 +19,7 @@ import (
 
 type Rule struct {
 	Name   string
+	Help   string
 	When   string
 	Action func(extraTypes.Context) []extraTypes.MsgPayload
 }

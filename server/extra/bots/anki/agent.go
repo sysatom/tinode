@@ -15,7 +15,8 @@ const (
 
 var agentRules = []agent.Rule{
 	{
-		Id: StatsAgentID,
+		Id:   StatsAgentID,
+		Help: "import anki stats",
 		Handler: func(ctx types.Context, content interface{}) types.MsgPayload {
 			html := ""
 			if m, ok := content.(map[string]interface{}); ok {
@@ -37,7 +38,8 @@ var agentRules = []agent.Rule{
 		},
 	},
 	{
-		Id: ReviewAgentID,
+		Id:   ReviewAgentID,
+		Help: "import anki review count",
 		Handler: func(ctx types.Context, content interface{}) types.MsgPayload {
 			num := int64(0)
 			if m, ok := content.(map[string]interface{}); ok {

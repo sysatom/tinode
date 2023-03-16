@@ -16,6 +16,7 @@ import (
 var cronRules = []cron.Rule{
 	{
 		Name: "anki_review_remind",
+		Help: "Regular reminders to review",
 		When: "* * * * *",
 		Action: func(ctx types.Context) []types.MsgPayload {
 			j, err := store.Chatbot.DataGet(ctx.AsUser, ctx.Original, "getNumCardsReviewedToday")
