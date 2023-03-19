@@ -410,3 +410,18 @@ func (m QuestionMsg) Convert() (map[string]interface{}, interface{}) {
 	}
 	return builder.Content()
 }
+
+type InstructMsg struct {
+	No       string
+	Object   model.InstructObject
+	Bot      string
+	Flag     string
+	Content  model.JSON
+	Priority model.InstructPriority
+	State    model.InstructState
+	ExpireAt time.Time
+}
+
+func (t InstructMsg) Convert() (map[string]interface{}, interface{}) {
+	return nil, nil
+}

@@ -27,7 +27,6 @@ func main() {
 func example() {
     err := agent.PostData(agentURI, agent.Data{
         Id:      {{ .BotName }}.ExampleAgentID,
-        Version: {{ .BotName }}.AgentVersion,
         Content: nil,
     })
     if err != nil {

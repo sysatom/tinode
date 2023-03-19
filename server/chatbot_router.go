@@ -444,6 +444,27 @@ func postHelper(rw http.ResponseWriter, req *http.Request) {
 			botSend(uid1.P2PName(topicUid), topicUid, payload)
 		}
 	case helper.Pull:
+		list, err := store.Chatbot.ListInstruct(uid1, false)
+		if err != nil {
+			errorResponse(rw, "error")
+			return
+		}
+		var instruct []map[string]interface{}
+		for _, item := range list {
+			instruct = append(instruct, map[string]interface{}{
+				"no":        item.No,
+				"bot":       item.Bot,
+				"flag":      item.Flag,
+				"content":   item.Content,
+				"expire_at": item.ExpireAt,
+			})
+		}
+
+		res, _ := json.Marshal(map[string]interface{}{
+			"instruct": instruct,
+		})
+		_, _ = rw.Write(res)
+		return
 	case helper.Info:
 		user, err := serverStore.Users.Get(uid1)
 		if err != nil {

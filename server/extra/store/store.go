@@ -166,6 +166,10 @@ type ChatbotPersistenceInterface interface {
 	ListCounter(uid types.Uid, topic string) ([]*model.Counter, error)
 	GetCounter(id int64) (model.Counter, error)
 	GetCounterByFlag(uid types.Uid, topic string, flag string) (model.Counter, error)
+
+	CreateInstruct(instruct *model.Instruct) (int64, error)
+	ListInstruct(uid types.Uid, isExpire bool) ([]*model.Instruct, error)
+	UpdateInstruct(instruct *model.Instruct) error
 }
 
 var Chatbot ChatbotPersistenceInterface
@@ -450,6 +454,18 @@ func (c chatbotMapper) GetCounter(id int64) (model.Counter, error) {
 
 func (c chatbotMapper) GetCounterByFlag(uid types.Uid, topic string, flag string) (model.Counter, error) {
 	return adp.GetCounterByFlag(uid, topic, flag)
+}
+
+func (c chatbotMapper) CreateInstruct(instruct *model.Instruct) (int64, error) {
+	return adp.CreateInstruct(instruct)
+}
+
+func (c chatbotMapper) ListInstruct(uid types.Uid, isExpire bool) ([]*model.Instruct, error) {
+	return adp.ListInstruct(uid, isExpire)
+}
+
+func (c chatbotMapper) UpdateInstruct(instruct *model.Instruct) error {
+	return adp.UpdateInstruct(instruct)
 }
 
 func init() {

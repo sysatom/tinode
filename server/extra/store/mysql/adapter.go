@@ -906,6 +906,42 @@ func (a *adapter) GetCounterByFlag(uid types.Uid, topic string, flag string) (mo
 	return find, nil
 }
 
+func (a *adapter) CreateInstruct(instruct *model.Instruct) (int64, error) {
+	if instruct.ExpireAt.Before(time.Now()) {
+		return 0, errors.New("expire time error")
+	}
+	err := a.db.Create(&instruct)
+	if err != nil {
+		return 0, nil
+	}
+	return int64(instruct.ID), nil
+}
+
+func (a *adapter) ListInstruct(uid types.Uid, isExpire bool) ([]*model.Instruct, error) {
+	var items []*model.Instruct
+	builder := a.db.Where("`uid` = ?", uid.UserId())
+	if isExpire {
+		builder.Where("expire_at < ?", time.Now())
+	} else {
+		builder.Where("expire_at >= ?", time.Now())
+	}
+
+	err := builder.Order("priority DESC").
+		Order("updated_at DESC").Find(&items).Error
+	if err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+func (a *adapter) UpdateInstruct(instruct *model.Instruct) error {
+	return a.db.Model(&model.Todo{}).
+		Where("`no` = ?", instruct.No).
+		UpdateColumns(map[string]interface{}{
+			"state": instruct.State,
+		}).Error
+}
+
 func init() {
 	store.RegisterAdapter(&adapter{})
 }

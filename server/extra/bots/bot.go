@@ -459,6 +459,30 @@ func CreateShortUrl(text string) (string, error) {
 	return "", errors.New("error url")
 }
 
+func StoreInstruct(ctx types.Context, payload types.MsgPayload) types.MsgPayload {
+	msg, ok := payload.(types.InstructMsg)
+	if !ok {
+		return types.TextMsg{Text: "error instruct msg type"}
+	}
+
+	_, err := store.Chatbot.CreateInstruct(&model.Instruct{
+		Uid:      ctx.AsUser.UserId(),
+		No:       msg.No,
+		Object:   msg.Object,
+		Bot:      msg.Bot,
+		Flag:     msg.Flag,
+		Content:  msg.Content,
+		Priority: msg.Priority,
+		State:    msg.State,
+		ExpireAt: msg.ExpireAt,
+	})
+	if err != nil {
+		return types.TextMsg{Text: "store instruct error"}
+	}
+
+	return types.TextMsg{Text: fmt.Sprintf("No: %s", msg.No)}
+}
+
 const (
 	MessageBotIncomingBehavior   = "message_bot_incoming"
 	MessageGroupIncomingBehavior = "message_group_incoming"

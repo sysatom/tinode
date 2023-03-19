@@ -124,4 +124,8 @@ type Adapter interface {
 	ListCounter(uid types.Uid, topic string) ([]*model.Counter, error)
 	GetCounter(id int64) (model.Counter, error)
 	GetCounterByFlag(uid types.Uid, topic string, flag string) (model.Counter, error)
+
+	CreateInstruct(instruct *model.Instruct) (int64, error)
+	ListInstruct(uid types.Uid, isExpire bool) ([]*model.Instruct, error)
+	UpdateInstruct(instruct *model.Instruct) error
 }

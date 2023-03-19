@@ -283,3 +283,45 @@ type Behavior struct {
 func (Behavior) TableName() string {
 	return "chatbot_behavior"
 }
+
+type Instruct struct {
+	ID        int `gorm:"primaryKey"`
+	No        string
+	Uid       string
+	Object    InstructObject
+	Bot       string
+	Flag      string
+	Content   JSON `gorm:"type:json"`
+	Priority  InstructPriority
+	State     InstructState
+	ExpireAt  time.Time
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+func (Instruct) TableName() string {
+	return "chatbot_instruct"
+}
+
+type InstructState int
+
+const (
+	InstructStateUnknown InstructState = iota
+	InstructCreate
+	InstructDone
+	InstructCancel
+)
+
+type InstructObject string
+
+const (
+	InstructObjectHelper InstructObject = "helper"
+)
+
+type InstructPriority int
+
+const (
+	InstructPriorityHigh    InstructPriority = 3
+	InstructPriorityDefault InstructPriority = 2
+	InstructPriorityLow     InstructPriority = 1
+)

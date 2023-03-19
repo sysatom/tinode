@@ -82,7 +82,7 @@ var commandRules = []command.Rule{
 	},
 	{
 		Define: "messages",
-		Help:   `Demo messages`,
+		Help:   `[example] messages`,
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
 			return types.TextMsg{Text: "msg1"}
 		},
@@ -103,7 +103,7 @@ var commandRules = []command.Rule{
 	},
 	{
 		Define: "form",
-		Help:   `Demo form`,
+		Help:   `[example] form`,
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
 			return bots.StoreForm(ctx, types.FormMsg{
 				ID:    helpFormID,
@@ -183,7 +183,7 @@ var commandRules = []command.Rule{
 	},
 	{
 		Define: "action",
-		Help:   "Demo action",
+		Help:   "[example] action",
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
 			return types.ActionMsg{
 				ID:     helpActionID,
@@ -226,7 +226,7 @@ var commandRules = []command.Rule{
 	},
 	{
 		Define: "plot",
-		Help:   `plot graph`,
+		Help:   `[example] plot graph`,
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
 			p := plot.New()
 
@@ -258,13 +258,31 @@ var commandRules = []command.Rule{
 	},
 	{
 		Define: "queue",
-		Help:   `publish queue`,
+		Help:   `[example] publish queue`,
 		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
 			err := queue.AsyncMessage(ctx.RcptTo, ctx.Original, types.TextMsg{Text: time.Now().String()})
 			if err != nil {
 				return types.TextMsg{Text: err.Error()}
 			}
 			return types.TextMsg{Text: "ok"}
+		},
+	},
+	{
+		Define: "instruct",
+		Help:   `[example] create instruct`,
+		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+			data := model.JSON{}
+			data["txt"] = "example"
+			return bots.StoreInstruct(ctx, types.InstructMsg{
+				No:       types.Id().String(),
+				Object:   model.InstructObjectHelper,
+				Bot:      Name,
+				Flag:     "help_instruct",
+				Content:  data,
+				Priority: model.InstructPriorityDefault,
+				State:    model.InstructCreate,
+				ExpireAt: time.Now().Add(time.Hour),
+			})
 		},
 	},
 }
