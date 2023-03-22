@@ -383,7 +383,7 @@ func postHelper(rw http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		subs, err := serverStore.Users.FindSubs(userUid, [][]string{{"bot"}}, nil)
+		subs, err := serverStore.Users.FindSubs(userUid, [][]string{{"bot"}}, nil, true)
 		if err != nil {
 			errorResponse(rw, "error")
 			return
