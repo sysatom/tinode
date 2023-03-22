@@ -39,6 +39,32 @@ func largeFileServe(wrt http.ResponseWriter, req *http.Request) {
 		}
 	}
 
+	// Preflight request: process before any security checks.
+	if req.Method == http.MethodOptions {
+		headers, statusCode, err := mh.Headers(req, true)
+		if err != nil {
+			writeHttpResponse(decodeStoreError(err, "", now, nil), err)
+			return
+		}
+		for name, values := range headers {
+			for _, value := range values {
+				wrt.Header().Add(name, value)
+			}
+		}
+		if statusCode <= 0 {
+			statusCode = http.StatusNoContent
+		}
+		wrt.WriteHeader(statusCode)
+		logs.Info.Println("media serve: preflight completed")
+		return
+	}
+
+	// Check if this is a GET/HEAD request.
+	if req.Method != http.MethodGet && req.Method != http.MethodHead {
+		writeHttpResponse(ErrOperationNotAllowed("", "", now), errors.New("method '"+req.Method+"' not allowed"))
+		return
+	}
+
 	// Check for API key presence
 	if isValid, _ := checkAPIKey(getAPIKey(req)); !isValid {
 		writeHttpResponse(ErrAPIKeyRequired(now), errors.New("invalid or missing API key"))
@@ -48,7 +74,7 @@ func largeFileServe(wrt http.ResponseWriter, req *http.Request) {
 	// Check authorization: either auth information or SID must be present
 	uid, challenge, err := authHttpRequest(req)
 	if err != nil {
-		writeHttpResponse(decodeStoreError(err, "", "", now, nil), err)
+		writeHttpResponse(decodeStoreError(err, "", now, nil), err)
 		return
 	}
 
@@ -63,16 +89,10 @@ func largeFileServe(wrt http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// Check if this is a GET/OPTIONS/HEAD request.
-	if req.Method != http.MethodGet && req.Method != http.MethodHead && req.Method != http.MethodOptions {
-		writeHttpResponse(ErrOperationNotAllowed("", "", now), errors.New("method '"+req.Method+"' not allowed"))
-		return
-	}
-
 	// Check if media handler redirects or adds headers.
 	headers, statusCode, err := mh.Headers(req, true)
 	if err != nil {
-		writeHttpResponse(decodeStoreError(err, "", "", now, nil), err)
+		writeHttpResponse(decodeStoreError(err, "", now, nil), err)
 		return
 	}
 
@@ -98,7 +118,7 @@ func largeFileServe(wrt http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if req.Method == http.MethodHead || req.Method == http.MethodOptions {
+	if req.Method == http.MethodHead {
 		wrt.WriteHeader(http.StatusOK)
 		logs.Info.Println("media serve: completed", req.Method, "uid=", uid)
 		return
@@ -106,7 +126,7 @@ func largeFileServe(wrt http.ResponseWriter, req *http.Request) {
 
 	fd, rsc, err := mh.Download(req.URL.String())
 	if err != nil {
-		writeHttpResponse(decodeStoreError(err, "", "", now, nil), err)
+		writeHttpResponse(decodeStoreError(err, "", now, nil), err)
 		return
 	}
 
@@ -137,9 +157,28 @@ func largeFileReceive(wrt http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	// Check if this is a POST/PUT/OPTIONS/HEAD request.
-	if req.Method != http.MethodPost && req.Method != http.MethodPut &&
-		req.Method != http.MethodHead && req.Method != http.MethodOptions {
+	// Preflight request: process before any security checks.
+	if req.Method == http.MethodOptions {
+		headers, statusCode, err := mh.Headers(req, false)
+		if err != nil {
+			writeHttpResponse(decodeStoreError(err, "", now, nil), err)
+			return
+		}
+		for name, values := range headers {
+			for _, value := range values {
+				wrt.Header().Add(name, value)
+			}
+		}
+		if statusCode <= 0 {
+			statusCode = http.StatusNoContent
+		}
+		wrt.WriteHeader(statusCode)
+		logs.Info.Println("media upload: preflight completed")
+		return
+	}
+
+	// Check if this is a POST/PUT/HEAD request.
+	if req.Method != http.MethodPost && req.Method != http.MethodPut && req.Method != http.MethodHead {
 		writeHttpResponse(ErrOperationNotAllowed("", "", now), errors.New("method '"+req.Method+"' not allowed"))
 		return
 	}
@@ -159,7 +198,7 @@ func largeFileReceive(wrt http.ResponseWriter, req *http.Request) {
 	// Check authorization: either auth information or SID must be present
 	uid, challenge, err := authHttpRequest(req)
 	if err != nil {
-		writeHttpResponse(decodeStoreError(err, msgID, "", now, nil), err)
+		writeHttpResponse(decodeStoreError(err, msgID, now, nil), err)
 		return
 	}
 	if challenge != nil {
@@ -175,8 +214,8 @@ func largeFileReceive(wrt http.ResponseWriter, req *http.Request) {
 	// Check if uploads are handled elsewhere.
 	headers, statusCode, err := mh.Headers(req, false)
 	if err != nil {
-		logs.Info.Println("Headers check failed", err)
-		writeHttpResponse(decodeStoreError(err, "", "", now, nil), err)
+		logs.Info.Println("media upload: headers check failed", err)
+		writeHttpResponse(decodeStoreError(err, "", now, nil), err)
 		return
 	}
 
@@ -210,7 +249,7 @@ func largeFileReceive(wrt http.ResponseWriter, req *http.Request) {
 
 	file, _, err := req.FormFile("file")
 	if err != nil {
-		logs.Info.Println("Invalid multipart form", err)
+		logs.Info.Println("media upload: invalid multipart form", err)
 		if strings.Contains(err.Error(), "request body too large") {
 			writeHttpResponse(ErrTooLarge(msgID, "", now), err)
 		} else {
@@ -240,18 +279,18 @@ func largeFileReceive(wrt http.ResponseWriter, req *http.Request) {
 
 	url, size, err := mh.Upload(fdef, file)
 	if err != nil {
-		logs.Info.Println("Upload failed", file, "key", fdef.Location, err)
+		logs.Info.Println("media upload: failed", file, "key", fdef.Location, err)
 		store.Files.FinishUpload(fdef, false, 0)
-		writeHttpResponse(decodeStoreError(err, msgID, "", now, nil), err)
+		writeHttpResponse(decodeStoreError(err, msgID, now, nil), err)
 		return
 	}
 
 	fdef, err = store.Files.FinishUpload(fdef, true, size)
 	if err != nil {
-		logs.Info.Println("Failed to finalize upload", file, "key", fdef.Location, err)
+		logs.Info.Println("media upload: failed to finalize", file, "key", fdef.Location, err)
 		// Best effort cleanup.
 		mh.Delete([]string{fdef.Location})
-		writeHttpResponse(decodeStoreError(err, msgID, "", now, nil), err)
+		writeHttpResponse(decodeStoreError(err, msgID, now, nil), err)
 		return
 	}
 

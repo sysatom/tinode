@@ -964,7 +964,19 @@ func (t *Topic) saveAndBroadcastMessage(msg *ClientComMessage, asUid types.Uid, 
 		}
 	}
 
-	if err := store.Messages.Save(
+	if msg.sess != nil && msg.sess.uid != asUid {
+		// The "sender" header contains ID of the user who sent the message on behalf of asUid.
+		if head == nil {
+			head = map[string]interface{}{}
+		}
+		head["sender"] = msg.sess.uid.UserId()
+	} else if head != nil {
+		// Make sure the received Head does not include a fake "sender" header.
+		delete(head, "sender")
+	}
+
+	markedReadBySender := false
+	if err, unreadUpdated := store.Messages.Save(
 		&types.Message{
 			ObjHeader: types.ObjHeader{CreatedAt: msg.Timestamp},
 			SeqId:     t.lastID + 1,
@@ -977,6 +989,8 @@ func (t *Topic) saveAndBroadcastMessage(msg *ClientComMessage, asUid types.Uid, 
 		msg.sess.queueOut(ErrUnknown(msg.Id, t.original(asUid), msg.Timestamp))
 
 		return err
+	} else {
+		markedReadBySender = unreadUpdated
 	}
 
 	t.lastID++
@@ -1023,7 +1037,7 @@ func (t *Topic) saveAndBroadcastMessage(msg *ClientComMessage, asUid types.Uid, 
 	t.broadcastToSessions(data)
 
 	// sendPush will update unread message count and send push notification.
-	if pushRcpt := t.pushForData(asUid, data.Data); pushRcpt != nil {
+	if pushRcpt := t.pushForData(asUid, data.Data, markedReadBySender); pushRcpt != nil {
 		sendPush(pushRcpt)
 	}
 	return nil
@@ -1283,17 +1297,15 @@ func (t *Topic) broadcastToSessions(msg *ServerComMessage) {
 					continue
 				}
 			}
-		} else {
+		} else if pssd.isChanSub && types.IsChannel(sess.sid) {
 			// If it's a chnX multiplexing session, check if there's a corresponding
 			// grpX multiplexing session as we don't want to send the message to both.
-			if pssd.isChanSub && types.IsChannel(sess.sid) {
-				grpSid := types.ChnToGrp(sess.sid)
-				if grpSess := globals.sessionStore.Get(grpSid); grpSess != nil && grpSess.isMultiplex() {
-					// If grpX multiplexing session's attached to topic, skip this chnX session
-					// (message will be routed to the topic proxy via the grpX session).
-					if _, attached := t.sessions[grpSess]; attached {
-						continue
-					}
+			grpSid := types.ChnToGrp(sess.sid)
+			if grpSess := globals.sessionStore.Get(grpSid); grpSess != nil && grpSess.isMultiplex() {
+				// If grpX multiplexing session's attached to topic, skip this chnX session
+				// (message will be routed to the topic proxy via the grpX session).
+				if _, attached := t.sessions[grpSess]; attached {
+					continue
 				}
 			}
 		}
@@ -2421,8 +2433,9 @@ func (t *Topic) replyGetSub(sess *Session, asUid types.Uid, authLevel auth.Level
 							return errors.New("attempt to search by restricted tags")
 						}
 
-						// TODO: allow root to find suspended users and topics.
-						subs, err = store.Users.FindSubs(asUid, req, opt)
+						// Ordinary users: find only active topics and accounts.
+						// Root users: find all topics and accounts, including suspended and soft-deleted.
+						subs, err = store.Users.FindSubs(asUid, req, opt, sess.authLvl != auth.LevelRoot)
 						if err != nil {
 							sess.queueOut(decodeStoreErrorExplicitTs(err, id, msg.Original, now, incomingReqTs, nil))
 							return err
