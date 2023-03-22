@@ -41,7 +41,6 @@ func initializeBotFather() error {
 			User:      "new",
 			State:     "ok",
 			AuthLevel: "auth",
-			Token:     nil,
 			Scheme:    "basic",
 			Secret:    []byte(fmt.Sprintf("%s:170953280278461931", BotFather)),
 			Login:     false,
@@ -114,6 +113,19 @@ func initializeBotFather() error {
 	_, err := authhdl.AddRecord(&auth.Rec{Uid: user.Uid(), Tags: user.Tags}, msg.Acc.Secret, "")
 	if err != nil {
 		return fmt.Errorf("create bot user: add auth record failed, %s", err)
+	}
+
+	// Create or update validation record in DB.
+	value := strings.ToLower(fmt.Sprintf("%s@bot.system", BotFather))
+	_, err = store.Users.UpsertCred(&types.Credential{
+		User:   user.Uid().String(),
+		Method: "email",
+		Value:  value,
+		Resp:   "000000",
+		Done:   true,
+	})
+	if err != nil {
+		return fmt.Errorf("create credential record error %s (%s)", value, err)
 	}
 
 	return nil
@@ -198,6 +210,26 @@ func initializeBotUsers() error {
 		_, err = authhdl.AddRecord(&auth.Rec{Uid: user.Uid(), Tags: user.Tags}, msg.Acc.Secret, "")
 		if err != nil {
 			return fmt.Errorf("create bot user: add auth record failed, %s", err)
+		}
+
+		// Create or update validation record in DB.
+		secret := string(msg.Acc.Secret)
+		splitAt := strings.Index(secret, ":")
+		if splitAt < 0 {
+			return fmt.Errorf("secret split error %s", msg.Acc.Secret)
+		}
+		uname := strings.ToLower(secret[:splitAt])
+		value := strings.ToLower(fmt.Sprintf("%s@bot.system", uname))
+
+		_, err = store.Users.UpsertCred(&types.Credential{
+			User:   user.Uid().String(),
+			Method: "email",
+			Value:  value,
+			Resp:   "000000",
+			Done:   true,
+		})
+		if err != nil {
+			return fmt.Errorf("create credential record error %s (%s)", value, err)
 		}
 	}
 	return nil
@@ -463,6 +495,23 @@ func botSend(rcptTo string, uid types.Uid, out extraTypes.MsgPayload) {
 
 	t := globals.hub.topicGet(rcptTo)
 	if t == nil {
+		var original = ""
+		switch types.GetTopicCat(rcptTo) {
+		case types.TopicCatP2P:
+			u1, u2, err := types.ParseP2P(rcptTo)
+			if err != nil {
+				logs.Err.Println(err)
+				return
+			}
+			if u1 == uid {
+				original = u2.UserId()
+			} else {
+				original = u1.UserId()
+			}
+		default:
+			original = uid.UserId() // initTopicP2P: userID2 := types.ParseUserId(t.xoriginal)
+		}
+
 		sess := &Session{
 			uid:     uid,
 			authLvl: auth.LevelAuth,
@@ -478,7 +527,7 @@ func botSend(rcptTo string, uid types.Uid, out extraTypes.MsgPayload) {
 				Created: false,
 				Newsub:  false,
 			},
-			Original:  uid.UserId(),
+			Original:  original,
 			RcptTo:    rcptTo,
 			AsUser:    uid.UserId(),
 			AuthLvl:   int(auth.LevelAuth),
