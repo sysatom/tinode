@@ -277,7 +277,7 @@ var commandRules = []command.Rule{
 				No:       types.Id().String(),
 				Object:   model.InstructObjectHelper,
 				Bot:      Name,
-				Flag:     "help_instruct",
+				Flag:     ExampleInstruct,
 				Content:  data,
 				Priority: model.InstructPriorityDefault,
 				State:    model.InstructCreate,

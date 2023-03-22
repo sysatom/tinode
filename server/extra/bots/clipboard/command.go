@@ -27,7 +27,7 @@ var commandRules = []command.Rule{
 				No:       types.Id().String(),
 				Object:   model.InstructObjectHelper,
 				Bot:      Name,
-				Flag:     "clipboard_share",
+				Flag:     ShareInstruct,
 				Content:  data,
 				Priority: model.InstructPriorityDefault,
 				State:    model.InstructCreate,

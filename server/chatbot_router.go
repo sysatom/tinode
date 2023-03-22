@@ -449,7 +449,7 @@ func postHelper(rw http.ResponseWriter, req *http.Request) {
 			errorResponse(rw, "error")
 			return
 		}
-		var instruct []map[string]interface{}
+		var instruct = []map[string]interface{}{}
 		for _, item := range list {
 			instruct = append(instruct, map[string]interface{}{
 				"no":        item.No,
