@@ -21,4 +21,7 @@ go run github.com/tinode/chat/server/extra/cmd/generator -bot example -rule inpu
 
 # Migrate cli
 go run github.com/tinode/chat/server/extra/cmd/migrate
+
+# Migration file cli
+go run github.com/tinode/chat/server/extra/cmd/migration example_name
 ```
