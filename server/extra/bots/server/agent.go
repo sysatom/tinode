@@ -17,7 +17,7 @@ var agentRules = []agent.Rule{
 	{
 		Id:   StatsAgentID,
 		Help: "upload server status",
-		Args: []string{"cpu", "men"},
+		Args: []string{"cpu", "memory", "info"},
 		Handler: func(ctx types.Context, content interface{}) types.MsgPayload {
 			j, err := utils.ConvertJSON(content)
 			if err != nil {

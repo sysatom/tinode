@@ -26,3 +26,8 @@ func (r Ruleset) ProcessAgent(agentVersion int, ctx types.Context, content inter
 	}
 	return result, nil
 }
+
+type Data struct {
+	Id      string      `json:"id"`
+	Content interface{} `json:"content"`
+}
