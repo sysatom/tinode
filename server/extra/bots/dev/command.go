@@ -6,7 +6,7 @@ import (
 	_ "embed"
 	"fmt"
 	"github.com/tinode/chat/server/extra/bots"
-	"github.com/tinode/chat/server/extra/queue"
+	"github.com/tinode/chat/server/extra/pkg/queue"
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/types"

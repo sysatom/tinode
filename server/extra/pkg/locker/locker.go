@@ -3,7 +3,7 @@ package locker
 import (
 	"context"
 	"github.com/bsm/redislock"
-	"github.com/tinode/chat/server/extra/cache"
+	"github.com/tinode/chat/server/extra/pkg/cache"
 	"time"
 )
 

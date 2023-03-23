@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"github.com/influxdata/cron"
 	"github.com/tinode/chat/server/auth"
-	"github.com/tinode/chat/server/extra/cache"
+	"github.com/tinode/chat/server/extra/pkg/cache"
 	"github.com/tinode/chat/server/extra/store"
 	extraTypes "github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"

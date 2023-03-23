@@ -2,7 +2,7 @@ package bark
 
 import (
 	"fmt"
-	"github.com/tinode/chat/server/extra/bark"
+	"github.com/tinode/chat/server/extra/pkg/bark"
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/types"

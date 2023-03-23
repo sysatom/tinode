@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"github.com/go-redis/redis/v9"
 	"github.com/influxdata/cron"
-	"github.com/tinode/chat/server/extra/cache"
+	"github.com/tinode/chat/server/extra/pkg/cache"
 	"github.com/tinode/chat/server/extra/utils"
 	"github.com/tinode/chat/server/logs"
 	"sort"

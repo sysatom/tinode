@@ -7,7 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/tinode/chat/server/drafty"
-	"github.com/tinode/chat/server/extra/cache"
+	"github.com/tinode/chat/server/extra/pkg/cache"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/push"

@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"github.com/go-redis/redis/v9"
 	"github.com/go-resty/resty/v2"
-	"github.com/tinode/chat/server/extra/cache"
+	"github.com/tinode/chat/server/extra/pkg/cache"
 	"net/http"
 	"time"
 )

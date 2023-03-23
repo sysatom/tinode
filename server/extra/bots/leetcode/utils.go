@@ -4,7 +4,7 @@ import (
 	"context"
 	_ "embed"
 	"encoding/json"
-	"github.com/tinode/chat/server/extra/cache"
+	"github.com/tinode/chat/server/extra/pkg/cache"
 	"github.com/tinode/chat/server/logs"
 )
 

@@ -3,9 +3,9 @@ package main
 import (
 	"encoding/json"
 	"github.com/tinode/chat/server/extra/bots"
-	"github.com/tinode/chat/server/extra/cache"
 	"github.com/tinode/chat/server/extra/channels"
-	"github.com/tinode/chat/server/extra/queue"
+	"github.com/tinode/chat/server/extra/pkg/cache"
+	"github.com/tinode/chat/server/extra/pkg/queue"
 	extraStore "github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/logs"
 	"net/http"
@@ -40,13 +40,13 @@ import (
 	_ "github.com/tinode/chat/server/extra/bots/webhook"
 
 	// push
-	_ "github.com/tinode/chat/server/extra/bark"
+	_ "github.com/tinode/chat/server/extra/pkg/bark"
 
 	// store
 	_ "github.com/tinode/chat/server/extra/store/mysql"
 
 	// cache
-	_ "github.com/tinode/chat/server/extra/cache"
+	_ "github.com/tinode/chat/server/extra/pkg/cache"
 )
 
 // hook
