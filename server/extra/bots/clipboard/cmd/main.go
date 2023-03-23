@@ -26,7 +26,7 @@ func main() {
 
 func example() {
 	err := agent.PostData(agentURI, agent.Data{
-		Id:      clipboard.ExampleAgentID,
+		Id:      clipboard.UploadAgentID,
 		Content: nil,
 	})
 	if err != nil {

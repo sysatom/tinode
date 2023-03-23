@@ -74,10 +74,6 @@ func (b bot) Input(ctx types.Context, _ map[string]interface{}, content interfac
 	return nil, nil
 }
 
-func (b bot) Group(_ types.Context, _ map[string]interface{}, _ interface{}) (types.MsgPayload, error) {
-	return nil, nil
-}
-
 func (b bot) Command(ctx types.Context, content interface{}) (types.MsgPayload, error) {
 	return bots.RunCommand(commandRules, ctx, content)
 }

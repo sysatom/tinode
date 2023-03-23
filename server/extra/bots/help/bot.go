@@ -3,6 +3,7 @@ package help
 import (
 	"encoding/json"
 	"errors"
+	"github.com/tinode/chat/server/auth"
 	"github.com/tinode/chat/server/extra/bots"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
@@ -50,6 +51,10 @@ func (bot) Init(jsonconf json.RawMessage) error {
 
 func (bot) IsReady() bool {
 	return handler.initialized
+}
+
+func (bot) AuthLevel() auth.Level {
+	return auth.LevelRoot
 }
 
 func (b bot) Help() (map[string][]string, error) {
