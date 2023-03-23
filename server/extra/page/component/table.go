@@ -6,6 +6,7 @@ import (
 	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/utils"
+	"math"
 )
 
 type Table struct {
@@ -44,7 +45,12 @@ func (c *Table) Render() app.UI {
 							if txt, ok := item.(string); ok && utils.IsUrl(txt) {
 								return app.Td().Body(app.A().Target("_blank").Href(txt).Text(txt))
 							} else if num, ok := item.(float64); ok {
-								return app.Td().Text(int(num)) // todo check float
+								_, frac := math.Modf(num)
+								if frac == 0 {
+									return app.Td().Text(int(num))
+								} else {
+									return app.Td().Text(num)
+								}
 							} else {
 								return app.Td().Text(c.Schema.Row[i][j])
 							}

@@ -85,7 +85,7 @@ var commandRules = []command.Rule{
 				logs.Err.Println(err)
 				return nil
 			}
-			fmt.Println(resp) // fixme
+			fmt.Println(resp)
 
 			return nil
 		},
