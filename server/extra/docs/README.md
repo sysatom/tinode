@@ -1,4 +1,6 @@
-# ENV
+# extra chatbot framework
+
+## ENV
 
 CHANNEL_PATH=/subscribe
 REDIS_ADDR=127.0.0.1:6379
@@ -6,10 +8,17 @@ REDIS_PASSWORD=123456
 TINODE_URL=http://127.0.0.1:6060
 DOWNLOAD_PATH=/download
 
-# Tools
+## extra json config
 
-## Generator cli
+> See extra.conf
+
+## Dev tools
 
 ```shell
-generator -bot example -rule input,group,agent,command,condition,cron,form
+
+# Generator cli
+go run github.com/tinode/chat/server/extra/cmd/generator -bot example -rule input,group,agent,command,condition,cron,form
+
+# Migrate cli
+go run github.com/tinode/chat/server/extra/cmd/migrate
 ```
