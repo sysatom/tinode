@@ -933,6 +933,14 @@ func notifyAfterReboot() {
 	}
 
 	for _, cred := range creds {
+		_, level, _, _, err := store.Users.GetAuthRecord(store.EncodeUid(cred.UserId), "basic")
+		if err != nil {
+			logs.Err.Println(err)
+			continue
+		}
+		if level != auth.LevelRoot {
+			continue
+		}
 		rcptTo := store.EncodeUid(cred.UserId).P2PName(botUid)
 		if rcptTo != "" {
 			botSend(rcptTo, botUid, extraTypes.TextMsg{Text: "reboot"})
