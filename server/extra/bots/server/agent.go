@@ -3,8 +3,8 @@ package server
 import (
 	"github.com/tinode/chat/server/extra/ruleset/agent"
 	"github.com/tinode/chat/server/extra/store"
-	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/types"
+	"github.com/tinode/chat/server/extra/utils"
 	"github.com/tinode/chat/server/logs"
 )
 
@@ -15,18 +15,18 @@ const (
 
 var agentRules = []agent.Rule{
 	{
-		Id: StatsAgentID,
+		Id:   StatsAgentID,
+		Help: "upload server status",
+		Args: []string{"cpu", "men"},
 		Handler: func(ctx types.Context, content interface{}) types.MsgPayload {
-			var v model.JSON
-			err := v.Scan(content)
+			j, err := utils.ConvertJSON(content)
 			if err != nil {
-				logs.Err.Println(err)
 				return nil
 			}
 			// alert
 
 			// store
-			err = store.Chatbot.DataSet(ctx.AsUser, ctx.Original, "stats", v)
+			err = store.Chatbot.DataSet(ctx.AsUser, ctx.Original, "stats", j)
 			if err != nil {
 				logs.Err.Println(err)
 				return nil

@@ -14,6 +14,7 @@ var agentRules = []agent.Rule{
 	{
 		Id:   ImportAgentID,
 		Help: "agent example",
+		Args: []string{},
 		Handler: func(ctx types.Context, content interface{}) types.MsgPayload {
 			return types.TextMsg{Text: "imported"}
 		},

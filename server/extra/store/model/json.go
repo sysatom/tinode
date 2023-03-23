@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"reflect"
 )
 
 type JSON map[string]interface{}
@@ -44,8 +45,9 @@ func (j JSON) String(key string) (string, bool) {
 
 func (j JSON) Int64(key string) (int64, bool) {
 	if v, ok := j.get(key); ok {
-		if t, ok := v.(int64); ok {
-			return t, ok
+		switch n := v.(type) {
+		case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
+			return reflect.ValueOf(n).Convert(reflect.TypeOf(int64(0))).Int(), true
 		}
 	}
 	return 0, false

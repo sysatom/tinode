@@ -8,6 +8,7 @@ import (
 type Rule struct {
 	Id      string
 	Help    string
+	Args    []string
 	Handler func(ctx types.Context, content interface{}) types.MsgPayload
 }
 
