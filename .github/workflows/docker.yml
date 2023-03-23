@@ -49,9 +49,6 @@ jobs:
           go env -w GOARCH=amd64
           go env
           CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -tags mysql -o tinode github.com/tinode/chat/server
-          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -tags mysql -o help_agent github.com/tinode/chat/server/extra/bots/help/cmd
-          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -tags mysql -o server_agent github.com/tinode/chat/server/extra/bots/server/cmd
-          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -tags mysql -o anki_agent github.com/tinode/chat/server/extra/bots/anki/cmd
 
       - name: Build js
         run: cd webapp && npm install && npm run build
@@ -71,7 +68,6 @@ jobs:
           cp webapp/service-worker.js webapp/static/
           cp webapp/version.js webapp/static/
           cp tinode app/
-          cp *_agent app/
           cp -R server/templ/ app/
           cp -R webapp/static/ app/
 
