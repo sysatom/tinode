@@ -480,7 +480,30 @@ func postHelper(rw http.ResponseWriter, req *http.Request) {
 		_, _ = rw.Write(res)
 		return
 	case helper.Bots:
-		_, _ = rw.Write([]byte(`{"bots": [{"id": "anki", "name": "anki"}, {"id": "help", "name": "help"}]}`)) // todo
+		var data []map[string]interface{}
+		for name, bot := range bots.List() {
+			instruct, err := bot.Instruct()
+			if err != nil {
+				continue
+			}
+			if len(instruct) <= 0 {
+				continue
+			}
+			data = append(data, map[string]interface{}{
+				"id":   name,
+				"name": name,
+			})
+		}
+
+		result, err := json.Marshal(map[string]interface{}{
+			"bots": data,
+		})
+		if err != nil {
+			errorResponse(rw, "error")
+			return
+		}
+
+		_, _ = rw.Write(result)
 		return
 	case helper.Help:
 		if id, ok := data.Content.(string); ok {
