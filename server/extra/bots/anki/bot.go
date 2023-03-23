@@ -65,5 +65,5 @@ func (b bot) Cron(send func(rcptTo string, uid serverTypes.Uid, out types.MsgPay
 }
 
 func (b bot) Agent(ctx types.Context, content interface{}) (types.MsgPayload, error) {
-	return bots.RunAgent(agentRules, ctx, content)
+	return bots.RunAgent(AgentVersion, agentRules, ctx, content)
 }

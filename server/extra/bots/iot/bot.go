@@ -56,5 +56,5 @@ func (b bot) Command(ctx types.Context, content interface{}) (types.MsgPayload, 
 }
 
 func (b bot) Agent(ctx types.Context, content interface{}) (types.MsgPayload, error) {
-	return bots.RunAgent(agentRules, ctx, content)
+	return bots.RunAgent(AgentVersion, agentRules, ctx, content)
 }

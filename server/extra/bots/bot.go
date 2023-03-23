@@ -303,9 +303,9 @@ func RunCondition(conditionRules []condition.Rule, ctx types.Context, forwarded 
 	return rs.ProcessCondition(ctx, forwarded)
 }
 
-func RunAgent(agentRules []agent.Rule, ctx types.Context, content interface{}) (types.MsgPayload, error) {
+func RunAgent(agentVersion int, agentRules []agent.Rule, ctx types.Context, content interface{}) (types.MsgPayload, error) {
 	rs := agent.Ruleset(agentRules)
-	return rs.ProcessCondition(ctx, content)
+	return rs.ProcessAgent(agentVersion, ctx, content)
 }
 
 func RunSession(sessionRules []session.Rule, ctx types.Context, content interface{}) (types.MsgPayload, error) {
