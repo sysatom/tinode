@@ -55,6 +55,12 @@ var sessionTemple string
 //go:embed tmpl/session_func.tmpl
 var sessionFuncTemple string
 
+//go:embed tmpl/instruct.tmpl
+var instructTemple string
+
+//go:embed tmpl/instruct_func.tmpl
+var instructFuncTemple string
+
 //go:embed tmpl/group_func.tmpl
 var groupFuncTemple string
 
@@ -150,6 +156,12 @@ func main() {
 				panic(err)
 			}
 		}
+		if data.HasInstruct {
+			err = os.WriteFile(filePath(data.BotName, "instruct.go"), parseTemplate(instructTemple, data), os.ModePerm)
+			if err != nil {
+				panic(err)
+			}
+		}
 	} else {
 		if !fileExist(data.BotName, "bot.go") {
 			panic("dir exist, but bot.go file not exist")
@@ -236,6 +248,16 @@ func main() {
 				appendFileContent(filePath(data.BotName, "bot.go"), parseTemplate(sessionFuncTemple, data))
 			}
 		}
+		if !fileExist(data.BotName, "instruct.go") {
+			if data.HasInstruct {
+				err = os.WriteFile(filePath(data.BotName, "instruct.go"), parseTemplate(instructTemple, data), os.ModePerm)
+				if err != nil {
+					panic(err)
+				}
+				// append
+				appendFileContent(filePath(data.BotName, "bot.go"), parseTemplate(instructFuncTemple, data))
+			}
+		}
 	}
 
 	fmt.Println("ok")
@@ -252,6 +274,7 @@ type schema struct {
 	HasForm      bool
 	HasAction    bool
 	HasSession   bool
+	HasInstruct  bool
 }
 
 func filePath(botName, fileName string) string {
@@ -297,6 +320,8 @@ func parseRule(rule string, data *schema) {
 			data.HasAction = true
 		case "session":
 			data.HasSession = true
+		case "instruct":
+			data.HasInstruct = true
 		}
 	}
 }

@@ -11,6 +11,7 @@ import (
 	"github.com/tinode/chat/server/extra/ruleset/condition"
 	"github.com/tinode/chat/server/extra/ruleset/cron"
 	"github.com/tinode/chat/server/extra/ruleset/form"
+	"github.com/tinode/chat/server/extra/ruleset/instruct"
 	"github.com/tinode/chat/server/extra/ruleset/session"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/store/model"
@@ -64,6 +65,9 @@ type Handler interface {
 
 	// Agent return group result
 	Agent(ctx types.Context, content interface{}) (types.MsgPayload, error)
+
+	// Instruct return instruct list
+	Instruct() (instruct.Ruleset, error)
 }
 
 type Base struct{}
@@ -113,6 +117,10 @@ func (Base) Group(_ types.Context, _ map[string]interface{}, _ interface{}) (typ
 }
 
 func (Base) Agent(_ types.Context, _ interface{}) (types.MsgPayload, error) {
+	return nil, nil
+}
+
+func (Base) Instruct() (instruct.Ruleset, error) {
 	return nil, nil
 }
 

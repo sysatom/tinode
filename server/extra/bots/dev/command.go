@@ -19,6 +19,7 @@ import (
 	"gonum.org/v1/plot/vg/vgimg"
 	"math/big"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -277,12 +278,29 @@ var commandRules = []command.Rule{
 				No:       types.Id().String(),
 				Object:   model.InstructObjectHelper,
 				Bot:      Name,
-				Flag:     ExampleInstruct,
+				Flag:     ExampleInstructID,
 				Content:  data,
 				Priority: model.InstructPriorityDefault,
 				State:    model.InstructCreate,
 				ExpireAt: time.Now().Add(time.Hour),
 			})
+		},
+	},
+	{
+		Define: "instruct list",
+		Help:   `all bot instruct`,
+		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+			models := make(map[string]interface{})
+			for name, bot := range bots.List() {
+				ruleset, _ := bot.Instruct()
+				for _, rule := range ruleset {
+					models[fmt.Sprintf("(%s) %s", name, rule.Id)] = fmt.Sprintf("[%s]", strings.Join(rule.Args, ","))
+				}
+			}
+			return types.InfoMsg{
+				Title: "Instruct",
+				Model: models,
+			}
 		},
 	},
 }

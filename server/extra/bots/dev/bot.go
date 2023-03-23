@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/tinode/chat/server/auth"
 	"github.com/tinode/chat/server/extra/bots"
+	"github.com/tinode/chat/server/extra/ruleset/instruct"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
 	serverTypes "github.com/tinode/chat/server/store/types"
@@ -95,4 +96,8 @@ func (b bot) Agent(ctx types.Context, content interface{}) (types.MsgPayload, er
 
 func (b bot) Session(ctx types.Context, content interface{}) (types.MsgPayload, error) {
 	return bots.RunSession(sessionRules, ctx, content)
+}
+
+func (b bot) Instruct() (instruct.Ruleset, error) {
+	return instructRules, nil
 }

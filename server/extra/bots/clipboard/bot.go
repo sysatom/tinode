@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/tinode/chat/server/extra/bots"
+	"github.com/tinode/chat/server/extra/ruleset/instruct"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
 )
@@ -57,4 +58,8 @@ func (b bot) Command(ctx types.Context, content interface{}) (types.MsgPayload, 
 
 func (b bot) Agent(ctx types.Context, content interface{}) (types.MsgPayload, error) {
 	return bots.RunAgent(agentRules, ctx, content)
+}
+
+func (b bot) Instruct() (instruct.Ruleset, error) {
+	return instructRules, nil
 }
