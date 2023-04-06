@@ -2,13 +2,14 @@ package queue
 
 import (
 	"encoding/json"
+	"os"
+	"time"
+
 	"github.com/adjust/rmq/v5"
 	"github.com/go-redis/redis/v8"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
 	serverTypes "github.com/tinode/chat/server/store/types"
-	"os"
-	"time"
 )
 
 const (

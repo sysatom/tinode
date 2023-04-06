@@ -16,9 +16,6 @@ var mainTemple string
 //go:embed tmpl/agent.tmpl
 var agentTemple string
 
-//go:embed tmpl/agent_cmd.tmpl
-var agentCmdTemple string
-
 //go:embed tmpl/agent_func.tmpl
 var agentFuncTemple string
 
@@ -102,20 +99,7 @@ func main() {
 			panic(err)
 		}
 		if data.HasAgent {
-			cmdDir := fmt.Sprintf("%s/%s/cmd", BasePath, data.BotName)
-			_, err = os.Stat(cmdDir)
-			if os.IsNotExist(err) {
-				err = os.Mkdir(cmdDir, os.ModePerm)
-				if err != nil {
-					panic(err)
-				}
-			}
-
 			err = os.WriteFile(filePath(data.BotName, "agent.go"), parseTemplate(agentTemple, data), os.ModePerm)
-			if err != nil {
-				panic(err)
-			}
-			err = os.WriteFile(filePath(data.BotName, "cmd/main.go"), parseTemplate(agentCmdTemple, data), os.ModePerm)
 			if err != nil {
 				panic(err)
 			}
@@ -176,24 +160,10 @@ func main() {
 		}
 		if !fileExist(data.BotName, "agent.go") {
 			if data.HasAgent {
-				cmdDir := fmt.Sprintf("%s/%s/cmd", BasePath, data.BotName)
-				_, err = os.Stat(cmdDir)
-				if os.IsNotExist(err) {
-					err = os.Mkdir(cmdDir, os.ModePerm)
-					if err != nil {
-						panic(err)
-					}
-				}
-
 				err = os.WriteFile(filePath(data.BotName, "agent.go"), parseTemplate(agentTemple, data), os.ModePerm)
 				if err != nil {
 					panic(err)
 				}
-				err = os.WriteFile(filePath(data.BotName, "cmd/main.go"), parseTemplate(agentCmdTemple, data), os.ModePerm)
-				if err != nil {
-					panic(err)
-				}
-
 				// append
 				appendFileContent(filePath(data.BotName, "bot.go"), parseTemplate(agentFuncTemple, data))
 			}

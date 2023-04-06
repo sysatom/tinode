@@ -5,11 +5,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/go-redis/redis/v9"
-	"github.com/go-resty/resty/v2"
-	"github.com/tinode/chat/server/extra/pkg/cache"
 	"net/http"
 	"time"
+
+	"github.com/go-resty/resty/v2"
+	"github.com/redis/go-redis/v9"
+	"github.com/tinode/chat/server/extra/pkg/cache"
 )
 
 const (

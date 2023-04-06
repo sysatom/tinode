@@ -4,7 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/go-redis/redis/v9"
+	"runtime"
+	"strconv"
+	"time"
+
+	"github.com/redis/go-redis/v9"
 	"github.com/tinode/chat/server/extra"
 	"github.com/tinode/chat/server/extra/bots"
 	"github.com/tinode/chat/server/extra/pkg/cache"
@@ -12,9 +16,6 @@ import (
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
-	"runtime"
-	"strconv"
-	"time"
 )
 
 var commandRules = []command.Rule{
