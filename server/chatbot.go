@@ -32,6 +32,7 @@ import (
 	_ "github.com/tinode/chat/server/extra/bots/pocket"
 	_ "github.com/tinode/chat/server/extra/bots/qr"
 	_ "github.com/tinode/chat/server/extra/bots/queue"
+	_ "github.com/tinode/chat/server/extra/bots/rust"
 	_ "github.com/tinode/chat/server/extra/bots/search"
 	_ "github.com/tinode/chat/server/extra/bots/server"
 	_ "github.com/tinode/chat/server/extra/bots/share"

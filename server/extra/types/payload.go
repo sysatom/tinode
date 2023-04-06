@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"math"
 	"reflect"
 	"strconv"
 	"strings"
@@ -553,6 +554,10 @@ func toString(v interface{}) string {
 		return strconv.Itoa(v)
 
 	case float64:
+		_, frac := math.Modf(v)
+		if frac == 0 {
+			return strconv.Itoa(int(v))
+		}
 		return strconv.FormatFloat(v, 'f', 4, 64)
 
 	case bool:
@@ -630,6 +635,10 @@ func ToPayload(typ string, src []byte) MsgPayload {
 		return r
 	case "RepoMsg":
 		var r RepoMsg
+		_ = json.Unmarshal(src, &r)
+		return r
+	case "CrateMsg":
+		var r CrateMsg
 		_ = json.Unmarshal(src, &r)
 		return r
 	case "QuestionMsg":

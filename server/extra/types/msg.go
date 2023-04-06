@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/tinode/chat/server/extra/store/model"
+	"github.com/tinode/chat/server/extra/utils"
 	"sort"
 	"time"
 )
@@ -321,7 +322,7 @@ type RepoMsg struct {
 func (i RepoMsg) Convert() (map[string]interface{}, interface{}) {
 	builder := MsgBuilder{Payload: i}
 	// title
-	builder.AppendTextLine(*i.FullName, TextOption{})
+	builder.AppendTextLine(*i.FullName, TextOption{IsBold: true})
 
 	var m map[string]interface{}
 	d, _ := json.Marshal(i)
@@ -336,7 +337,8 @@ func (i RepoMsg) Convert() (map[string]interface{}, interface{}) {
 
 	for _, k := range keys {
 		builder.AppendText(fmt.Sprintf("%s: ", k), TextOption{IsBold: true})
-		builder.AppendText(toString(m[k]), TextOption{})
+		s := toString(m[k])
+		builder.AppendText(s, TextOption{IsLink: utils.IsUrl(s)})
 		builder.AppendText("\n", TextOption{})
 	}
 
@@ -369,6 +371,48 @@ func (m CardListMsg) Convert() (map[string]interface{}, interface{}) {
 		builder.AppendText(" ", TextOption{})
 		builder.AppendTextLine(card.URI, TextOption{IsLink: true})
 	}
+	return builder.Content()
+}
+
+type CrateMsg struct {
+	ID            string `json:"id,omitempty"`
+	Name          string `json:"name,omitempty"`
+	Description   string `json:"description,omitempty"`
+	Documentation string `json:"documentation,omitempty"`
+	Homepage      string `json:"homepage,omitempty"`
+	Repository    string `json:"repository,omitempty"`
+	NewestVersion string `json:"newest_version,omitempty"`
+	Downloads     int    `json:"downloads,omitempty"`
+}
+
+func (c CrateMsg) Convert() (map[string]interface{}, interface{}) {
+	builder := MsgBuilder{Payload: c}
+	// title
+	builder.AppendTextLine(c.Name, TextOption{IsBold: true})
+
+	var m map[string]interface{}
+	d, _ := json.Marshal(c)
+	_ = json.Unmarshal(d, &m)
+
+	// sort keys
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	for _, k := range keys {
+		builder.AppendText(fmt.Sprintf("%s: ", k), TextOption{IsBold: true})
+		s := toString(m[k])
+		builder.AppendText(s, TextOption{IsLink: utils.IsUrl(s)})
+		builder.AppendText("\n", TextOption{})
+	}
+
+	// info page
+	builder.AppendText("crates.io page: ", TextOption{IsBold: true})
+	builder.AppendText(fmt.Sprintf("https://crates.io/crates/%s", c.ID), TextOption{IsLink: true})
+	builder.AppendText("\n", TextOption{})
+
 	return builder.Content()
 }
 
