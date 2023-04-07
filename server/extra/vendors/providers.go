@@ -1,7 +1,10 @@
 package vendors
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
+	"github.com/tidwall/gjson"
 	extraTypes "github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/store/types"
 	"net/http"
@@ -16,4 +19,14 @@ type OAuthProvider interface {
 
 func RedirectURI(category string, uid1, uid2 types.Uid) string {
 	return fmt.Sprintf("%s/extra/oauth/%s/%d/%d", extraTypes.AppUrl(), category, uid1, uid2)
+}
+
+var Configs json.RawMessage
+
+func GetConfig(name, key string) (gjson.Result, error) {
+	if len(Configs) == 0 {
+		return gjson.Result{}, errors.New("error configs")
+	}
+	value := gjson.GetBytes(Configs, fmt.Sprintf("%s.%s", name, key))
+	return value, nil
 }

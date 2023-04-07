@@ -283,7 +283,6 @@ type configType struct {
 	// Configs for subsystems
 	Cluster   json.RawMessage             `json:"cluster_config"`
 	Plugin    json.RawMessage             `json:"plugins"`
-	Bot       json.RawMessage             `json:"bots"`
 	Store     json.RawMessage             `json:"store_config"`
 	Push      json.RawMessage             `json:"push"`
 	TLS       json.RawMessage             `json:"tls"`
@@ -292,6 +291,10 @@ type configType struct {
 	AccountGC *accountGcConfig            `json:"acc_gc_config"`
 	Media     *mediaConfig                `json:"media"`
 	WebRTC    json.RawMessage             `json:"webrtc"`
+
+	// Configs for extra
+	Bot    json.RawMessage `json:"bots"`
+	Vendor json.RawMessage `json:"vendors"`
 }
 
 func main() {
@@ -625,7 +628,7 @@ func main() {
 	usersInit()
 
 	// Initialize bots
-	hookBot(config.Bot)
+	hookBot(config.Bot, config.Vendor)
 
 	// Initialize channels
 	hookChannel()

@@ -7,6 +7,7 @@ import (
 	"github.com/tinode/chat/server/extra/pkg/cache"
 	"github.com/tinode/chat/server/extra/pkg/queue"
 	extraStore "github.com/tinode/chat/server/extra/store"
+	"github.com/tinode/chat/server/extra/vendors"
 	"github.com/tinode/chat/server/logs"
 	"net/http"
 	"strings"
@@ -69,7 +70,10 @@ func hookStore() {
 	}
 }
 
-func hookBot(jsconfig json.RawMessage) {
+func hookBot(jsconfig json.RawMessage, vc json.RawMessage) {
+	// set vendors configs
+	vendors.Configs = vc
+
 	// init bots
 	err := bots.Init(jsconfig)
 	if err != nil {
