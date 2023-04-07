@@ -723,15 +723,24 @@ func botIncomingMessage(t *Topic, msg *ClientComMessage) {
 			}
 			// command
 			if payload == nil {
+				var content interface{}
 				if msg.Pub.Head == nil {
-					payload, err = handle.Command(ctx, msg.Pub.Content)
-					if err != nil {
-						logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
+					content = msg.Pub.Content
+				} else {
+					// Compatible with drafty
+					if m, ok := msg.Pub.Content.(map[string]interface{}); ok {
+						if txt, ok := m["txt"]; ok {
+							content = txt
+						}
 					}
-
-					// stats
-					statsInc("BotRunCommandTotal", 1)
 				}
+				payload, err = handle.Command(ctx, content)
+				if err != nil {
+					logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
+				}
+
+				// stats
+				statsInc("BotRunCommandTotal", 1)
 			}
 			// condition
 			if payload == nil {
