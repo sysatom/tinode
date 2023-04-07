@@ -534,6 +534,7 @@ func Init(jsonconf json.RawMessage) error {
 		if v, ok := configMap[name]; ok {
 			configItem = v
 		} else {
+			// default config
 			configItem = []byte(`{"enabled": true}`)
 		}
 		if err := bot.Init(configItem); err != nil {

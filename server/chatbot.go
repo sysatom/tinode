@@ -38,6 +38,7 @@ import (
 	_ "github.com/tinode/chat/server/extra/bots/share"
 	_ "github.com/tinode/chat/server/extra/bots/subscribe"
 	_ "github.com/tinode/chat/server/extra/bots/url"
+	_ "github.com/tinode/chat/server/extra/bots/web"
 	_ "github.com/tinode/chat/server/extra/bots/webhook"
 
 	// push
