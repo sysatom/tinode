@@ -158,15 +158,17 @@ func hookHandleGroupEvent(t *Topic, msg *ClientComMessage, event int) {
 	if strings.HasPrefix(msg.Original, "grp") {
 		switch extraTypes.GroupEvent(event) {
 		case extraTypes.GroupEventJoin:
-			user, err := store.Users.Get(types.ParseUserId(msg.Set.MsgSetQuery.Sub.User))
-			if err != nil {
-				logs.Err.Println(err)
-			}
-			// Current user is bot
-			if isBotUser(user) {
-				return
-			}
 			msg.AsUser = msg.Set.MsgSetQuery.Sub.User
+		case extraTypes.GroupEventExit:
+			msg.AsUser = msg.Del.User
+		}
+		user, err := store.Users.Get(types.ParseUserId(msg.AsUser))
+		if err != nil {
+			logs.Err.Println(err)
+		}
+		// Current user is bot
+		if isBotUser(user) {
+			return
 		}
 		groupIncomingMessage(t, msg, extraTypes.GroupEvent(event))
 	}

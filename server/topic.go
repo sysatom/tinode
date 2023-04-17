@@ -3214,6 +3214,9 @@ func (t *Topic) replyDelSub(sess *Session, asUid types.Uid, msg *ClientComMessag
 		globals.hub.unreg <- &topicUnreg{del: true, sess: nil, rcptTo: t.name, pkt: nil}
 	}
 
+	// chatbot group exit event hook
+	hookHandleGroupEvent(t, msg, 2)
+
 	return nil
 }
 
