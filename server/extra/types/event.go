@@ -6,7 +6,5 @@ const (
 	GroupEventUnknown GroupEvent = iota
 	GroupEventJoin
 	GroupEventExit
-	GroupEventOnline
-	GroupEventOffline
 	GroupEventReceive
 )
