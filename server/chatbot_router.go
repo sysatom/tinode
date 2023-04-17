@@ -16,6 +16,7 @@ import (
 	"github.com/tinode/chat/server/extra/store/model"
 	extraTypes "github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/types/helper"
+	"github.com/tinode/chat/server/extra/utils"
 	"github.com/tinode/chat/server/logs"
 	serverStore "github.com/tinode/chat/server/store"
 	"github.com/tinode/chat/server/store/types"
@@ -474,7 +475,7 @@ func postHelper(rw http.ResponseWriter, req *http.Request) {
 
 		result := map[string]interface{}{
 			"version":  1,
-			"username": fn(user.Public),
+			"username": utils.Fn(user.Public),
 		}
 		res, _ := json.Marshal(result)
 		_, _ = rw.Write(res)

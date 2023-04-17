@@ -58,3 +58,14 @@ func Masker(input string, start int) string {
 		return ""
 	}
 }
+
+func Fn(public interface{}) string {
+	if v, ok := public.(map[string]interface{}); ok {
+		if s, ok := v["fn"]; ok {
+			if ss, ok := s.(string); ok {
+				return ss
+			}
+		}
+	}
+	return ""
+}

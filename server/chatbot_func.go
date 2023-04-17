@@ -427,7 +427,7 @@ func isBot(subs types.Subscription) bool {
 	if public == nil {
 		return false
 	}
-	name := fn(public)
+	name := utils.Fn(public)
 	if !strings.HasSuffix(name, bots.BotNameSuffix) {
 		return false
 	}
@@ -448,7 +448,7 @@ func isBotUser(user *types.User) bool {
 		return false
 	}
 	// check name
-	name := fn(user.Public)
+	name := utils.Fn(user.Public)
 	if !strings.HasSuffix(name, bots.BotNameSuffix) {
 		return false
 	}
@@ -467,23 +467,12 @@ func isVerified(trusted interface{}) bool {
 	return false
 }
 
-func fn(public interface{}) string {
-	if v, ok := public.(map[string]interface{}); ok {
-		if s, ok := v["fn"]; ok {
-			if ss, ok := s.(string); ok {
-				return ss
-			}
-		}
-	}
-	return ""
-}
-
 func botName(subs types.Subscription) string {
 	public := subs.GetPublic()
 	if public == nil {
 		return ""
 	}
-	name := fn(public)
+	name := utils.Fn(public)
 	name = strings.ReplaceAll(name, bots.BotNameSuffix, "")
 	return name
 }
