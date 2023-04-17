@@ -37,6 +37,7 @@ import (
 	// Database backends
 	_ "github.com/tinode/chat/server/db/mongodb"
 	_ "github.com/tinode/chat/server/db/mysql"
+	_ "github.com/tinode/chat/server/db/postgres"
 	_ "github.com/tinode/chat/server/db/rethinkdb"
 
 	"github.com/tinode/chat/server/logs"
@@ -195,6 +196,9 @@ var globals struct {
 
 	// ICE servers config (video calling)
 	iceServers []iceServer
+
+	// Websocket per-message compression negotiation is enabled.
+	wsCompression bool
 }
 
 // Credential validator config.
@@ -245,6 +249,9 @@ type configType struct {
 	ApiPath string `json:"api_path"`
 	// Cache-Control value for static content.
 	CacheControl int `json:"cache_control"`
+	// If true, do not attempt to negotiate websocket per message compression (RFC 7692.4).
+	// It should be disabled (set to true) if you are using MSFT IIS as a reverse proxy.
+	WSCompressionDisabled bool `json:"ws_compression_disabled"`
 	// Address:port to listen for gRPC clients. If blank gRPC support will not be initialized.
 	// Could be overridden from the command line with --grpc_listen.
 	GrpcListen string `json:"grpc_listen"`
@@ -548,6 +555,9 @@ func main() {
 	if globals.defaultCountryCode == "" {
 		globals.defaultCountryCode = defaultCountryCode
 	}
+
+	// Websocket compression.
+	globals.wsCompression = !config.WSCompressionDisabled
 
 	if config.Media != nil {
 		if config.Media.UseHandler == "" {
