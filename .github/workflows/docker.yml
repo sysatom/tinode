@@ -19,6 +19,7 @@ jobs:
         with:
           repository: sysatom/tinode-webapp
           path: webapp
+          ref: extra
 
       - name: Set up Go 1.x
         uses: actions/setup-go@v3
@@ -68,6 +69,12 @@ jobs:
           go env -w GOARCH=amd64
           go env
           CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -tags mysql -o tinode github.com/tinode/chat/server
+
+      - name: NPM cache
+        uses: actions/cache@v3
+        with:
+          path: webapp/node_modules
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
 
       - name: Build js
         run: cd webapp && npm install && npm run build
