@@ -1,6 +1,7 @@
 package command
 
 import (
+	"fmt"
 	"github.com/tinode/chat/server/extra/types"
 	"strings"
 )
@@ -17,7 +18,7 @@ func (r Ruleset) Help(in string) (types.MsgPayload, error) {
 	if strings.ToLower(in) == "help" {
 		m := make(map[string]interface{})
 		for _, rule := range r {
-			m[rule.Define] = rule.Help
+			m[fmt.Sprintf("/%s", rule.Define)] = rule.Help
 		}
 
 		return types.InfoMsg{
