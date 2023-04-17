@@ -86,8 +86,8 @@ func (b bot) Condition(ctx types.Context, forwarded types.MsgPayload) (types.Msg
 	return bots.RunCondition(conditionRules, ctx, forwarded)
 }
 
-func (b bot) Group(_ types.Context, _ map[string]interface{}, _ interface{}) (types.MsgPayload, error) {
-	return types.TextMsg{Text: "Group"}, nil
+func (b bot) Group(ctx types.Context, head map[string]interface{}, content interface{}) (types.MsgPayload, error) {
+	return bots.RunGroup(eventRules, ctx, head, content)
 }
 
 func (b bot) Agent(ctx types.Context, content interface{}) (types.MsgPayload, error) {

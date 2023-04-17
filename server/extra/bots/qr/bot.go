@@ -63,18 +63,6 @@ func (b bot) Input(_ types.Context, _ map[string]interface{}, context interface{
 	return qrEncode(text)
 }
 
-func (b bot) Group(_ types.Context, _ map[string]interface{}, context interface{}) (types.MsgPayload, error) {
-	text := ""
-	if v, ok := context.(string); ok {
-		text = v
-	}
-	if text == "" {
-		return types.TextMsg{Text: "input error"}, nil
-	}
-
-	return qrEncode(text)
-}
-
 func (b bot) Command(ctx types.Context, content interface{}) (types.MsgPayload, error) {
 	return bots.RunCommand(commandRules, ctx, content)
 }

@@ -10,6 +10,7 @@ import (
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/ruleset/condition"
 	"github.com/tinode/chat/server/extra/ruleset/cron"
+	"github.com/tinode/chat/server/extra/ruleset/event"
 	"github.com/tinode/chat/server/extra/ruleset/form"
 	"github.com/tinode/chat/server/extra/ruleset/instruct"
 	"github.com/tinode/chat/server/extra/ruleset/session"
@@ -184,6 +185,19 @@ func Help(commandRules []command.Rule, agentRules []agent.Rule, cronRules []cron
 	}
 
 	return result, nil
+}
+
+func RunGroup(eventRules []event.Rule, ctx types.Context, head map[string]interface{}, content interface{}) (types.MsgPayload, error) {
+	rs := event.Ruleset(eventRules)
+	payload, err := rs.ProcessEvent(ctx, head, content)
+	if err != nil {
+		return nil, err
+	}
+	// todo
+	if len(payload) > 0 {
+		return payload[0], nil
+	}
+	return nil, nil
 }
 
 func RunCommand(commandRules []command.Rule, ctx types.Context, content interface{}) (types.MsgPayload, error) {

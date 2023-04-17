@@ -55,10 +55,6 @@ func (b bot) Input(_ types.Context, _ map[string]interface{}, _ interface{}) (ty
 	return nil, nil
 }
 
-func (b bot) Group(_ types.Context, _ map[string]interface{}, _ interface{}) (types.MsgPayload, error) {
-	return nil, nil
-}
-
 func (b bot) Command(ctx types.Context, content interface{}) (types.MsgPayload, error) {
 	return bots.RunCommand(commandRules, ctx, content)
 }

@@ -58,6 +58,9 @@ var instructTemple string
 //go:embed tmpl/instruct_func.tmpl
 var instructFuncTemple string
 
+//go:embed tmpl/group.tmpl
+var groupTemple string
+
 //go:embed tmpl/group_func.tmpl
 var groupFuncTemple string
 
@@ -146,6 +149,12 @@ func main() {
 				panic(err)
 			}
 		}
+		if data.HasGroup {
+			err = os.WriteFile(filePath(data.BotName, "group.go"), parseTemplate(groupTemple, data), os.ModePerm)
+			if err != nil {
+				panic(err)
+			}
+		}
 	} else {
 		if !fileExist(data.BotName, "bot.go") {
 			panic("dir exist, but bot.go file not exist")
@@ -154,9 +163,15 @@ func main() {
 			// append
 			appendFileContent(filePath(data.BotName, "bot.go"), parseTemplate(inputFuncTemple, data))
 		}
-		if data.HasGroup {
-			// append
-			appendFileContent(filePath(data.BotName, "bot.go"), parseTemplate(groupFuncTemple, data))
+		if !fileExist(data.BotName, "group.go") {
+			if data.HasGroup {
+				err = os.WriteFile(filePath(data.BotName, "group.go"), parseTemplate(groupTemple, data), os.ModePerm)
+				if err != nil {
+					panic(err)
+				}
+				// append
+				appendFileContent(filePath(data.BotName, "bot.go"), parseTemplate(groupFuncTemple, data))
+			}
 		}
 		if !fileExist(data.BotName, "agent.go") {
 			if data.HasAgent {

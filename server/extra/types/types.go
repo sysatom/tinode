@@ -51,6 +51,8 @@ type Context struct {
 	SessionInitValues model.JSON
 	// session last values
 	SessionLastValues model.JSON
+	// group event
+	GroupEvent GroupEvent
 }
 
 func Id() types.Uid {

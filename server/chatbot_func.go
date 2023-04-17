@@ -744,6 +744,11 @@ func botIncomingMessage(t *Topic, msg *ClientComMessage) {
 
 					// stats
 					statsInc("BotRunCommandTotal", 1)
+
+					// error message
+					if payload == nil {
+						payload = extraTypes.TextMsg{Text: "error command"}
+					}
 				}
 			}
 			// condition
@@ -913,6 +918,7 @@ func groupIncomingMessage(t *Topic, msg *ClientComMessage) {
 
 		// group
 		if payload == nil {
+			ctx.GroupEvent = extraTypes.GroupEventReceive
 			payload, err = handle.Group(ctx, msg.Pub.Head, msg.Pub.Content)
 			if err != nil {
 				logs.Warn.Printf("topic[%s]: failed to run group bot: %v", t.name, err)
