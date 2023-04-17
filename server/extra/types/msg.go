@@ -247,7 +247,7 @@ func (i InfoMsg) Convert() (map[string]interface{}, interface{}) {
 	sort.Strings(keys)
 
 	for _, k := range keys {
-		builder.AppendText(fmt.Sprintf("%s: ", k), TextOption{IsBold: true})
+		builder.AppendText(fmt.Sprintf("/%s: ", k), TextOption{IsBold: true})
 		builder.AppendText(toString(m[k]), TextOption{})
 		builder.AppendText("\n", TextOption{})
 	}

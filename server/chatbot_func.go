@@ -734,13 +734,17 @@ func botIncomingMessage(t *Topic, msg *ClientComMessage) {
 						}
 					}
 				}
-				payload, err = handle.Command(ctx, content)
-				if err != nil {
-					logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
-				}
+				// check "/" prefix
+				if in, ok := content.(string); ok && strings.HasPrefix(in, "/") {
+					in = strings.Replace(in, "/", "", 1)
+					payload, err = handle.Command(ctx, in)
+					if err != nil {
+						logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
+					}
 
-				// stats
-				statsInc("BotRunCommandTotal", 1)
+					// stats
+					statsInc("BotRunCommandTotal", 1)
+				}
 			}
 			// condition
 			if payload == nil {
