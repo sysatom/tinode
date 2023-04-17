@@ -2697,6 +2697,9 @@ func (t *Topic) replySetSub(sess *Session, pkt *ClientComMessage, asChan bool) e
 
 	sess.queueOut(resp)
 
+	// chatbot group join event hook
+	hookHandleGroupEvent(t, pkt, 1)
+
 	return nil
 }
 

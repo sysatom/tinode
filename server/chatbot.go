@@ -7,8 +7,11 @@ import (
 	"github.com/tinode/chat/server/extra/pkg/cache"
 	"github.com/tinode/chat/server/extra/pkg/queue"
 	extraStore "github.com/tinode/chat/server/extra/store"
+	extraTypes "github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/vendors"
 	"github.com/tinode/chat/server/logs"
+	"github.com/tinode/chat/server/store"
+	"github.com/tinode/chat/server/store/types"
 	"net/http"
 	"strings"
 
@@ -144,10 +147,28 @@ func hookHandleIncomingMessage(t *Topic, msg *ClientComMessage) {
 	// update online status
 	onlineStatus(msg.AsUser)
 	// check grp or p2p
-	if strings.HasPrefix(msg.Pub.Topic, "grp") {
-		groupIncomingMessage(t, msg)
+	if strings.HasPrefix(msg.Original, "grp") {
+		groupIncomingMessage(t, msg, extraTypes.GroupEventReceive)
 	} else {
 		botIncomingMessage(t, msg)
+	}
+}
+
+func hookHandleGroupEvent(t *Topic, msg *ClientComMessage, event int) {
+	if strings.HasPrefix(msg.Original, "grp") {
+		switch extraTypes.GroupEvent(event) {
+		case extraTypes.GroupEventJoin:
+			user, err := store.Users.Get(types.ParseUserId(msg.Set.MsgSetQuery.Sub.User))
+			if err != nil {
+				logs.Err.Println(err)
+			}
+			// Current user is bot
+			if isBotUser(user) {
+				return
+			}
+			msg.AsUser = msg.Set.MsgSetQuery.Sub.User
+		}
+		groupIncomingMessage(t, msg, extraTypes.GroupEvent(event))
 	}
 }
 

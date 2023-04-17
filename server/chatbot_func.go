@@ -804,7 +804,7 @@ func botIncomingMessage(t *Topic, msg *ClientComMessage) {
 			}
 		}
 
-		// send  message
+		// send message
 		if payload == nil {
 			continue
 		}
@@ -814,8 +814,8 @@ func botIncomingMessage(t *Topic, msg *ClientComMessage) {
 	}
 }
 
-func groupIncomingMessage(t *Topic, msg *ClientComMessage) {
-	subs, err := store.Topics.GetUsers(msg.Pub.Topic, nil)
+func groupIncomingMessage(t *Topic, msg *ClientComMessage, event extraTypes.GroupEvent) {
+	subs, err := store.Topics.GetUsers(msg.Original, nil)
 	if err != nil {
 		logs.Err.Println("hook bot incoming", err)
 		return
@@ -877,7 +877,7 @@ func groupIncomingMessage(t *Topic, msg *ClientComMessage) {
 		// auth
 		if payload == nil {
 			// condition
-			if msg.Pub.Head != nil {
+			if msg.Pub != nil && msg.Pub.Head != nil {
 				fUid := ""
 				fSeq := int64(0)
 				if v, ok := msg.Pub.Head["forwarded"]; ok {
@@ -918,8 +918,14 @@ func groupIncomingMessage(t *Topic, msg *ClientComMessage) {
 
 		// group
 		if payload == nil {
-			ctx.GroupEvent = extraTypes.GroupEventReceive
-			payload, err = handle.Group(ctx, msg.Pub.Head, msg.Pub.Content)
+			ctx.GroupEvent = event
+			var head map[string]any
+			var content any
+			if msg.Pub != nil {
+				head = msg.Pub.Head
+				content = msg.Pub.Content
+			}
+			payload, err = handle.Group(ctx, head, content)
 			if err != nil {
 				logs.Warn.Printf("topic[%s]: failed to run group bot: %v", t.name, err)
 				continue
@@ -929,7 +935,7 @@ func groupIncomingMessage(t *Topic, msg *ClientComMessage) {
 			statsInc("BotRunGroupTotal", 1)
 		}
 
-		// send  message
+		// send message
 		if payload == nil {
 			continue
 		}
