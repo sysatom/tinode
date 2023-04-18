@@ -1,12 +1,12 @@
-package main
+package generator
 
 import (
 	"bytes"
 	_ "embed"
-	"flag"
+	"errors"
 	"fmt"
+	"github.com/urfave/cli/v2"
 	"os"
-	"strings"
 	"text/template"
 )
 
@@ -69,20 +69,19 @@ var inputFuncTemple string
 
 const BasePath = "./server/extra/bots"
 
-func main() {
+func BotAction(c *cli.Context) error {
 	// args
-	bot := flag.String("bot", "", "bot package")
-	rule := flag.String("rule", "command", "rule type") // input,group,agent,command,condition,cron,form
-	flag.Parse()
-	if *bot == "" {
-		panic("bot args error")
+	bot := c.String("name")
+	rule := c.StringSlice("rule") // input,group,agent,command,condition,cron,form
+	if bot == "" {
+		return errors.New("bot name args error")
 	}
 
 	// schema
 	data := schema{
-		BotName: *bot,
+		BotName: bot,
 	}
-	parseRule(*rule, &data)
+	parseRule(rule, &data)
 
 	// check dir
 	_, err := os.Stat(BasePath)
@@ -94,65 +93,65 @@ func main() {
 	if os.IsNotExist(err) {
 		err = os.Mkdir(dir, os.ModePerm)
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		err = os.WriteFile(filePath(data.BotName, "bot.go"), parseTemplate(mainTemple, data), os.ModePerm)
 		if err != nil {
-			panic(err)
+			return err
 		}
 		if data.HasAgent {
 			err = os.WriteFile(filePath(data.BotName, "agent.go"), parseTemplate(agentTemple, data), os.ModePerm)
 			if err != nil {
-				panic(err)
+				return err
 			}
 		}
 		if data.HasCommand {
 			err = os.WriteFile(filePath(data.BotName, "command.go"), parseTemplate(commandTemple, data), os.ModePerm)
 			if err != nil {
-				panic(err)
+				return err
 			}
 		}
 		if data.HasCondition {
 			err = os.WriteFile(filePath(data.BotName, "condition.go"), parseTemplate(conditionTemple, data), os.ModePerm)
 			if err != nil {
-				panic(err)
+				return err
 			}
 		}
 		if data.HasCron {
 			err = os.WriteFile(filePath(data.BotName, "cron.go"), parseTemplate(cronTemple, data), os.ModePerm)
 			if err != nil {
-				panic(err)
+				return err
 			}
 		}
 		if data.HasForm {
 			err = os.WriteFile(filePath(data.BotName, "form.go"), parseTemplate(formTemple, data), os.ModePerm)
 			if err != nil {
-				panic(err)
+				return err
 			}
 		}
 		if data.HasAction {
 			err = os.WriteFile(filePath(data.BotName, "action.go"), parseTemplate(actionTemple, data), os.ModePerm)
 			if err != nil {
-				panic(err)
+				return err
 			}
 		}
 		if data.HasSession {
 			err = os.WriteFile(filePath(data.BotName, "session.go"), parseTemplate(sessionTemple, data), os.ModePerm)
 			if err != nil {
-				panic(err)
+				return err
 			}
 		}
 		if data.HasInstruct {
 			err = os.WriteFile(filePath(data.BotName, "instruct.go"), parseTemplate(instructTemple, data), os.ModePerm)
 			if err != nil {
-				panic(err)
+				return err
 			}
 		}
 		if data.HasGroup {
 			err = os.WriteFile(filePath(data.BotName, "group.go"), parseTemplate(groupTemple, data), os.ModePerm)
 			if err != nil {
-				panic(err)
+				return err
 			}
 		}
 	} else {
@@ -167,7 +166,7 @@ func main() {
 			if data.HasGroup {
 				err = os.WriteFile(filePath(data.BotName, "group.go"), parseTemplate(groupTemple, data), os.ModePerm)
 				if err != nil {
-					panic(err)
+					return err
 				}
 				// append
 				appendFileContent(filePath(data.BotName, "bot.go"), parseTemplate(groupFuncTemple, data))
@@ -177,7 +176,7 @@ func main() {
 			if data.HasAgent {
 				err = os.WriteFile(filePath(data.BotName, "agent.go"), parseTemplate(agentTemple, data), os.ModePerm)
 				if err != nil {
-					panic(err)
+					return err
 				}
 				// append
 				appendFileContent(filePath(data.BotName, "bot.go"), parseTemplate(agentFuncTemple, data))
@@ -187,7 +186,7 @@ func main() {
 			if data.HasCondition {
 				err = os.WriteFile(filePath(data.BotName, "condition.go"), parseTemplate(conditionTemple, data), os.ModePerm)
 				if err != nil {
-					panic(err)
+					return err
 				}
 				// append
 				appendFileContent(filePath(data.BotName, "bot.go"), parseTemplate(conditionFuncTemple, data))
@@ -197,7 +196,7 @@ func main() {
 			if data.HasCron {
 				err = os.WriteFile(filePath(data.BotName, "cron.go"), parseTemplate(cronTemple, data), os.ModePerm)
 				if err != nil {
-					panic(err)
+					return err
 				}
 				// append
 				appendFileContent(filePath(data.BotName, "bot.go"), parseTemplate(cronFuncTemple, data))
@@ -207,7 +206,7 @@ func main() {
 			if data.HasForm {
 				err = os.WriteFile(filePath(data.BotName, "form.go"), parseTemplate(formTemple, data), os.ModePerm)
 				if err != nil {
-					panic(err)
+					return err
 				}
 				// append
 				appendFileContent(filePath(data.BotName, "bot.go"), parseTemplate(formFuncTemple, data))
@@ -217,7 +216,7 @@ func main() {
 			if data.HasAction {
 				err = os.WriteFile(filePath(data.BotName, "action.go"), parseTemplate(actionTemple, data), os.ModePerm)
 				if err != nil {
-					panic(err)
+					return err
 				}
 				// append
 				appendFileContent(filePath(data.BotName, "bot.go"), parseTemplate(actionFuncTemple, data))
@@ -227,7 +226,7 @@ func main() {
 			if data.HasSession {
 				err = os.WriteFile(filePath(data.BotName, "session.go"), parseTemplate(sessionTemple, data), os.ModePerm)
 				if err != nil {
-					panic(err)
+					return err
 				}
 				// append
 				appendFileContent(filePath(data.BotName, "bot.go"), parseTemplate(sessionFuncTemple, data))
@@ -237,7 +236,7 @@ func main() {
 			if data.HasInstruct {
 				err = os.WriteFile(filePath(data.BotName, "instruct.go"), parseTemplate(instructTemple, data), os.ModePerm)
 				if err != nil {
-					panic(err)
+					return err
 				}
 				// append
 				appendFileContent(filePath(data.BotName, "bot.go"), parseTemplate(instructFuncTemple, data))
@@ -246,6 +245,7 @@ func main() {
 	}
 
 	fmt.Println("ok")
+	return nil
 }
 
 type schema struct {
@@ -284,9 +284,8 @@ func parseTemplate(text string, data interface{}) []byte {
 	return buf.Bytes()
 }
 
-func parseRule(rule string, data *schema) {
+func parseRule(rules []string, data *schema) {
 	data.HasCommand = true
-	rules := strings.Split(rule, ",")
 	for _, item := range rules {
 		switch item {
 		case "input":

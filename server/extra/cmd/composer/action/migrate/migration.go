@@ -1,21 +1,22 @@
-package main
+package migrate
 
 import (
+	"errors"
 	"fmt"
+	"github.com/urfave/cli/v2"
 	"log"
 	"os"
 	"regexp"
 	"strconv"
 )
 
-func main() {
-	path := "./server/extra/store/migrate/migrations"
-	args := os.Args
-	if len(args) != 2 {
-		panic("error args")
-	}
+const path = "./server/extra/store/migrate/migrations"
 
-	name := args[1]
+func MigrationAction(c *cli.Context) error {
+	name := c.String("name")
+	if name == "" {
+		return errors.New("error name")
+	}
 
 	// find current version
 	entry, err := os.ReadDir(path)
@@ -60,4 +61,5 @@ func main() {
 	}
 	fmt.Printf("Created %s\n", downName)
 	fmt.Println("All done.")
+	return nil
 }

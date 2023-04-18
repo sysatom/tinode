@@ -1,33 +1,20 @@
-package main
+package migrate
 
 import (
 	"encoding/json"
-	"flag"
 	"fmt"
 	"github.com/golang-migrate/migrate/v4"
-	_ "github.com/golang-migrate/migrate/v4/database/mysql"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
 	extraMigrate "github.com/tinode/chat/server/extra/store/migrate"
 	"github.com/tinode/jsonco"
+	"github.com/urfave/cli/v2"
 	"os"
 )
 
-type configType struct {
-	StoreConfig struct {
-		UseAdapter string `json:"use_adapter"`
-		Adapters   struct {
-			Mysql struct {
-				DSN string `json:"dsn"`
-			} `json:"mysql"`
-		} `json:"adapters"`
-	} `json:"store_config"`
-}
+func ImportAction(c *cli.Context) error {
+	conffile := c.String("config")
 
-func main() {
-	conffile := flag.String("config", "./tinode.conf", "config of the database connection")
-	flag.Parse()
-
-	file, err := os.Open(*conffile)
+	file, err := os.Open(conffile)
 	if err != nil {
 		panic(err)
 	}
@@ -59,4 +46,16 @@ func main() {
 		panic(err)
 	}
 	fmt.Println("migrate done")
+	return nil
+}
+
+type configType struct {
+	StoreConfig struct {
+		UseAdapter string `json:"use_adapter"`
+		Adapters   struct {
+			Mysql struct {
+				DSN string `json:"dsn"`
+			} `json:"mysql"`
+		} `json:"adapters"`
+	} `json:"store_config"`
 }
