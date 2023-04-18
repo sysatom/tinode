@@ -13,3 +13,8 @@ func TestHasHan(t *testing.T) {
 func TestMasker(t *testing.T) {
 	require.Equal(t, "qwerty**********7890", Masker("qwertyuiop1234567890", 2))
 }
+
+func TestFirstUpper(t *testing.T) {
+	require.Equal(t, "Test", FirstUpper("test"))
+	require.Equal(t, "", FirstUpper(""))
+}

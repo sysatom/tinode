@@ -5,7 +5,6 @@ import (
 	"github.com/tinode/chat/server/extra"
 	"github.com/tinode/chat/server/extra/cmd/composer/action/generator"
 	"github.com/tinode/chat/server/extra/cmd/composer/action/migrate"
-	"github.com/tinode/chat/server/logs"
 	"github.com/urfave/cli/v2"
 	"os"
 )
@@ -13,7 +12,7 @@ import (
 func main() {
 	command := NewCommand()
 	if err := command.Run(os.Args); err != nil {
-		logs.Err.Println(err)
+		panic(err)
 	}
 }
 
@@ -81,10 +80,14 @@ func NewCommand() *cli.App {
 					{
 						Name:  "vendor",
 						Usage: "generate vendor api files",
-						Action: func(c *cli.Context) error {
-							fmt.Println("vendor")
-							return nil
+						Flags: []cli.Flag{
+							&cli.StringFlag{
+								Name:  "name",
+								Value: "",
+								Usage: "vendor name",
+							},
 						},
+						Action: generator.VendorAction,
 					},
 				},
 			},
