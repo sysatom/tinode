@@ -14,6 +14,7 @@ import (
 	"github.com/tinode/chat/server/extra/ruleset/form"
 	"github.com/tinode/chat/server/extra/ruleset/instruct"
 	"github.com/tinode/chat/server/extra/ruleset/session"
+	"github.com/tinode/chat/server/extra/ruleset/workflow"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/types"
@@ -63,6 +64,9 @@ type Handler interface {
 
 	// Group return group result
 	Group(ctx types.Context, head map[string]interface{}, content interface{}) (types.MsgPayload, error)
+
+	// Workflow return workflow result
+	Workflow(ctx types.Context, head map[string]interface{}, content interface{}) (types.MsgPayload, error)
 
 	// Agent return group result
 	Agent(ctx types.Context, content interface{}) (types.MsgPayload, error)
@@ -114,6 +118,10 @@ func (Base) Condition(_ types.Context, _ types.MsgPayload) (types.MsgPayload, er
 }
 
 func (Base) Group(_ types.Context, _ map[string]interface{}, _ interface{}) (types.MsgPayload, error) {
+	return nil, nil
+}
+
+func (Base) Workflow(_ types.Context, _ map[string]interface{}, _ interface{}) (types.MsgPayload, error) {
 	return nil, nil
 }
 
@@ -198,6 +206,15 @@ func RunGroup(eventRules []event.Rule, ctx types.Context, head map[string]interf
 		return payload[0], nil
 	}
 	return nil, nil
+}
+
+func RunWorkflow(workflowRules []workflow.Rule, ctx types.Context, head map[string]interface{}, content interface{}) (types.MsgPayload, error) {
+	rs := workflow.Ruleset(workflowRules)
+	payload, err := rs.ProcessWorkflow(ctx, head, content)
+	if err != nil {
+		return nil, err
+	}
+	return payload, nil
 }
 
 func RunCommand(commandRules []command.Rule, ctx types.Context, content interface{}) (types.MsgPayload, error) {

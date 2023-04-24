@@ -391,6 +391,37 @@ func (a *adapter) SessionGet(uid types.Uid, topic string) (model.Session, error)
 	return find, nil
 }
 
+func (a *adapter) WorkflowCreate(workflow model.Workflow) error {
+	return a.db.Create(&model.Workflow{
+		Uid:     workflow.Uid,
+		Topic:   workflow.Topic,
+		Flag:    workflow.Flag,
+		RuleId:  workflow.RuleId,
+		Version: workflow.Version,
+		Step:    workflow.Step,
+		Values:  workflow.Values,
+		State:   workflow.State,
+	}).Error
+}
+
+func (a *adapter) WorkflowState(uid types.Uid, topic string, workflow model.Workflow) error {
+	return a.db.
+		Model(&model.Session{}).
+		Where("`uid` = ? AND `topic` = ? AND `flag` = ?", uid.UserId(), topic, workflow.Flag).
+		Updates(map[string]interface{}{
+			"state": workflow.State,
+		}).Error
+}
+
+func (a *adapter) WorkflowGet(uid types.Uid, topic string, flag string) (model.Workflow, error) {
+	var find model.Workflow
+	err := a.db.Where("`uid` = ? AND `topic` = ? AND `flag` = ?", uid.UserId(), topic, flag).Order("created_at DESC").First(&find).Error
+	if err != nil {
+		return model.Workflow{}, err
+	}
+	return find, nil
+}
+
 func (a *adapter) BehaviorSet(behavior model.Behavior) error {
 	return a.db.Create(&behavior).Error
 }

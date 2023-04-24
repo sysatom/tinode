@@ -325,3 +325,30 @@ const (
 	InstructPriorityDefault InstructPriority = 2
 	InstructPriorityLow     InstructPriority = 1
 )
+
+type Workflow struct {
+	ID        uint64 `gorm:"primaryKey"`
+	Uid       string
+	Topic     string
+	Flag      string
+	RuleId    string
+	Version   int
+	Step      int
+	Values    JSON `gorm:"type:json"`
+	State     WorkflowState
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+func (Workflow) TableName() string {
+	return "chatbot_workflow"
+}
+
+type WorkflowState int
+
+const (
+	WorkflowStateUnknown WorkflowState = iota
+	WorkflowStart
+	WorkflowDone
+	WorkflowCancel
+)

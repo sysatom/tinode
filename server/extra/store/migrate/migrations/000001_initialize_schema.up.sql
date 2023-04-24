@@ -289,3 +289,23 @@ CREATE TABLE `chatbot_instruct`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;
+
+
+CREATE TABLE `chatbot_workflow`
+(
+    `id`         int unsigned                                                  NOT NULL AUTO_INCREMENT,
+    `uid`        char(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci     NOT NULL,
+    `topic`      char(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci     NOT NULL,
+    `flag`       char(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci     NOT NULL,
+    `rule_id`    varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+    `version`    int                                                           NOT NULL,
+    `step`       int                                                           NOT NULL,
+    `values`     json                                                          NOT NULL,
+    `state`      tinyint                                                       NOT NULL,
+    `created_at` datetime                                                      NOT NULL,
+    `updated_at` datetime                                                      NOT NULL,
+    PRIMARY KEY (`id`),
+    KEY `uid` (`uid`, `topic`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci;

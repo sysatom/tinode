@@ -53,6 +53,12 @@ type Context struct {
 	SessionLastValues model.JSON
 	// group event
 	GroupEvent GroupEvent
+	// workflow rule id
+	WorkflowRuleId string
+	// workflow version
+	WorkflowVersion int
+	// workflow step index
+	WorkflowStepIndex int
 }
 
 func Id() types.Uid {

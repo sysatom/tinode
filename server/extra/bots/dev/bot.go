@@ -90,6 +90,10 @@ func (b bot) Group(ctx types.Context, head map[string]interface{}, content inter
 	return bots.RunGroup(eventRules, ctx, head, content)
 }
 
+func (b bot) Workflow(ctx types.Context, head map[string]interface{}, content interface{}) (types.MsgPayload, error) {
+	return bots.RunWorkflow(workflowRules, ctx, head, content)
+}
+
 func (b bot) Agent(ctx types.Context, content interface{}) (types.MsgPayload, error) {
 	return bots.RunAgent(AgentVersion, agentRules, ctx, content)
 }

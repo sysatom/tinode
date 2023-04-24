@@ -63,6 +63,12 @@ type Adapter interface {
 	SessionState(uid types.Uid, topic string, state model.SessionState) error
 	// SessionGet session get
 	SessionGet(uid types.Uid, topic string) (model.Session, error)
+	// WorkflowCreate workflow create
+	WorkflowCreate(workflow model.Workflow) error
+	// WorkflowState workflow set state
+	WorkflowState(uid types.Uid, topic string, workflow model.Workflow) error
+	// WorkflowGet workflow get
+	WorkflowGet(uid types.Uid, topic string, flag string) (model.Workflow, error)
 	// PageSet page set
 	PageSet(pageId string, page model.Page) error
 	// PageGet page get

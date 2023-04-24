@@ -116,6 +116,9 @@ type ChatbotPersistenceInterface interface {
 	SessionSet(uid types.Uid, topic string, session model.Session) error
 	SessionState(uid types.Uid, topic string, state model.SessionState) error
 	SessionGet(uid types.Uid, topic string) (model.Session, error)
+	WorkflowCreate(workflow model.Workflow) error
+	WorkflowState(uid types.Uid, topic string, workflow model.Workflow) error
+	WorkflowGet(uid types.Uid, topic string, flag string) (model.Workflow, error)
 	PageSet(pageId string, page model.Page) error
 	PageGet(pageId string) (model.Page, error)
 	UrlCreate(url model.Url) error
@@ -250,6 +253,18 @@ func (c chatbotMapper) SessionState(uid types.Uid, topic string, state model.Ses
 
 func (c chatbotMapper) SessionGet(uid types.Uid, topic string) (model.Session, error) {
 	return adp.SessionGet(uid, topic)
+}
+
+func (c chatbotMapper) WorkflowCreate(workflow model.Workflow) error {
+	return adp.WorkflowCreate(workflow)
+}
+
+func (c chatbotMapper) WorkflowState(uid types.Uid, topic string, workflow model.Workflow) error {
+	return adp.WorkflowState(uid, topic, workflow)
+}
+
+func (c chatbotMapper) WorkflowGet(uid types.Uid, topic string, flag string) (model.Workflow, error) {
+	return adp.WorkflowGet(uid, topic, flag)
 }
 
 func (c chatbotMapper) PageSet(pageId string, page model.Page) error {
