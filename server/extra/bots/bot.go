@@ -247,13 +247,16 @@ func ProcessWorkflow(workflowRules []workflow.Rule, ctx types.Context, head map[
 	if index < 0 || index >= len(rule.Step) {
 		return nil, errors.New("error workflow step index")
 	}
+	var payload types.MsgPayload
 	step := rule.Step[index]
 	switch step.Type {
 	case types.FormStep:
-		payload := StoreForm(ctx, types.FormMsg{ID: step.Flag})
-		if payload != nil {
-			return payload, nil
-		}
+		payload = StoreForm(ctx, types.FormMsg{ID: step.Flag})
+	case types.ActionStep:
+		payload = ActionMsg(ctx, step.Flag)
+	}
+	if payload != nil {
+		return payload, nil
 	}
 
 	return nil, errors.New("error trigger")
@@ -482,6 +485,33 @@ func StoreForm(ctx types.Context, payload types.MsgPayload) types.MsgPayload {
 	return types.LinkMsg{
 		Title: fmt.Sprintf("%s Form[%s]", formMsg.Title, formId),
 		Url:   fmt.Sprintf("%s/extra/page/%s", types.AppUrl(), formId),
+	}
+}
+
+func ActionMsg(_ types.Context, id string) types.MsgPayload {
+	var title string
+	var option []string
+	for _, handler := range List() {
+		for _, item := range handler.Rules() {
+			switch v := item.(type) {
+			case []action.Rule:
+				for _, rule := range v {
+					if rule.Id == id {
+						title = rule.Title
+						option = rule.Option
+					}
+				}
+			}
+		}
+	}
+	if len(option) <= 0 {
+		return types.TextMsg{Text: "error action rule id"}
+	}
+
+	return types.ActionMsg{
+		ID:     id,
+		Title:  title,
+		Option: option,
 	}
 }
 

@@ -116,11 +116,7 @@ var commandRules = []command.Rule{
 		Define: "action",
 		Help:   "[example] action",
 		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
-			return types.ActionMsg{
-				ID:     devActionID,
-				Title:  "Operate ... ?",
-				Option: []string{"do1", "do2"},
-			}
+			return bots.ActionMsg(ctx, devActionID)
 		},
 	},
 	{

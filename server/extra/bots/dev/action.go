@@ -12,7 +12,9 @@ const (
 
 var actionRules = []action.Rule{
 	{
-		Id: devActionID,
+		Id:     devActionID,
+		Title:  "Operate ... ?",
+		Option: []string{"do1", "do2"},
 		Handler: map[string]func(ctx types.Context) types.MsgPayload{
 			"do1": func(ctx types.Context) types.MsgPayload {
 				return types.TextMsg{Text: fmt.Sprintf("do 1 something, action [%s: %d]", ctx.ActionRuleId, ctx.SeqId)}

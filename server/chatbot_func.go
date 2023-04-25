@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/tinode/chat/server/extra/ruleset/action"
 	"net/http"
 	"sort"
 	"strconv"
@@ -703,9 +704,28 @@ func botIncomingMessage(t *Topic, msg *ClientComMessage) {
 						}
 						ctx.SeqId = int(seq)
 						ctx.ActionRuleId = actionRuleId
-						payload, err = handle.Action(ctx, option)
-						if err != nil {
-							logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
+
+						// get action handler
+						var botHandler bots.Handler
+						for _, handler := range bots.List() {
+							for _, item := range handler.Rules() {
+								switch v := item.(type) {
+								case []action.Rule:
+									for _, rule := range v {
+										if rule.Id == actionRuleId {
+											botHandler = handler
+										}
+									}
+								}
+							}
+						}
+						if botHandler == nil {
+							payload = extraTypes.TextMsg{Text: "error action"}
+						} else {
+							payload, err = botHandler.Action(ctx, option)
+							if err != nil {
+								logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
+							}
 						}
 					}
 				}

@@ -8,6 +8,8 @@ import (
 type Rule struct {
 	Id         string
 	IsLongTerm bool
+	Title      string
+	Option     []string
 	Handler    map[string]func(ctx types.Context) types.MsgPayload
 }
 
