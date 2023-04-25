@@ -107,9 +107,7 @@ var commandRules = []command.Rule{
 		Define: "form",
 		Help:   `[example] form`,
 		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
-			return bots.StoreForm(ctx, types.FormMsg{
-				ID: devFormID,
-			})
+			return bots.FormMsg(ctx, devFormID)
 		},
 	},
 	{
@@ -200,16 +198,7 @@ var commandRules = []command.Rule{
 		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			data := model.JSON{}
 			data["txt"] = "example"
-			return bots.StoreInstruct(ctx, types.InstructMsg{
-				No:       types.Id().String(),
-				Object:   model.InstructObjectHelper,
-				Bot:      Name,
-				Flag:     ExampleInstructID,
-				Content:  data,
-				Priority: model.InstructPriorityDefault,
-				State:    model.InstructCreate,
-				ExpireAt: time.Now().Add(time.Hour),
-			})
+			return bots.InstructMsg(ctx, ExampleInstructID, data)
 		},
 	},
 	{

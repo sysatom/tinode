@@ -24,6 +24,7 @@ import (
 	serverTypes "github.com/tinode/chat/server/store/types"
 	"gorm.io/gorm"
 	"strings"
+	"time"
 )
 
 const BotNameSuffix = "_bot"
@@ -280,6 +281,12 @@ func ProcessWorkflow(workflowRules []workflow.Rule, ctx types.Context, head map[
 				}
 			}
 		}
+	case types.InstructStep:
+		data := make(map[string]interface{}) // fixme
+		for i, arg := range step.Args {
+			data[fmt.Sprintf("val%d", i+1)] = arg
+		}
+		payload = InstructMsg(ctx, step.Flag, data)
 	}
 	if payload != nil {
 		return payload, nil
@@ -434,12 +441,10 @@ func RunSession(sessionRules []session.Rule, ctx types.Context, content interfac
 	return rs.ProcessSession(ctx, content)
 }
 
-func StoreForm(ctx types.Context, payload types.MsgPayload) types.MsgPayload {
+func FormMsg(ctx types.Context, id string) types.MsgPayload {
 	// get form fields
-	formMsg, ok := payload.(types.FormMsg)
-	if !ok {
-		return types.TextMsg{Text: "form msg error"}
-	}
+	formMsg := types.FormMsg{ID: id}
+	var title string
 	var field []types.FormField
 	if len(field) == 0 { // todo
 		for _, handler := range List() {
@@ -447,7 +452,8 @@ func StoreForm(ctx types.Context, payload types.MsgPayload) types.MsgPayload {
 				switch v := item.(type) {
 				case []form.Rule:
 					for _, rule := range v {
-						if rule.Id == formMsg.ID {
+						if rule.Id == id {
+							title = rule.Title
 							field = rule.Field
 						}
 					}
@@ -458,10 +464,20 @@ func StoreForm(ctx types.Context, payload types.MsgPayload) types.MsgPayload {
 			return types.TextMsg{Text: "form field error"}
 		}
 	}
-
+	formMsg.Title = title
 	formMsg.Field = field
+
+	return StoreForm(ctx, formMsg)
+}
+
+func StoreForm(ctx types.Context, payload types.MsgPayload) types.MsgPayload {
+	formMsg, ok := payload.(types.FormMsg)
+	if !ok {
+		return types.TextMsg{Text: "form msg error"}
+	}
+
 	formId := types.Id().String()
-	d, err := json.Marshal(formMsg)
+	d, err := json.Marshal(payload)
 	if err != nil {
 		logs.Err.Println(err)
 		return types.TextMsg{Text: "store form error"}
@@ -640,6 +656,33 @@ func CreateShortUrl(text string) (string, error) {
 	return "", errors.New("error url")
 }
 
+func InstructMsg(ctx types.Context, id string, data map[string]interface{}) types.MsgPayload {
+	var botName string
+	for name, handler := range List() {
+		for _, item := range handler.Rules() {
+			switch v := item.(type) {
+			case []instruct.Rule:
+				for _, rule := range v {
+					if rule.Id == id {
+						botName = name
+					}
+				}
+			}
+		}
+	}
+
+	return StoreInstruct(ctx, types.InstructMsg{
+		No:       types.Id().String(),
+		Object:   model.InstructObjectHelper,
+		Bot:      botName,
+		Flag:     id,
+		Content:  data,
+		Priority: model.InstructPriorityDefault,
+		State:    model.InstructCreate,
+		ExpireAt: time.Now().Add(time.Hour),
+	})
+}
+
 func StoreInstruct(ctx types.Context, payload types.MsgPayload) types.MsgPayload {
 	msg, ok := payload.(types.InstructMsg)
 	if !ok {
@@ -661,7 +704,7 @@ func StoreInstruct(ctx types.Context, payload types.MsgPayload) types.MsgPayload
 		return types.TextMsg{Text: "store instruct error"}
 	}
 
-	return types.TextMsg{Text: fmt.Sprintf("No: %s", msg.No)}
+	return types.TextMsg{Text: fmt.Sprintf("Instruct[%s:%s]", msg.Flag, msg.No)}
 }
 
 const (
