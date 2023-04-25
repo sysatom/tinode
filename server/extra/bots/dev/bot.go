@@ -62,6 +62,17 @@ func (b bot) Help() (map[string][]string, error) {
 	return bots.Help(commandRules, agentRules, cronRules)
 }
 
+func (b bot) Rules() []interface{} {
+	return []interface{}{
+		commandRules,
+		formRules,
+		conditionRules,
+		actionRules,
+		instructRules,
+		sessionRules,
+	}
+}
+
 func (b bot) Input(_ types.Context, _ map[string]interface{}, _ interface{}) (types.MsgPayload, error) {
 	return types.TextMsg{Text: "Input"}, nil
 }
@@ -88,10 +99,6 @@ func (b bot) Condition(ctx types.Context, forwarded types.MsgPayload) (types.Msg
 
 func (b bot) Group(ctx types.Context, head map[string]interface{}, content interface{}) (types.MsgPayload, error) {
 	return bots.RunGroup(eventRules, ctx, head, content)
-}
-
-func (b bot) Workflow(ctx types.Context, head map[string]interface{}, content interface{}) (types.MsgPayload, error) {
-	return bots.RunWorkflow(workflowRules, ctx, head, content)
 }
 
 func (b bot) Agent(ctx types.Context, content interface{}) (types.MsgPayload, error) {

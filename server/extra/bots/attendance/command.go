@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"github.com/nikolaydubina/calendarheatmap/charts"
+	"github.com/tinode/chat/server/extra/pkg/parser"
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/store/model"
@@ -21,14 +22,14 @@ var commandRules = []command.Rule{
 	{
 		Define: "info",
 		Help:   `Bot info`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			return nil
 		},
 	},
 	{
 		Define: "today",
 		Help:   `today detail`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			today := time.Now().Format("2006-01-02")
 			datas, err := store.Chatbot.DataList(ctx.AsUser, ctx.Original, types.DataFilter{Prefix: &today})
 			if err != nil || len(datas) == 0 {
@@ -59,7 +60,7 @@ var commandRules = []command.Rule{
 	{
 		Define: "check [string] [string]",
 		Help:   `punch in [topic] [summary]`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			topic, _ := tokens[1].Value.String()
 			summary, _ := tokens[2].Value.String()
 			today := time.Now().Format("2006-01-02")
@@ -76,7 +77,7 @@ var commandRules = []command.Rule{
 	{
 		Define: "heatmap [string]",
 		Help:   `heatmap last year [topic]`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			topic, _ := tokens[1].Value.String()
 
 			start := time.Now().AddDate(-1, 0, 0)

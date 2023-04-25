@@ -1,4 +1,4 @@
-package command
+package parser
 
 import (
 	"fmt"
@@ -60,7 +60,7 @@ func TestCheck(t *testing.T) {
 
 	for i, tt := range tests {
 		t.Run(fmt.Sprintf("Syntax Check #%d", i), func(t *testing.T) {
-			a, err := ParseCommand(tt.input)
+			a, err := ParseString(tt.input)
 			if err != nil {
 				t.Fatal(err)
 			}

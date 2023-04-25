@@ -1,4 +1,4 @@
-package command
+package parser
 
 import (
 	"errors"
@@ -118,7 +118,7 @@ func (l *Lexer) GetNextToken() (*Token, error) {
 	return &Token{Type: EOFToken, Value: Variable("")}, nil
 }
 
-func ParseCommand(in string) ([]*Token, error) {
+func ParseString(in string) ([]*Token, error) {
 	if in == "" {
 		return []*Token{}, nil
 	}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/tinode/chat/server/extra/pkg/parser"
 	"runtime"
 	"strconv"
 	"time"
@@ -22,14 +23,14 @@ var commandRules = []command.Rule{
 	{
 		Define: "version",
 		Help:   `Version`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			return types.TextMsg{Text: fmt.Sprintf("Chatbot framework v%s", extra.Version)}
 		},
 	},
 	{
 		Define: "vars",
 		Help:   `vars url`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			return types.LinkMsg{
 				Title: "Vars Url",
 				Url:   fmt.Sprintf("%s/debug/vars", types.AppUrl()),
@@ -39,7 +40,7 @@ var commandRules = []command.Rule{
 	{
 		Define: "mem stats",
 		Help:   `App memory stats`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			var memStats runtime.MemStats
 			runtime.ReadMemStats(&memStats)
 
@@ -52,7 +53,7 @@ var commandRules = []command.Rule{
 	{
 		Define: "golang stats",
 		Help:   `App golang stats`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			numGoroutine := runtime.NumGoroutine()
 
 			return types.InfoMsg{
@@ -66,7 +67,7 @@ var commandRules = []command.Rule{
 	{
 		Define: "server stats",
 		Help:   `Server stats`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			data, err := store.Chatbot.DataGet(ctx.AsUser, ctx.Original, "stats")
 			if err != nil {
 				return types.TextMsg{Text: "Empty server stats"}
@@ -81,7 +82,7 @@ var commandRules = []command.Rule{
 	{
 		Define: "online stats",
 		Help:   `Online stats`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			ctx_ := context.Background()
 			keys, err := cache.DB.Keys(ctx_, "online:*").Result()
 			if err != nil {
@@ -108,7 +109,7 @@ var commandRules = []command.Rule{
 	{
 		Define: "agent",
 		Help:   `agent url`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			return bots.AgentURI(ctx)
 		},
 	},

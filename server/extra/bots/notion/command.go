@@ -2,6 +2,7 @@ package notion
 
 import (
 	"github.com/tinode/chat/server/extra/bots"
+	"github.com/tinode/chat/server/extra/pkg/parser"
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/types"
@@ -13,14 +14,14 @@ var commandRules = []command.Rule{
 	{
 		Define: "info",
 		Help:   `Bot info`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			return nil
 		},
 	},
 	{
 		Define: "config",
 		Help:   `Config`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			c1, _ := store.Chatbot.ConfigGet(ctx.AsUser, ctx.Original, TokenKey)
 			tokenValue, _ := c1.String("value")
 			c2, _ := store.Chatbot.ConfigGet(ctx.AsUser, ctx.Original, ImportPageIdKey)
@@ -53,7 +54,7 @@ var commandRules = []command.Rule{
 	{
 		Define: "search [string]",
 		Help:   "Searches all original pages, databases, and child pages/databases that are shared with the integration.",
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			query, _ := tokens[1].Value.String()
 
 			// token value
@@ -84,7 +85,7 @@ var commandRules = []command.Rule{
 	{
 		Define: "import [string]",
 		Help:   "Append to MindCache page",
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			text, _ := tokens[1].Value.String()
 
 			// token value

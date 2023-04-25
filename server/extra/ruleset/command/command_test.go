@@ -1,6 +1,7 @@
 package command
 
 import (
+	"github.com/tinode/chat/server/extra/pkg/parser"
 	"github.com/tinode/chat/server/extra/types"
 	"strconv"
 	"testing"
@@ -14,14 +15,14 @@ func TestRegexRule(t *testing.T) {
 		{
 			Define: `test`,
 			Help:   `Test info`,
-			Handler: func(ctx types.Context, tokens []*Token) types.MsgPayload {
+			Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 				return types.TextMsg{Text: "test"}
 			},
 		},
 		{
 			Define: `todo [string]`,
 			Help:   `todo something`,
-			Handler: func(ctx types.Context, tokens []*Token) types.MsgPayload {
+			Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 				text, _ := tokens[1].Value.String()
 				return types.TextMsg{Text: text}
 			},
@@ -29,7 +30,7 @@ func TestRegexRule(t *testing.T) {
 		{
 			Define: `add [number] [number]`,
 			Help:   `Addition`,
-			Handler: func(ctx types.Context, tokens []*Token) types.MsgPayload {
+			Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 				tt1, _ := tokens[1].Value.Int64()
 				tt2, _ := tokens[2].Value.Int64()
 				return types.TextMsg{Text: strconv.Itoa(int(tt1 + tt2))}

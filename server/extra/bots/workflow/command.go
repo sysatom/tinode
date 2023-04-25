@@ -1,4 +1,4 @@
-package iot
+package workflow
 
 import (
 	"github.com/tinode/chat/server/extra/pkg/parser"

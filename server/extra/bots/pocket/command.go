@@ -3,6 +3,7 @@ package pocket
 import (
 	"errors"
 	"github.com/tinode/chat/server/extra/bots"
+	"github.com/tinode/chat/server/extra/pkg/parser"
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/store/model"
@@ -18,14 +19,14 @@ var commandRules = []command.Rule{
 	{
 		Define: "info",
 		Help:   `Bot info`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			return nil
 		},
 	},
 	{
 		Define: "oauth",
 		Help:   `OAuth`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			// check oauth token
 			oauth, err := store.Chatbot.OAuthGet(ctx.AsUser, ctx.Original, Name)
 			if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -51,7 +52,7 @@ var commandRules = []command.Rule{
 	{
 		Define: "list",
 		Help:   `newest 10`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			oauth, err := store.Chatbot.OAuthGet(ctx.AsUser, ctx.Original, Name)
 			if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 				logs.Err.Println("bot command pocket oauth", err)

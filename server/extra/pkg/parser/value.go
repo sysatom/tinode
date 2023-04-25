@@ -1,4 +1,4 @@
-package command
+package parser
 
 type Value struct {
 	Source interface{}

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/tinode/chat/server/extra/bots"
+	"github.com/tinode/chat/server/extra/pkg/parser"
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/types"
@@ -19,14 +20,14 @@ var commandRules = []command.Rule{
 	{
 		Define: "info",
 		Help:   `Bot info`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			return nil
 		},
 	},
 	{
 		Define: "config",
 		Help:   `Config`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			j, _ := store.Chatbot.ConfigGet(ctx.AsUser, ctx.Original, RepoKey)
 			repoValue, _ := j.String("value")
 
@@ -49,7 +50,7 @@ var commandRules = []command.Rule{
 	{
 		Define: "oauth",
 		Help:   `OAuth`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			// check oauth token
 			oauth, err := store.Chatbot.OAuthGet(ctx.AsUser, ctx.Original, Name)
 			if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -71,7 +72,7 @@ var commandRules = []command.Rule{
 	{
 		Define: "user",
 		Help:   `Get current user info`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			// get token
 			oauth, err := store.Chatbot.OAuthGet(ctx.AsUser, ctx.Original, Name)
 			if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -105,7 +106,7 @@ var commandRules = []command.Rule{
 	{
 		Define: "issue [string]",
 		Help:   `create issue`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			text, _ := tokens[1].Value.String()
 
 			oauth, err := store.Chatbot.OAuthGet(ctx.AsUser, ctx.Original, github.ID)
@@ -155,7 +156,7 @@ var commandRules = []command.Rule{
 	{
 		Define: "card [string]",
 		Help:   `create project card`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			text, _ := tokens[1].Value.String()
 
 			oauth, err := store.Chatbot.OAuthGet(ctx.AsUser, ctx.Original, github.ID)
@@ -212,7 +213,7 @@ var commandRules = []command.Rule{
 	{
 		Define: "repo [string]",
 		Help:   "get repo info",
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			str, _ := tokens[1].Value.String()
 
 			oauth, err := store.Chatbot.OAuthGet(ctx.AsUser, ctx.Original, github.ID)
@@ -264,7 +265,7 @@ var commandRules = []command.Rule{
 	{
 		Define: "user [string]",
 		Help:   "get user info",
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			username, _ := tokens[1].Value.String()
 
 			oauth, err := store.Chatbot.OAuthGet(ctx.AsUser, ctx.Original, github.ID)

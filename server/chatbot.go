@@ -44,6 +44,7 @@ import (
 	_ "github.com/tinode/chat/server/extra/bots/url"
 	_ "github.com/tinode/chat/server/extra/bots/web"
 	_ "github.com/tinode/chat/server/extra/bots/webhook"
+	_ "github.com/tinode/chat/server/extra/bots/workflow"
 
 	// push
 	_ "github.com/tinode/chat/server/extra/pkg/bark"
@@ -116,6 +117,7 @@ func hookBot(jsconfig json.RawMessage, vc json.RawMessage) {
 	statsRegisterInt("BotRunConditionTotal")
 	statsRegisterInt("BotRunCronTotal")
 	statsRegisterInt("BotRunFormTotal")
+	statsRegisterInt("BotTriggerWorkflowTotal")
 
 	statsSet("BotTotal", int64(len(bots.List())))
 }

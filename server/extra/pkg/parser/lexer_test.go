@@ -1,4 +1,4 @@
-package command
+package parser
 
 import (
 	"testing"
@@ -36,19 +36,19 @@ func TestLexer(t *testing.T) {
 }
 
 func TestParseCommand(t *testing.T) {
-	c, err := ParseCommand("subs")
+	c, err := ParseString("subs")
 	if err != nil {
 		t.Fatal(err)
 	}
 	require.Len(t, c, 1)
 
-	c, err = ParseCommand("subs list")
+	c, err = ParseString("subs list")
 	if err != nil {
 		t.Fatal(err)
 	}
 	require.Len(t, c, 2)
 
-	c, err = ParseCommand("subs open abc")
+	c, err = ParseString("subs open abc")
 	if err != nil {
 		t.Fatal(err)
 	}

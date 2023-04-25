@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/tinode/chat/server/extra/bots"
+	"github.com/tinode/chat/server/extra/pkg/parser"
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/types"
@@ -14,14 +15,14 @@ var commandRules = []command.Rule{
 	{
 		Define: "info",
 		Help:   `Bot info`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			return nil
 		},
 	},
 	{
 		Define: `fund [string]`,
 		Help:   `Get fund`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			code, _ := tokens[1].Value.String()
 
 			reply, err := doctorxiong.GetFund(context.Background(), code)
@@ -55,7 +56,7 @@ var commandRules = []command.Rule{
 	{
 		Define: `stock [string]`,
 		Help:   `Get stock`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			code, _ := tokens[1].Value.String()
 
 			reply, err := doctorxiong.GetStock(context.Background(), code)

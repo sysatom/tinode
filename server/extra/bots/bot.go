@@ -41,6 +41,9 @@ type Handler interface {
 	// Help return bot help
 	Help() (map[string][]string, error)
 
+	// Rules return bot rule set
+	Rules() []interface{}
+
 	// Input return input result
 	Input(ctx types.Context, head map[string]interface{}, content interface{}) (types.MsgPayload, error)
 
@@ -66,7 +69,7 @@ type Handler interface {
 	Group(ctx types.Context, head map[string]interface{}, content interface{}) (types.MsgPayload, error)
 
 	// Workflow return workflow result
-	Workflow(ctx types.Context, head map[string]interface{}, content interface{}) (types.MsgPayload, error)
+	Workflow(ctx types.Context, head map[string]interface{}, content interface{}, operate types.WorkflowOperate) (types.MsgPayload, error)
 
 	// Agent return group result
 	Agent(ctx types.Context, content interface{}) (types.MsgPayload, error)
@@ -87,6 +90,10 @@ func (Base) AuthLevel() auth.Level {
 
 func (Base) Help() (map[string][]string, error) {
 	return nil, nil
+}
+
+func (Base) Rules() []interface{} {
+	return nil
 }
 
 func (Base) Input(_ types.Context, _ map[string]interface{}, _ interface{}) (types.MsgPayload, error) {
@@ -121,7 +128,7 @@ func (Base) Group(_ types.Context, _ map[string]interface{}, _ interface{}) (typ
 	return nil, nil
 }
 
-func (Base) Workflow(_ types.Context, _ map[string]interface{}, _ interface{}) (types.MsgPayload, error) {
+func (Base) Workflow(_ types.Context, _ map[string]interface{}, _ interface{}, _ types.WorkflowOperate) (types.MsgPayload, error) {
 	return nil, nil
 }
 
@@ -181,7 +188,7 @@ func Help(commandRules []command.Rule, agentRules []agent.Rule, cronRules []cron
 	}
 
 	// cron
-	if agentRules != nil {
+	if cronRules != nil {
 		rs := cronRules
 		var rows []string
 		for _, rule := range rs {
@@ -208,13 +215,67 @@ func RunGroup(eventRules []event.Rule, ctx types.Context, head map[string]interf
 	return nil, nil
 }
 
-func RunWorkflow(workflowRules []workflow.Rule, ctx types.Context, head map[string]interface{}, content interface{}) (types.MsgPayload, error) {
+func HelpWorkflow(workflowRules []workflow.Rule, _ types.Context, _ map[string]interface{}, content interface{}) (types.MsgPayload, error) {
 	rs := workflow.Ruleset(workflowRules)
-	payload, err := rs.ProcessWorkflow(ctx, head, content)
-	if err != nil {
-		return nil, err
+	in, ok := content.(string)
+	if ok {
+		payload, err := rs.Help(in)
+		if err != nil {
+			return nil, err
+		}
+		if payload != nil {
+			return payload, nil
+		}
 	}
-	return payload, nil
+	return nil, nil
+}
+
+func TriggerWorkflow(workflowRules []workflow.Rule, ctx types.Context, head map[string]interface{}, content interface{}, trigger types.TriggerType) (workflow.Rule, error) {
+	rs := workflow.Ruleset(workflowRules)
+	in, ok := content.(string)
+	if ok {
+		rule, err := rs.TriggerWorkflow(ctx, trigger, in)
+		if err != nil {
+			return workflow.Rule{}, err
+		}
+		return rule, nil
+	}
+	return workflow.Rule{}, errors.New("error trigger")
+}
+
+func ProcessWorkflow(workflowRules []workflow.Rule, ctx types.Context, head map[string]interface{}, content interface{}, rule workflow.Rule, index int) (types.MsgPayload, error) {
+	if index < 0 || index >= len(rule.Step) {
+		return nil, errors.New("error workflow step index")
+	}
+	step := rule.Step[index]
+	switch step.Type {
+	case types.FormStep:
+		payload := StoreForm(ctx, types.FormMsg{ID: step.Flag})
+		if payload != nil {
+			return payload, nil
+		}
+	}
+
+	return nil, errors.New("error trigger")
+}
+
+func RunWorkflow(workflowRules []workflow.Rule, ctx types.Context, head map[string]interface{}, content interface{}, operate types.WorkflowOperate) (types.MsgPayload, error) {
+	switch operate {
+	case types.WorkflowCommandTriggerOperate:
+		payload, err := HelpWorkflow(workflowRules, ctx, head, content)
+		if err != nil {
+			return nil, err
+		}
+		if payload != nil {
+			return payload, nil
+		}
+		rule, err := TriggerWorkflow(workflowRules, ctx, head, content, types.TriggerCommandType)
+		if err != nil {
+			return nil, err
+		}
+		return ProcessWorkflow(workflowRules, ctx, head, content, rule, 0)
+	}
+	return nil, nil
 }
 
 func RunCommand(commandRules []command.Rule, ctx types.Context, content interface{}) (types.MsgPayload, error) {
@@ -345,8 +406,33 @@ func RunSession(sessionRules []session.Rule, ctx types.Context, content interfac
 }
 
 func StoreForm(ctx types.Context, payload types.MsgPayload) types.MsgPayload {
+	// get form fields
+	formMsg, ok := payload.(types.FormMsg)
+	if !ok {
+		return types.TextMsg{Text: "form msg error"}
+	}
+	var field []types.FormField
+	if len(field) == 0 { // todo
+		for _, handler := range List() {
+			for _, item := range handler.Rules() {
+				switch v := item.(type) {
+				case []form.Rule:
+					for _, rule := range v {
+						if rule.Id == formMsg.ID {
+							field = rule.Field
+						}
+					}
+				}
+			}
+		}
+		if len(field) <= 0 {
+			return types.TextMsg{Text: "form field error"}
+		}
+	}
+
+	formMsg.Field = field
 	formId := types.Id().String()
-	d, err := json.Marshal(payload)
+	d, err := json.Marshal(formMsg)
 	if err != nil {
 		logs.Err.Println(err)
 		return types.TextMsg{Text: "store form error"}
@@ -382,7 +468,7 @@ func StoreForm(ctx types.Context, payload types.MsgPayload) types.MsgPayload {
 	// store page
 	err = store.Chatbot.PageSet(formId, model.Page{
 		PageId: formId,
-		Uid:    ctx.AsUser.UserId(),
+		Uid:    ctx.AsUser.UserId(), // todo
 		Topic:  ctx.Original,
 		Type:   model.PageForm,
 		Schema: schema,
@@ -394,7 +480,7 @@ func StoreForm(ctx types.Context, payload types.MsgPayload) types.MsgPayload {
 	}
 
 	return types.LinkMsg{
-		Title: fmt.Sprintf("Form [%s]", formId),
+		Title: fmt.Sprintf("%s Form[%s]", formMsg.Title, formId),
 		Url:   fmt.Sprintf("%s/extra/page/%s", types.AppUrl(), formId),
 	}
 }

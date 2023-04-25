@@ -2,6 +2,7 @@ package genshin
 
 import (
 	"fmt"
+	"github.com/tinode/chat/server/extra/pkg/parser"
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/types"
@@ -12,14 +13,14 @@ var commandRules = []command.Rule{
 	{
 		Define: "info",
 		Help:   `Bot info`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			return nil
 		},
 	},
 	{
 		Define: "uid",
 		Help:   `get uid`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			// get
 			v, err := store.Chatbot.ConfigGet(ctx.AsUser, ctx.Original, "uid")
 			if err != nil {
@@ -33,7 +34,7 @@ var commandRules = []command.Rule{
 	{
 		Define: "uid [number]",
 		Help:   `set uid`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			uid, _ := tokens[1].Value.Int64()
 
 			// get
@@ -57,7 +58,7 @@ var commandRules = []command.Rule{
 	{
 		Define: "profile",
 		Help:   `genshin profile`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			// get
 			v, err := store.Chatbot.ConfigGet(ctx.AsUser, ctx.Original, "uid")
 			if err != nil {

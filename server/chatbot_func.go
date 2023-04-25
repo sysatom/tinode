@@ -740,6 +740,36 @@ func botIncomingMessage(t *Topic, msg *ClientComMessage) {
 					}
 				}
 			}
+			// workflow command trigger
+			if payload == nil {
+				var content interface{}
+				if msg.Pub.Head == nil {
+					content = msg.Pub.Content
+				} else {
+					// Compatible with drafty
+					if m, ok := msg.Pub.Content.(map[string]interface{}); ok {
+						if txt, ok := m["txt"]; ok {
+							content = txt
+						}
+					}
+				}
+				// check "~" prefix
+				if in, ok := content.(string); ok && strings.HasPrefix(in, "~") {
+					in = strings.Replace(in, "~", "", 1)
+					payload, err = handle.Workflow(ctx, msg.Pub.Head, in, extraTypes.WorkflowCommandTriggerOperate)
+					if err != nil {
+						logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
+					}
+
+					// stats
+					statsInc("BotTriggerWorkflowTotal", 1)
+
+					// error message
+					if payload == nil {
+						payload = extraTypes.TextMsg{Text: "error workflow"}
+					}
+				}
+			}
 			// condition
 			if payload == nil {
 				if msg.Pub.Head != nil {

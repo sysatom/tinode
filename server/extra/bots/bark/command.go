@@ -3,6 +3,7 @@ package bark
 import (
 	"fmt"
 	"github.com/tinode/chat/server/extra/pkg/bark"
+	"github.com/tinode/chat/server/extra/pkg/parser"
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/types"
@@ -14,14 +15,14 @@ var commandRules = []command.Rule{
 	{
 		Define: "info",
 		Help:   `Bot info`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			return nil
 		},
 	},
 	{
 		Define: "key",
 		Help:   `get device key`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			// get
 			v, err := store.Chatbot.ConfigGet(ctx.AsUser, "", bark.BarkDeviceKey)
 			if err != nil {
@@ -35,7 +36,7 @@ var commandRules = []command.Rule{
 	{
 		Define: "key [string]",
 		Help:   `Set device key`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			key, _ := tokens[1].Value.String()
 
 			// get

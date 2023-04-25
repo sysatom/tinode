@@ -2,6 +2,7 @@ package webhook
 
 import (
 	"fmt"
+	"github.com/tinode/chat/server/extra/pkg/parser"
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/types"
@@ -14,14 +15,14 @@ var commandRules = []command.Rule{
 	{
 		Define: "info",
 		Help:   `Bot info`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			return nil
 		},
 	},
 	{
 		Define: `list`,
 		Help:   `List webhook`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			prefix := "webhook:"
 			items, err := store.Chatbot.DataList(ctx.AsUser, ctx.Original, types.DataFilter{Prefix: &prefix})
 			if err != nil {
@@ -46,7 +47,7 @@ var commandRules = []command.Rule{
 	{
 		Define: `create`,
 		Help:   `create webhook`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			id := types.Id()
 			err := store.Chatbot.DataSet(ctx.AsUser, ctx.Original,
 				fmt.Sprintf("webhook:%s", id.String()), map[string]interface{}{
@@ -65,7 +66,7 @@ var commandRules = []command.Rule{
 	{
 		Define: `del [string]`,
 		Help:   `delete webhook`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			flag, _ := tokens[1].Value.String()
 
 			err := store.Chatbot.DataDelete(ctx.AsUser, ctx.Original, fmt.Sprintf("webhook:%s", flag))

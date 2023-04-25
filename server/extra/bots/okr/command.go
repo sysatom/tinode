@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/tinode/chat/server/extra/bots"
+	"github.com/tinode/chat/server/extra/pkg/parser"
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/store/model"
@@ -17,14 +18,14 @@ var commandRules = []command.Rule{
 	{
 		Define: "info",
 		Help:   `Bot info`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			return nil
 		},
 	},
 	{
 		Define: `obj list`,
 		Help:   `List objectives`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			items, err := store.Chatbot.ListObjectives(ctx.AsUser, ctx.Original)
 			if err != nil {
 				logs.Err.Println(err)
@@ -49,7 +50,7 @@ var commandRules = []command.Rule{
 	{
 		Define: `obj [number]`,
 		Help:   `View objective`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			sequence, _ := tokens[1].Value.Int64()
 
 			objective, err := store.Chatbot.GetObjectiveBySequence(ctx.AsUser, ctx.Original, sequence)
@@ -75,7 +76,7 @@ var commandRules = []command.Rule{
 	{
 		Define: `obj del [number]`,
 		Help:   `Delete objective`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			sequence, _ := tokens[2].Value.Int64()
 
 			err := store.Chatbot.DeleteObjectiveBySequence(ctx.AsUser, ctx.Original, sequence)
@@ -90,7 +91,7 @@ var commandRules = []command.Rule{
 	{
 		Define: `obj update [number]`,
 		Help:   `Update objective`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			sequence, _ := tokens[2].Value.Int64()
 
 			item, err := store.Chatbot.GetObjectiveBySequence(ctx.AsUser, ctx.Original, sequence)
@@ -146,7 +147,7 @@ var commandRules = []command.Rule{
 	{
 		Define: `obj create`,
 		Help:   `Create Objective`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			return bots.StoreForm(ctx, types.FormMsg{
 				ID:    CreateObjectiveFormID,
 				Title: "Create Objective",
@@ -201,7 +202,7 @@ var commandRules = []command.Rule{
 	{
 		Define: `kr list`,
 		Help:   `List KeyResult`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			items, err := store.Chatbot.ListKeyResults(ctx.AsUser, ctx.Original)
 			if err != nil {
 				logs.Err.Println(err)
@@ -227,7 +228,7 @@ var commandRules = []command.Rule{
 	{
 		Define: `kr create`,
 		Help:   `Create KeyResult`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			return bots.StoreForm(ctx, types.FormMsg{
 				ID:    CreateKeyResultFormID,
 				Title: "Create Key Result",
@@ -276,7 +277,7 @@ var commandRules = []command.Rule{
 	{
 		Define: `kr [number]`,
 		Help:   `View KeyResult`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			sequence, _ := tokens[1].Value.Int64()
 
 			item, err := store.Chatbot.GetKeyResultBySequence(ctx.AsUser, ctx.Original, sequence)
@@ -294,7 +295,7 @@ var commandRules = []command.Rule{
 	{
 		Define: `kr del [number]`,
 		Help:   `Delete KeyResult`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			sequence, _ := tokens[2].Value.Int64()
 
 			err := store.Chatbot.DeleteKeyResultBySequence(ctx.AsUser, ctx.Original, sequence)
@@ -309,7 +310,7 @@ var commandRules = []command.Rule{
 	{
 		Define: `kr update [number]`,
 		Help:   `Update KeyResult`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			sequence, _ := tokens[2].Value.Int64()
 
 			item, err := store.Chatbot.GetKeyResultBySequence(ctx.AsUser, ctx.Original, sequence)
@@ -366,7 +367,7 @@ var commandRules = []command.Rule{
 	{
 		Define: `kr value`,
 		Help:   `Create KeyResult value`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			return bots.StoreForm(ctx, types.FormMsg{
 				ID:    CreateKeyResultValueFormID,
 				Title: "Create Key Result value",
@@ -390,7 +391,7 @@ var commandRules = []command.Rule{
 	{
 		Define: `kr value [number]`,
 		Help:   `List KeyResult value`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			sequence, _ := tokens[2].Value.Int64()
 
 			keyResult, err := store.Chatbot.GetKeyResultBySequence(ctx.AsUser, ctx.Original, sequence)
@@ -425,7 +426,7 @@ var commandRules = []command.Rule{
 	{
 		Define: `todo list`,
 		Help:   `List todo`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			items, err := store.Chatbot.ListTodos(ctx.AsUser, ctx.Original)
 			if err != nil {
 				logs.Err.Println(err)
@@ -441,7 +442,7 @@ var commandRules = []command.Rule{
 	{
 		Define: `todo create`,
 		Help:   "Create Todo something",
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			return bots.StoreForm(ctx, types.FormMsg{
 				ID:    CreateTodoFormID,
 				Title: "Create todo",
@@ -477,7 +478,7 @@ var commandRules = []command.Rule{
 	{
 		Define: `todo update [number]`,
 		Help:   "Update Todo something",
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			sequence, _ := tokens[2].Value.Int64()
 
 			item, err := store.Chatbot.GetTodoBySequence(ctx.AsUser, ctx.Original, sequence)
@@ -533,7 +534,7 @@ var commandRules = []command.Rule{
 	{
 		Define: `todo complete [number]`,
 		Help:   "Complete Todo",
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			sequence, _ := tokens[2].Value.Int64()
 			err := store.Chatbot.CompleteTodoBySequence(ctx.AsUser, ctx.Original, sequence)
 			if err != nil {
@@ -547,7 +548,7 @@ var commandRules = []command.Rule{
 	{
 		Define: `counters`,
 		Help:   `List Counter`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			items, err := store.Chatbot.ListCounter(ctx.AsUser, ctx.Original)
 			if err != nil {
 				return nil
@@ -572,7 +573,7 @@ var commandRules = []command.Rule{
 	{
 		Define: "counter [string]",
 		Help:   `Count things`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			flag, _ := tokens[1].Value.String()
 
 			item, err := store.Chatbot.GetCounterByFlag(ctx.AsUser, ctx.Original, flag)
@@ -607,7 +608,7 @@ var commandRules = []command.Rule{
 	{
 		Define: "increase [string]",
 		Help:   `Increase Counter`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			flag, _ := tokens[1].Value.String()
 
 			item, err := store.Chatbot.GetCounterByFlag(ctx.AsUser, ctx.Original, flag)
@@ -626,7 +627,7 @@ var commandRules = []command.Rule{
 	{
 		Define: "decrease [string]",
 		Help:   `Decrease Counter`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			flag, _ := tokens[1].Value.String()
 
 			item, err := store.Chatbot.GetCounterByFlag(ctx.AsUser, ctx.Original, flag)
@@ -645,7 +646,7 @@ var commandRules = []command.Rule{
 	{
 		Define: "reset [string]",
 		Help:   `Reset Counter`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			flag, _ := tokens[1].Value.String()
 
 			item, err := store.Chatbot.GetCounterByFlag(ctx.AsUser, ctx.Original, flag)

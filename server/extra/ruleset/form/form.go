@@ -5,6 +5,8 @@ import "github.com/tinode/chat/server/extra/types"
 type Rule struct {
 	Id         string
 	IsLongTerm bool
+	Title      string
+	Field      []types.FormField
 	Handler    func(ctx types.Context, values map[string]interface{}) types.MsgPayload
 }
 

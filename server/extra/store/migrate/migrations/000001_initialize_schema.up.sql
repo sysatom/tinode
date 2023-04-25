@@ -88,7 +88,7 @@ CREATE TABLE `chatbot_form`
     `uid`        char(25) COLLATE utf8mb4_unicode_ci                       NOT NULL,
     `topic`      char(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
     `schema`     json                                                      NOT NULL,
-    `values`     json                                                      NOT NULL,
+    `values`     json DEFAULT NULL                                         NOT NULL,
     `state`      tinyint                                                   NOT NULL,
     `created_at` datetime                                                  NOT NULL,
     `updated_at` datetime                                                  NOT NULL,

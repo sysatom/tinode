@@ -2,6 +2,7 @@ package command
 
 import (
 	"fmt"
+	"github.com/tinode/chat/server/extra/pkg/parser"
 	"github.com/tinode/chat/server/extra/types"
 	"strings"
 )
@@ -9,7 +10,7 @@ import (
 type Rule struct {
 	Define  string
 	Help    string
-	Handler func(types.Context, []*Token) types.MsgPayload
+	Handler func(types.Context, []*parser.Token) types.MsgPayload
 }
 
 type Ruleset []Rule
@@ -32,11 +33,11 @@ func (r Ruleset) Help(in string) (types.MsgPayload, error) {
 func (r Ruleset) ProcessCommand(ctx types.Context, in string) (types.MsgPayload, error) {
 	var result types.MsgPayload
 	for _, rule := range r {
-		tokens, err := ParseCommand(in)
+		tokens, err := parser.ParseString(in)
 		if err != nil {
 			return nil, err
 		}
-		check, err := SyntaxCheck(rule.Define, tokens)
+		check, err := parser.SyntaxCheck(rule.Define, tokens)
 		if err != nil {
 			return nil, err
 		}

@@ -12,6 +12,7 @@ import (
 	"github.com/tinode/chat/server/extra/page"
 	"github.com/tinode/chat/server/extra/pkg/queue"
 	"github.com/tinode/chat/server/extra/ruleset/agent"
+	"github.com/tinode/chat/server/extra/ruleset/form"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/store/model"
 	extraTypes "github.com/tinode/chat/server/extra/types"
@@ -167,23 +168,16 @@ func postForm(rw http.ResponseWriter, req *http.Request) {
 	topicUid := types.ParseUserId(uid2)
 	topic := userUid.P2PName(topicUid)
 
-	form, err := store.Chatbot.FormGet(formId)
+	formData, err := store.Chatbot.FormGet(formId)
 	if err != nil {
 		return
 	}
-	if form.State == model.FormStateSubmitSuccess || form.State == model.FormStateSubmitFailed {
-		return
-	}
-
-	subs, err := serverStore.Topics.GetUsers(topic, nil)
-	if err != nil {
-		logs.Err.Printf("form %s %s", formId, err)
+	if formData.State == model.FormStateSubmitSuccess || formData.State == model.FormStateSubmitFailed {
 		return
 	}
 
 	values := make(map[string]interface{})
-
-	d, err := json.Marshal(form.Schema)
+	d, err := json.Marshal(formData.Schema)
 	if err != nil {
 		return
 	}
@@ -238,43 +232,52 @@ func postForm(rw http.ResponseWriter, req *http.Request) {
 		Original:   topicUid.UserId(),
 		RcptTo:     topic,
 		AsUser:     types.ParseUserId(uid),
-		FormId:     form.FormId,
+		FormId:     formData.FormId,
 		FormRuleId: formMsg.ID,
 	}
 
 	// user auth record
 	_, authLvl, _, _, _ := serverStore.Users.GetAuthRecord(userUid, "basic")
 
-	for _, sub := range subs {
-		if !isBot(sub) {
-			continue
+	// get bot handler
+	formRuleId, ok := formData.Schema.String("id")
+	if !ok {
+		logs.Err.Printf("form %s %s", formId, "error form rule id")
+		return
+	}
+	var botHandler bots.Handler
+	for _, handler := range bots.List() {
+		for _, item := range handler.Rules() {
+			switch v := item.(type) {
+			case []form.Rule:
+				for _, rule := range v {
+					if rule.Id == formRuleId {
+						botHandler = handler
+					}
+				}
+			}
 		}
+	}
 
-		// bot name
-		name := botName(sub)
-		handle, ok := bots.List()[name]
-		if !ok {
-			continue
-		}
-
-		if !handle.IsReady() {
+	if botHandler != nil {
+		if !botHandler.IsReady() {
 			logs.Info.Printf("bot %s unavailable", topic)
-			continue
+			return
 		}
 
-		switch handle.AuthLevel() {
+		switch botHandler.AuthLevel() {
 		case auth.LevelRoot:
 			if authLvl != auth.LevelRoot {
 				// Unauthorized
-				continue
+				return
 			}
 		}
 
 		// form message
-		payload, err := handle.Form(ctx, values)
+		payload, err := botHandler.Form(ctx, values)
 		if err != nil {
 			logs.Warn.Printf("topic[%s]: failed to form bot: %v", topic, err)
-			continue
+			return
 		}
 
 		// stats
@@ -282,7 +285,7 @@ func postForm(rw http.ResponseWriter, req *http.Request) {
 
 		// send message
 		if payload == nil {
-			continue
+			return
 		}
 
 		botSend(topic, topicUid, payload)
@@ -551,7 +554,7 @@ func urlRedirect(rw http.ResponseWriter, req *http.Request) {
 	return
 }
 
-func queueStats(rw http.ResponseWriter, req *http.Request) {
+func queueStats(rw http.ResponseWriter, _ *http.Request) {
 	html, err := queue.Stats()
 	if err != nil {
 		errorResponse(rw, "queue stats error")

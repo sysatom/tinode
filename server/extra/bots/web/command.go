@@ -1,6 +1,7 @@
 package web
 
 import (
+	"github.com/tinode/chat/server/extra/pkg/parser"
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/vendors"
@@ -12,14 +13,14 @@ var commandRules = []command.Rule{
 	{
 		Define: "info",
 		Help:   `Bot info`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			return nil
 		},
 	},
 	{
 		Define: "summary [string]",
 		Help:   `web page summary`,
-		Handler: func(ctx types.Context, tokens []*command.Token) types.MsgPayload {
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			url, _ := tokens[1].Value.String()
 			// api key
 			val, err := vendors.GetConfig(oneai.ID, oneai.ApiKey)
