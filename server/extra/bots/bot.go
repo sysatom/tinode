@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/tinode/chat/server/auth"
+	"github.com/tinode/chat/server/extra/pkg/parser"
 	"github.com/tinode/chat/server/extra/ruleset/action"
 	"github.com/tinode/chat/server/extra/ruleset/agent"
 	"github.com/tinode/chat/server/extra/ruleset/command"
@@ -243,17 +244,42 @@ func TriggerWorkflow(workflowRules []workflow.Rule, ctx types.Context, head map[
 	return workflow.Rule{}, errors.New("error trigger")
 }
 
-func ProcessWorkflow(workflowRules []workflow.Rule, ctx types.Context, head map[string]interface{}, content interface{}, rule workflow.Rule, index int) (types.MsgPayload, error) {
-	if index < 0 || index >= len(rule.Step) {
+func ProcessWorkflow(workflowRules []workflow.Rule, ctx types.Context, head map[string]interface{}, content interface{}, workflowRule workflow.Rule, index int) (types.MsgPayload, error) {
+	if index < 0 || index >= len(workflowRule.Step) {
 		return nil, errors.New("error workflow step index")
 	}
 	var payload types.MsgPayload
-	step := rule.Step[index]
+	step := workflowRule.Step[index]
 	switch step.Type {
 	case types.FormStep:
 		payload = StoreForm(ctx, types.FormMsg{ID: step.Flag})
 	case types.ActionStep:
 		payload = ActionMsg(ctx, step.Flag)
+	case types.CommandStep:
+		for name, handler := range List() {
+			if step.Bot != types.Bot(name) {
+				continue
+			}
+			for _, item := range handler.Rules() {
+				switch v := item.(type) {
+				case []command.Rule:
+					for _, rule := range v {
+						tokens, err := parser.ParseString(strings.Join(step.Args, " "))
+						if err != nil {
+							return nil, err
+						}
+						check, err := parser.SyntaxCheck(rule.Define, tokens)
+						if err != nil {
+							return nil, err
+						}
+						if !check {
+							continue
+						}
+						payload = rule.Handler(ctx, tokens)
+					}
+				}
+			}
+		}
 	}
 	if payload != nil {
 		return payload, nil
