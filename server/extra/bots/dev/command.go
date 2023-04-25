@@ -122,16 +122,11 @@ var commandRules = []command.Rule{
 		Help:   "Guess number game",
 		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			// rand number
-			big, err := rand.Int(rand.Reader, big.NewInt(1000))
+			big, _ := rand.Int(rand.Reader, big.NewInt(1000))
 
 			var initValue model.JSON
 			initValue = map[string]interface{}{"number": big.Int64()}
-			ctx.SessionRuleId = guessSessionID
-			err = bots.SessionStart(ctx, initValue)
-			if err != nil {
-				return types.TextMsg{Text: "session error"}
-			}
-			return types.TextMsg{Text: "Input a number?"}
+			return bots.SessionMsg(ctx, guessSessionID, initValue)
 		},
 	},
 	{

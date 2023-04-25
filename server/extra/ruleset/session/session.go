@@ -4,6 +4,7 @@ import "github.com/tinode/chat/server/extra/types"
 
 type Rule struct {
 	Id      string
+	Title   string
 	Handler func(ctx types.Context, content interface{}) types.MsgPayload
 }
 

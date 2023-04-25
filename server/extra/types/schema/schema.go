@@ -27,14 +27,6 @@ func Command(bot types.Bot, token ...string) types.Step {
 	}
 }
 
-func Condition(bot types.Bot, msgType string) types.Step {
-	return types.Step{
-		Type: types.ConditionStep,
-		Bot:  bot,
-		Flag: msgType,
-	}
-}
-
 func Form(id string) types.Step {
 	return types.Step{
 		Type: types.FormStep,
@@ -50,10 +42,11 @@ func Instruct(id string, args ...string) types.Step {
 	}
 }
 
-func Session(id string) types.Step {
+func Session(id string, args ...string) types.Step {
 	return types.Step{
 		Type: types.SessionStep,
 		Flag: id,
+		Args: args,
 	}
 }
 

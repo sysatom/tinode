@@ -287,6 +287,12 @@ func ProcessWorkflow(workflowRules []workflow.Rule, ctx types.Context, head map[
 			data[fmt.Sprintf("val%d", i+1)] = arg
 		}
 		payload = InstructMsg(ctx, step.Flag, data)
+	case types.SessionStep:
+		data := make(map[string]interface{}) // fixme
+		for i, arg := range step.Args {
+			data[fmt.Sprintf("val%d", i+1)] = arg
+		}
+		payload = SessionMsg(ctx, step.Flag, data)
 	}
 	if payload != nil {
 		return payload, nil
@@ -595,6 +601,33 @@ func StorePage(ctx types.Context, category model.PageType, title string, payload
 		Title: title,
 		Url:   fmt.Sprintf("%s/extra/page/%s", types.AppUrl(), pageId),
 	}
+}
+
+func SessionMsg(ctx types.Context, id string, data map[string]interface{}) types.MsgPayload {
+	var title string
+	for _, handler := range List() {
+		for _, item := range handler.Rules() {
+			switch v := item.(type) {
+			case []session.Rule:
+				for _, rule := range v {
+					if rule.Id == id {
+						title = rule.Title
+					}
+				}
+			}
+		}
+	}
+	if title == "" {
+		return types.TextMsg{Text: "error session id"}
+	}
+
+	ctx.SessionRuleId = id
+	err := SessionStart(ctx, data)
+	if err != nil {
+		return types.TextMsg{Text: "session error"}
+	}
+
+	return types.TextMsg{Text: title}
 }
 
 func SessionStart(ctx types.Context, initValues model.JSON) error {

@@ -15,12 +15,11 @@ var workflowRules = []workflow.Rule{
 		Help:    "example workflow",
 		Trigger: schema.CommandTrigger("example [string]"),
 		Step: schema.Step(
-			schema.Form("dev_form"),
-			schema.Action("dev_action"),
+			schema.Session("guess_session", "100"),
 			schema.Instruct("dev_example"),
-			schema.Session("guess_session"),
-			schema.Command(schema.Bot("dev"), "rand", "1", "2"),
-			schema.Condition(schema.Bot("dev"), "RepoMsg"),
+			schema.Command(schema.Bot("dev"), "rand", "1", "100"),
+			schema.Action("dev_action"),
+			schema.Form("dev_form"),
 		),
 	},
 }

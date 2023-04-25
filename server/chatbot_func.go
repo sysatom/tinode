@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/tinode/chat/server/extra/ruleset/action"
+	"github.com/tinode/chat/server/extra/ruleset/session"
 	"net/http"
 	"sort"
 	"strconv"
@@ -640,7 +641,7 @@ func botIncomingMessage(t *Topic, msg *ClientComMessage) {
 		// auth
 		if payload == nil {
 			// session
-			if session, ok := sessionCurrent(uid, msg.Original); ok && session.State == model.SessionStart {
+			if sess, ok := sessionCurrent(uid, msg.Original); ok && sess.State == model.SessionStart {
 				// session cancel command
 				isCancel := false
 				if msg.Pub.Head == nil {
@@ -653,12 +654,31 @@ func botIncomingMessage(t *Topic, msg *ClientComMessage) {
 					}
 				}
 				if !isCancel {
-					ctx.SessionRuleId = session.RuleId
-					ctx.SessionInitValues = session.Init
-					ctx.SessionLastValues = session.Values
-					payload, err = handle.Session(ctx, msg.Pub.Content)
-					if err != nil {
-						logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
+					ctx.SessionRuleId = sess.RuleId
+					ctx.SessionInitValues = sess.Init
+					ctx.SessionLastValues = sess.Values
+
+					// get action handler
+					var botHandler bots.Handler
+					for _, handler := range bots.List() {
+						for _, item := range handler.Rules() {
+							switch v := item.(type) {
+							case []session.Rule:
+								for _, rule := range v {
+									if rule.Id == sess.RuleId {
+										botHandler = handler
+									}
+								}
+							}
+						}
+					}
+					if botHandler == nil {
+						payload = extraTypes.TextMsg{Text: "error session"}
+					} else {
+						payload, err = botHandler.Session(ctx, msg.Pub.Content)
+						if err != nil {
+							logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
+						}
 					}
 				}
 			}

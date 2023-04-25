@@ -9,12 +9,11 @@ const (
 type StepType string
 
 const (
-	ActionStep    StepType = "action"
-	CommandStep   StepType = "command"
-	ConditionStep StepType = "condition"
-	FormStep      StepType = "form"
-	InstructStep  StepType = "instruct"
-	SessionStep   StepType = "session"
+	ActionStep   StepType = "action"
+	CommandStep  StepType = "command"
+	FormStep     StepType = "form"
+	InstructStep StepType = "instruct"
+	SessionStep  StepType = "session"
 )
 
 type Step struct {

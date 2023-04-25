@@ -15,7 +15,8 @@ const (
 
 var sessionRules = []session.Rule{
 	{
-		Id: guessSessionID,
+		Id:    guessSessionID,
+		Title: "Input a number?",
 		Handler: func(ctx types.Context, content interface{}) types.MsgPayload {
 			number := int64(0)
 			if v, ok := content.(string); ok {
