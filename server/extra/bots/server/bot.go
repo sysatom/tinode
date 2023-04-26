@@ -7,7 +7,6 @@ import (
 	"github.com/tinode/chat/server/extra/bots"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
-	serverTypes "github.com/tinode/chat/server/store/types"
 )
 
 const Name = "server"
@@ -65,6 +64,6 @@ func (b bot) Agent(ctx types.Context, content interface{}) (types.MsgPayload, er
 	return bots.RunAgent(AgentVersion, agentRules, ctx, content)
 }
 
-func (b bot) Cron(send func(rcptTo string, uid serverTypes.Uid, out types.MsgPayload)) error {
+func (b bot) Cron(send types.SendFunc) error {
 	return bots.RunCron(cronRules, Name, b.AuthLevel(), send)
 }

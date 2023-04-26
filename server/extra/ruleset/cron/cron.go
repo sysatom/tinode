@@ -30,7 +30,7 @@ type Ruleset struct {
 	outCh     chan result
 	cronRules []Rule
 
-	Send func(rcptTo string, uid types.Uid, out extraTypes.MsgPayload)
+	Send extraTypes.SendFunc
 }
 
 type result struct {

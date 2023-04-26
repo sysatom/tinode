@@ -8,7 +8,6 @@ import (
 	"github.com/tinode/chat/server/extra/ruleset/instruct"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
-	serverTypes "github.com/tinode/chat/server/store/types"
 )
 
 const Name = "dev"
@@ -89,7 +88,7 @@ func (b bot) Action(ctx types.Context, option string) (types.MsgPayload, error) 
 	return bots.RunAction(actionRules, ctx, option)
 }
 
-func (b bot) Cron(send func(rcptTo string, uid serverTypes.Uid, out types.MsgPayload)) error {
+func (b bot) Cron(send types.SendFunc) error {
 	return bots.RunCron(cronRules, Name, b.AuthLevel(), send)
 }
 

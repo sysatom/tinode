@@ -53,6 +53,8 @@ type Context struct {
 	SessionLastValues model.JSON
 	// group event
 	GroupEvent GroupEvent
+	// workflow flag id
+	WorkflowFlag string
 	// workflow rule id
 	WorkflowRuleId string
 	// workflow version
@@ -106,4 +108,10 @@ type DataFilter struct {
 	Prefix       *string
 	CreatedStart *time.Time
 	CreatedEnd   *time.Time
+}
+
+type SendFunc func(rcptTo string, uid types.Uid, out MsgPayload, option ...interface{})
+
+func WithContext(ctx Context) Context {
+	return ctx
 }

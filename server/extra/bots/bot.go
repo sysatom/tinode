@@ -62,7 +62,7 @@ type Handler interface {
 	Session(ctx types.Context, content interface{}) (types.MsgPayload, error)
 
 	// Cron cron script daemon
-	Cron(send func(rcptTo string, uid serverTypes.Uid, out types.MsgPayload)) error
+	Cron(send types.SendFunc) error
 
 	// Condition run conditional process
 	Condition(ctx types.Context, forwarded types.MsgPayload) (types.MsgPayload, error)
@@ -71,7 +71,7 @@ type Handler interface {
 	Group(ctx types.Context, head map[string]interface{}, content interface{}) (types.MsgPayload, error)
 
 	// Workflow return workflow result
-	Workflow(ctx types.Context, head map[string]interface{}, content interface{}, operate types.WorkflowOperate) (types.MsgPayload, error)
+	Workflow(ctx types.Context, head map[string]interface{}, content interface{}, operate types.WorkflowOperate) (types.MsgPayload, string, int, error)
 
 	// Agent return group result
 	Agent(ctx types.Context, content interface{}) (types.MsgPayload, error)
@@ -118,7 +118,7 @@ func (Base) Session(_ types.Context, _ interface{}) (types.MsgPayload, error) {
 	return nil, nil
 }
 
-func (Base) Cron(_ func(rcptTo string, uid serverTypes.Uid, out types.MsgPayload)) error {
+func (Base) Cron(_ types.SendFunc) error {
 	return nil
 }
 
@@ -130,8 +130,8 @@ func (Base) Group(_ types.Context, _ map[string]interface{}, _ interface{}) (typ
 	return nil, nil
 }
 
-func (Base) Workflow(_ types.Context, _ map[string]interface{}, _ interface{}, _ types.WorkflowOperate) (types.MsgPayload, error) {
-	return nil, nil
+func (Base) Workflow(_ types.Context, _ map[string]interface{}, _ interface{}, _ types.WorkflowOperate) (types.MsgPayload, string, int, error) {
+	return nil, "", 0, nil
 }
 
 func (Base) Agent(_ types.Context, _ interface{}) (types.MsgPayload, error) {
@@ -232,28 +232,43 @@ func HelpWorkflow(workflowRules []workflow.Rule, _ types.Context, _ map[string]i
 	return nil, nil
 }
 
-func TriggerWorkflow(workflowRules []workflow.Rule, ctx types.Context, head map[string]interface{}, content interface{}, trigger types.TriggerType) (workflow.Rule, error) {
+func TriggerWorkflow(workflowRules []workflow.Rule, ctx types.Context, _ map[string]interface{}, content interface{}, trigger types.TriggerType) (string, workflow.Rule, error) {
 	rs := workflow.Ruleset(workflowRules)
 	in, ok := content.(string)
 	if ok {
 		rule, err := rs.TriggerWorkflow(ctx, trigger, in)
 		if err != nil {
-			return workflow.Rule{}, err
+			return "", workflow.Rule{}, err
 		}
-		return rule, nil
+
+		workflowFlag := ""
+		if ctx.WorkflowFlag == "" {
+			// store workflow
+			flag, err := StoreWorkflow(ctx, rule, 0)
+			if err != nil {
+				logs.Err.Println(err)
+				return "", workflow.Rule{}, err
+			}
+			workflowFlag = flag
+		}
+
+		return workflowFlag, rule, nil
 	}
-	return workflow.Rule{}, errors.New("error trigger")
+	return "", workflow.Rule{}, errors.New("error trigger")
 }
 
-func ProcessWorkflow(workflowRules []workflow.Rule, ctx types.Context, head map[string]interface{}, content interface{}, workflowRule workflow.Rule, index int) (types.MsgPayload, error) {
-	if index < 0 || index >= len(workflowRule.Step) {
+func ProcessWorkflow(ctx types.Context, workflowRule workflow.Rule, index int) (types.MsgPayload, error) {
+	if index < 0 || index > len(workflowRule.Step) {
 		return nil, errors.New("error workflow step index")
+	}
+	if index == len(workflowRule.Step) {
+		return types.TextMsg{Text: "Workflow Done"}, SetWorkflowState(ctx, ctx.WorkflowFlag, model.WorkflowDone)
 	}
 	var payload types.MsgPayload
 	step := workflowRule.Step[index]
 	switch step.Type {
 	case types.FormStep:
-		payload = StoreForm(ctx, types.FormMsg{ID: step.Flag})
+		payload = FormMsg(ctx, step.Flag)
 	case types.ActionStep:
 		payload = ActionMsg(ctx, step.Flag)
 	case types.CommandStep:
@@ -294,30 +309,74 @@ func ProcessWorkflow(workflowRules []workflow.Rule, ctx types.Context, head map[
 		}
 		payload = SessionMsg(ctx, step.Flag, data)
 	}
+
 	if payload != nil {
 		return payload, nil
 	}
-
-	return nil, errors.New("error trigger")
+	return nil, errors.New("error workflow process")
 }
 
-func RunWorkflow(workflowRules []workflow.Rule, ctx types.Context, head map[string]interface{}, content interface{}, operate types.WorkflowOperate) (types.MsgPayload, error) {
+func RunWorkflow(workflowRules []workflow.Rule, ctx types.Context, head map[string]interface{}, content interface{}, operate types.WorkflowOperate) (types.MsgPayload, string, int, error) {
 	switch operate {
 	case types.WorkflowCommandTriggerOperate:
 		payload, err := HelpWorkflow(workflowRules, ctx, head, content)
 		if err != nil {
-			return nil, err
+			return nil, "", 0, err
 		}
 		if payload != nil {
-			return payload, nil
+			return payload, "", 0, nil
 		}
-		rule, err := TriggerWorkflow(workflowRules, ctx, head, content, types.TriggerCommandType)
+		flag, rule, err := TriggerWorkflow(workflowRules, ctx, head, content, types.TriggerCommandType)
 		if err != nil {
-			return nil, err
+			return nil, "", 0, err
 		}
-		return ProcessWorkflow(workflowRules, ctx, head, content, rule, 0)
+		ctx.WorkflowFlag = flag
+		ctx.WorkflowVersion = rule.Version
+		payload, err = ProcessWorkflow(ctx, rule, 0)
+		if err != nil {
+			return nil, "", 0, err
+		}
+		return payload, flag, rule.Version, SetWorkflowStep(ctx, flag, 1)
+	case types.WorkflowProcessOperate:
+	case types.WorkflowNextOperate:
+		for _, rule := range workflowRules {
+			if rule.Id == ctx.WorkflowRuleId {
+				payload, err := ProcessWorkflow(ctx, rule, ctx.WorkflowStepIndex)
+				if err != nil {
+					return nil, "", 0, err
+				}
+				return payload, ctx.WorkflowFlag, ctx.WorkflowVersion, SetWorkflowStep(ctx, ctx.WorkflowFlag, ctx.WorkflowStepIndex+1)
+			}
+		}
 	}
-	return nil, nil
+	return nil, "", 0, nil
+}
+
+func StoreWorkflow(ctx types.Context, workflowRule workflow.Rule, index int) (string, error) {
+	flag := types.Id().String()
+	return flag, store.Chatbot.WorkflowCreate(model.Workflow{
+		Uid:     ctx.AsUser.UserId(),
+		Topic:   ctx.Original,
+		Flag:    flag,
+		RuleId:  workflowRule.Id,
+		Version: workflowRule.Version,
+		Step:    index,
+		State:   model.WorkflowStart,
+	})
+}
+
+func SetWorkflowState(ctx types.Context, flag string, state model.WorkflowState) error {
+	return store.Chatbot.WorkflowState(ctx.AsUser, ctx.Original, model.Workflow{
+		Flag:  flag,
+		State: state,
+	})
+}
+
+func SetWorkflowStep(ctx types.Context, flag string, index int) error {
+	return store.Chatbot.WorkflowStep(ctx.AsUser, ctx.Original, model.Workflow{
+		Flag: flag,
+		Step: index,
+	})
 }
 
 func RunCommand(commandRules []command.Rule, ctx types.Context, content interface{}) (types.MsgPayload, error) {
@@ -425,7 +484,7 @@ func RunAction(actionRules []action.Rule, ctx types.Context, option string) (typ
 	return payload, nil
 }
 
-func RunCron(cronRules []cron.Rule, name string, level auth.Level, send func(rcptTo string, uid serverTypes.Uid, out types.MsgPayload)) error {
+func RunCron(cronRules []cron.Rule, name string, level auth.Level, send types.SendFunc) error {
 	ruleset := cron.NewCronRuleset(name, level, cronRules)
 	ruleset.Send = send
 	ruleset.Daemon()
@@ -452,23 +511,21 @@ func FormMsg(ctx types.Context, id string) types.MsgPayload {
 	formMsg := types.FormMsg{ID: id}
 	var title string
 	var field []types.FormField
-	if len(field) == 0 { // todo
-		for _, handler := range List() {
-			for _, item := range handler.Rules() {
-				switch v := item.(type) {
-				case []form.Rule:
-					for _, rule := range v {
-						if rule.Id == id {
-							title = rule.Title
-							field = rule.Field
-						}
+	for _, handler := range List() {
+		for _, item := range handler.Rules() {
+			switch v := item.(type) {
+			case []form.Rule:
+				for _, rule := range v {
+					if rule.Id == id {
+						title = rule.Title
+						field = rule.Field
 					}
 				}
 			}
 		}
-		if len(field) <= 0 {
-			return types.TextMsg{Text: "form field error"}
-		}
+	}
+	if len(field) <= 0 {
+		return types.TextMsg{Text: "form field error"}
 	}
 	formMsg.Title = title
 	formMsg.Field = field
@@ -502,6 +559,13 @@ func StoreForm(ctx types.Context, payload types.MsgPayload) types.MsgPayload {
 		}
 	}
 
+	// set extra
+	var extra model.JSON = make(map[string]interface{})
+	if ctx.WorkflowFlag != "" {
+		extra["workflow_flag"] = ctx.WorkflowFlag
+		extra["workflow_version"] = ctx.WorkflowVersion
+	}
+
 	// store form
 	err = store.Chatbot.FormSet(formId, model.Form{
 		FormId: formId,
@@ -509,6 +573,7 @@ func StoreForm(ctx types.Context, payload types.MsgPayload) types.MsgPayload {
 		Topic:  ctx.Original,
 		Schema: schema,
 		Values: values,
+		Extra:  extra,
 		State:  model.FormStateCreated,
 	})
 	if err != nil {
@@ -519,7 +584,7 @@ func StoreForm(ctx types.Context, payload types.MsgPayload) types.MsgPayload {
 	// store page
 	err = store.Chatbot.PageSet(formId, model.Page{
 		PageId: formId,
-		Uid:    ctx.AsUser.UserId(), // todo
+		Uid:    ctx.AsUser.UserId(),
 		Topic:  ctx.Original,
 		Type:   model.PageForm,
 		Schema: schema,
@@ -807,7 +872,7 @@ func Bootstrap() error {
 }
 
 // Cron registered handlers
-func Cron(send func(rcptTo string, uid serverTypes.Uid, out types.MsgPayload)) error {
+func Cron(send func(rcptTo string, uid serverTypes.Uid, out types.MsgPayload, option ...interface{})) error {
 	for _, bot := range handlers {
 		if err := bot.Cron(send); err != nil {
 			return err

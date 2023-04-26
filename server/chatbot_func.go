@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/tinode/chat/server/extra/ruleset/action"
 	"github.com/tinode/chat/server/extra/ruleset/session"
+	"github.com/tinode/chat/server/extra/ruleset/workflow"
 	"net/http"
 	"sort"
 	"strconv"
@@ -480,7 +481,7 @@ func botName(subs types.Subscription) string {
 }
 
 // botSend bot send message, rcptTo: user uid: bot
-func botSend(rcptTo string, uid types.Uid, out extraTypes.MsgPayload) {
+func botSend(rcptTo string, uid types.Uid, out extraTypes.MsgPayload, option ...interface{}) {
 	if out == nil {
 		return
 	}
@@ -546,6 +547,24 @@ func botSend(rcptTo string, uid types.Uid, out extraTypes.MsgPayload) {
 		return
 	}
 	head, content := heads[0], contents[0]
+
+	// set head context
+	if len(option) > 0 {
+		for _, item := range option {
+			switch v := item.(type) {
+			case extraTypes.Context:
+				if head != nil {
+					if v.WorkflowFlag != "" {
+						head["x-workflow-flag"] = v.WorkflowFlag
+					}
+					if v.WorkflowVersion > 0 {
+						head["x-workflow-version"] = v.WorkflowVersion
+					}
+				}
+			}
+		}
+	}
+
 	msg := &ClientComMessage{
 		Pub: &MsgClientPub{
 			Topic:   rcptTo,
@@ -746,6 +765,17 @@ func botIncomingMessage(t *Topic, msg *ClientComMessage) {
 							if err != nil {
 								logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
 							}
+
+							if payload != nil {
+								botUid := types.ParseUserId(msg.Original)
+								botSend(msg.RcptTo, botUid, payload, extraTypes.WithContext(ctx))
+
+								// workflow action step
+								workflowFlag, _ := message.Head.String("x-workflow-flag")
+								workflowVersion, _ := message.Head.Int64("x-workflow-version")
+								nextWorkflow(ctx, workflowFlag, int(workflowVersion), msg.RcptTo, botUid)
+								return
+							}
 						}
 					}
 				}
@@ -795,11 +825,15 @@ func botIncomingMessage(t *Topic, msg *ClientComMessage) {
 				}
 				// check "~" prefix
 				if in, ok := content.(string); ok && strings.HasPrefix(in, "~") {
+					var workflowFlag string
+					var workflowVersion int
 					in = strings.Replace(in, "~", "", 1)
-					payload, err = handle.Workflow(ctx, msg.Pub.Head, in, extraTypes.WorkflowCommandTriggerOperate)
+					payload, workflowFlag, workflowVersion, err = handle.Workflow(ctx, msg.Pub.Head, in, extraTypes.WorkflowCommandTriggerOperate)
 					if err != nil {
 						logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
 					}
+					ctx.WorkflowFlag = workflowFlag
+					ctx.WorkflowVersion = workflowVersion
 
 					// stats
 					statsInc("BotTriggerWorkflowTotal", 1)
@@ -869,7 +903,7 @@ func botIncomingMessage(t *Topic, msg *ClientComMessage) {
 		}
 
 		botUid := types.ParseUserId(msg.Original)
-		botSend(msg.RcptTo, botUid, payload)
+		botSend(msg.RcptTo, botUid, payload, extraTypes.WithContext(ctx))
 	}
 }
 
@@ -1001,6 +1035,37 @@ func groupIncomingMessage(t *Topic, msg *ClientComMessage, event extraTypes.Grou
 
 		botUid := types.ParseUid(sub.User)
 		botSend(msg.RcptTo, botUid, payload)
+	}
+}
+
+func nextWorkflow(ctx extraTypes.Context, workflowFlag string, workflowVersion int, rcptTo string, botUid types.Uid) {
+	if workflowFlag != "" && workflowVersion > 0 {
+		workflowData, err := extraStore.Chatbot.WorkflowGet(ctx.AsUser, ctx.Original, workflowFlag)
+		if err != nil {
+			logs.Err.Println(err)
+			return
+		}
+		for _, handler := range bots.List() {
+			for _, item := range handler.Rules() {
+				switch v := item.(type) {
+				case []workflow.Rule:
+					for _, rule := range v {
+						if rule.Id == workflowData.RuleId {
+							ctx.WorkflowFlag = workflowFlag
+							ctx.WorkflowVersion = workflowVersion
+							ctx.WorkflowRuleId = workflowData.RuleId
+							ctx.WorkflowStepIndex = workflowData.Step
+							payload, _, _, err := handler.Workflow(ctx, nil, nil, extraTypes.WorkflowNextOperate)
+							if err != nil {
+								logs.Err.Println(err)
+								return
+							}
+							botSend(rcptTo, botUid, payload, extraTypes.WithContext(ctx))
+						}
+					}
+				}
+			}
+		}
 	}
 }
 

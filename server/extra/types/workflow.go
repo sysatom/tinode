@@ -33,6 +33,7 @@ type WorkflowOperate string
 const (
 	WorkflowCommandTriggerOperate WorkflowOperate = "command_trigger"
 	WorkflowProcessOperate        WorkflowOperate = "workflow_process"
+	WorkflowNextOperate           WorkflowOperate = "workflow_next"
 )
 
 type Bot string

@@ -296,6 +296,7 @@ func (a *adapter) FormSet(formId string, form model.Form) error {
 			Schema: form.Schema,
 			Values: form.Values,
 			State:  form.State,
+			Extra:  form.Extra,
 		}).Error
 	}
 }
@@ -406,10 +407,19 @@ func (a *adapter) WorkflowCreate(workflow model.Workflow) error {
 
 func (a *adapter) WorkflowState(uid types.Uid, topic string, workflow model.Workflow) error {
 	return a.db.
-		Model(&model.Session{}).
+		Model(&model.Workflow{}).
 		Where("`uid` = ? AND `topic` = ? AND `flag` = ?", uid.UserId(), topic, workflow.Flag).
 		Updates(map[string]interface{}{
 			"state": workflow.State,
+		}).Error
+}
+
+func (a *adapter) WorkflowStep(uid types.Uid, topic string, workflow model.Workflow) error {
+	return a.db.
+		Model(&model.Workflow{}).
+		Where("`uid` = ? AND `topic` = ? AND `flag` = ?", uid.UserId(), topic, workflow.Flag).
+		Updates(map[string]interface{}{
+			"step": workflow.Step,
 		}).Error
 }
 

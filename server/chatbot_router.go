@@ -289,6 +289,11 @@ func postForm(rw http.ResponseWriter, req *http.Request) {
 		}
 
 		botSend(topic, topicUid, payload)
+
+		// workflow form step
+		workflowFlag, _ := formData.Extra.String("workflow_flag")
+		workflowVersion, _ := formData.Extra.Int64("workflow_version")
+		nextWorkflow(ctx, workflowFlag, int(workflowVersion), topic, topicUid)
 	}
 
 	_, _ = rw.Write([]byte("ok"))

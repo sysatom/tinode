@@ -48,6 +48,8 @@ func (j JSON) Int64(key string) (int64, bool) {
 		switch n := v.(type) {
 		case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
 			return reflect.ValueOf(n).Convert(reflect.TypeOf(int64(0))).Int(), true
+		case float32, float64:
+			return reflect.ValueOf(n).Convert(reflect.TypeOf(int64(0))).Int(), true
 		}
 	}
 	return 0, false

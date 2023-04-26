@@ -130,6 +130,7 @@ type Form struct {
 	Topic     string
 	Schema    JSON `gorm:"type:json"`
 	Values    JSON `gorm:"type:json"`
+	Extra     JSON `gorm:"type:json"`
 	State     FormState
 	CreatedAt time.Time
 	UpdatedAt time.Time

@@ -67,6 +67,8 @@ type Adapter interface {
 	WorkflowCreate(workflow model.Workflow) error
 	// WorkflowState workflow set state
 	WorkflowState(uid types.Uid, topic string, workflow model.Workflow) error
+	// WorkflowStep workflow set step
+	WorkflowStep(uid types.Uid, topic string, workflow model.Workflow) error
 	// WorkflowGet workflow get
 	WorkflowGet(uid types.Uid, topic string, flag string) (model.Workflow, error)
 	// PageSet page set
