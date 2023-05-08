@@ -461,6 +461,35 @@ func (a *adapter) BehaviorIncrease(uid types.Uid, flag string, number int) error
 		UpdateColumn("count", gorm.Expr("count + ?", number)).Error
 }
 
+func (a *adapter) ParameterSet(flag string, params model.JSON, expiredAt time.Time) error {
+	var find model.Parameter
+	err := a.db.Where("`flag` = ?", flag).First(&find).Error
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		return err
+	}
+	if find.ID > 0 {
+		return a.db.
+			Model(&model.Parameter{}).
+			Where("`flag` = ?", flag).
+			Update("expired_at", expiredAt).Error
+	} else {
+		return a.db.Create(&model.Parameter{
+			Flag:      flag,
+			Params:    params,
+			ExpiredAt: expiredAt,
+		}).Error
+	}
+}
+
+func (a *adapter) ParameterGet(flag string) (model.Parameter, error) {
+	var find model.Parameter
+	err := a.db.Where("`flag` = ?", flag).First(&find).Error
+	if err != nil {
+		return model.Parameter{}, err
+	}
+	return find, nil
+}
+
 func (a *adapter) UrlCreate(url model.Url) error {
 	return a.db.Create(&model.Url{
 		Flag:  url.Flag,

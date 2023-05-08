@@ -4,6 +4,7 @@ import (
 	"github.com/tinode/chat/server/extra/store/model"
 	extraTypes "github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/store/types"
+	"time"
 )
 
 type Adapter interface {
@@ -93,6 +94,10 @@ type Adapter interface {
 	BehaviorList(uid types.Uid) ([]*model.Behavior, error)
 	// BehaviorIncrease increase user behavior count
 	BehaviorIncrease(uid types.Uid, flag string, number int) error
+	// ParameterSet parameter set
+	ParameterSet(flag string, params model.JSON, expiredAt time.Time) error
+	// ParameterGet parameter get
+	ParameterGet(flag string) (model.Parameter, error)
 
 	GetObjectiveByID(id int64) (*model.Objective, error)
 	GetObjectiveBySequence(uid types.Uid, topic string, sequence int64) (*model.Objective, error)

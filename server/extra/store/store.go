@@ -5,6 +5,7 @@ import (
 	"github.com/tinode/chat/server/extra/store/model"
 	extraTypes "github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/store/types"
+	"time"
 )
 
 var adp Adapter
@@ -131,6 +132,8 @@ type ChatbotPersistenceInterface interface {
 	BehaviorGet(uid types.Uid, flag string) (model.Behavior, error)
 	BehaviorList(uid types.Uid) ([]*model.Behavior, error)
 	BehaviorIncrease(uid types.Uid, flag string, number int) error
+	ParameterSet(flag string, params model.JSON, expiredAt time.Time) error
+	ParameterGet(flag string) (model.Parameter, error)
 
 	GetObjectiveByID(id int64) (*model.Objective, error)
 	GetObjectiveBySequence(uid types.Uid, topic string, sequence int64) (*model.Objective, error)
@@ -330,6 +333,14 @@ func (c chatbotMapper) BehaviorList(uid types.Uid) ([]*model.Behavior, error) {
 
 func (c chatbotMapper) BehaviorIncrease(uid types.Uid, flag string, number int) error {
 	return adp.BehaviorIncrease(uid, flag, number)
+}
+
+func (c chatbotMapper) ParameterSet(flag string, params model.JSON, expiredAt time.Time) error {
+	return adp.ParameterSet(flag, params, expiredAt)
+}
+
+func (c chatbotMapper) ParameterGet(flag string) (model.Parameter, error) {
+	return adp.ParameterGet(flag)
 }
 
 func (c chatbotMapper) GetObjectiveByID(id int64) (*model.Objective, error) {

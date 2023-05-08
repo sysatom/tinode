@@ -354,3 +354,16 @@ const (
 	WorkflowDone
 	WorkflowCancel
 )
+
+type Parameter struct {
+	ID        uint64 `gorm:"primaryKey"`
+	Flag      string
+	Params    JSON `gorm:"type:json"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	ExpiredAt time.Time
+}
+
+func (Parameter) TableName() string {
+	return "chatbot_parameter"
+}

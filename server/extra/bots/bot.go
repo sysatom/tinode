@@ -601,6 +601,11 @@ func StoreForm(ctx types.Context, payload types.MsgPayload) types.MsgPayload {
 	}
 }
 
+func StoreParameter(params model.JSON, expiredAt time.Time) (string, error) {
+	flag := strings.ToLower(types.Id().String())
+	return flag, store.Chatbot.ParameterSet(flag, params, expiredAt)
+}
+
 func ActionMsg(_ types.Context, id string) types.MsgPayload {
 	var title string
 	var option []string

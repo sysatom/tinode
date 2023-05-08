@@ -26,6 +26,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 )
 
 func newRouter() *mux.Router {
@@ -38,7 +39,7 @@ func newRouter() *mux.Router {
 	s.HandleFunc("/webhook/{uid1}/{uid2}/{uid3}", webhook).Methods(http.MethodPost)
 	s.HandleFunc("/helper/{uid1}/{uid2}", postHelper).Methods(http.MethodPost)
 	s.HandleFunc("/queue/stats", queueStats)
-	s.HandleFunc("/editor/markdown/{uid}", markdownEditor)
+	s.HandleFunc("/editor/markdown/{flag}", markdownEditor)
 
 	return s
 }
@@ -577,8 +578,18 @@ var editorTemplate string
 
 func markdownEditor(rw http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
-	uid, _ := strconv.ParseUint(vars["uid"], 10, 64)
-	fmt.Println(uid)
+	flag, _ := vars["flag"]
+
+	p, err := store.Chatbot.ParameterGet(flag)
+	if err != nil {
+		errorResponse(rw, "flag error")
+		return
+	}
+	if p.ExpiredAt.Before(time.Now()) {
+		errorResponse(rw, "page expired")
+		return
+	}
+	fmt.Println(p.Params)
 
 	_, _ = fmt.Fprint(rw, editorTemplate)
 }
