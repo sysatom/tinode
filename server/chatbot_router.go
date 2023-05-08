@@ -607,8 +607,8 @@ func markdownEditor(rw http.ResponseWriter, req *http.Request) {
 }
 
 func postMarkdown(rw http.ResponseWriter, req *http.Request) {
+	// data
 	d, _ := io.ReadAll(req.Body)
-
 	var data map[string]string
 	err := json.Unmarshal(d, &data)
 	if err != nil {
@@ -623,16 +623,17 @@ func postMarkdown(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	// store
 	userUid := types.ParseUserId(uid)
-	payload := bots.StorePage(
-		extraTypes.Context{AsUser: userUid, Original: ""},
-		model.PageMarkdown, "created",
-		extraTypes.MarkdownMsg{Raw: markdown})
-
 	botUid, _, _, _, err := store.Users.GetAuthUniqueRecord("basic", "markdown_bot")
 	topic := userUid.P2PName(botUid)
+	payload := bots.StorePage(
+		extraTypes.Context{AsUser: userUid, Original: botUid.UserId()},
+		model.PageMarkdown, "",
+		extraTypes.MarkdownMsg{Raw: markdown})
 
+	// send
 	botSend(topic, botUid, payload)
 
-	_, _ = fmt.Fprint(rw, payload)
+	_, _ = fmt.Fprint(rw, "ok")
 }
