@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Markdown Editor</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.15.12/dist/css/uikit.min.css" />
+    <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css" />
+    <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
+</head>
+<body>
+<div id="editor"></div>
+<p class="uk-margin uk-margin-left">
+    <button class="uk-button uk-button-primary" id="button">Create</button>
+</p>
+<script>
+    const Editor = toastui.Editor;
+    const editor = new Editor({
+        el: document.querySelector('#editor'),
+        height: 'auto',
+        initialEditType: 'markdown',
+        previewStyle: 'tab'
+    });
+    editor.getMarkdown();
+
+    document.querySelector("#button").addEventListener("click", function () {
+        alert(editor.getMarkdown())
+    })
+</script>
+</body>
+</html>

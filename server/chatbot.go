@@ -30,6 +30,7 @@ import (
 	_ "github.com/tinode/chat/server/extra/bots/helper"
 	_ "github.com/tinode/chat/server/extra/bots/iot"
 	_ "github.com/tinode/chat/server/extra/bots/leetcode"
+	_ "github.com/tinode/chat/server/extra/bots/markdown"
 	_ "github.com/tinode/chat/server/extra/bots/mtg"
 	_ "github.com/tinode/chat/server/extra/bots/notion"
 	_ "github.com/tinode/chat/server/extra/bots/okr"

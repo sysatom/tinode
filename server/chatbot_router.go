@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "embed"
 	"encoding/json"
 	"fmt"
 	"github.com/go-echarts/go-echarts/v2/charts"
@@ -37,6 +38,7 @@ func newRouter() *mux.Router {
 	s.HandleFunc("/webhook/{uid1}/{uid2}/{uid3}", webhook).Methods(http.MethodPost)
 	s.HandleFunc("/helper/{uid1}/{uid2}", postHelper).Methods(http.MethodPost)
 	s.HandleFunc("/queue/stats", queueStats)
+	s.HandleFunc("/editor/markdown/{uid}", markdownEditor)
 
 	return s
 }
@@ -568,4 +570,15 @@ func queueStats(rw http.ResponseWriter, _ *http.Request) {
 		return
 	}
 	_, _ = fmt.Fprint(rw, html)
+}
+
+//go:embed extra/page/template/markdown.html
+var editorTemplate string
+
+func markdownEditor(rw http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	uid, _ := strconv.ParseUint(vars["uid"], 10, 64)
+	fmt.Println(uid)
+
+	_, _ = fmt.Fprint(rw, editorTemplate)
 }
