@@ -2,6 +2,7 @@ package component
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/types"
@@ -36,5 +37,7 @@ func (c *Markdown) Render() app.UI {
 		buf.WriteString("error markdown")
 	}
 
-	return app.Raw(buf.String())
+	return app.Raw(fmt.Sprintf(`
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown.min.css" />
+<div class="markdown-body">%s</div>`, buf.String()))
 }

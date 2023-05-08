@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	_ "embed"
 	"encoding/json"
 	"fmt"
@@ -14,18 +15,19 @@ import (
 	"github.com/tinode/chat/server/extra/pkg/queue"
 	"github.com/tinode/chat/server/extra/ruleset/agent"
 	"github.com/tinode/chat/server/extra/ruleset/form"
-	"github.com/tinode/chat/server/extra/store"
+	extraStore "github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/store/model"
 	extraTypes "github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/types/helper"
 	"github.com/tinode/chat/server/extra/utils"
 	"github.com/tinode/chat/server/logs"
-	serverStore "github.com/tinode/chat/server/store"
+	"github.com/tinode/chat/server/store"
 	"github.com/tinode/chat/server/store/types"
 	"io"
 	"net/http"
 	"os"
 	"strconv"
+	"text/template"
 	"time"
 )
 
@@ -40,6 +42,7 @@ func newRouter() *mux.Router {
 	s.HandleFunc("/helper/{uid1}/{uid2}", postHelper).Methods(http.MethodPost)
 	s.HandleFunc("/queue/stats", queueStats)
 	s.HandleFunc("/editor/markdown/{flag}", markdownEditor)
+	s.HandleFunc("/editor/markdown", postMarkdown).Methods(http.MethodPost)
 
 	return s
 }
@@ -82,7 +85,7 @@ func storeOAuth(rw http.ResponseWriter, req *http.Request) {
 	// store
 	extra := model.JSON{}
 	_ = extra.Scan(tk["extra"])
-	err = store.Chatbot.OAuthSet(model.OAuth{
+	err = extraStore.Chatbot.OAuthSet(model.OAuth{
 		Uid:   types.Uid(ui1).UserId(),
 		Topic: types.Uid(ui2).UserId(),
 		Name:  category,
@@ -103,7 +106,7 @@ func getPage(rw http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	id := vars["id"]
 
-	p, err := store.Chatbot.PageGet(id)
+	p, err := extraStore.Chatbot.PageGet(id)
 	if err != nil {
 		logs.Err.Println(err)
 		errorResponse(rw, "page error")
@@ -113,7 +116,7 @@ func getPage(rw http.ResponseWriter, req *http.Request) {
 	var comp app.UI
 	switch p.Type {
 	case model.PageForm:
-		f, _ := store.Chatbot.FormGet(p.PageId)
+		f, _ := extraStore.Chatbot.FormGet(p.PageId)
 		comp = page.RenderForm(p, f)
 	case model.PageOkr:
 		comp = page.RenderOkr(p)
@@ -173,7 +176,7 @@ func postForm(rw http.ResponseWriter, req *http.Request) {
 	topicUid := types.ParseUserId(uid2)
 	topic := userUid.P2PName(topicUid)
 
-	formData, err := store.Chatbot.FormGet(formId)
+	formData, err := extraStore.Chatbot.FormGet(formId)
 	if err != nil {
 		return
 	}
@@ -242,7 +245,7 @@ func postForm(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	// user auth record
-	_, authLvl, _, _, _ := serverStore.Users.GetAuthRecord(userUid, "basic")
+	_, authLvl, _, _, _ := store.Users.GetAuthRecord(userUid, "basic")
 
 	// get bot handler
 	formRuleId, ok := formData.Schema.String("id")
@@ -316,7 +319,7 @@ func webhook(rw http.ResponseWriter, req *http.Request) {
 	uid3 := types.Uid(ui3)
 	topic := uid1.P2PName(uid2)
 
-	value, err := store.Chatbot.DataGet(uid1, uid2.UserId(), fmt.Sprintf("webhook:%s", uid3.String()))
+	value, err := extraStore.Chatbot.DataGet(uid1, uid2.UserId(), fmt.Sprintf("webhook:%s", uid3.String()))
 	if err != nil {
 		errorResponse(rw, "webhook error")
 		return
@@ -352,7 +355,7 @@ func postHelper(rw http.ResponseWriter, req *http.Request) {
 
 	uid1 := types.Uid(ui1)
 
-	value, err := store.Chatbot.ConfigGet(uid1, "", fmt.Sprintf("helper:%d", ui1))
+	value, err := extraStore.Chatbot.ConfigGet(uid1, "", fmt.Sprintf("helper:%d", ui1))
 	if err != nil {
 		errorResponse(rw, "error")
 		return
@@ -397,14 +400,14 @@ func postHelper(rw http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		subs, err := serverStore.Users.FindSubs(userUid, [][]string{{"bot"}}, nil, true)
+		subs, err := store.Users.FindSubs(userUid, [][]string{{"bot"}}, nil, true)
 		if err != nil {
 			errorResponse(rw, "error")
 			return
 		}
 
 		// user auth record
-		_, authLvl, _, _, _ := serverStore.Users.GetAuthRecord(userUid, "basic")
+		_, authLvl, _, _, _ := store.Users.GetAuthRecord(userUid, "basic")
 
 		for _, sub := range subs {
 			if !isBot(sub) {
@@ -458,12 +461,13 @@ func postHelper(rw http.ResponseWriter, req *http.Request) {
 			botSend(uid1.P2PName(topicUid), topicUid, payload)
 		}
 	case helper.Pull:
-		list, err := store.Chatbot.ListInstruct(uid1, false)
+		list, err := extraStore.Chatbot.ListInstruct(uid1, false)
 		if err != nil {
 			errorResponse(rw, "error")
 			return
 		}
-		var instruct = []map[string]interface{}{}
+		var instruct []map[string]interface{}
+		instruct = []map[string]interface{}{}
 		for _, item := range list {
 			instruct = append(instruct, map[string]interface{}{
 				"no":        item.No,
@@ -480,7 +484,7 @@ func postHelper(rw http.ResponseWriter, req *http.Request) {
 		_, _ = rw.Write(res)
 		return
 	case helper.Info:
-		user, err := serverStore.Users.Get(uid1)
+		user, err := store.Users.Get(uid1)
 		if err != nil {
 			errorResponse(rw, "error")
 			return
@@ -550,14 +554,14 @@ func urlRedirect(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	url, err := store.Chatbot.UrlGetByFlag(flag)
+	url, err := extraStore.Chatbot.UrlGetByFlag(flag)
 	if err != nil {
 		errorResponse(rw, "error")
 		return
 	}
 
 	// view count
-	_ = store.Chatbot.UrlViewIncrease(flag)
+	_ = extraStore.Chatbot.UrlViewIncrease(flag)
 
 	// redirect
 	http.Redirect(rw, req, url.Url, http.StatusFound)
@@ -580,7 +584,7 @@ func markdownEditor(rw http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	flag, _ := vars["flag"]
 
-	p, err := store.Chatbot.ParameterGet(flag)
+	p, err := extraStore.Chatbot.ParameterGet(flag)
 	if err != nil {
 		errorResponse(rw, "flag error")
 		return
@@ -589,7 +593,46 @@ func markdownEditor(rw http.ResponseWriter, req *http.Request) {
 		errorResponse(rw, "page expired")
 		return
 	}
-	fmt.Println(p.Params)
 
-	_, _ = fmt.Fprint(rw, editorTemplate)
+	t, err := template.New("tmpl").Parse(editorTemplate)
+	if err != nil {
+		errorResponse(rw, "page template error")
+		return
+	}
+	buf := bytes.NewBufferString("")
+	data := p.Params
+	err = t.Execute(buf, data)
+
+	_, _ = fmt.Fprint(rw, buf.String())
+}
+
+func postMarkdown(rw http.ResponseWriter, req *http.Request) {
+	d, _ := io.ReadAll(req.Body)
+
+	var data map[string]string
+	err := json.Unmarshal(d, &data)
+	if err != nil {
+		errorResponse(rw, "params error")
+		return
+	}
+
+	uid, _ := data["uid"]
+	markdown, _ := data["markdown"]
+	if uid == "" || markdown == "" {
+		errorResponse(rw, "params error")
+		return
+	}
+
+	userUid := types.ParseUserId(uid)
+	payload := bots.StorePage(
+		extraTypes.Context{AsUser: userUid, Original: ""},
+		model.PageMarkdown, "created",
+		extraTypes.MarkdownMsg{Raw: markdown})
+
+	botUid, _, _, _, err := store.Users.GetAuthUniqueRecord("basic", "markdown_bot")
+	topic := userUid.P2PName(botUid)
+
+	botSend(topic, botUid, payload)
+
+	_, _ = fmt.Fprint(rw, payload)
 }
