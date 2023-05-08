@@ -122,6 +122,8 @@ func getPage(rw http.ResponseWriter, req *http.Request) {
 		comp = page.RenderJson(p)
 	case model.PageHtml:
 		comp = page.RenderHtml(p)
+	case model.PageMarkdown:
+		comp = page.RenderMarkdown(p)
 	case model.PageChart:
 		d, err := json.Marshal(p.Schema)
 		if err != nil {

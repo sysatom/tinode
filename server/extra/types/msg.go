@@ -424,6 +424,14 @@ func (m HtmlMsg) Convert() (map[string]interface{}, interface{}) {
 	return nil, nil
 }
 
+type MarkdownMsg struct {
+	Raw string
+}
+
+func (m MarkdownMsg) Convert() (map[string]interface{}, interface{}) {
+	return nil, nil
+}
+
 type LinkListMsg struct {
 	Links []LinkMsg
 }

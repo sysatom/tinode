@@ -217,13 +217,14 @@ func (Page) TableName() string {
 type PageType string
 
 const (
-	PageForm  PageType = "form"
-	PageChart PageType = "chart"
-	PageTable PageType = "table"
-	PageOkr   PageType = "okr"
-	PageShare PageType = "share"
-	PageJson  PageType = "json"
-	PageHtml  PageType = "html"
+	PageForm     PageType = "form"
+	PageChart    PageType = "chart"
+	PageTable    PageType = "table"
+	PageOkr      PageType = "okr"
+	PageShare    PageType = "share"
+	PageJson     PageType = "json"
+	PageHtml     PageType = "html"
+	PageMarkdown PageType = "markdown"
 )
 
 type PageState int

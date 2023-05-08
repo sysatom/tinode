@@ -134,3 +134,21 @@ func RenderHtml(page model.Page) app.UI {
 	}
 	return comp
 }
+
+func RenderMarkdown(page model.Page) app.UI {
+	d, err := json.Marshal(page.Schema)
+	if err != nil {
+		return nil
+	}
+	var msg types.MarkdownMsg
+	err = json.Unmarshal(d, &msg)
+	if err != nil {
+		return nil
+	}
+
+	comp := &component.Markdown{
+		Page:   page,
+		Schema: msg,
+	}
+	return comp
+}
