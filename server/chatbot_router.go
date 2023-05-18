@@ -40,7 +40,7 @@ func newRouter() *mux.Router {
 	s.HandleFunc("/page/{id}", getPage)
 	s.HandleFunc("/form", postForm).Methods(http.MethodPost)
 	s.HandleFunc("/webhook/{uid1}/{uid2}/{uid3}", webhook).Methods(http.MethodPost)
-	s.HandleFunc("/linkit", postLinkitData).Methods(http.MethodPost)
+	s.HandleFunc("/linkit", postLinkitData)
 	s.HandleFunc("/queue/stats", queueStats)
 	s.HandleFunc("/editor/markdown/{flag}", markdownEditor)
 	s.HandleFunc("/editor/markdown", postMarkdown).Methods(http.MethodPost)
@@ -345,6 +345,7 @@ func webhook(rw http.ResponseWriter, req *http.Request) {
 
 func postLinkitData(rw http.ResponseWriter, req *http.Request) {
 	rw.Header().Set("Access-Control-Allow-Origin", "*")
+	rw.Header().Set("Access-Control-Allow-Headers", "*")
 	if req.Method == http.MethodOptions {
 		return
 	}
@@ -481,6 +482,7 @@ func postLinkitData(rw http.ResponseWriter, req *http.Request) {
 		res, _ := json.Marshal(map[string]interface{}{
 			"instruct": instruct,
 		})
+		rw.Header().Set("Content-Type", "application/json")
 		_, _ = rw.Write(res)
 		return
 	case linkit.Info:
@@ -495,6 +497,7 @@ func postLinkitData(rw http.ResponseWriter, req *http.Request) {
 			"username": utils.Fn(user.Public),
 		}
 		res, _ := json.Marshal(result)
+		rw.Header().Set("Content-Type", "application/json")
 		_, _ = rw.Write(res)
 		return
 	case linkit.Bots:
@@ -521,6 +524,7 @@ func postLinkitData(rw http.ResponseWriter, req *http.Request) {
 			return
 		}
 
+		rw.Header().Set("Content-Type", "application/json")
 		_, _ = rw.Write(result)
 		return
 	case linkit.Help:
@@ -532,6 +536,7 @@ func postLinkitData(rw http.ResponseWriter, req *http.Request) {
 					return
 				}
 				d, _ := json.Marshal(result)
+				rw.Header().Set("Content-Type", "application/json")
 				_, _ = rw.Write(d)
 				return
 			}
