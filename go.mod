@@ -48,12 +48,12 @@ require (
 	github.com/urfave/cli/v2 v2.25.1
 	github.com/yeqown/go-qrcode/v2 v2.2.1
 	github.com/yeqown/go-qrcode/writer/standard v1.2.1
+	github.com/yuin/goldmark v1.5.4
 	golang.org/x/image v0.0.0-20220902085622-e7cb96979f69
 	gonum.org/v1/plot v0.12.0
 	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/driver/mysql v1.4.1
 	gorm.io/gorm v1.24.0
-	github.com/yuin/goldmark v1.5.4
 )
 
 require (

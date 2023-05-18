@@ -33,6 +33,7 @@ import (
 	_ "github.com/tinode/chat/server/extra/bots/markdown"
 	_ "github.com/tinode/chat/server/extra/bots/mtg"
 	_ "github.com/tinode/chat/server/extra/bots/notion"
+	_ "github.com/tinode/chat/server/extra/bots/obsidian"
 	_ "github.com/tinode/chat/server/extra/bots/okr"
 	_ "github.com/tinode/chat/server/extra/bots/pocket"
 	_ "github.com/tinode/chat/server/extra/bots/qr"
