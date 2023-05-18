@@ -18,7 +18,7 @@ import (
 	extraStore "github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/store/model"
 	extraTypes "github.com/tinode/chat/server/extra/types"
-	"github.com/tinode/chat/server/extra/types/helper"
+	"github.com/tinode/chat/server/extra/types/linkit"
 	"github.com/tinode/chat/server/extra/utils"
 	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/store"
@@ -27,6 +27,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"text/template"
 	"time"
 )
@@ -39,7 +40,7 @@ func newRouter() *mux.Router {
 	s.HandleFunc("/page/{id}", getPage)
 	s.HandleFunc("/form", postForm).Methods(http.MethodPost)
 	s.HandleFunc("/webhook/{uid1}/{uid2}/{uid3}", webhook).Methods(http.MethodPost)
-	s.HandleFunc("/helper/{uid1}/{uid2}", postHelper).Methods(http.MethodPost)
+	s.HandleFunc("/linkit", postLinkitData).Methods(http.MethodPost)
 	s.HandleFunc("/queue/stats", queueStats)
 	s.HandleFunc("/editor/markdown/{flag}", markdownEditor)
 	s.HandleFunc("/editor/markdown", postMarkdown).Methods(http.MethodPost)
@@ -342,32 +343,31 @@ func webhook(rw http.ResponseWriter, req *http.Request) {
 	_, _ = rw.Write([]byte("ok"))
 }
 
-func postHelper(rw http.ResponseWriter, req *http.Request) {
+func postLinkitData(rw http.ResponseWriter, req *http.Request) {
 	rw.Header().Set("Access-Control-Allow-Origin", "*")
 	if req.Method == http.MethodOptions {
 		return
 	}
 
-	vars := mux.Vars(req)
+	// authorization
+	token := req.Header.Get("Authorization")
+	token = strings.TrimSpace(token)
+	token = strings.ReplaceAll(token, "Bearer ", "")
 
-	ui1, _ := strconv.ParseUint(vars["uid1"], 10, 64)
-	ui2, _ := vars["uid2"]
-
-	uid1 := types.Uid(ui1)
-
-	value, err := extraStore.Chatbot.ConfigGet(uid1, "", fmt.Sprintf("helper:%d", ui1))
+	p, err := extraStore.Chatbot.ParameterGet(token)
 	if err != nil {
 		errorResponse(rw, "error")
 		return
 	}
-	uiValue, ok := value.String("value")
-	if !ok {
-		errorResponse(rw, "error")
+	if p.ID <= 0 || p.ExpiredAt.Before(time.Now()) {
+		errorResponse(rw, "401")
 		return
 	}
 
-	if uiValue != ui2 {
-		errorResponse(rw, "auth error")
+	ui1, _ := p.Params.String("uid")
+	uid1 := types.ParseUserId(ui1)
+	if uid1.IsZero() {
+		errorResponse(rw, "401")
 		return
 	}
 
@@ -377,7 +377,7 @@ func postHelper(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	var data helper.Data
+	var data linkit.Data
 	err = json.Unmarshal(body, &data)
 	if err != nil {
 		errorResponse(rw, "error")
@@ -385,7 +385,7 @@ func postHelper(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	switch data.Action {
-	case helper.Agent:
+	case linkit.Agent:
 		userUid := uid1
 
 		d, err := json.Marshal(data.Content)
@@ -460,7 +460,7 @@ func postHelper(rw http.ResponseWriter, req *http.Request) {
 
 			botSend(uid1.P2PName(topicUid), topicUid, payload)
 		}
-	case helper.Pull:
+	case linkit.Pull:
 		list, err := extraStore.Chatbot.ListInstruct(uid1, false)
 		if err != nil {
 			errorResponse(rw, "error")
@@ -483,7 +483,7 @@ func postHelper(rw http.ResponseWriter, req *http.Request) {
 		})
 		_, _ = rw.Write(res)
 		return
-	case helper.Info:
+	case linkit.Info:
 		user, err := store.Users.Get(uid1)
 		if err != nil {
 			errorResponse(rw, "error")
@@ -497,7 +497,7 @@ func postHelper(rw http.ResponseWriter, req *http.Request) {
 		res, _ := json.Marshal(result)
 		_, _ = rw.Write(res)
 		return
-	case helper.Bots:
+	case linkit.Bots:
 		var data []map[string]interface{}
 		for name, bot := range bots.List() {
 			instruct, err := bot.Instruct()
@@ -523,7 +523,7 @@ func postHelper(rw http.ResponseWriter, req *http.Request) {
 
 		_, _ = rw.Write(result)
 		return
-	case helper.Help:
+	case linkit.Help:
 		if id, ok := data.Content.(string); ok {
 			if bot, ok := bots.List()[id]; ok {
 				result, err := bot.Help()

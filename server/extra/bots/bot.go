@@ -776,7 +776,7 @@ func InstructMsg(ctx types.Context, id string, data map[string]interface{}) type
 
 	return StoreInstruct(ctx, types.InstructMsg{
 		No:       types.Id().String(),
-		Object:   model.InstructObjectHelper,
+		Object:   model.InstructObjectLinkit,
 		Bot:      botName,
 		Flag:     id,
 		Content:  data,

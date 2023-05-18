@@ -317,7 +317,7 @@ const (
 type InstructObject string
 
 const (
-	InstructObjectHelper InstructObject = "helper"
+	InstructObjectLinkit InstructObject = "linkit"
 )
 
 type InstructPriority int

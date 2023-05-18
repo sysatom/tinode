@@ -1,4 +1,4 @@
-package helper
+package linkit
 
 type Data struct {
 	Action  Action      `json:"action"`

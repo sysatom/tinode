@@ -1,4 +1,4 @@
-package helper
+package linkit
 
 import (
 	"encoding/json"
@@ -8,7 +8,7 @@ import (
 	"github.com/tinode/chat/server/logs"
 )
 
-const Name = "helper"
+const Name = "linkit"
 
 var handler bot
 
