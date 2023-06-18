@@ -68,7 +68,7 @@ func (s *Crawler) Run() {
 }
 
 func (s *Crawler) ruleWorker(name string, r Rule) {
-	logs.Info.Printf("crawler %s crawl...", name)
+	logs.Info.Printf("crawler %s start", name)
 	p, err := cron.ParseUTC(r.When)
 	if err != nil {
 		logs.Err.Println(err, name)

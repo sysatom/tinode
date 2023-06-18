@@ -51,11 +51,9 @@ func NewCronRuleset(name string, authLevel auth.Level, rules []Rule) *Ruleset {
 }
 
 func (r *Ruleset) Daemon() {
-	logs.Info.Println("cron starting...")
-
 	// process cron
 	for rule := range r.cronRules {
-		logs.Info.Printf("cron %s start...", r.cronRules[rule].Name)
+		logs.Info.Printf("cron %s start", r.cronRules[rule].Name)
 		go r.ruleWorker(r.cronRules[rule])
 	}
 

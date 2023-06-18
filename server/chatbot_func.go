@@ -258,7 +258,7 @@ func initializeChannels() error {
 	for _, channel := range channels.List() {
 		topic, _ := store.Topics.Get(fmt.Sprintf("grp%s", channel.Id))
 		if topic != nil && topic.Id != "" {
-			logs.Info.Printf("channel %s registered", channel.Id)
+			logs.Info.Printf("channel %s registered", channel.Name)
 			continue
 		}
 
