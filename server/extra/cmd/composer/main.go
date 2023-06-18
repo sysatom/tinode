@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/tinode/chat/server/extra"
+	"github.com/tinode/chat/server/extra/cmd/composer/action/dao"
 	"github.com/tinode/chat/server/extra/cmd/composer/action/generator"
 	"github.com/tinode/chat/server/extra/cmd/composer/action/migrate"
 	"github.com/urfave/cli/v2"
@@ -90,6 +91,18 @@ func NewCommand() *cli.App {
 						Action: generator.VendorAction,
 					},
 				},
+			},
+			{
+				Name:  "dao",
+				Usage: "dao generator",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:  "config",
+						Value: "./tinode.conf",
+						Usage: "config of the database connection",
+					},
+				},
+				Action: dao.GenerationAction,
 			},
 		},
 	}

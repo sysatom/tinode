@@ -11,6 +11,7 @@ import (
 	"github.com/tinode/chat/server/db/mysql"
 	"github.com/tinode/chat/server/extra/pkg/locker"
 	"github.com/tinode/chat/server/extra/store"
+	"github.com/tinode/chat/server/extra/store/dao"
 	"github.com/tinode/chat/server/extra/store/model"
 	extraTypes "github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
@@ -47,7 +48,12 @@ func (a *adapter) Open() error {
 	if err != nil {
 		return err
 	}
+
+	// Initialize dao
+	dao.SetDefault(db)
+	// gorm
 	a.db = db
+
 	return nil
 }
 
