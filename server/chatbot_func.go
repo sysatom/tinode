@@ -1121,11 +1121,11 @@ func onlineStatus(usrStr string) {
 }
 
 func sessionCurrent(uid types.Uid, topic string) (model.Session, bool) {
-	session, err := extraStore.Chatbot.SessionGet(uid, topic)
+	sess, err := extraStore.Chatbot.SessionGet(uid, topic)
 	if err != nil {
 		return model.Session{}, false
 	}
-	return session, true
+	return sess, true
 }
 
 func errorResponse(rw http.ResponseWriter, text string) {
