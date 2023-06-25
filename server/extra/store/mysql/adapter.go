@@ -173,7 +173,7 @@ func (a *adapter) DataSet(uid types.Uid, topic, key string, value model.JSON) er
 			Update("value", value).Error
 	} else {
 		return a.db.Create(&model.Data{
-			Uid:   uid.UserId(),
+			UID:   uid.UserId(),
 			Topic: topic,
 			Key:   key,
 			Value: value,
@@ -226,7 +226,7 @@ func (a *adapter) ConfigSet(uid types.Uid, topic, key string, value model.JSON) 
 			Update("value", value).Error
 	} else {
 		return a.db.Create(&model.Config{
-			Uid:   uid.UserId(),
+			UID:   uid.UserId(),
 			Topic: topic,
 			Key:   key,
 			Value: value,
@@ -245,14 +245,14 @@ func (a *adapter) ConfigGet(uid types.Uid, topic, key string) (model.JSON, error
 
 func (a *adapter) OAuthSet(oauth model.OAuth) error {
 	var find model.OAuth
-	err := a.db.Where("`uid` = ? AND `topic` = ? AND `type` = ?", oauth.Uid, oauth.Topic, oauth.Type).First(&find).Error
+	err := a.db.Where("`uid` = ? AND `topic` = ? AND `type` = ?", oauth.UID, oauth.Topic, oauth.Type).First(&find).Error
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return err
 	}
 	if find.ID > 0 {
 		return a.db.
 			Model(&model.OAuth{}).
-			Where("`uid` = ? AND `topic` = ? AND `type` = ?", oauth.Uid, oauth.Topic, oauth.Type).
+			Where("`uid` = ? AND `topic` = ? AND `type` = ?", oauth.UID, oauth.Topic, oauth.Type).
 			UpdateColumns(map[string]interface{}{
 				"token": oauth.Token,
 				"extra": oauth.Extra,
@@ -296,8 +296,8 @@ func (a *adapter) FormSet(formId string, form model.Form) error {
 			}).Error
 	} else {
 		return a.db.Create(&model.Form{
-			FormId: formId,
-			Uid:    form.Uid,
+			FormID: formId,
+			UID:    form.UID,
 			Topic:  form.Topic,
 			Schema: form.Schema,
 			Values: form.Values,
@@ -332,9 +332,9 @@ func (a *adapter) ActionSet(topic string, seqId int, action model.Action) error 
 			}).Error
 	} else {
 		return a.db.Create(&model.Action{
-			Uid:   action.Uid,
+			UID:   action.UID,
 			Topic: topic,
-			SeqId: seqId,
+			Seqid: int32(seqId),
 			Value: action.Value,
 			State: action.State,
 		}).Error
@@ -352,9 +352,9 @@ func (a *adapter) ActionGet(topic string, seqId int) (model.Action, error) {
 
 func (a *adapter) SessionCreate(session model.Session) error {
 	return a.db.Create(&model.Session{
-		Uid:    session.Uid,
+		UID:    session.UID,
 		Topic:  session.Topic,
-		RuleId: session.RuleId,
+		RuleID: session.RuleID,
 		Init:   session.Init,
 		Values: session.Values,
 		State:  session.State,
@@ -400,10 +400,10 @@ func (a *adapter) SessionGet(uid types.Uid, topic string) (model.Session, error)
 
 func (a *adapter) WorkflowCreate(workflow model.Workflow) error {
 	return a.db.Create(&model.Workflow{
-		Uid:     workflow.Uid,
+		UID:     workflow.UID,
 		Topic:   workflow.Topic,
 		Flag:    workflow.Flag,
-		RuleId:  workflow.RuleId,
+		RuleID:  workflow.RuleID,
 		Version: workflow.Version,
 		Step:    workflow.Step,
 		Values:  workflow.Values,
@@ -499,7 +499,7 @@ func (a *adapter) ParameterGet(flag string) (model.Parameter, error) {
 func (a *adapter) UrlCreate(url model.Url) error {
 	return a.db.Create(&model.Url{
 		Flag:  url.Flag,
-		Url:   url.Url,
+		URL:   url.URL,
 		State: url.State,
 	}).Error
 }
@@ -604,7 +604,7 @@ func (a *adapter) CreateObjective(objective *model.Objective) (int64, error) {
 	// sequence
 	sequence := int64(0)
 	var max model.Objective
-	err = a.db.Where("`uid` = ? AND `topic` = ?", objective.Uid, objective.Topic).Order("sequence DESC").Take(&max).Error
+	err = a.db.Where("`uid` = ? AND `topic` = ?", objective.UID, objective.Topic).Order("sequence DESC").Take(&max).Error
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return 0, err
 	}
@@ -618,12 +618,12 @@ func (a *adapter) CreateObjective(objective *model.Objective) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
-	return objective.Id, nil
+	return int64(objective.ID), nil
 }
 
 func (a *adapter) UpdateObjective(objective *model.Objective) error {
 	return a.db.Model(&model.Objective{}).
-		Where("`uid` = ? AND `topic` = ? AND sequence = ?", objective.Uid, objective.Topic, objective.Sequence).
+		Where("`uid` = ? AND `topic` = ? AND sequence = ?", objective.UID, objective.Topic, objective.Sequence).
 		UpdateColumns(map[string]interface{}{
 			"title":       objective.Title,
 			"memo":        objective.Memo,
@@ -700,7 +700,7 @@ func (a *adapter) CreateKeyResult(keyResult *model.KeyResult) (int64, error) {
 	// sequence
 	sequence := int64(0)
 	var max model.KeyResult
-	err = a.db.Where("`uid` = ? AND `topic` = ?", keyResult.Uid, keyResult.Topic).Order("sequence DESC").Take(&max).Error
+	err = a.db.Where("`uid` = ? AND `topic` = ?", keyResult.UID, keyResult.Topic).Order("sequence DESC").Take(&max).Error
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return 0, err
 	}
@@ -718,7 +718,7 @@ func (a *adapter) CreateKeyResult(keyResult *model.KeyResult) (int64, error) {
 	// init value record
 	if keyResult.CurrentValue > 0 {
 		err = a.db.Create(&model.KeyResultValue{
-			KeyResultId: keyResult.Id,
+			KeyResultID: keyResult.ID,
 			Value:       keyResult.CurrentValue,
 		}).Error
 		if err != nil {
@@ -726,12 +726,12 @@ func (a *adapter) CreateKeyResult(keyResult *model.KeyResult) (int64, error) {
 		}
 	}
 
-	return keyResult.Id, nil
+	return int64(keyResult.ID), nil
 }
 
 func (a *adapter) UpdateKeyResult(keyResult *model.KeyResult) error {
 	return a.db.Model(&model.KeyResult{}).
-		Where("`uid` = ? AND `topic` = ? AND sequence = ?", keyResult.Uid, keyResult.Topic, keyResult.Sequence).
+		Where("`uid` = ? AND `topic` = ? AND sequence = ?", keyResult.UID, keyResult.Topic, keyResult.Sequence).
 		UpdateColumns(map[string]interface{}{
 			"title":        keyResult.Title,
 			"memo":         keyResult.Memo,
@@ -796,7 +796,7 @@ func (a *adapter) CreateKeyResultValue(keyResultValue *model.KeyResultValue) (in
 	if err != nil {
 		return 0, err
 	}
-	return keyResultValue.Id, nil
+	return int64(keyResultValue.ID), nil
 }
 
 func (a *adapter) GetKeyResultValues(keyResultId int64) ([]*model.KeyResultValue, error) {
@@ -820,7 +820,7 @@ func (a *adapter) CreateTodo(todo *model.Todo) (int64, error) {
 	// sequence
 	sequence := int64(0)
 	var max model.Todo
-	err = a.db.Where("`uid` = ? AND `topic` = ?", todo.Uid, todo.Topic).Order("sequence DESC").Take(&max).Error
+	err = a.db.Where("`uid` = ? AND `topic` = ?", todo.UID, todo.Topic).Order("sequence DESC").Take(&max).Error
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return 0, err
 	}
@@ -834,7 +834,7 @@ func (a *adapter) CreateTodo(todo *model.Todo) (int64, error) {
 	if err != nil {
 		return 0, nil
 	}
-	return todo.Id, nil
+	return int64(todo.ID), nil
 }
 
 func (a *adapter) ListTodos(uid types.Uid, topic string) ([]*model.Todo, error) {
@@ -896,7 +896,7 @@ func (a *adapter) CompleteTodoBySequence(uid types.Uid, topic string, sequence i
 
 func (a *adapter) UpdateTodo(todo *model.Todo) error {
 	return a.db.Model(&model.Todo{}).
-		Where("`uid` = ? AND `topic` = ? AND sequence = ?", todo.Uid, todo.Topic, todo.Sequence).
+		Where("`uid` = ? AND `topic` = ? AND sequence = ?", todo.UID, todo.Topic, todo.Sequence).
 		UpdateColumns(map[string]interface{}{
 			"content":  todo.Content,
 			"category": todo.Category,
@@ -920,8 +920,8 @@ func (a *adapter) CreateCounter(counter *model.Counter) (int64, error) {
 	if err != nil {
 		return 0, nil
 	}
-	a.record(counter.Id, counter.Digit)
-	return counter.Id, nil
+	a.record(int64(counter.ID), counter.Digit)
+	return int64(counter.ID), nil
 }
 
 func (a *adapter) IncreaseCounter(id, amount int64) error {

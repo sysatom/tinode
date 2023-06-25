@@ -27,11 +27,11 @@ func newUrl(db *gorm.DB, opts ...gen.DOOption) url {
 
 	tableName := _url.urlDo.TableName()
 	_url.ALL = field.NewAsterisk(tableName)
-	_url.ID = field.NewUint64(tableName, "id")
+	_url.ID = field.NewInt32(tableName, "id")
 	_url.Flag = field.NewString(tableName, "flag")
-	_url.Url = field.NewString(tableName, "url")
-	_url.State = field.NewInt(tableName, "state")
-	_url.ViewCount = field.NewInt(tableName, "view_count")
+	_url.URL = field.NewString(tableName, "url")
+	_url.State = field.NewField(tableName, "state")
+	_url.ViewCount = field.NewInt32(tableName, "view_count")
 	_url.CreatedAt = field.NewTime(tableName, "created_at")
 	_url.UpdatedAt = field.NewTime(tableName, "updated_at")
 
@@ -44,11 +44,11 @@ type url struct {
 	urlDo
 
 	ALL       field.Asterisk
-	ID        field.Uint64
+	ID        field.Int32
 	Flag      field.String
-	Url       field.String
-	State     field.Int
-	ViewCount field.Int
+	URL       field.String
+	State     field.Field
+	ViewCount field.Int32
 	CreatedAt field.Time
 	UpdatedAt field.Time
 
@@ -67,11 +67,11 @@ func (u url) As(alias string) *url {
 
 func (u *url) updateTableName(table string) *url {
 	u.ALL = field.NewAsterisk(table)
-	u.ID = field.NewUint64(table, "id")
+	u.ID = field.NewInt32(table, "id")
 	u.Flag = field.NewString(table, "flag")
-	u.Url = field.NewString(table, "url")
-	u.State = field.NewInt(table, "state")
-	u.ViewCount = field.NewInt(table, "view_count")
+	u.URL = field.NewString(table, "url")
+	u.State = field.NewField(table, "state")
+	u.ViewCount = field.NewInt32(table, "view_count")
 	u.CreatedAt = field.NewTime(table, "created_at")
 	u.UpdatedAt = field.NewTime(table, "updated_at")
 
@@ -93,7 +93,7 @@ func (u *url) fillFieldMap() {
 	u.fieldMap = make(map[string]field.Expr, 7)
 	u.fieldMap["id"] = u.ID
 	u.fieldMap["flag"] = u.Flag
-	u.fieldMap["url"] = u.Url
+	u.fieldMap["url"] = u.URL
 	u.fieldMap["state"] = u.State
 	u.fieldMap["view_count"] = u.ViewCount
 	u.fieldMap["created_at"] = u.CreatedAt

@@ -127,7 +127,7 @@ func (b bot) Input(ctx types.Context, _ map[string]interface{}, content interfac
 			if detail == "" {
 				detail = string(v.Raw)
 			}
-			row = append(row, []interface{}{fmt.Sprintf("%s (%s)", topic, v.Topic), v.SeqId, detail, v.CreatedAt})
+			row = append(row, []interface{}{fmt.Sprintf("%s (%s)", topic, v.Topic), v.Seqid, detail, v.Createdat})
 		}
 	}
 	if len(row) == 0 {

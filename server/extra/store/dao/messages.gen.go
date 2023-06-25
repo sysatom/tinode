@@ -27,18 +27,16 @@ func newMessage(db *gorm.DB, opts ...gen.DOOption) message {
 
 	tableName := _message.messageDo.TableName()
 	_message.ALL = field.NewAsterisk(tableName)
-	_message.ID = field.NewUint64(tableName, "id")
-	_message.DelId = field.NewInt(tableName, "delid")
-	_message.SeqId = field.NewInt(tableName, "seqid")
+	_message.ID = field.NewInt32(tableName, "id")
+	_message.Createdat = field.NewTime(tableName, "createdat")
+	_message.Updatedat = field.NewTime(tableName, "updatedat")
+	_message.Deletedat = field.NewTime(tableName, "deletedat")
+	_message.Delid = field.NewInt32(tableName, "delid")
+	_message.Seqid = field.NewInt32(tableName, "seqid")
 	_message.Topic = field.NewString(tableName, "topic")
-	_message.From = field.NewUint64(tableName, "from")
+	_message.From = field.NewInt64(tableName, "from")
 	_message.Head = field.NewField(tableName, "head")
 	_message.Content = field.NewField(tableName, "content")
-	_message.CreatedAt = field.NewTime(tableName, "createdat")
-	_message.UpdatedAt = field.NewTime(tableName, "updatedat")
-	_message.DeletedAt = field.NewTime(tableName, "deletedat")
-	_message.Txt = field.NewString(tableName, "txt")
-	_message.Raw = field.NewBytes(tableName, "raw")
 
 	_message.fillFieldMap()
 
@@ -49,18 +47,16 @@ type message struct {
 	messageDo
 
 	ALL       field.Asterisk
-	ID        field.Uint64
-	DelId     field.Int
-	SeqId     field.Int
+	ID        field.Int32
+	Createdat field.Time
+	Updatedat field.Time
+	Deletedat field.Time
+	Delid     field.Int32
+	Seqid     field.Int32
 	Topic     field.String
-	From      field.Uint64
+	From      field.Int64
 	Head      field.Field
 	Content   field.Field
-	CreatedAt field.Time
-	UpdatedAt field.Time
-	DeletedAt field.Time
-	Txt       field.String
-	Raw       field.Bytes
 
 	fieldMap map[string]field.Expr
 }
@@ -77,18 +73,16 @@ func (m message) As(alias string) *message {
 
 func (m *message) updateTableName(table string) *message {
 	m.ALL = field.NewAsterisk(table)
-	m.ID = field.NewUint64(table, "id")
-	m.DelId = field.NewInt(table, "delid")
-	m.SeqId = field.NewInt(table, "seqid")
+	m.ID = field.NewInt32(table, "id")
+	m.Createdat = field.NewTime(table, "createdat")
+	m.Updatedat = field.NewTime(table, "updatedat")
+	m.Deletedat = field.NewTime(table, "deletedat")
+	m.Delid = field.NewInt32(table, "delid")
+	m.Seqid = field.NewInt32(table, "seqid")
 	m.Topic = field.NewString(table, "topic")
-	m.From = field.NewUint64(table, "from")
+	m.From = field.NewInt64(table, "from")
 	m.Head = field.NewField(table, "head")
 	m.Content = field.NewField(table, "content")
-	m.CreatedAt = field.NewTime(table, "createdat")
-	m.UpdatedAt = field.NewTime(table, "updatedat")
-	m.DeletedAt = field.NewTime(table, "deletedat")
-	m.Txt = field.NewString(table, "txt")
-	m.Raw = field.NewBytes(table, "raw")
 
 	m.fillFieldMap()
 
@@ -107,17 +101,16 @@ func (m *message) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 func (m *message) fillFieldMap() {
 	m.fieldMap = make(map[string]field.Expr, 12)
 	m.fieldMap["id"] = m.ID
-	m.fieldMap["delid"] = m.DelId
-	m.fieldMap["seqid"] = m.SeqId
+	m.fieldMap["createdat"] = m.Createdat
+	m.fieldMap["updatedat"] = m.Updatedat
+	m.fieldMap["deletedat"] = m.Deletedat
+	m.fieldMap["delid"] = m.Delid
+	m.fieldMap["seqid"] = m.Seqid
 	m.fieldMap["topic"] = m.Topic
 	m.fieldMap["from"] = m.From
 	m.fieldMap["head"] = m.Head
 	m.fieldMap["content"] = m.Content
-	m.fieldMap["createdat"] = m.CreatedAt
-	m.fieldMap["updatedat"] = m.UpdatedAt
-	m.fieldMap["deletedat"] = m.DeletedAt
-	m.fieldMap["txt"] = m.Txt
-	m.fieldMap["raw"] = m.Raw
+
 }
 
 func (m message) clone(db *gorm.DB) message {

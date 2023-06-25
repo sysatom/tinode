@@ -27,17 +27,17 @@ func newCredential(db *gorm.DB, opts ...gen.DOOption) credential {
 
 	tableName := _credential.credentialDo.TableName()
 	_credential.ALL = field.NewAsterisk(tableName)
-	_credential.ID = field.NewUint64(tableName, "id")
-	_credential.UserId = field.NewInt64(tableName, "userid")
+	_credential.ID = field.NewInt32(tableName, "id")
+	_credential.Createdat = field.NewTime(tableName, "createdat")
+	_credential.Updatedat = field.NewTime(tableName, "updatedat")
+	_credential.Deletedat = field.NewTime(tableName, "deletedat")
 	_credential.Method = field.NewString(tableName, "method")
 	_credential.Value = field.NewString(tableName, "value")
 	_credential.Synthetic = field.NewString(tableName, "synthetic")
+	_credential.Userid = field.NewInt64(tableName, "userid")
 	_credential.Resp = field.NewString(tableName, "resp")
-	_credential.Done = field.NewBool(tableName, "done")
-	_credential.Retries = field.NewInt(tableName, "retries")
-	_credential.CreatedAt = field.NewTime(tableName, "createdat")
-	_credential.UpdatedAt = field.NewTime(tableName, "updatedat")
-	_credential.DeletedAt = field.NewTime(tableName, "deletedat")
+	_credential.Done = field.NewInt32(tableName, "done")
+	_credential.Retries = field.NewInt32(tableName, "retries")
 
 	_credential.fillFieldMap()
 
@@ -48,17 +48,17 @@ type credential struct {
 	credentialDo
 
 	ALL       field.Asterisk
-	ID        field.Uint64
-	UserId    field.Int64
+	ID        field.Int32
+	Createdat field.Time
+	Updatedat field.Time
+	Deletedat field.Time
 	Method    field.String
 	Value     field.String
 	Synthetic field.String
+	Userid    field.Int64
 	Resp      field.String
-	Done      field.Bool
-	Retries   field.Int
-	CreatedAt field.Time
-	UpdatedAt field.Time
-	DeletedAt field.Time
+	Done      field.Int32
+	Retries   field.Int32
 
 	fieldMap map[string]field.Expr
 }
@@ -75,17 +75,17 @@ func (c credential) As(alias string) *credential {
 
 func (c *credential) updateTableName(table string) *credential {
 	c.ALL = field.NewAsterisk(table)
-	c.ID = field.NewUint64(table, "id")
-	c.UserId = field.NewInt64(table, "userid")
+	c.ID = field.NewInt32(table, "id")
+	c.Createdat = field.NewTime(table, "createdat")
+	c.Updatedat = field.NewTime(table, "updatedat")
+	c.Deletedat = field.NewTime(table, "deletedat")
 	c.Method = field.NewString(table, "method")
 	c.Value = field.NewString(table, "value")
 	c.Synthetic = field.NewString(table, "synthetic")
+	c.Userid = field.NewInt64(table, "userid")
 	c.Resp = field.NewString(table, "resp")
-	c.Done = field.NewBool(table, "done")
-	c.Retries = field.NewInt(table, "retries")
-	c.CreatedAt = field.NewTime(table, "createdat")
-	c.UpdatedAt = field.NewTime(table, "updatedat")
-	c.DeletedAt = field.NewTime(table, "deletedat")
+	c.Done = field.NewInt32(table, "done")
+	c.Retries = field.NewInt32(table, "retries")
 
 	c.fillFieldMap()
 
@@ -104,16 +104,16 @@ func (c *credential) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 func (c *credential) fillFieldMap() {
 	c.fieldMap = make(map[string]field.Expr, 11)
 	c.fieldMap["id"] = c.ID
-	c.fieldMap["userid"] = c.UserId
+	c.fieldMap["createdat"] = c.Createdat
+	c.fieldMap["updatedat"] = c.Updatedat
+	c.fieldMap["deletedat"] = c.Deletedat
 	c.fieldMap["method"] = c.Method
 	c.fieldMap["value"] = c.Value
 	c.fieldMap["synthetic"] = c.Synthetic
+	c.fieldMap["userid"] = c.Userid
 	c.fieldMap["resp"] = c.Resp
 	c.fieldMap["done"] = c.Done
 	c.fieldMap["retries"] = c.Retries
-	c.fieldMap["createdat"] = c.CreatedAt
-	c.fieldMap["updatedat"] = c.UpdatedAt
-	c.fieldMap["deletedat"] = c.DeletedAt
 }
 
 func (c credential) clone(db *gorm.DB) credential {

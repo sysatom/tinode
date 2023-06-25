@@ -70,7 +70,7 @@ func (b bot) Input(_ types.Context, _ map[string]interface{}, content interface{
 		flag := strings.ToLower(types.Id().String())
 		err = store.Chatbot.UrlCreate(model.Url{
 			Flag:  flag,
-			Url:   text,
+			URL:   text,
 			State: model.UrlStateEnable,
 		})
 		if err != nil {
@@ -83,7 +83,7 @@ func (b bot) Input(_ types.Context, _ map[string]interface{}, content interface{
 			return types.TextMsg{Text: "query url error"}, nil
 		}
 		if url.ID > 0 {
-			return types.LinkMsg{Url: url.Url}, nil
+			return types.LinkMsg{Url: url.URL}, nil
 		}
 		return types.TextMsg{Text: "empty"}, nil
 	}

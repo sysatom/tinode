@@ -27,8 +27,8 @@ func newCounter(db *gorm.DB, opts ...gen.DOOption) counter {
 
 	tableName := _counter.counterDo.TableName()
 	_counter.ALL = field.NewAsterisk(tableName)
-	_counter.Id = field.NewInt64(tableName, "id")
-	_counter.Uid = field.NewString(tableName, "uid")
+	_counter.ID = field.NewInt32(tableName, "id")
+	_counter.UID = field.NewString(tableName, "uid")
 	_counter.Topic = field.NewString(tableName, "topic")
 	_counter.Flag = field.NewString(tableName, "flag")
 	_counter.Digit = field.NewInt64(tableName, "digit")
@@ -45,8 +45,8 @@ type counter struct {
 	counterDo
 
 	ALL       field.Asterisk
-	Id        field.Int64
-	Uid       field.String
+	ID        field.Int32
+	UID       field.String
 	Topic     field.String
 	Flag      field.String
 	Digit     field.Int64
@@ -69,8 +69,8 @@ func (c counter) As(alias string) *counter {
 
 func (c *counter) updateTableName(table string) *counter {
 	c.ALL = field.NewAsterisk(table)
-	c.Id = field.NewInt64(table, "id")
-	c.Uid = field.NewString(table, "uid")
+	c.ID = field.NewInt32(table, "id")
+	c.UID = field.NewString(table, "uid")
 	c.Topic = field.NewString(table, "topic")
 	c.Flag = field.NewString(table, "flag")
 	c.Digit = field.NewInt64(table, "digit")
@@ -94,8 +94,8 @@ func (c *counter) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 
 func (c *counter) fillFieldMap() {
 	c.fieldMap = make(map[string]field.Expr, 8)
-	c.fieldMap["id"] = c.Id
-	c.fieldMap["uid"] = c.Uid
+	c.fieldMap["id"] = c.ID
+	c.fieldMap["uid"] = c.UID
 	c.fieldMap["topic"] = c.Topic
 	c.fieldMap["flag"] = c.Flag
 	c.fieldMap["digit"] = c.Digit

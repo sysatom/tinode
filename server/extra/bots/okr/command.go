@@ -59,7 +59,7 @@ var commandRules = []command.Rule{
 				return nil
 			}
 
-			keyResult, err := store.Chatbot.ListKeyResultsByObjectiveId(objective.Id)
+			keyResult, err := store.Chatbot.ListKeyResultsByObjectiveId(int64(objective.ID))
 			if err != nil {
 				logs.Err.Println(err)
 				return nil
@@ -400,7 +400,7 @@ var commandRules = []command.Rule{
 				return nil
 			}
 
-			items, err := store.Chatbot.GetKeyResultValues(keyResult.Id)
+			items, err := store.Chatbot.GetKeyResultValues(int64(keyResult.ID))
 			if err != nil {
 				logs.Err.Println(err)
 				return nil
@@ -581,7 +581,7 @@ var commandRules = []command.Rule{
 				return nil
 			}
 
-			if item.Id > 0 {
+			if item.ID > 0 {
 				return types.DigitMsg{
 					Title: item.Flag,
 					Digit: int(item.Digit),
@@ -589,7 +589,7 @@ var commandRules = []command.Rule{
 			}
 
 			_, err = store.Chatbot.CreateCounter(&model.Counter{
-				Uid:    ctx.AsUser.UserId(),
+				UID:    ctx.AsUser.UserId(),
 				Topic:  ctx.Original,
 				Flag:   flag,
 				Digit:  1,
@@ -616,7 +616,7 @@ var commandRules = []command.Rule{
 				return nil
 			}
 
-			err = store.Chatbot.IncreaseCounter(item.Id, 1)
+			err = store.Chatbot.IncreaseCounter(int64(item.ID), 1)
 			if err != nil {
 				return nil
 			}
@@ -635,7 +635,7 @@ var commandRules = []command.Rule{
 				return nil
 			}
 
-			err = store.Chatbot.DecreaseCounter(item.Id, 1)
+			err = store.Chatbot.DecreaseCounter(int64(item.ID), 1)
 			if err != nil {
 				return nil
 			}
@@ -654,7 +654,7 @@ var commandRules = []command.Rule{
 				return nil
 			}
 
-			err = store.Chatbot.IncreaseCounter(item.Id, 1-item.Digit)
+			err = store.Chatbot.IncreaseCounter(int64(item.ID), 1-item.Digit)
 			if err != nil {
 				return nil
 			}

@@ -27,13 +27,13 @@ func newPage(db *gorm.DB, opts ...gen.DOOption) page {
 
 	tableName := _page.pageDo.TableName()
 	_page.ALL = field.NewAsterisk(tableName)
-	_page.ID = field.NewUint64(tableName, "id")
-	_page.PageId = field.NewString(tableName, "page_id")
-	_page.Uid = field.NewString(tableName, "uid")
+	_page.ID = field.NewInt32(tableName, "id")
+	_page.PageID = field.NewString(tableName, "page_id")
+	_page.UID = field.NewString(tableName, "uid")
 	_page.Topic = field.NewString(tableName, "topic")
-	_page.Type = field.NewString(tableName, "type")
+	_page.Type = field.NewField(tableName, "type")
 	_page.Schema = field.NewField(tableName, "schema")
-	_page.State = field.NewInt(tableName, "state")
+	_page.State = field.NewField(tableName, "state")
 	_page.CreatedAt = field.NewTime(tableName, "created_at")
 	_page.UpdatedAt = field.NewTime(tableName, "updated_at")
 
@@ -46,13 +46,13 @@ type page struct {
 	pageDo
 
 	ALL       field.Asterisk
-	ID        field.Uint64
-	PageId    field.String
-	Uid       field.String
+	ID        field.Int32
+	PageID    field.String
+	UID       field.String
 	Topic     field.String
-	Type      field.String
+	Type      field.Field
 	Schema    field.Field
-	State     field.Int
+	State     field.Field
 	CreatedAt field.Time
 	UpdatedAt field.Time
 
@@ -71,13 +71,13 @@ func (p page) As(alias string) *page {
 
 func (p *page) updateTableName(table string) *page {
 	p.ALL = field.NewAsterisk(table)
-	p.ID = field.NewUint64(table, "id")
-	p.PageId = field.NewString(table, "page_id")
-	p.Uid = field.NewString(table, "uid")
+	p.ID = field.NewInt32(table, "id")
+	p.PageID = field.NewString(table, "page_id")
+	p.UID = field.NewString(table, "uid")
 	p.Topic = field.NewString(table, "topic")
-	p.Type = field.NewString(table, "type")
+	p.Type = field.NewField(table, "type")
 	p.Schema = field.NewField(table, "schema")
-	p.State = field.NewInt(table, "state")
+	p.State = field.NewField(table, "state")
 	p.CreatedAt = field.NewTime(table, "created_at")
 	p.UpdatedAt = field.NewTime(table, "updated_at")
 
@@ -98,8 +98,8 @@ func (p *page) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 func (p *page) fillFieldMap() {
 	p.fieldMap = make(map[string]field.Expr, 9)
 	p.fieldMap["id"] = p.ID
-	p.fieldMap["page_id"] = p.PageId
-	p.fieldMap["uid"] = p.Uid
+	p.fieldMap["page_id"] = p.PageID
+	p.fieldMap["uid"] = p.UID
 	p.fieldMap["topic"] = p.Topic
 	p.fieldMap["type"] = p.Type
 	p.fieldMap["schema"] = p.Schema

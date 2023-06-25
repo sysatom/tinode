@@ -27,15 +27,15 @@ func newWorkflow(db *gorm.DB, opts ...gen.DOOption) workflow {
 
 	tableName := _workflow.workflowDo.TableName()
 	_workflow.ALL = field.NewAsterisk(tableName)
-	_workflow.ID = field.NewUint64(tableName, "id")
-	_workflow.Uid = field.NewString(tableName, "uid")
+	_workflow.ID = field.NewInt32(tableName, "id")
+	_workflow.UID = field.NewString(tableName, "uid")
 	_workflow.Topic = field.NewString(tableName, "topic")
 	_workflow.Flag = field.NewString(tableName, "flag")
-	_workflow.RuleId = field.NewString(tableName, "rule_id")
-	_workflow.Version = field.NewInt(tableName, "version")
-	_workflow.Step = field.NewInt(tableName, "step")
+	_workflow.RuleID = field.NewString(tableName, "rule_id")
+	_workflow.Version = field.NewInt32(tableName, "version")
+	_workflow.Step = field.NewInt32(tableName, "step")
 	_workflow.Values = field.NewField(tableName, "values")
-	_workflow.State = field.NewInt(tableName, "state")
+	_workflow.State = field.NewField(tableName, "state")
 	_workflow.CreatedAt = field.NewTime(tableName, "created_at")
 	_workflow.UpdatedAt = field.NewTime(tableName, "updated_at")
 
@@ -48,15 +48,15 @@ type workflow struct {
 	workflowDo
 
 	ALL       field.Asterisk
-	ID        field.Uint64
-	Uid       field.String
+	ID        field.Int32
+	UID       field.String
 	Topic     field.String
 	Flag      field.String
-	RuleId    field.String
-	Version   field.Int
-	Step      field.Int
+	RuleID    field.String
+	Version   field.Int32
+	Step      field.Int32
 	Values    field.Field
-	State     field.Int
+	State     field.Field
 	CreatedAt field.Time
 	UpdatedAt field.Time
 
@@ -75,15 +75,15 @@ func (w workflow) As(alias string) *workflow {
 
 func (w *workflow) updateTableName(table string) *workflow {
 	w.ALL = field.NewAsterisk(table)
-	w.ID = field.NewUint64(table, "id")
-	w.Uid = field.NewString(table, "uid")
+	w.ID = field.NewInt32(table, "id")
+	w.UID = field.NewString(table, "uid")
 	w.Topic = field.NewString(table, "topic")
 	w.Flag = field.NewString(table, "flag")
-	w.RuleId = field.NewString(table, "rule_id")
-	w.Version = field.NewInt(table, "version")
-	w.Step = field.NewInt(table, "step")
+	w.RuleID = field.NewString(table, "rule_id")
+	w.Version = field.NewInt32(table, "version")
+	w.Step = field.NewInt32(table, "step")
 	w.Values = field.NewField(table, "values")
-	w.State = field.NewInt(table, "state")
+	w.State = field.NewField(table, "state")
 	w.CreatedAt = field.NewTime(table, "created_at")
 	w.UpdatedAt = field.NewTime(table, "updated_at")
 
@@ -104,10 +104,10 @@ func (w *workflow) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 func (w *workflow) fillFieldMap() {
 	w.fieldMap = make(map[string]field.Expr, 11)
 	w.fieldMap["id"] = w.ID
-	w.fieldMap["uid"] = w.Uid
+	w.fieldMap["uid"] = w.UID
 	w.fieldMap["topic"] = w.Topic
 	w.fieldMap["flag"] = w.Flag
-	w.fieldMap["rule_id"] = w.RuleId
+	w.fieldMap["rule_id"] = w.RuleID
 	w.fieldMap["version"] = w.Version
 	w.fieldMap["step"] = w.Step
 	w.fieldMap["values"] = w.Values

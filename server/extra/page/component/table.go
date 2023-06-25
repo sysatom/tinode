@@ -20,10 +20,10 @@ func (c *Table) Render() app.UI {
 	switch c.Page.State {
 	case model.PageStateProcessedSuccess:
 		alert = app.Div().Class("uk-alert-success").Body(
-			app.P().Style("padding", "20px").Text(fmt.Sprintf("Table [%s] processed success, %s", c.Page.PageId, c.Page.UpdatedAt)))
+			app.P().Style("padding", "20px").Text(fmt.Sprintf("Table [%s] processed success, %s", c.Page.PageID, c.Page.UpdatedAt)))
 	case model.PageStateProcessedFailed:
 		alert = app.Div().Class("uk-alert-danger").Body(
-			app.P().Style("padding", "20px").Text(fmt.Sprintf("Table [%s] processed failed, %s", c.Page.PageId, c.Page.UpdatedAt)))
+			app.P().Style("padding", "20px").Text(fmt.Sprintf("Table [%s] processed failed, %s", c.Page.PageID, c.Page.UpdatedAt)))
 	}
 
 	return app.Div().Body(

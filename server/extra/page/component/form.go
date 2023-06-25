@@ -21,16 +21,16 @@ func (c *Form) Render() app.UI {
 	switch c.Page.State {
 	case model.PageStateProcessedSuccess:
 		alert = app.Div().Class("uk-alert-success").Body(
-			app.P().Style("padding", "20px").Text(fmt.Sprintf("Form [%s] processed success, %s", c.Page.PageId, c.Page.UpdatedAt)))
+			app.P().Style("padding", "20px").Text(fmt.Sprintf("Form [%s] processed success, %s", c.Page.PageID, c.Page.UpdatedAt)))
 	case model.PageStateProcessedFailed:
 		alert = app.Div().Class("uk-alert-danger").Body(
-			app.P().Style("padding", "20px").Text(fmt.Sprintf("Form [%s] processed failed, %s", c.Page.PageId, c.Page.UpdatedAt)))
+			app.P().Style("padding", "20px").Text(fmt.Sprintf("Form [%s] processed failed, %s", c.Page.PageID, c.Page.UpdatedAt)))
 	}
 
 	// hidden
 	fields = append(fields, app.Input().Hidden(true).Type("text").Name("x-csrf-token").Value(types.Id()))
-	fields = append(fields, app.Input().Hidden(true).Type("text").Name("x-form_id").Value(c.Page.PageId))
-	fields = append(fields, app.Input().Hidden(true).Type("text").Name("x-uid").Value(c.Page.Uid))
+	fields = append(fields, app.Input().Hidden(true).Type("text").Name("x-form_id").Value(c.Page.PageID))
+	fields = append(fields, app.Input().Hidden(true).Type("text").Name("x-uid").Value(c.Page.UID))
 	fields = append(fields, app.Input().Hidden(true).Type("text").Name("x-topic").Value(c.Page.Topic))
 	for _, field := range c.Schema.Field {
 		if field.Hidden {

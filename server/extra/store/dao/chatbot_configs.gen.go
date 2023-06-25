@@ -27,8 +27,8 @@ func newConfig(db *gorm.DB, opts ...gen.DOOption) config {
 
 	tableName := _config.configDo.TableName()
 	_config.ALL = field.NewAsterisk(tableName)
-	_config.ID = field.NewUint(tableName, "id")
-	_config.Uid = field.NewString(tableName, "uid")
+	_config.ID = field.NewInt32(tableName, "id")
+	_config.UID = field.NewString(tableName, "uid")
 	_config.Topic = field.NewString(tableName, "topic")
 	_config.Key = field.NewString(tableName, "key")
 	_config.Value = field.NewField(tableName, "value")
@@ -44,8 +44,8 @@ type config struct {
 	configDo
 
 	ALL       field.Asterisk
-	ID        field.Uint
-	Uid       field.String
+	ID        field.Int32
+	UID       field.String
 	Topic     field.String
 	Key       field.String
 	Value     field.Field
@@ -67,8 +67,8 @@ func (c config) As(alias string) *config {
 
 func (c *config) updateTableName(table string) *config {
 	c.ALL = field.NewAsterisk(table)
-	c.ID = field.NewUint(table, "id")
-	c.Uid = field.NewString(table, "uid")
+	c.ID = field.NewInt32(table, "id")
+	c.UID = field.NewString(table, "uid")
 	c.Topic = field.NewString(table, "topic")
 	c.Key = field.NewString(table, "key")
 	c.Value = field.NewField(table, "value")
@@ -92,7 +92,7 @@ func (c *config) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 func (c *config) fillFieldMap() {
 	c.fieldMap = make(map[string]field.Expr, 7)
 	c.fieldMap["id"] = c.ID
-	c.fieldMap["uid"] = c.Uid
+	c.fieldMap["uid"] = c.UID
 	c.fieldMap["topic"] = c.Topic
 	c.fieldMap["key"] = c.Key
 	c.fieldMap["value"] = c.Value

@@ -87,7 +87,7 @@ func storeOAuth(rw http.ResponseWriter, req *http.Request) {
 	extra := model.JSON{}
 	_ = extra.Scan(tk["extra"])
 	err = extraStore.Chatbot.OAuthSet(model.OAuth{
-		Uid:   types.Uid(ui1).UserId(),
+		UID:   types.Uid(ui1).UserId(),
 		Topic: types.Uid(ui2).UserId(),
 		Name:  category,
 		Type:  category,
@@ -117,7 +117,7 @@ func getPage(rw http.ResponseWriter, req *http.Request) {
 	var comp app.UI
 	switch p.Type {
 	case model.PageForm:
-		f, _ := extraStore.Chatbot.FormGet(p.PageId)
+		f, _ := extraStore.Chatbot.FormGet(p.PageID)
 		comp = page.RenderForm(p, f)
 	case model.PageOkr:
 		comp = page.RenderOkr(p)
@@ -241,7 +241,7 @@ func postForm(rw http.ResponseWriter, req *http.Request) {
 		Original:   topicUid.UserId(),
 		RcptTo:     topic,
 		AsUser:     types.ParseUserId(uid),
-		FormId:     formData.FormId,
+		FormId:     formData.FormID,
 		FormRuleId: formMsg.ID,
 	}
 
@@ -569,7 +569,7 @@ func urlRedirect(rw http.ResponseWriter, req *http.Request) {
 	_ = extraStore.Chatbot.UrlViewIncrease(flag)
 
 	// redirect
-	http.Redirect(rw, req, url.Url, http.StatusFound)
+	http.Redirect(rw, req, url.URL, http.StatusFound)
 	return
 }
 

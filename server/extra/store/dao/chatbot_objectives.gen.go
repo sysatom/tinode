@@ -27,21 +27,22 @@ func newObjective(db *gorm.DB, opts ...gen.DOOption) objective {
 
 	tableName := _objective.objectiveDo.TableName()
 	_objective.ALL = field.NewAsterisk(tableName)
-	_objective.Id = field.NewInt64(tableName, "id")
-	_objective.Uid = field.NewString(tableName, "uid")
+	_objective.ID = field.NewInt32(tableName, "id")
+	_objective.UID = field.NewString(tableName, "uid")
 	_objective.Topic = field.NewString(tableName, "topic")
 	_objective.Sequence = field.NewInt64(tableName, "sequence")
 	_objective.Title = field.NewString(tableName, "title")
 	_objective.Memo = field.NewString(tableName, "memo")
 	_objective.Motive = field.NewString(tableName, "motive")
 	_objective.Feasibility = field.NewString(tableName, "feasibility")
-	_objective.IsPlan = field.NewBool(tableName, "is_plan")
+	_objective.IsPlan = field.NewInt32(tableName, "is_plan")
 	_objective.PlanStart = field.NewInt64(tableName, "plan_start")
 	_objective.PlanEnd = field.NewInt64(tableName, "plan_end")
 	_objective.TotalValue = field.NewInt32(tableName, "total_value")
 	_objective.CurrentValue = field.NewInt32(tableName, "current_value")
-	_objective.CreatedAt = field.NewTime(tableName, "created_at")
-	_objective.UpdatedAt = field.NewTime(tableName, "updated_at")
+	_objective.Tag = field.NewString(tableName, "tag")
+	_objective.CreatedData = field.NewTime(tableName, "created_data")
+	_objective.UpdatedDate = field.NewTime(tableName, "updated_date")
 
 	_objective.fillFieldMap()
 
@@ -52,21 +53,22 @@ type objective struct {
 	objectiveDo
 
 	ALL          field.Asterisk
-	Id           field.Int64
-	Uid          field.String
+	ID           field.Int32
+	UID          field.String
 	Topic        field.String
 	Sequence     field.Int64
 	Title        field.String
 	Memo         field.String
 	Motive       field.String
 	Feasibility  field.String
-	IsPlan       field.Bool
+	IsPlan       field.Int32
 	PlanStart    field.Int64
 	PlanEnd      field.Int64
 	TotalValue   field.Int32
 	CurrentValue field.Int32
-	CreatedAt    field.Time
-	UpdatedAt    field.Time
+	Tag          field.String
+	CreatedData  field.Time
+	UpdatedDate  field.Time
 
 	fieldMap map[string]field.Expr
 }
@@ -83,21 +85,22 @@ func (o objective) As(alias string) *objective {
 
 func (o *objective) updateTableName(table string) *objective {
 	o.ALL = field.NewAsterisk(table)
-	o.Id = field.NewInt64(table, "id")
-	o.Uid = field.NewString(table, "uid")
+	o.ID = field.NewInt32(table, "id")
+	o.UID = field.NewString(table, "uid")
 	o.Topic = field.NewString(table, "topic")
 	o.Sequence = field.NewInt64(table, "sequence")
 	o.Title = field.NewString(table, "title")
 	o.Memo = field.NewString(table, "memo")
 	o.Motive = field.NewString(table, "motive")
 	o.Feasibility = field.NewString(table, "feasibility")
-	o.IsPlan = field.NewBool(table, "is_plan")
+	o.IsPlan = field.NewInt32(table, "is_plan")
 	o.PlanStart = field.NewInt64(table, "plan_start")
 	o.PlanEnd = field.NewInt64(table, "plan_end")
 	o.TotalValue = field.NewInt32(table, "total_value")
 	o.CurrentValue = field.NewInt32(table, "current_value")
-	o.CreatedAt = field.NewTime(table, "created_at")
-	o.UpdatedAt = field.NewTime(table, "updated_at")
+	o.Tag = field.NewString(table, "tag")
+	o.CreatedData = field.NewTime(table, "created_data")
+	o.UpdatedDate = field.NewTime(table, "updated_date")
 
 	o.fillFieldMap()
 
@@ -114,9 +117,9 @@ func (o *objective) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (o *objective) fillFieldMap() {
-	o.fieldMap = make(map[string]field.Expr, 15)
-	o.fieldMap["id"] = o.Id
-	o.fieldMap["uid"] = o.Uid
+	o.fieldMap = make(map[string]field.Expr, 16)
+	o.fieldMap["id"] = o.ID
+	o.fieldMap["uid"] = o.UID
 	o.fieldMap["topic"] = o.Topic
 	o.fieldMap["sequence"] = o.Sequence
 	o.fieldMap["title"] = o.Title
@@ -128,8 +131,9 @@ func (o *objective) fillFieldMap() {
 	o.fieldMap["plan_end"] = o.PlanEnd
 	o.fieldMap["total_value"] = o.TotalValue
 	o.fieldMap["current_value"] = o.CurrentValue
-	o.fieldMap["created_at"] = o.CreatedAt
-	o.fieldMap["updated_at"] = o.UpdatedAt
+	o.fieldMap["tag"] = o.Tag
+	o.fieldMap["created_data"] = o.CreatedData
+	o.fieldMap["updated_date"] = o.UpdatedDate
 }
 
 func (o objective) clone(db *gorm.DB) objective {

@@ -27,15 +27,15 @@ func newInstruct(db *gorm.DB, opts ...gen.DOOption) instruct {
 
 	tableName := _instruct.instructDo.TableName()
 	_instruct.ALL = field.NewAsterisk(tableName)
-	_instruct.ID = field.NewInt(tableName, "id")
+	_instruct.ID = field.NewInt32(tableName, "id")
 	_instruct.No = field.NewString(tableName, "no")
-	_instruct.Uid = field.NewString(tableName, "uid")
-	_instruct.Object = field.NewString(tableName, "object")
+	_instruct.UID = field.NewString(tableName, "uid")
+	_instruct.Object = field.NewField(tableName, "object")
 	_instruct.Bot = field.NewString(tableName, "bot")
 	_instruct.Flag = field.NewString(tableName, "flag")
 	_instruct.Content = field.NewField(tableName, "content")
-	_instruct.Priority = field.NewInt(tableName, "priority")
-	_instruct.State = field.NewInt(tableName, "state")
+	_instruct.Priority = field.NewField(tableName, "priority")
+	_instruct.State = field.NewField(tableName, "state")
 	_instruct.ExpireAt = field.NewTime(tableName, "expire_at")
 	_instruct.CreatedAt = field.NewTime(tableName, "created_at")
 	_instruct.UpdatedAt = field.NewTime(tableName, "updated_at")
@@ -49,15 +49,15 @@ type instruct struct {
 	instructDo
 
 	ALL       field.Asterisk
-	ID        field.Int
+	ID        field.Int32
 	No        field.String
-	Uid       field.String
-	Object    field.String
+	UID       field.String
+	Object    field.Field
 	Bot       field.String
 	Flag      field.String
 	Content   field.Field
-	Priority  field.Int
-	State     field.Int
+	Priority  field.Field
+	State     field.Field
 	ExpireAt  field.Time
 	CreatedAt field.Time
 	UpdatedAt field.Time
@@ -77,15 +77,15 @@ func (i instruct) As(alias string) *instruct {
 
 func (i *instruct) updateTableName(table string) *instruct {
 	i.ALL = field.NewAsterisk(table)
-	i.ID = field.NewInt(table, "id")
+	i.ID = field.NewInt32(table, "id")
 	i.No = field.NewString(table, "no")
-	i.Uid = field.NewString(table, "uid")
-	i.Object = field.NewString(table, "object")
+	i.UID = field.NewString(table, "uid")
+	i.Object = field.NewField(table, "object")
 	i.Bot = field.NewString(table, "bot")
 	i.Flag = field.NewString(table, "flag")
 	i.Content = field.NewField(table, "content")
-	i.Priority = field.NewInt(table, "priority")
-	i.State = field.NewInt(table, "state")
+	i.Priority = field.NewField(table, "priority")
+	i.State = field.NewField(table, "state")
 	i.ExpireAt = field.NewTime(table, "expire_at")
 	i.CreatedAt = field.NewTime(table, "created_at")
 	i.UpdatedAt = field.NewTime(table, "updated_at")
@@ -108,7 +108,7 @@ func (i *instruct) fillFieldMap() {
 	i.fieldMap = make(map[string]field.Expr, 12)
 	i.fieldMap["id"] = i.ID
 	i.fieldMap["no"] = i.No
-	i.fieldMap["uid"] = i.Uid
+	i.fieldMap["uid"] = i.UID
 	i.fieldMap["object"] = i.Object
 	i.fieldMap["bot"] = i.Bot
 	i.fieldMap["flag"] = i.Flag

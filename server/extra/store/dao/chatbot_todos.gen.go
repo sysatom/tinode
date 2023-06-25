@@ -27,20 +27,20 @@ func newTodo(db *gorm.DB, opts ...gen.DOOption) todo {
 
 	tableName := _todo.todoDo.TableName()
 	_todo.ALL = field.NewAsterisk(tableName)
-	_todo.Id = field.NewInt64(tableName, "id")
-	_todo.Uid = field.NewString(tableName, "uid")
+	_todo.ID = field.NewInt32(tableName, "id")
+	_todo.UID = field.NewString(tableName, "uid")
 	_todo.Topic = field.NewString(tableName, "topic")
 	_todo.Sequence = field.NewInt64(tableName, "sequence")
 	_todo.Content = field.NewString(tableName, "content")
 	_todo.Category = field.NewString(tableName, "category")
 	_todo.Remark = field.NewString(tableName, "remark")
 	_todo.Priority = field.NewInt64(tableName, "priority")
-	_todo.IsRemindAtTime = field.NewBool(tableName, "is_remind_at_time")
+	_todo.IsRemindAtTime = field.NewInt32(tableName, "is_remind_at_time")
 	_todo.RemindAt = field.NewInt64(tableName, "remind_at")
 	_todo.RepeatMethod = field.NewString(tableName, "repeat_method")
 	_todo.RepeatRule = field.NewString(tableName, "repeat_rule")
 	_todo.RepeatEndAt = field.NewInt64(tableName, "repeat_end_at")
-	_todo.Complete = field.NewBool(tableName, "complete")
+	_todo.Complete = field.NewInt32(tableName, "complete")
 	_todo.CreatedAt = field.NewTime(tableName, "created_at")
 	_todo.UpdatedAt = field.NewTime(tableName, "updated_at")
 
@@ -53,20 +53,20 @@ type todo struct {
 	todoDo
 
 	ALL            field.Asterisk
-	Id             field.Int64
-	Uid            field.String
+	ID             field.Int32
+	UID            field.String
 	Topic          field.String
 	Sequence       field.Int64
 	Content        field.String
 	Category       field.String
 	Remark         field.String
 	Priority       field.Int64
-	IsRemindAtTime field.Bool
+	IsRemindAtTime field.Int32
 	RemindAt       field.Int64
 	RepeatMethod   field.String
 	RepeatRule     field.String
 	RepeatEndAt    field.Int64
-	Complete       field.Bool
+	Complete       field.Int32
 	CreatedAt      field.Time
 	UpdatedAt      field.Time
 
@@ -85,20 +85,20 @@ func (t todo) As(alias string) *todo {
 
 func (t *todo) updateTableName(table string) *todo {
 	t.ALL = field.NewAsterisk(table)
-	t.Id = field.NewInt64(table, "id")
-	t.Uid = field.NewString(table, "uid")
+	t.ID = field.NewInt32(table, "id")
+	t.UID = field.NewString(table, "uid")
 	t.Topic = field.NewString(table, "topic")
 	t.Sequence = field.NewInt64(table, "sequence")
 	t.Content = field.NewString(table, "content")
 	t.Category = field.NewString(table, "category")
 	t.Remark = field.NewString(table, "remark")
 	t.Priority = field.NewInt64(table, "priority")
-	t.IsRemindAtTime = field.NewBool(table, "is_remind_at_time")
+	t.IsRemindAtTime = field.NewInt32(table, "is_remind_at_time")
 	t.RemindAt = field.NewInt64(table, "remind_at")
 	t.RepeatMethod = field.NewString(table, "repeat_method")
 	t.RepeatRule = field.NewString(table, "repeat_rule")
 	t.RepeatEndAt = field.NewInt64(table, "repeat_end_at")
-	t.Complete = field.NewBool(table, "complete")
+	t.Complete = field.NewInt32(table, "complete")
 	t.CreatedAt = field.NewTime(table, "created_at")
 	t.UpdatedAt = field.NewTime(table, "updated_at")
 
@@ -118,8 +118,8 @@ func (t *todo) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 
 func (t *todo) fillFieldMap() {
 	t.fieldMap = make(map[string]field.Expr, 16)
-	t.fieldMap["id"] = t.Id
-	t.fieldMap["uid"] = t.Uid
+	t.fieldMap["id"] = t.ID
+	t.fieldMap["uid"] = t.UID
 	t.fieldMap["topic"] = t.Topic
 	t.fieldMap["sequence"] = t.Sequence
 	t.fieldMap["content"] = t.Content

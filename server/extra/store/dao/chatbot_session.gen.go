@@ -27,13 +27,13 @@ func newSession(db *gorm.DB, opts ...gen.DOOption) session {
 
 	tableName := _session.sessionDo.TableName()
 	_session.ALL = field.NewAsterisk(tableName)
-	_session.ID = field.NewUint64(tableName, "id")
-	_session.Uid = field.NewString(tableName, "uid")
+	_session.ID = field.NewInt32(tableName, "id")
+	_session.UID = field.NewString(tableName, "uid")
 	_session.Topic = field.NewString(tableName, "topic")
-	_session.RuleId = field.NewString(tableName, "rule_id")
+	_session.RuleID = field.NewString(tableName, "rule_id")
 	_session.Init = field.NewField(tableName, "init")
 	_session.Values = field.NewField(tableName, "values")
-	_session.State = field.NewInt(tableName, "state")
+	_session.State = field.NewField(tableName, "state")
 	_session.CreatedAt = field.NewTime(tableName, "created_at")
 	_session.UpdatedAt = field.NewTime(tableName, "updated_at")
 
@@ -46,13 +46,13 @@ type session struct {
 	sessionDo
 
 	ALL       field.Asterisk
-	ID        field.Uint64
-	Uid       field.String
+	ID        field.Int32
+	UID       field.String
 	Topic     field.String
-	RuleId    field.String
+	RuleID    field.String
 	Init      field.Field
 	Values    field.Field
-	State     field.Int
+	State     field.Field
 	CreatedAt field.Time
 	UpdatedAt field.Time
 
@@ -71,13 +71,13 @@ func (s session) As(alias string) *session {
 
 func (s *session) updateTableName(table string) *session {
 	s.ALL = field.NewAsterisk(table)
-	s.ID = field.NewUint64(table, "id")
-	s.Uid = field.NewString(table, "uid")
+	s.ID = field.NewInt32(table, "id")
+	s.UID = field.NewString(table, "uid")
 	s.Topic = field.NewString(table, "topic")
-	s.RuleId = field.NewString(table, "rule_id")
+	s.RuleID = field.NewString(table, "rule_id")
 	s.Init = field.NewField(table, "init")
 	s.Values = field.NewField(table, "values")
-	s.State = field.NewInt(table, "state")
+	s.State = field.NewField(table, "state")
 	s.CreatedAt = field.NewTime(table, "created_at")
 	s.UpdatedAt = field.NewTime(table, "updated_at")
 
@@ -98,9 +98,9 @@ func (s *session) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 func (s *session) fillFieldMap() {
 	s.fieldMap = make(map[string]field.Expr, 9)
 	s.fieldMap["id"] = s.ID
-	s.fieldMap["uid"] = s.Uid
+	s.fieldMap["uid"] = s.UID
 	s.fieldMap["topic"] = s.Topic
-	s.fieldMap["rule_id"] = s.RuleId
+	s.fieldMap["rule_id"] = s.RuleID
 	s.fieldMap["init"] = s.Init
 	s.fieldMap["values"] = s.Values
 	s.fieldMap["state"] = s.State

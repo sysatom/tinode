@@ -27,17 +27,18 @@ func newKeyResult(db *gorm.DB, opts ...gen.DOOption) keyResult {
 
 	tableName := _keyResult.keyResultDo.TableName()
 	_keyResult.ALL = field.NewAsterisk(tableName)
-	_keyResult.Id = field.NewInt64(tableName, "id")
-	_keyResult.Uid = field.NewString(tableName, "uid")
+	_keyResult.ID = field.NewInt32(tableName, "id")
+	_keyResult.UID = field.NewString(tableName, "uid")
 	_keyResult.Topic = field.NewString(tableName, "topic")
-	_keyResult.ObjectiveId = field.NewInt64(tableName, "objective_id")
+	_keyResult.ObjectiveID = field.NewInt64(tableName, "objective_id")
 	_keyResult.Sequence = field.NewInt64(tableName, "sequence")
 	_keyResult.Title = field.NewString(tableName, "title")
 	_keyResult.Memo = field.NewString(tableName, "memo")
 	_keyResult.InitialValue = field.NewInt32(tableName, "initial_value")
 	_keyResult.TargetValue = field.NewInt32(tableName, "target_value")
 	_keyResult.CurrentValue = field.NewInt32(tableName, "current_value")
-	_keyResult.ValueMode = field.NewString(tableName, "value_mode")
+	_keyResult.ValueMode = field.NewField(tableName, "value_mode")
+	_keyResult.Tag = field.NewString(tableName, "tag")
 	_keyResult.CreatedAt = field.NewTime(tableName, "created_at")
 	_keyResult.UpdatedAt = field.NewTime(tableName, "updated_at")
 
@@ -50,17 +51,18 @@ type keyResult struct {
 	keyResultDo
 
 	ALL          field.Asterisk
-	Id           field.Int64
-	Uid          field.String
+	ID           field.Int32
+	UID          field.String
 	Topic        field.String
-	ObjectiveId  field.Int64
+	ObjectiveID  field.Int64
 	Sequence     field.Int64
 	Title        field.String
 	Memo         field.String
 	InitialValue field.Int32
 	TargetValue  field.Int32
 	CurrentValue field.Int32
-	ValueMode    field.String
+	ValueMode    field.Field
+	Tag          field.String
 	CreatedAt    field.Time
 	UpdatedAt    field.Time
 
@@ -79,17 +81,18 @@ func (k keyResult) As(alias string) *keyResult {
 
 func (k *keyResult) updateTableName(table string) *keyResult {
 	k.ALL = field.NewAsterisk(table)
-	k.Id = field.NewInt64(table, "id")
-	k.Uid = field.NewString(table, "uid")
+	k.ID = field.NewInt32(table, "id")
+	k.UID = field.NewString(table, "uid")
 	k.Topic = field.NewString(table, "topic")
-	k.ObjectiveId = field.NewInt64(table, "objective_id")
+	k.ObjectiveID = field.NewInt64(table, "objective_id")
 	k.Sequence = field.NewInt64(table, "sequence")
 	k.Title = field.NewString(table, "title")
 	k.Memo = field.NewString(table, "memo")
 	k.InitialValue = field.NewInt32(table, "initial_value")
 	k.TargetValue = field.NewInt32(table, "target_value")
 	k.CurrentValue = field.NewInt32(table, "current_value")
-	k.ValueMode = field.NewString(table, "value_mode")
+	k.ValueMode = field.NewField(table, "value_mode")
+	k.Tag = field.NewString(table, "tag")
 	k.CreatedAt = field.NewTime(table, "created_at")
 	k.UpdatedAt = field.NewTime(table, "updated_at")
 
@@ -108,11 +111,11 @@ func (k *keyResult) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (k *keyResult) fillFieldMap() {
-	k.fieldMap = make(map[string]field.Expr, 13)
-	k.fieldMap["id"] = k.Id
-	k.fieldMap["uid"] = k.Uid
+	k.fieldMap = make(map[string]field.Expr, 14)
+	k.fieldMap["id"] = k.ID
+	k.fieldMap["uid"] = k.UID
 	k.fieldMap["topic"] = k.Topic
-	k.fieldMap["objective_id"] = k.ObjectiveId
+	k.fieldMap["objective_id"] = k.ObjectiveID
 	k.fieldMap["sequence"] = k.Sequence
 	k.fieldMap["title"] = k.Title
 	k.fieldMap["memo"] = k.Memo
@@ -120,6 +123,7 @@ func (k *keyResult) fillFieldMap() {
 	k.fieldMap["target_value"] = k.TargetValue
 	k.fieldMap["current_value"] = k.CurrentValue
 	k.fieldMap["value_mode"] = k.ValueMode
+	k.fieldMap["tag"] = k.Tag
 	k.fieldMap["created_at"] = k.CreatedAt
 	k.fieldMap["updated_at"] = k.UpdatedAt
 }

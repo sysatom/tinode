@@ -27,8 +27,8 @@ func newOAuth(db *gorm.DB, opts ...gen.DOOption) oAuth {
 
 	tableName := _oAuth.oAuthDo.TableName()
 	_oAuth.ALL = field.NewAsterisk(tableName)
-	_oAuth.ID = field.NewUint64(tableName, "id")
-	_oAuth.Uid = field.NewString(tableName, "uid")
+	_oAuth.ID = field.NewInt32(tableName, "id")
+	_oAuth.UID = field.NewString(tableName, "uid")
 	_oAuth.Topic = field.NewString(tableName, "topic")
 	_oAuth.Name = field.NewString(tableName, "name")
 	_oAuth.Type = field.NewString(tableName, "type")
@@ -46,8 +46,8 @@ type oAuth struct {
 	oAuthDo
 
 	ALL       field.Asterisk
-	ID        field.Uint64
-	Uid       field.String
+	ID        field.Int32
+	UID       field.String
 	Topic     field.String
 	Name      field.String
 	Type      field.String
@@ -71,8 +71,8 @@ func (o oAuth) As(alias string) *oAuth {
 
 func (o *oAuth) updateTableName(table string) *oAuth {
 	o.ALL = field.NewAsterisk(table)
-	o.ID = field.NewUint64(table, "id")
-	o.Uid = field.NewString(table, "uid")
+	o.ID = field.NewInt32(table, "id")
+	o.UID = field.NewString(table, "uid")
 	o.Topic = field.NewString(table, "topic")
 	o.Name = field.NewString(table, "name")
 	o.Type = field.NewString(table, "type")
@@ -98,7 +98,7 @@ func (o *oAuth) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 func (o *oAuth) fillFieldMap() {
 	o.fieldMap = make(map[string]field.Expr, 9)
 	o.fieldMap["id"] = o.ID
-	o.fieldMap["uid"] = o.Uid
+	o.fieldMap["uid"] = o.UID
 	o.fieldMap["topic"] = o.Topic
 	o.fieldMap["name"] = o.Name
 	o.fieldMap["type"] = o.Type

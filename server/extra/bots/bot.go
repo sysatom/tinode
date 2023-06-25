@@ -355,12 +355,12 @@ func RunWorkflow(workflowRules []workflow.Rule, ctx types.Context, head map[stri
 func StoreWorkflow(ctx types.Context, workflowRule workflow.Rule, index int) (string, error) {
 	flag := types.Id().String()
 	return flag, store.Chatbot.WorkflowCreate(model.Workflow{
-		Uid:     ctx.AsUser.UserId(),
+		UID:     ctx.AsUser.UserId(),
 		Topic:   ctx.Original,
 		Flag:    flag,
-		RuleId:  workflowRule.Id,
-		Version: workflowRule.Version,
-		Step:    index,
+		RuleID:  workflowRule.Id,
+		Version: int32(workflowRule.Version),
+		Step:    int32(index),
 		State:   model.WorkflowStart,
 	})
 }
@@ -375,7 +375,7 @@ func SetWorkflowState(ctx types.Context, flag string, state model.WorkflowState)
 func SetWorkflowStep(ctx types.Context, flag string, index int) error {
 	return store.Chatbot.WorkflowStep(ctx.AsUser, ctx.Original, model.Workflow{
 		Flag: flag,
-		Step: index,
+		Step: int32(index),
 	})
 }
 
@@ -476,7 +476,7 @@ func RunAction(actionRules []action.Rule, ctx types.Context, option string) (typ
 		state = model.ActionStateLongTerm
 	}
 	// store action
-	err = store.Chatbot.ActionSet(ctx.RcptTo, ctx.SeqId, model.Action{Uid: ctx.AsUser.UserId(), Value: option, State: state})
+	err = store.Chatbot.ActionSet(ctx.RcptTo, ctx.SeqId, model.Action{UID: ctx.AsUser.UserId(), Value: option, State: state})
 	if err != nil {
 		return nil, err
 	}
@@ -568,8 +568,8 @@ func StoreForm(ctx types.Context, payload types.MsgPayload) types.MsgPayload {
 
 	// store form
 	err = store.Chatbot.FormSet(formId, model.Form{
-		FormId: formId,
-		Uid:    ctx.AsUser.UserId(),
+		FormID: formId,
+		UID:    ctx.AsUser.UserId(),
 		Topic:  ctx.Original,
 		Schema: schema,
 		Values: values,
@@ -583,8 +583,8 @@ func StoreForm(ctx types.Context, payload types.MsgPayload) types.MsgPayload {
 
 	// store page
 	err = store.Chatbot.PageSet(formId, model.Page{
-		PageId: formId,
-		Uid:    ctx.AsUser.UserId(),
+		PageID: formId,
+		UID:    ctx.AsUser.UserId(),
 		Topic:  ctx.Original,
 		Type:   model.PageForm,
 		Schema: schema,
@@ -649,8 +649,8 @@ func StorePage(ctx types.Context, category model.PageType, title string, payload
 
 	// store page
 	err = store.Chatbot.PageSet(pageId, model.Page{
-		PageId: pageId,
-		Uid:    ctx.AsUser.UserId(),
+		PageID: pageId,
+		UID:    ctx.AsUser.UserId(),
 		Topic:  ctx.Original,
 		Type:   category,
 		Schema: schema,
@@ -711,9 +711,9 @@ func SessionStart(ctx types.Context, initValues model.JSON) error {
 	var values model.JSON
 	values = map[string]interface{}{"val": nil}
 	_ = store.Chatbot.SessionCreate(model.Session{
-		Uid:    ctx.AsUser.UserId(),
+		UID:    ctx.AsUser.UserId(),
 		Topic:  ctx.Original,
-		RuleId: ctx.SessionRuleId,
+		RuleID: ctx.SessionRuleId,
 		Init:   initValues,
 		Values: values,
 		State:  model.SessionStart,
@@ -748,7 +748,7 @@ func CreateShortUrl(text string) (string, error) {
 		flag := strings.ToLower(types.Id().String())
 		err = store.Chatbot.UrlCreate(model.Url{
 			Flag:  flag,
-			Url:   text,
+			URL:   text,
 			State: model.UrlStateEnable,
 		})
 		if err != nil {
@@ -793,7 +793,7 @@ func StoreInstruct(ctx types.Context, payload types.MsgPayload) types.MsgPayload
 	}
 
 	_, err := store.Chatbot.CreateInstruct(&model.Instruct{
-		Uid:      ctx.AsUser.UserId(),
+		UID:      ctx.AsUser.UserId(),
 		No:       msg.No,
 		Object:   msg.Object,
 		Bot:      msg.Bot,
@@ -824,9 +824,9 @@ func Behavior(uid serverTypes.Uid, flag string, number int) {
 		_ = store.Chatbot.BehaviorIncrease(uid, flag, number)
 	} else {
 		_ = store.Chatbot.BehaviorSet(model.Behavior{
-			Uid:   uid.UserId(),
-			Flag:  flag,
-			Count: number,
+			UID:    uid.UserId(),
+			Flag:   flag,
+			Count_: int32(number),
 		})
 	}
 }

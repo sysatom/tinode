@@ -27,23 +27,21 @@ func newTopic(db *gorm.DB, opts ...gen.DOOption) topic {
 
 	tableName := _topic.topicDo.TableName()
 	_topic.ALL = field.NewAsterisk(tableName)
-	_topic.ID = field.NewUint64(tableName, "id")
-	_topic.State = field.NewInt(tableName, "state")
+	_topic.ID = field.NewInt32(tableName, "id")
+	_topic.Createdat = field.NewTime(tableName, "createdat")
+	_topic.Updatedat = field.NewTime(tableName, "updatedat")
+	_topic.State = field.NewInt32(tableName, "state")
 	_topic.Stateat = field.NewTime(tableName, "stateat")
+	_topic.Touchedat = field.NewTime(tableName, "touchedat")
 	_topic.Name = field.NewString(tableName, "name")
-	_topic.UseBt = field.NewBool(tableName, "usebt")
-	_topic.Owner = field.NewUint64(tableName, "owner")
-	_topic.SeqId = field.NewInt(tableName, "seqid")
-	_topic.DelId = field.NewInt(tableName, "delid")
+	_topic.Usebt = field.NewInt32(tableName, "usebt")
+	_topic.Owner = field.NewInt64(tableName, "owner")
 	_topic.Access = field.NewField(tableName, "access")
+	_topic.Seqid = field.NewInt32(tableName, "seqid")
+	_topic.Delid = field.NewInt32(tableName, "delid")
 	_topic.Public = field.NewField(tableName, "public")
 	_topic.Trusted = field.NewField(tableName, "trusted")
-	_topic.Tags = field.NewField(tableName, "tags")
-	_topic.CreatedAt = field.NewTime(tableName, "createdat")
-	_topic.UpdatedAt = field.NewTime(tableName, "updatedat")
-	_topic.TouchedAt = field.NewTime(tableName, "touchedat")
-	_topic.Fn = field.NewString(tableName, "fn")
-	_topic.Verified = field.NewBool(tableName, "verified")
+	_topic.Tags = field.NewString(tableName, "tags")
 
 	_topic.fillFieldMap()
 
@@ -54,23 +52,21 @@ type topic struct {
 	topicDo
 
 	ALL       field.Asterisk
-	ID        field.Uint64
-	State     field.Int
+	ID        field.Int32
+	Createdat field.Time
+	Updatedat field.Time
+	State     field.Int32
 	Stateat   field.Time
+	Touchedat field.Time
 	Name      field.String
-	UseBt     field.Bool
-	Owner     field.Uint64
-	SeqId     field.Int
-	DelId     field.Int
+	Usebt     field.Int32
+	Owner     field.Int64
 	Access    field.Field
+	Seqid     field.Int32
+	Delid     field.Int32
 	Public    field.Field
 	Trusted   field.Field
-	Tags      field.Field
-	CreatedAt field.Time
-	UpdatedAt field.Time
-	TouchedAt field.Time
-	Fn        field.String
-	Verified  field.Bool
+	Tags      field.String
 
 	fieldMap map[string]field.Expr
 }
@@ -87,23 +83,21 @@ func (t topic) As(alias string) *topic {
 
 func (t *topic) updateTableName(table string) *topic {
 	t.ALL = field.NewAsterisk(table)
-	t.ID = field.NewUint64(table, "id")
-	t.State = field.NewInt(table, "state")
+	t.ID = field.NewInt32(table, "id")
+	t.Createdat = field.NewTime(table, "createdat")
+	t.Updatedat = field.NewTime(table, "updatedat")
+	t.State = field.NewInt32(table, "state")
 	t.Stateat = field.NewTime(table, "stateat")
+	t.Touchedat = field.NewTime(table, "touchedat")
 	t.Name = field.NewString(table, "name")
-	t.UseBt = field.NewBool(table, "usebt")
-	t.Owner = field.NewUint64(table, "owner")
-	t.SeqId = field.NewInt(table, "seqid")
-	t.DelId = field.NewInt(table, "delid")
+	t.Usebt = field.NewInt32(table, "usebt")
+	t.Owner = field.NewInt64(table, "owner")
 	t.Access = field.NewField(table, "access")
+	t.Seqid = field.NewInt32(table, "seqid")
+	t.Delid = field.NewInt32(table, "delid")
 	t.Public = field.NewField(table, "public")
 	t.Trusted = field.NewField(table, "trusted")
-	t.Tags = field.NewField(table, "tags")
-	t.CreatedAt = field.NewTime(table, "createdat")
-	t.UpdatedAt = field.NewTime(table, "updatedat")
-	t.TouchedAt = field.NewTime(table, "touchedat")
-	t.Fn = field.NewString(table, "fn")
-	t.Verified = field.NewBool(table, "verified")
+	t.Tags = field.NewString(table, "tags")
 
 	t.fillFieldMap()
 
@@ -122,22 +116,21 @@ func (t *topic) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 func (t *topic) fillFieldMap() {
 	t.fieldMap = make(map[string]field.Expr, 17)
 	t.fieldMap["id"] = t.ID
+	t.fieldMap["createdat"] = t.Createdat
+	t.fieldMap["updatedat"] = t.Updatedat
 	t.fieldMap["state"] = t.State
 	t.fieldMap["stateat"] = t.Stateat
+	t.fieldMap["touchedat"] = t.Touchedat
 	t.fieldMap["name"] = t.Name
-	t.fieldMap["usebt"] = t.UseBt
+	t.fieldMap["usebt"] = t.Usebt
 	t.fieldMap["owner"] = t.Owner
-	t.fieldMap["seqid"] = t.SeqId
-	t.fieldMap["delid"] = t.DelId
 	t.fieldMap["access"] = t.Access
+	t.fieldMap["seqid"] = t.Seqid
+	t.fieldMap["delid"] = t.Delid
 	t.fieldMap["public"] = t.Public
 	t.fieldMap["trusted"] = t.Trusted
 	t.fieldMap["tags"] = t.Tags
-	t.fieldMap["createdat"] = t.CreatedAt
-	t.fieldMap["updatedat"] = t.UpdatedAt
-	t.fieldMap["touchedat"] = t.TouchedAt
-	t.fieldMap["fn"] = t.Fn
-	t.fieldMap["verified"] = t.Verified
+
 }
 
 func (t topic) clone(db *gorm.DB) topic {

@@ -18,10 +18,10 @@ func (c *Okr) Render() app.UI {
 	switch c.Page.State {
 	case model.PageStateProcessedSuccess:
 		alert = app.Div().Class("uk-alert-success").Body(
-			app.P().Style("padding", "20px").Text(fmt.Sprintf("Okr [%s] processed success, %s", c.Page.PageId, c.Page.UpdatedAt)))
+			app.P().Style("padding", "20px").Text(fmt.Sprintf("Okr [%s] processed success, %s", c.Page.PageID, c.Page.UpdatedAt)))
 	case model.PageStateProcessedFailed:
 		alert = app.Div().Class("uk-alert-danger").Body(
-			app.P().Style("padding", "20px").Text(fmt.Sprintf("Okr [%s] processed failed, %s", c.Page.PageId, c.Page.UpdatedAt)))
+			app.P().Style("padding", "20px").Text(fmt.Sprintf("Okr [%s] processed failed, %s", c.Page.PageID, c.Page.UpdatedAt)))
 	}
 
 	ratio := float64(0)

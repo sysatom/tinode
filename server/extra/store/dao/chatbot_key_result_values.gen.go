@@ -27,8 +27,8 @@ func newKeyResultValue(db *gorm.DB, opts ...gen.DOOption) keyResultValue {
 
 	tableName := _keyResultValue.keyResultValueDo.TableName()
 	_keyResultValue.ALL = field.NewAsterisk(tableName)
-	_keyResultValue.Id = field.NewInt64(tableName, "id")
-	_keyResultValue.KeyResultId = field.NewInt64(tableName, "key_result_id")
+	_keyResultValue.ID = field.NewInt32(tableName, "id")
+	_keyResultValue.KeyResultID = field.NewInt32(tableName, "key_result_id")
 	_keyResultValue.Value = field.NewInt32(tableName, "value")
 	_keyResultValue.CreatedAt = field.NewTime(tableName, "created_at")
 	_keyResultValue.UpdatedAt = field.NewTime(tableName, "updated_at")
@@ -42,8 +42,8 @@ type keyResultValue struct {
 	keyResultValueDo
 
 	ALL         field.Asterisk
-	Id          field.Int64
-	KeyResultId field.Int64
+	ID          field.Int32
+	KeyResultID field.Int32
 	Value       field.Int32
 	CreatedAt   field.Time
 	UpdatedAt   field.Time
@@ -63,8 +63,8 @@ func (k keyResultValue) As(alias string) *keyResultValue {
 
 func (k *keyResultValue) updateTableName(table string) *keyResultValue {
 	k.ALL = field.NewAsterisk(table)
-	k.Id = field.NewInt64(table, "id")
-	k.KeyResultId = field.NewInt64(table, "key_result_id")
+	k.ID = field.NewInt32(table, "id")
+	k.KeyResultID = field.NewInt32(table, "key_result_id")
 	k.Value = field.NewInt32(table, "value")
 	k.CreatedAt = field.NewTime(table, "created_at")
 	k.UpdatedAt = field.NewTime(table, "updated_at")
@@ -85,8 +85,8 @@ func (k *keyResultValue) GetFieldByName(fieldName string) (field.OrderExpr, bool
 
 func (k *keyResultValue) fillFieldMap() {
 	k.fieldMap = make(map[string]field.Expr, 5)
-	k.fieldMap["id"] = k.Id
-	k.fieldMap["key_result_id"] = k.KeyResultId
+	k.fieldMap["id"] = k.ID
+	k.fieldMap["key_result_id"] = k.KeyResultID
 	k.fieldMap["value"] = k.Value
 	k.fieldMap["created_at"] = k.CreatedAt
 	k.fieldMap["updated_at"] = k.UpdatedAt

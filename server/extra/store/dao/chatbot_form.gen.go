@@ -27,14 +27,14 @@ func newForm(db *gorm.DB, opts ...gen.DOOption) form {
 
 	tableName := _form.formDo.TableName()
 	_form.ALL = field.NewAsterisk(tableName)
-	_form.ID = field.NewUint64(tableName, "id")
-	_form.FormId = field.NewString(tableName, "form_id")
-	_form.Uid = field.NewString(tableName, "uid")
+	_form.ID = field.NewInt32(tableName, "id")
+	_form.FormID = field.NewString(tableName, "form_id")
+	_form.UID = field.NewString(tableName, "uid")
 	_form.Topic = field.NewString(tableName, "topic")
 	_form.Schema = field.NewField(tableName, "schema")
 	_form.Values = field.NewField(tableName, "values")
 	_form.Extra = field.NewField(tableName, "extra")
-	_form.State = field.NewInt(tableName, "state")
+	_form.State = field.NewField(tableName, "state")
 	_form.CreatedAt = field.NewTime(tableName, "created_at")
 	_form.UpdatedAt = field.NewTime(tableName, "updated_at")
 
@@ -47,14 +47,14 @@ type form struct {
 	formDo
 
 	ALL       field.Asterisk
-	ID        field.Uint64
-	FormId    field.String
-	Uid       field.String
+	ID        field.Int32
+	FormID    field.String
+	UID       field.String
 	Topic     field.String
 	Schema    field.Field
 	Values    field.Field
 	Extra     field.Field
-	State     field.Int
+	State     field.Field
 	CreatedAt field.Time
 	UpdatedAt field.Time
 
@@ -73,14 +73,14 @@ func (f form) As(alias string) *form {
 
 func (f *form) updateTableName(table string) *form {
 	f.ALL = field.NewAsterisk(table)
-	f.ID = field.NewUint64(table, "id")
-	f.FormId = field.NewString(table, "form_id")
-	f.Uid = field.NewString(table, "uid")
+	f.ID = field.NewInt32(table, "id")
+	f.FormID = field.NewString(table, "form_id")
+	f.UID = field.NewString(table, "uid")
 	f.Topic = field.NewString(table, "topic")
 	f.Schema = field.NewField(table, "schema")
 	f.Values = field.NewField(table, "values")
 	f.Extra = field.NewField(table, "extra")
-	f.State = field.NewInt(table, "state")
+	f.State = field.NewField(table, "state")
 	f.CreatedAt = field.NewTime(table, "created_at")
 	f.UpdatedAt = field.NewTime(table, "updated_at")
 
@@ -101,8 +101,8 @@ func (f *form) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 func (f *form) fillFieldMap() {
 	f.fieldMap = make(map[string]field.Expr, 10)
 	f.fieldMap["id"] = f.ID
-	f.fieldMap["form_id"] = f.FormId
-	f.fieldMap["uid"] = f.Uid
+	f.fieldMap["form_id"] = f.FormID
+	f.fieldMap["uid"] = f.UID
 	f.fieldMap["topic"] = f.Topic
 	f.fieldMap["schema"] = f.Schema
 	f.fieldMap["values"] = f.Values

@@ -27,12 +27,12 @@ func newAction(db *gorm.DB, opts ...gen.DOOption) action {
 
 	tableName := _action.actionDo.TableName()
 	_action.ALL = field.NewAsterisk(tableName)
-	_action.ID = field.NewUint64(tableName, "id")
-	_action.Uid = field.NewString(tableName, "uid")
+	_action.ID = field.NewInt32(tableName, "id")
+	_action.UID = field.NewString(tableName, "uid")
 	_action.Topic = field.NewString(tableName, "topic")
-	_action.SeqId = field.NewInt(tableName, "seqid")
+	_action.Seqid = field.NewInt32(tableName, "seqid")
 	_action.Value = field.NewString(tableName, "value")
-	_action.State = field.NewInt(tableName, "state")
+	_action.State = field.NewField(tableName, "state")
 	_action.CreatedAt = field.NewTime(tableName, "created_at")
 	_action.UpdatedAt = field.NewTime(tableName, "updated_at")
 
@@ -45,12 +45,12 @@ type action struct {
 	actionDo
 
 	ALL       field.Asterisk
-	ID        field.Uint64
-	Uid       field.String
+	ID        field.Int32
+	UID       field.String
 	Topic     field.String
-	SeqId     field.Int
+	Seqid     field.Int32
 	Value     field.String
-	State     field.Int
+	State     field.Field
 	CreatedAt field.Time
 	UpdatedAt field.Time
 
@@ -69,12 +69,12 @@ func (a action) As(alias string) *action {
 
 func (a *action) updateTableName(table string) *action {
 	a.ALL = field.NewAsterisk(table)
-	a.ID = field.NewUint64(table, "id")
-	a.Uid = field.NewString(table, "uid")
+	a.ID = field.NewInt32(table, "id")
+	a.UID = field.NewString(table, "uid")
 	a.Topic = field.NewString(table, "topic")
-	a.SeqId = field.NewInt(table, "seqid")
+	a.Seqid = field.NewInt32(table, "seqid")
 	a.Value = field.NewString(table, "value")
-	a.State = field.NewInt(table, "state")
+	a.State = field.NewField(table, "state")
 	a.CreatedAt = field.NewTime(table, "created_at")
 	a.UpdatedAt = field.NewTime(table, "updated_at")
 
@@ -95,9 +95,9 @@ func (a *action) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 func (a *action) fillFieldMap() {
 	a.fieldMap = make(map[string]field.Expr, 8)
 	a.fieldMap["id"] = a.ID
-	a.fieldMap["uid"] = a.Uid
+	a.fieldMap["uid"] = a.UID
 	a.fieldMap["topic"] = a.Topic
-	a.fieldMap["seqid"] = a.SeqId
+	a.fieldMap["seqid"] = a.Seqid
 	a.fieldMap["value"] = a.Value
 	a.fieldMap["state"] = a.State
 	a.fieldMap["created_at"] = a.CreatedAt

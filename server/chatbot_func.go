@@ -673,7 +673,7 @@ func botIncomingMessage(t *Topic, msg *ClientComMessage) {
 					}
 				}
 				if !isCancel {
-					ctx.SessionRuleId = sess.RuleId
+					ctx.SessionRuleId = sess.RuleID
 					ctx.SessionInitValues = sess.Init
 					ctx.SessionLastValues = sess.Values
 
@@ -684,7 +684,7 @@ func botIncomingMessage(t *Topic, msg *ClientComMessage) {
 							switch v := item.(type) {
 							case []session.Rule:
 								for _, rule := range v {
-									if rule.Id == sess.RuleId {
+									if rule.Id == sess.RuleID {
 										botHandler = handler
 									}
 								}
@@ -1050,11 +1050,11 @@ func nextWorkflow(ctx extraTypes.Context, workflowFlag string, workflowVersion i
 				switch v := item.(type) {
 				case []workflow.Rule:
 					for _, rule := range v {
-						if rule.Id == workflowData.RuleId {
+						if rule.Id == workflowData.RuleID {
 							ctx.WorkflowFlag = workflowFlag
 							ctx.WorkflowVersion = workflowVersion
-							ctx.WorkflowRuleId = workflowData.RuleId
-							ctx.WorkflowStepIndex = workflowData.Step
+							ctx.WorkflowRuleId = workflowData.RuleID
+							ctx.WorkflowStepIndex = int(workflowData.Step)
 							payload, _, _, err := handler.Workflow(ctx, nil, nil, extraTypes.WorkflowNextOperate)
 							if err != nil {
 								logs.Err.Println(err)
@@ -1083,7 +1083,7 @@ func notifyAfterReboot() {
 	}
 
 	for _, cred := range creds {
-		_, level, _, _, err := store.Users.GetAuthRecord(store.EncodeUid(cred.UserId), "basic")
+		_, level, _, _, err := store.Users.GetAuthRecord(store.EncodeUid(cred.Userid), "basic")
 		if err != nil {
 			logs.Err.Println(err)
 			continue
@@ -1091,7 +1091,7 @@ func notifyAfterReboot() {
 		if level != auth.LevelRoot {
 			continue
 		}
-		rcptTo := store.EncodeUid(cred.UserId).P2PName(botUid)
+		rcptTo := store.EncodeUid(cred.Userid).P2PName(botUid)
 		if rcptTo != "" {
 			botSend(rcptTo, botUid, extraTypes.TextMsg{Text: "reboot"})
 		}

@@ -27,10 +27,10 @@ func newBehavior(db *gorm.DB, opts ...gen.DOOption) behavior {
 
 	tableName := _behavior.behaviorDo.TableName()
 	_behavior.ALL = field.NewAsterisk(tableName)
-	_behavior.ID = field.NewUint(tableName, "id")
-	_behavior.Uid = field.NewString(tableName, "uid")
+	_behavior.ID = field.NewInt32(tableName, "id")
+	_behavior.UID = field.NewString(tableName, "uid")
 	_behavior.Flag = field.NewString(tableName, "flag")
-	_behavior.Count_ = field.NewInt(tableName, "count")
+	_behavior.Count_ = field.NewInt32(tableName, "count")
 	_behavior.Extra = field.NewField(tableName, "extra")
 	_behavior.CreatedAt = field.NewTime(tableName, "created_at")
 	_behavior.UpdatedAt = field.NewTime(tableName, "updated_at")
@@ -44,10 +44,10 @@ type behavior struct {
 	behaviorDo
 
 	ALL       field.Asterisk
-	ID        field.Uint
-	Uid       field.String
+	ID        field.Int32
+	UID       field.String
 	Flag      field.String
-	Count_    field.Int
+	Count_    field.Int32
 	Extra     field.Field
 	CreatedAt field.Time
 	UpdatedAt field.Time
@@ -67,10 +67,10 @@ func (b behavior) As(alias string) *behavior {
 
 func (b *behavior) updateTableName(table string) *behavior {
 	b.ALL = field.NewAsterisk(table)
-	b.ID = field.NewUint(table, "id")
-	b.Uid = field.NewString(table, "uid")
+	b.ID = field.NewInt32(table, "id")
+	b.UID = field.NewString(table, "uid")
 	b.Flag = field.NewString(table, "flag")
-	b.Count_ = field.NewInt(table, "count")
+	b.Count_ = field.NewInt32(table, "count")
 	b.Extra = field.NewField(table, "extra")
 	b.CreatedAt = field.NewTime(table, "created_at")
 	b.UpdatedAt = field.NewTime(table, "updated_at")
@@ -92,7 +92,7 @@ func (b *behavior) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 func (b *behavior) fillFieldMap() {
 	b.fieldMap = make(map[string]field.Expr, 7)
 	b.fieldMap["id"] = b.ID
-	b.fieldMap["uid"] = b.Uid
+	b.fieldMap["uid"] = b.UID
 	b.fieldMap["flag"] = b.Flag
 	b.fieldMap["count"] = b.Count_
 	b.fieldMap["extra"] = b.Extra

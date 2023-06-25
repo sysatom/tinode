@@ -27,7 +27,7 @@ func newParameter(db *gorm.DB, opts ...gen.DOOption) parameter {
 
 	tableName := _parameter.parameterDo.TableName()
 	_parameter.ALL = field.NewAsterisk(tableName)
-	_parameter.ID = field.NewUint64(tableName, "id")
+	_parameter.ID = field.NewInt32(tableName, "id")
 	_parameter.Flag = field.NewString(tableName, "flag")
 	_parameter.Params = field.NewField(tableName, "params")
 	_parameter.CreatedAt = field.NewTime(tableName, "created_at")
@@ -43,7 +43,7 @@ type parameter struct {
 	parameterDo
 
 	ALL       field.Asterisk
-	ID        field.Uint64
+	ID        field.Int32
 	Flag      field.String
 	Params    field.Field
 	CreatedAt field.Time
@@ -65,7 +65,7 @@ func (p parameter) As(alias string) *parameter {
 
 func (p *parameter) updateTableName(table string) *parameter {
 	p.ALL = field.NewAsterisk(table)
-	p.ID = field.NewUint64(table, "id")
+	p.ID = field.NewInt32(table, "id")
 	p.Flag = field.NewString(table, "flag")
 	p.Params = field.NewField(table, "params")
 	p.CreatedAt = field.NewTime(table, "created_at")

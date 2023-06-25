@@ -27,8 +27,8 @@ func newData(db *gorm.DB, opts ...gen.DOOption) data {
 
 	tableName := _data.dataDo.TableName()
 	_data.ALL = field.NewAsterisk(tableName)
-	_data.ID = field.NewUint64(tableName, "id")
-	_data.Uid = field.NewString(tableName, "uid")
+	_data.ID = field.NewInt32(tableName, "id")
+	_data.UID = field.NewString(tableName, "uid")
 	_data.Topic = field.NewString(tableName, "topic")
 	_data.Key = field.NewString(tableName, "key")
 	_data.Value = field.NewField(tableName, "value")
@@ -44,8 +44,8 @@ type data struct {
 	dataDo
 
 	ALL       field.Asterisk
-	ID        field.Uint64
-	Uid       field.String
+	ID        field.Int32
+	UID       field.String
 	Topic     field.String
 	Key       field.String
 	Value     field.Field
@@ -67,8 +67,8 @@ func (d data) As(alias string) *data {
 
 func (d *data) updateTableName(table string) *data {
 	d.ALL = field.NewAsterisk(table)
-	d.ID = field.NewUint64(table, "id")
-	d.Uid = field.NewString(table, "uid")
+	d.ID = field.NewInt32(table, "id")
+	d.UID = field.NewString(table, "uid")
 	d.Topic = field.NewString(table, "topic")
 	d.Key = field.NewString(table, "key")
 	d.Value = field.NewField(table, "value")
@@ -92,7 +92,7 @@ func (d *data) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 func (d *data) fillFieldMap() {
 	d.fieldMap = make(map[string]field.Expr, 7)
 	d.fieldMap["id"] = d.ID
-	d.fieldMap["uid"] = d.Uid
+	d.fieldMap["uid"] = d.UID
 	d.fieldMap["topic"] = d.Topic
 	d.fieldMap["key"] = d.Key
 	d.fieldMap["value"] = d.Value
