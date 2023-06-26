@@ -23,8 +23,8 @@ type Message struct {
 	From      int64           `gorm:"column:from;not null" json:"from"`
 	Head      JSON            `gorm:"column:head" json:"head"`
 	Content   JSON            `gorm:"column:content" json:"content"`
-	Txt       string          ``
-	Raw       json.RawMessage ``
+	Txt       string          `json:"txt,omitempty"`
+	Raw       json.RawMessage `json:"raw,omitempty"`
 }
 
 // TableName Message's table name

@@ -94,19 +94,31 @@ func GenerationAction(c *cli.Context) error {
 		gen.FieldType("access", "JSON"),
 		gen.FieldType("public", "JSON"),
 		gen.FieldType("trusted", "JSON"),
-		gen.FieldNew("Fn", "string", nil),
-		gen.FieldNew("Verified", "bool", nil)))
+		gen.FieldNew("Fn", "string", map[string]string{
+			"json": "fn,omitempty",
+		}),
+		gen.FieldNew("Verified", "bool", map[string]string{
+			"json": "verified,omitempty",
+		})))
 	g.ApplyBasic(g.GenerateModel("topics",
 		gen.FieldType("access", "JSON"),
 		gen.FieldType("public", "JSON"),
 		gen.FieldType("trusted", "JSON"),
-		gen.FieldNew("Fn", "string", nil),
-		gen.FieldNew("Verified", "bool", nil)))
+		gen.FieldNew("Fn", "string", map[string]string{
+			"json": "fn,omitempty",
+		}),
+		gen.FieldNew("Verified", "bool", map[string]string{
+			"json": "verified,omitempty",
+		})))
 	g.ApplyBasic(g.GenerateModel("messages",
 		gen.FieldType("head", "JSON"),
 		gen.FieldType("content", "JSON"),
-		gen.FieldNew("Txt", "string", nil),
-		gen.FieldNew("Raw", "json.RawMessage", nil)))
+		gen.FieldNew("Txt", "string", map[string]string{
+			"json": "txt,omitempty",
+		}),
+		gen.FieldNew("Raw", "json.RawMessage", map[string]string{
+			"json": "raw,omitempty",
+		})))
 	g.ApplyBasic(g.GenerateModel("credentials"))
 	g.ApplyBasic(g.GenerateModel("auth"))
 	g.ApplyBasic(g.GenerateModel("dellog"))

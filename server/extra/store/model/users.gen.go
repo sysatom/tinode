@@ -23,8 +23,8 @@ type User struct {
 	Public    JSON      `gorm:"column:public" json:"public"`
 	Trusted   JSON      `gorm:"column:trusted" json:"trusted"`
 	Tags      string    `gorm:"column:tags" json:"tags"`
-	Fn        string    ``
-	Verified  bool      ``
+	Fn        string    `json:"fn,omitempty"`
+	Verified  bool      `json:"verified,omitempty"`
 }
 
 // TableName User's table name
