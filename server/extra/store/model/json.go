@@ -10,6 +10,10 @@ import (
 
 type JSON map[string]interface{}
 
+func (j JSON) GormDataType() string {
+	return "json"
+}
+
 func (j *JSON) Scan(value interface{}) error {
 	if bytes, ok := value.([]byte); ok {
 		result := make(map[string]interface{})
