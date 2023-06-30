@@ -6,6 +6,7 @@ package dao
 
 import (
 	"context"
+	"strings"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -111,6 +112,59 @@ func (c config) replaceDB(db *gorm.DB) config {
 }
 
 type configDo struct{ gen.DO }
+
+// GetByID
+//
+// SELECT * FROM @@table WHERE id=@id
+func (c configDo) GetByID(id int) (result model.Config, err error) {
+	var params []interface{}
+
+	var generateSQL strings.Builder
+	params = append(params, id)
+	generateSQL.WriteString("SELECT * FROM chatbot_configs WHERE id=? ")
+
+	var executeSQL *gorm.DB
+	executeSQL = c.UnderlyingDB().Raw(generateSQL.String(), params...).Take(&result) // ignore_security_alert
+	err = executeSQL.Error
+
+	return
+}
+
+// TakeByUidAndTopic query data by uid and topic and return one
+//
+// where("uid=@uid AND topic=@topic")
+func (c configDo) TakeByUidAndTopic(uid string, topic string) (result model.Config, err error) {
+	var params []interface{}
+
+	var generateSQL strings.Builder
+	params = append(params, uid)
+	params = append(params, topic)
+	generateSQL.WriteString("uid=? AND topic=? ")
+
+	var executeSQL *gorm.DB
+	executeSQL = c.UnderlyingDB().Where(generateSQL.String(), params...).Take(&result) // ignore_security_alert
+	err = executeSQL.Error
+
+	return
+}
+
+// FindByUidAndTopic query data by uid and topic and return array
+//
+// where("uid=@uid AND topic=@topic")
+func (c configDo) FindByUidAndTopic(uid string, topic string) (result []*model.Config, err error) {
+	var params []interface{}
+
+	var generateSQL strings.Builder
+	params = append(params, uid)
+	params = append(params, topic)
+	generateSQL.WriteString("uid=? AND topic=? ")
+
+	var executeSQL *gorm.DB
+	executeSQL = c.UnderlyingDB().Where(generateSQL.String(), params...).Find(&result) // ignore_security_alert
+	err = executeSQL.Error
+
+	return
+}
 
 func (c configDo) Debug() *configDo {
 	return c.withDO(c.DO.Debug())

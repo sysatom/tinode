@@ -10,6 +10,23 @@ import (
 	"os"
 )
 
+type Querier interface {
+	// GetByID
+	//
+	// SELECT * FROM @@table WHERE id=@id
+	GetByID(id int) (gen.T, error)
+
+	// TakeByUidAndTopic query data by uid and topic and return one
+	//
+	// where("uid=@uid AND topic=@topic")
+	TakeByUidAndTopic(uid, topic string) (gen.T, error)
+
+	// FindByUidAndTopic query data by uid and topic and return array
+	//
+	// where("uid=@uid AND topic=@topic")
+	FindByUidAndTopic(uid, topic string) ([]*gen.T, error)
+}
+
 func GenerationAction(c *cli.Context) error {
 	conffile := c.String("config")
 
@@ -46,46 +63,46 @@ func GenerationAction(c *cli.Context) error {
 	g.UseDB(db)
 
 	// chatbot table
-	g.ApplyBasic(g.GenerateModelAs("chatbot_action", "Action",
+	g.ApplyInterface(func(Querier) {}, g.GenerateModelAs("chatbot_action", "Action",
 		gen.FieldType("state", "ActionState")))
-	g.ApplyBasic(g.GenerateModelAs("chatbot_behavior", "Behavior",
+	g.ApplyInterface(func(Querier) {}, g.GenerateModelAs("chatbot_behavior", "Behavior",
 		gen.FieldType("extra", "*JSON")))
-	g.ApplyBasic(g.GenerateModelAs("chatbot_configs", "Config",
+	g.ApplyInterface(func(Querier) {}, g.GenerateModelAs("chatbot_configs", "Config",
 		gen.FieldType("value", "JSON")))
-	g.ApplyBasic(g.GenerateModelAs("chatbot_counter_records", "CounterRecord"))
-	g.ApplyBasic(g.GenerateModelAs("chatbot_counters", "Counter"))
-	g.ApplyBasic(g.GenerateModelAs("chatbot_data", "Data",
+	g.ApplyInterface(func(Querier) {}, g.GenerateModelAs("chatbot_counter_records", "CounterRecord"))
+	g.ApplyInterface(func(Querier) {}, g.GenerateModelAs("chatbot_counters", "Counter"))
+	g.ApplyInterface(func(Querier) {}, g.GenerateModelAs("chatbot_data", "Data",
 		gen.FieldType("value", "JSON")))
-	g.ApplyBasic(g.GenerateModelAs("chatbot_form", "Form",
+	g.ApplyInterface(func(Querier) {}, g.GenerateModelAs("chatbot_form", "Form",
 		gen.FieldType("schema", "JSON"),
 		gen.FieldType("values", "JSON"),
 		gen.FieldType("extra", "JSON"),
 		gen.FieldType("state", "FormState")))
-	g.ApplyBasic(g.GenerateModelAs("chatbot_instruct", "Instruct",
+	g.ApplyInterface(func(Querier) {}, g.GenerateModelAs("chatbot_instruct", "Instruct",
 		gen.FieldType("object", "InstructObject"),
 		gen.FieldType("content", "JSON"),
 		gen.FieldType("priority", "InstructPriority"),
 		gen.FieldType("state", "InstructState")))
-	g.ApplyBasic(g.GenerateModelAs("chatbot_key_result_values", "KeyResultValue"))
-	g.ApplyBasic(g.GenerateModelAs("chatbot_key_results", "KeyResult",
+	g.ApplyInterface(func(Querier) {}, g.GenerateModelAs("chatbot_key_result_values", "KeyResultValue"))
+	g.ApplyInterface(func(Querier) {}, g.GenerateModelAs("chatbot_key_results", "KeyResult",
 		gen.FieldType("value_mode", "ValueModeType")))
-	g.ApplyBasic(g.GenerateModelAs("chatbot_oauth", "OAuth",
+	g.ApplyInterface(func(Querier) {}, g.GenerateModelAs("chatbot_oauth", "OAuth",
 		gen.FieldType("extra", "JSON")))
-	g.ApplyBasic(g.GenerateModelAs("chatbot_objectives", "Objective"))
-	g.ApplyBasic(g.GenerateModelAs("chatbot_page", "Page",
+	g.ApplyInterface(func(Querier) {}, g.GenerateModelAs("chatbot_objectives", "Objective"))
+	g.ApplyInterface(func(Querier) {}, g.GenerateModelAs("chatbot_page", "Page",
 		gen.FieldType("type", "PageType"),
 		gen.FieldType("schema", "JSON"),
 		gen.FieldType("state", "PageState")))
-	g.ApplyBasic(g.GenerateModelAs("chatbot_parameter", "Parameter",
+	g.ApplyInterface(func(Querier) {}, g.GenerateModelAs("chatbot_parameter", "Parameter",
 		gen.FieldType("params", "JSON")))
-	g.ApplyBasic(g.GenerateModelAs("chatbot_session", "Session",
+	g.ApplyInterface(func(Querier) {}, g.GenerateModelAs("chatbot_session", "Session",
 		gen.FieldType("init", "JSON"),
 		gen.FieldType("values", "JSON"),
 		gen.FieldType("state", "SessionState")))
-	g.ApplyBasic(g.GenerateModelAs("chatbot_todos", "Todo"))
-	g.ApplyBasic(g.GenerateModelAs("chatbot_url", "Url",
+	g.ApplyInterface(func(Querier) {}, g.GenerateModelAs("chatbot_todos", "Todo"))
+	g.ApplyInterface(func(Querier) {}, g.GenerateModelAs("chatbot_url", "Url",
 		gen.FieldType("state", "UrlState")))
-	g.ApplyBasic(g.GenerateModelAs("chatbot_workflow", "Workflow",
+	g.ApplyInterface(func(Querier) {}, g.GenerateModelAs("chatbot_workflow", "Workflow",
 		gen.FieldType("values", "JSON"),
 		gen.FieldType("state", "WorkflowState")))
 

@@ -6,6 +6,7 @@ package dao
 
 import (
 	"context"
+	"strings"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -139,6 +140,59 @@ func (k keyResult) replaceDB(db *gorm.DB) keyResult {
 }
 
 type keyResultDo struct{ gen.DO }
+
+// GetByID
+//
+// SELECT * FROM @@table WHERE id=@id
+func (k keyResultDo) GetByID(id int) (result model.KeyResult, err error) {
+	var params []interface{}
+
+	var generateSQL strings.Builder
+	params = append(params, id)
+	generateSQL.WriteString("SELECT * FROM chatbot_key_results WHERE id=? ")
+
+	var executeSQL *gorm.DB
+	executeSQL = k.UnderlyingDB().Raw(generateSQL.String(), params...).Take(&result) // ignore_security_alert
+	err = executeSQL.Error
+
+	return
+}
+
+// TakeByUidAndTopic query data by uid and topic and return one
+//
+// where("uid=@uid AND topic=@topic")
+func (k keyResultDo) TakeByUidAndTopic(uid string, topic string) (result model.KeyResult, err error) {
+	var params []interface{}
+
+	var generateSQL strings.Builder
+	params = append(params, uid)
+	params = append(params, topic)
+	generateSQL.WriteString("uid=? AND topic=? ")
+
+	var executeSQL *gorm.DB
+	executeSQL = k.UnderlyingDB().Where(generateSQL.String(), params...).Take(&result) // ignore_security_alert
+	err = executeSQL.Error
+
+	return
+}
+
+// FindByUidAndTopic query data by uid and topic and return array
+//
+// where("uid=@uid AND topic=@topic")
+func (k keyResultDo) FindByUidAndTopic(uid string, topic string) (result []*model.KeyResult, err error) {
+	var params []interface{}
+
+	var generateSQL strings.Builder
+	params = append(params, uid)
+	params = append(params, topic)
+	generateSQL.WriteString("uid=? AND topic=? ")
+
+	var executeSQL *gorm.DB
+	executeSQL = k.UnderlyingDB().Where(generateSQL.String(), params...).Find(&result) // ignore_security_alert
+	err = executeSQL.Error
+
+	return
+}
 
 func (k keyResultDo) Debug() *keyResultDo {
 	return k.withDO(k.DO.Debug())

@@ -6,6 +6,7 @@ package dao
 
 import (
 	"context"
+	"strings"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -127,6 +128,59 @@ func (w workflow) replaceDB(db *gorm.DB) workflow {
 }
 
 type workflowDo struct{ gen.DO }
+
+// GetByID
+//
+// SELECT * FROM @@table WHERE id=@id
+func (w workflowDo) GetByID(id int) (result model.Workflow, err error) {
+	var params []interface{}
+
+	var generateSQL strings.Builder
+	params = append(params, id)
+	generateSQL.WriteString("SELECT * FROM chatbot_workflow WHERE id=? ")
+
+	var executeSQL *gorm.DB
+	executeSQL = w.UnderlyingDB().Raw(generateSQL.String(), params...).Take(&result) // ignore_security_alert
+	err = executeSQL.Error
+
+	return
+}
+
+// TakeByUidAndTopic query data by uid and topic and return one
+//
+// where("uid=@uid AND topic=@topic")
+func (w workflowDo) TakeByUidAndTopic(uid string, topic string) (result model.Workflow, err error) {
+	var params []interface{}
+
+	var generateSQL strings.Builder
+	params = append(params, uid)
+	params = append(params, topic)
+	generateSQL.WriteString("uid=? AND topic=? ")
+
+	var executeSQL *gorm.DB
+	executeSQL = w.UnderlyingDB().Where(generateSQL.String(), params...).Take(&result) // ignore_security_alert
+	err = executeSQL.Error
+
+	return
+}
+
+// FindByUidAndTopic query data by uid and topic and return array
+//
+// where("uid=@uid AND topic=@topic")
+func (w workflowDo) FindByUidAndTopic(uid string, topic string) (result []*model.Workflow, err error) {
+	var params []interface{}
+
+	var generateSQL strings.Builder
+	params = append(params, uid)
+	params = append(params, topic)
+	generateSQL.WriteString("uid=? AND topic=? ")
+
+	var executeSQL *gorm.DB
+	executeSQL = w.UnderlyingDB().Where(generateSQL.String(), params...).Find(&result) // ignore_security_alert
+	err = executeSQL.Error
+
+	return
+}
 
 func (w workflowDo) Debug() *workflowDo {
 	return w.withDO(w.DO.Debug())

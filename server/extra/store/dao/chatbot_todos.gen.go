@@ -6,6 +6,7 @@ package dao
 
 import (
 	"context"
+	"strings"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -147,6 +148,59 @@ func (t todo) replaceDB(db *gorm.DB) todo {
 }
 
 type todoDo struct{ gen.DO }
+
+// GetByID
+//
+// SELECT * FROM @@table WHERE id=@id
+func (t todoDo) GetByID(id int) (result model.Todo, err error) {
+	var params []interface{}
+
+	var generateSQL strings.Builder
+	params = append(params, id)
+	generateSQL.WriteString("SELECT * FROM chatbot_todos WHERE id=? ")
+
+	var executeSQL *gorm.DB
+	executeSQL = t.UnderlyingDB().Raw(generateSQL.String(), params...).Take(&result) // ignore_security_alert
+	err = executeSQL.Error
+
+	return
+}
+
+// TakeByUidAndTopic query data by uid and topic and return one
+//
+// where("uid=@uid AND topic=@topic")
+func (t todoDo) TakeByUidAndTopic(uid string, topic string) (result model.Todo, err error) {
+	var params []interface{}
+
+	var generateSQL strings.Builder
+	params = append(params, uid)
+	params = append(params, topic)
+	generateSQL.WriteString("uid=? AND topic=? ")
+
+	var executeSQL *gorm.DB
+	executeSQL = t.UnderlyingDB().Where(generateSQL.String(), params...).Take(&result) // ignore_security_alert
+	err = executeSQL.Error
+
+	return
+}
+
+// FindByUidAndTopic query data by uid and topic and return array
+//
+// where("uid=@uid AND topic=@topic")
+func (t todoDo) FindByUidAndTopic(uid string, topic string) (result []*model.Todo, err error) {
+	var params []interface{}
+
+	var generateSQL strings.Builder
+	params = append(params, uid)
+	params = append(params, topic)
+	generateSQL.WriteString("uid=? AND topic=? ")
+
+	var executeSQL *gorm.DB
+	executeSQL = t.UnderlyingDB().Where(generateSQL.String(), params...).Find(&result) // ignore_security_alert
+	err = executeSQL.Error
+
+	return
+}
 
 func (t todoDo) Debug() *todoDo {
 	return t.withDO(t.DO.Debug())
