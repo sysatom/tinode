@@ -15,6 +15,7 @@ import (
 	"github.com/tinode/chat/server/extra/ruleset/form"
 	"github.com/tinode/chat/server/extra/ruleset/instruct"
 	"github.com/tinode/chat/server/extra/ruleset/session"
+	"github.com/tinode/chat/server/extra/ruleset/setting"
 	"github.com/tinode/chat/server/extra/ruleset/workflow"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/store/model"
@@ -36,6 +37,7 @@ type Handler interface {
 	// IsReady сhecks if the bot is initialized.
 	IsReady() bool
 
+	// Bootstrap Lifecycle hook
 	Bootstrap() error
 
 	AuthLevel() auth.Level
@@ -519,6 +521,19 @@ func FormMsg(ctx types.Context, id string) types.MsgPayload {
 					if rule.Id == id {
 						title = rule.Title
 						field = rule.Field
+
+						// default value type
+						for index, formField := range field {
+							if formField.ValueType == "" {
+								switch formField.Type {
+								case types.FormFieldText, types.FormFieldPassword, types.FormFieldTextarea,
+									types.FormFieldEmail, types.FormFieldUrl:
+									field[index].ValueType = types.FormFieldValueString
+								case types.FormFieldNumber:
+									field[index].ValueType = types.FormFieldValueInt64
+								}
+							}
+						}
 					}
 				}
 			}
@@ -808,6 +823,44 @@ func StoreInstruct(ctx types.Context, payload types.MsgPayload) types.MsgPayload
 	}
 
 	return types.TextMsg{Text: fmt.Sprintf("Instruct[%s:%s]", msg.Flag, msg.No)}
+}
+
+func SettingCovertForm(id string, rule setting.Rule) form.Rule {
+	var result form.Rule
+	result.Id = fmt.Sprintf("%s_setting", id)
+	result.Title = fmt.Sprintf("%s Bot Setting", utils.FirstUpper(id))
+	result.Field = []types.FormField{}
+
+	for _, row := range rule {
+		result.Field = append(result.Field, types.FormField{
+			Key:      row.Key,
+			Type:     row.Type,
+			Required: true,
+			Label:    row.Title,
+		})
+	}
+
+	result.Handler = func(ctx types.Context, values map[string]interface{}) types.MsgPayload {
+		for key, value := range values {
+			err := store.Chatbot.ConfigSet(ctx.AsUser, ctx.Original, fmt.Sprintf("%s_%s", id, key), map[string]interface{}{
+				"value": value,
+			})
+			if err != nil {
+				return types.TextMsg{Text: fmt.Sprintf("setting [%s] %s error", ctx.FormId, key)}
+			}
+		}
+		return types.TextMsg{Text: fmt.Sprintf("ok, setting [%s]", ctx.FormId)}
+	}
+
+	return result
+}
+
+func SettingGet(ctx types.Context, id string, key string) (model.JSON, error) {
+	return store.Chatbot.ConfigGet(ctx.AsUser, ctx.Original, fmt.Sprintf("%s_%s", id, key))
+}
+
+func SettingMsg(ctx types.Context, id string) types.MsgPayload {
+	return FormMsg(ctx, fmt.Sprintf("%s_setting", id))
 }
 
 const (

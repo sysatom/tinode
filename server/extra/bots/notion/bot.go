@@ -10,11 +10,6 @@ import (
 
 const Name = "notion"
 
-const (
-	TokenKey        = "token"
-	ImportPageIdKey = "import_page_id"
-)
-
 var handler bot
 
 func init() {
@@ -54,6 +49,24 @@ func (bot) Init(jsonconf json.RawMessage) error {
 
 func (bot) IsReady() bool {
 	return handler.initialized
+}
+
+func (bot) Bootstrap() error {
+	// load setting rule
+	formRules = append(formRules, bots.SettingCovertForm(Name, settingRules))
+
+	return nil
+}
+
+func (b bot) Help() (map[string][]string, error) {
+	return bots.Help(commandRules, nil, nil)
+}
+
+func (b bot) Rules() []interface{} {
+	return []interface{}{
+		commandRules,
+		formRules,
+	}
 }
 
 func (b bot) Command(ctx types.Context, content interface{}) (types.MsgPayload, error) {

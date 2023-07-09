@@ -53,6 +53,13 @@ func (bot) IsReady() bool {
 	return handler.initialized
 }
 
+func (bot) Bootstrap() error {
+	// load setting rule
+	formRules = append(formRules, bots.SettingCovertForm(Name, settingRules))
+
+	return nil
+}
+
 func (bot) AuthLevel() auth.Level {
 	return auth.LevelRoot
 }

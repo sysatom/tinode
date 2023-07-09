@@ -19,36 +19,10 @@ var commandRules = []command.Rule{
 		},
 	},
 	{
-		Define: "config",
-		Help:   `Config`,
+		Define: "setting",
+		Help:   `Bot setting`,
 		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
-			c1, _ := store.Chatbot.ConfigGet(ctx.AsUser, ctx.Original, TokenKey)
-			tokenValue, _ := c1.String("value")
-			c2, _ := store.Chatbot.ConfigGet(ctx.AsUser, ctx.Original, ImportPageIdKey)
-			importBlockIdValue, _ := c2.String("value")
-
-			return bots.StoreForm(ctx, types.FormMsg{
-				ID:    configFormID,
-				Title: "Config",
-				Field: []types.FormField{
-					{
-						Type:        types.FormFieldText,
-						Key:         TokenKey,
-						Value:       tokenValue,
-						ValueType:   types.FormFieldValueString,
-						Label:       "Internal Integration Token",
-						Placeholder: "Input token",
-					},
-					{
-						Type:        types.FormFieldText,
-						Key:         ImportPageIdKey,
-						Value:       importBlockIdValue,
-						ValueType:   types.FormFieldValueString,
-						Label:       "MindCache page id",
-						Placeholder: "Input page id",
-					},
-				},
-			})
+			return bots.SettingMsg(ctx, Name)
 		},
 	},
 	{
@@ -89,21 +63,21 @@ var commandRules = []command.Rule{
 			text, _ := tokens[1].Value.String()
 
 			// token value
-			j, err := store.Chatbot.ConfigGet(ctx.AsUser, ctx.Original, TokenKey)
+			j, err := bots.SettingGet(ctx, Name, tokenSettingKey)
 			if err != nil {
 				return nil
 			}
-			token, _ := j.String("value")
+			token, _ := j.StringValue()
 			if token == "" {
 				return types.TextMsg{Text: "set config"}
 			}
 
 			// block id
-			j2, err := store.Chatbot.ConfigGet(ctx.AsUser, ctx.Original, ImportPageIdKey)
+			j2, err := bots.SettingGet(ctx, Name, importPageIdSettingKey)
 			if err != nil {
 				return nil
 			}
-			pageId, _ := j2.String("value")
+			pageId, _ := j2.StringValue()
 			if pageId == "" {
 				return types.TextMsg{Text: "set config"}
 			}

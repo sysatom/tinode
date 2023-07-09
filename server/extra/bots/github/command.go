@@ -25,26 +25,10 @@ var commandRules = []command.Rule{
 		},
 	},
 	{
-		Define: "config",
-		Help:   `Config`,
+		Define: "setting",
+		Help:   `Bot setting`,
 		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
-			j, _ := store.Chatbot.ConfigGet(ctx.AsUser, ctx.Original, RepoKey)
-			repoValue, _ := j.String("value")
-
-			return bots.StoreForm(ctx, types.FormMsg{
-				ID:    configFormID,
-				Title: "Config",
-				Field: []types.FormField{
-					{
-						Type:        types.FormFieldText,
-						Key:         "repo",
-						Value:       repoValue,
-						ValueType:   types.FormFieldValueString,
-						Label:       "Repo",
-						Placeholder: "Input repo",
-					},
-				},
-			})
+			return bots.SettingMsg(ctx, Name)
 		},
 	},
 	{
@@ -128,11 +112,11 @@ var commandRules = []command.Rule{
 			}
 
 			// repo value
-			j, err := store.Chatbot.ConfigGet(ctx.AsUser, ctx.Original, RepoKey)
+			j, err := bots.SettingGet(ctx, Name, repoSettingKey)
 			if err != nil {
 				return nil
 			}
-			repo, _ := j.String("value")
+			repo, _ := j.StringValue()
 			if repo == "" {
 				return types.TextMsg{Text: "set repo [string]"}
 			}

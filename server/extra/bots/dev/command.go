@@ -33,6 +33,13 @@ var commandRules = []command.Rule{
 		},
 	},
 	{
+		Define: "setting",
+		Help:   `Bot setting`,
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
+			return bots.SettingMsg(ctx, Name)
+		},
+	},
+	{
 		Define: "rand [number] [number]",
 		Help:   `Generate random numbers`,
 		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {

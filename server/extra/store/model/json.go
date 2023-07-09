@@ -90,3 +90,19 @@ func (j JSON) get(key string) (interface{}, bool) {
 	v, ok := j[key]
 	return v, ok
 }
+
+func (j JSON) StringValue() (string, bool) {
+	return j.String("value")
+}
+
+func (j JSON) Int64Value() (int64, bool) {
+	return j.Int64("value")
+}
+
+func (j JSON) Uint64Value() (uint64, bool) {
+	return j.Uint64("value")
+}
+
+func (j JSON) Float64Value() (float64, bool) {
+	return j.Float64("value")
+}
