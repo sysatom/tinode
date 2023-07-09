@@ -64,10 +64,6 @@ func (bot) AuthLevel() auth.Level {
 	return auth.LevelRoot
 }
 
-func (b bot) Help() (map[string][]string, error) {
-	return bots.Help(commandRules, agentRules, cronRules)
-}
-
 func (b bot) Rules() []interface{} {
 	return []interface{}{
 		commandRules,

@@ -60,10 +60,6 @@ func (bot) Bootstrap() error {
 	return nil
 }
 
-func (b bot) Help() (map[string][]string, error) {
-	return bots.Help(commandRules, nil, cronRules)
-}
-
 func (b bot) Rules() []interface{} {
 	return []interface{}{
 		commandRules,

@@ -92,8 +92,8 @@ func (Base) AuthLevel() auth.Level {
 	return auth.LevelAuth
 }
 
-func (Base) Help() (map[string][]string, error) {
-	return nil, nil
+func (b Base) Help() (map[string][]string, error) {
+	return Help(b.Rules())
 }
 
 func (Base) Rules() []interface{} {
@@ -164,42 +164,41 @@ func Register(name string, bot Handler) {
 	handlers[name] = bot
 }
 
-func Help(commandRules []command.Rule, agentRules []agent.Rule, cronRules []cron.Rule) (map[string][]string, error) {
+func Help(rules []interface{}) (map[string][]string, error) {
 	result := make(map[string][]string)
 
-	// command
-	if commandRules != nil {
-		rs := command.Ruleset(commandRules)
-		var rows []string
-		for _, rule := range rs {
-			rows = append(rows, fmt.Sprintf("%s : %s", rule.Define, rule.Help))
-		}
-		if len(rows) > 0 {
-			result["command"] = rows
-		}
-	}
-
-	// agent
-	if agentRules != nil {
-		rs := agent.Ruleset(agentRules)
-		var rows []string
-		for _, rule := range rs {
-			rows = append(rows, fmt.Sprintf("%s : %s", rule.Id, rule.Help))
-		}
-		if len(rows) > 0 {
-			result["agent"] = rows
-		}
-	}
-
-	// cron
-	if cronRules != nil {
-		rs := cronRules
-		var rows []string
-		for _, rule := range rs {
-			rows = append(rows, fmt.Sprintf("%s : %s", rule.Name, rule.Help))
-		}
-		if len(rows) > 0 {
-			result["cron"] = rows
+	for _, rule := range rules {
+		switch v := rule.(type) {
+		case []command.Rule:
+			// command
+			rs := command.Ruleset(v)
+			var rows []string
+			for _, rule := range rs {
+				rows = append(rows, fmt.Sprintf("%s : %s", rule.Define, rule.Help))
+			}
+			if len(rows) > 0 {
+				result["command"] = rows
+			}
+		case []agent.Rule:
+			// agent
+			rs := agent.Ruleset(v)
+			var rows []string
+			for _, rule := range rs {
+				rows = append(rows, fmt.Sprintf("%s : %s", rule.Id, rule.Help))
+			}
+			if len(rows) > 0 {
+				result["agent"] = rows
+			}
+		case []cron.Rule:
+			// cron
+			rs := v
+			var rows []string
+			for _, rule := range rs {
+				rows = append(rows, fmt.Sprintf("%s : %s", rule.Name, rule.Help))
+			}
+			if len(rows) > 0 {
+				result["cron"] = rows
+			}
 		}
 	}
 
