@@ -17,11 +17,12 @@ DOWNLOAD_PATH=/download
 ```shell
 
 # Generator cli
-go run github.com/tinode/chat/server/extra/cmd/generator -bot example -rule input,group,agent,command,condition,cron,form
+go run github.com/tinode/chat/server/extra/cmd/composer generator bot -name example -rule input,group,agent,command,condition,cron,form
+go run github.com/tinode/chat/server/extra/cmd/composer generator vendor -name example
 
 # Migrate cli
-go run github.com/tinode/chat/server/extra/cmd/migrate
+go run github.com/tinode/chat/server/extra/cmd/composer migrate import
 
 # Migration file cli
-go run github.com/tinode/chat/server/extra/cmd/migration example_name
+go run github.com/tinode/chat/server/extra/cmd/composer migrate migration -name file_name
 ```

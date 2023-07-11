@@ -1,9 +1,12 @@
 package migrate
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/mysql"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
 	extraMigrate "github.com/tinode/chat/server/extra/store/migrate"
 	"github.com/tinode/jsonco"
@@ -33,11 +36,14 @@ func ImportAction(c *cli.Context) error {
 	}
 	dsn := config.StoreConfig.Adapters.Mysql.DSN
 
+	db, _ := sql.Open("mysql", dsn)
+	driver, _ := mysql.WithInstance(db, &mysql.Config{})
+
 	d, err := iofs.New(extraMigrate.Fs, "migrations")
 	if err != nil {
 		panic(err)
 	}
-	m, err := migrate.NewWithSourceInstance("iofs", d, fmt.Sprintf("mysql://%s", dsn))
+	m, err := migrate.NewWithInstance("iofs", d, "mysql", driver)
 	if err != nil {
 		panic(err)
 	}
