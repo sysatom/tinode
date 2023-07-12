@@ -3,8 +3,10 @@ package dev
 import (
 	"encoding/json"
 	"errors"
+	"github.com/emicklei/go-restful/v3"
 	"github.com/tinode/chat/server/auth"
 	"github.com/tinode/chat/server/extra/bots"
+	"github.com/tinode/chat/server/extra/route"
 	"github.com/tinode/chat/server/extra/ruleset/instruct"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
@@ -62,6 +64,14 @@ func (bot) Bootstrap() error {
 
 func (bot) AuthLevel() auth.Level {
 	return auth.LevelRoot
+}
+
+func (bot) WebService() *restful.WebService {
+	return route.WebService(
+		Name, serviceVersion,
+		route.Route("GET", "/example", example, "get example data", nil, nil),
+		route.Route("POST", "/example", example, "create example data", nil, nil),
+	)
 }
 
 func (b bot) Rules() []interface{} {

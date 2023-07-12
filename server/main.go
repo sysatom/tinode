@@ -371,6 +371,9 @@ func main() {
 	// Set up HTTP server. Must use non-default mux because of expvar.
 	mux := http.NewServeMux()
 
+	// Handle extra
+	mux = hookMux()
+
 	// Exposing values for statistics and monitoring.
 	evpath := *expvarPath
 	if evpath == "" {
@@ -735,9 +738,6 @@ func main() {
 		logs.Info.Printf("Server status is available at '%s'", sspath)
 		mux.HandleFunc(sspath, serveStatus)
 	}
-
-	// Handle extra
-	hookMux(mux)
 
 	// Handle websocket clients.
 	mux.HandleFunc(config.ApiPath+"v0/channels", serveWebSocket)

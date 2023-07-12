@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/emicklei/go-restful/v3"
 	"github.com/tinode/chat/server/auth"
 	"github.com/tinode/chat/server/extra/pkg/parser"
 	"github.com/tinode/chat/server/extra/ruleset/action"
@@ -40,12 +41,16 @@ type Handler interface {
 	// Bootstrap Lifecycle hook
 	Bootstrap() error
 
+	// WebService restful web service
+	WebService() *restful.WebService
+
+	// AuthLevel authorizations
 	AuthLevel() auth.Level
 
 	// Help return bot help
 	Help() (map[string][]string, error)
 
-	// Rules return bot rule set
+	// Rules return bot ruleset
 	Rules() []interface{}
 
 	// Input return input result
@@ -85,6 +90,10 @@ type Handler interface {
 type Base struct{}
 
 func (Base) Bootstrap() error {
+	return nil
+}
+
+func (Base) WebService() *restful.WebService {
 	return nil
 }
 

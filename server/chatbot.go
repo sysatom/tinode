@@ -6,6 +6,7 @@ import (
 	"github.com/tinode/chat/server/extra/channels"
 	"github.com/tinode/chat/server/extra/pkg/cache"
 	"github.com/tinode/chat/server/extra/pkg/queue"
+	"github.com/tinode/chat/server/extra/route"
 	extraStore "github.com/tinode/chat/server/extra/store"
 	extraTypes "github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/vendors"
@@ -60,10 +61,22 @@ import (
 
 // hook
 
-func hookMux(mux *http.ServeMux) {
+func hookMux() *http.ServeMux {
+	// Bot WebService
+	wc := route.NewContainer()
+	for _, bot := range bots.List() {
+		if bot.WebService() != nil {
+			wc.Add(bot.WebService())
+		}
+	}
+	route.RegisterSwagger(wc)
+	mux := wc.ServeMux
+
 	mux.Handle("/extra/", newRouter())
 	mux.Handle("/u/", newUrlRouter())
 	mux.Handle("/d/", newDownloadRouter())
+
+	return mux
 }
 
 func hookStore() {
