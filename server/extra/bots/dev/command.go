@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	_ "embed"
 	"fmt"
+	"github.com/gookit/event"
 	"github.com/tinode/chat/server/extra/bots"
 	"github.com/tinode/chat/server/extra/pkg/parser"
 	"github.com/tinode/chat/server/extra/pkg/queue"
@@ -52,6 +53,9 @@ var commandRules = []command.Rule{
 				return nil
 			}
 			t := nBing.Int64() + min
+
+			//event.MustFire("evt1", event.M{"number": t})
+			event.Std().FireC("evt1", event.M{"number": t})
 
 			return types.TextMsg{Text: strconv.FormatInt(t, 10)}
 		},

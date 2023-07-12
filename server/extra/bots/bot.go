@@ -40,6 +40,8 @@ type Handler interface {
 	// Bootstrap Lifecycle hook
 	Bootstrap() error
 
+	OnEvent() error
+
 	AuthLevel() auth.Level
 
 	// Help return bot help
@@ -85,6 +87,10 @@ type Handler interface {
 type Base struct{}
 
 func (Base) Bootstrap() error {
+	return nil
+}
+
+func (Base) OnEvent() error {
 	return nil
 }
 
@@ -922,6 +928,9 @@ func Bootstrap() error {
 			continue
 		}
 		if err := bot.Bootstrap(); err != nil {
+			return err
+		}
+		if err := bot.OnEvent(); err != nil {
 			return err
 		}
 	}

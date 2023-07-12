@@ -3,6 +3,8 @@ package dev
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+	"github.com/gookit/event"
 	"github.com/tinode/chat/server/auth"
 	"github.com/tinode/chat/server/extra/bots"
 	"github.com/tinode/chat/server/extra/ruleset/instruct"
@@ -57,6 +59,16 @@ func (bot) Bootstrap() error {
 	// load setting rule
 	formRules = append(formRules, bots.SettingCovertForm(Name, settingRules))
 
+	return nil
+}
+
+func (bot) OnEvent() error {
+	event.Std().On("evt1", event.ListenerFunc(func(e event.Event) error {
+		fmt.Printf("handle event: %s\n", e.Name())
+		fmt.Println(e.Data())
+		fmt.Println(e.Get("number"))
+		return nil
+	}))
 	return nil
 }
 
