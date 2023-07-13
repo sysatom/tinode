@@ -34,12 +34,13 @@ func newRouter() *mux.Router {
 	r := mux.NewRouter()
 	s := r.PathPrefix("/extra").Subrouter()
 	s.Use(mux.CORSMethodMiddleware(r))
+	// common
 	s.HandleFunc("/oauth/{category}/{uid1}/{uid2}", storeOAuth)
 	s.HandleFunc("/page/{id}", getPage)
 	s.HandleFunc("/form", postForm).Methods(http.MethodPost)
-	s.HandleFunc("/webhook/{uid1}/{uid2}/{uid3}", webhook).Methods(http.MethodPost)
-	s.HandleFunc("/linkit", postLinkitData)
 	s.HandleFunc("/queue/stats", queueStats)
+	// bot
+	s.HandleFunc("/linkit", postLinkitData)
 
 	return s
 }
@@ -301,41 +302,6 @@ func postForm(rw http.ResponseWriter, req *http.Request) {
 		nextWorkflow(ctx, workflowFlag, int(workflowVersion), topic, topicUid)
 	}
 
-	_, _ = rw.Write([]byte("ok"))
-}
-
-func webhook(rw http.ResponseWriter, req *http.Request) {
-	vars := mux.Vars(req)
-
-	ui1, _ := strconv.ParseUint(vars["uid1"], 10, 64)
-	ui2, _ := strconv.ParseUint(vars["uid2"], 10, 64)
-	ui3, _ := strconv.ParseUint(vars["uid3"], 10, 64)
-
-	uid1 := types.Uid(ui1)
-	uid2 := types.Uid(ui2)
-	uid3 := types.Uid(ui3)
-	topic := uid1.P2PName(uid2)
-
-	value, err := extraStore.Chatbot.DataGet(uid1, uid2.UserId(), fmt.Sprintf("webhook:%s", uid3.String()))
-	if err != nil {
-		errorResponse(rw, "webhook error")
-		return
-	}
-	_, ok := value.String("value")
-	if !ok {
-		errorResponse(rw, "webhook error")
-		return
-	}
-
-	d, _ := io.ReadAll(req.Body)
-
-	txt := ""
-	if len(d) > 1000 {
-		txt = fmt.Sprintf("[webhook:%s] body too long", uid3.String())
-	} else {
-		txt = fmt.Sprintf("[webhook:%s] %s", uid3.String(), string(d))
-	}
-	botSend(topic, uid2, extraTypes.TextMsg{Text: txt})
 	_, _ = rw.Write([]byte("ok"))
 }
 
