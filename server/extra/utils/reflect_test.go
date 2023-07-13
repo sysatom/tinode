@@ -24,27 +24,67 @@ func TestGetFunctionName(t *testing.T) {
 			args: args{
 				i: foo1,
 			},
-			want: "foo1",
+			want: "github.com/tinode/chat/server/extra/utils.foo1",
 		},
 		{
 			name: "case2",
 			args: args{
 				i: foo2,
 			},
-			want: "foo2",
+			want: "github.com/tinode/chat/server/extra/utils.foo2",
 		},
 		{
 			name: "case3",
 			args: args{
 				i: foo3,
 			},
-			want: "foo3",
+			want: "github.com/tinode/chat/server/extra/utils.foo3",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := GetFunctionName(tt.args.i); got != tt.want {
 				t.Errorf("GetFunctionName() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestParseFunctionName(t *testing.T) {
+	type args struct {
+		name string
+	}
+	tests := []struct {
+		name  string
+		args  args
+		want  string
+		want1 string
+	}{
+		{
+			name: "case1",
+			args: args{
+				name: "github.com/tinode/chat/server/extra/utils.foo1",
+			},
+			want:  "github.com/tinode/chat/server/extra/utils",
+			want1: "foo1",
+		},
+		{
+			name: "case2",
+			args: args{
+				name: "dev.github.com/tinode/chat/server/extra/utils.foo2",
+			},
+			want:  "dev.github.com/tinode/chat/server/extra/utils",
+			want1: "foo2",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, got1 := ParseFunctionName(tt.args.name)
+			if got != tt.want {
+				t.Errorf("ParseFunctionName() got = %v, want %v", got, tt.want)
+			}
+			if got1 != tt.want1 {
+				t.Errorf("ParseFunctionName() got1 = %v, want %v", got1, tt.want1)
 			}
 		})
 	}

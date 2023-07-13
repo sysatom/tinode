@@ -69,7 +69,7 @@ func hookMux() *http.ServeMux {
 			wc.Add(bot.WebService())
 		}
 	}
-	route.RegisterSwagger(wc)
+	route.AddSwagger(wc)
 	mux := wc.ServeMux
 
 	mux.Handle("/extra/", newRouter())

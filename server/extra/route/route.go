@@ -4,8 +4,8 @@ import (
 	"fmt"
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
 	"github.com/emicklei/go-restful/v3"
-	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/utils"
+	"github.com/tinode/chat/server/logs"
 	"net/http"
 )
 
@@ -23,6 +23,14 @@ func NewContainer() *restful.Container {
 		logServiceError(serviceError, req, resp)
 	})
 
+	// CORS
+	cors := restful.CrossOriginResourceSharing{
+		AllowedHeaders: []string{"Content-Type", "Accept"},
+		AllowedMethods: []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
+		CookiesAllowed: false,
+		Container:      restfulContainer}
+	restfulContainer.Filter(cors.Filter)
+
 	return restfulContainer
 }
 
@@ -36,21 +44,12 @@ func newWebService(group string, version string) *restful.WebService {
 	return ws
 }
 
-func RegisterResourceHandlers(ws *restful.WebService, group string, function restful.RouteFunction) { // fixme group
-	resource := group
-	tags := []string{resource}
-	ws.Route(ws.GET("/user/{id}").To(function).
-		Doc(fmt.Sprintf("Get %s resource", resource)).
-		Operation(resource+"Get").
-		Metadata(restfulspec.KeyOpenAPITags, tags).
-		Returns(http.StatusOK, "OK", model.Objective{}).
-		Writes(model.Objective{}))
-}
-
 func WebService(group, version string, rs ...Router) *restful.WebService {
+	path := "/" + prefix + "/" + group + "/" + version
 	ws := newWebService(group, version)
 	for _, router := range rs {
-		resource := utils.GetFunctionName(router.Function)
+		funcName := utils.GetFunctionName(router.Function)
+		_, resource := utils.ParseFunctionName(funcName)
 		tags := []string{resource}
 		var builder *restful.RouteBuilder
 		switch router.Method {
@@ -74,6 +73,7 @@ func WebService(group, version string, rs ...Router) *restful.WebService {
 			Metadata(restfulspec.KeyOpenAPITags, tags).
 			Returns(http.StatusOK, "OK", router.ReturnSample).
 			Writes(router.WriteSample))
+		logs.Info.Printf("WebService %s \t%s%s -> %s", router.Method, path, router.Path, funcName)
 	}
 	return ws
 }

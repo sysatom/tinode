@@ -6,13 +6,13 @@ import (
 	"github.com/go-openapi/spec"
 )
 
-func RegisterSwagger(restfulContainer *restful.Container) {
-	c := restfulspec.Config{
-		WebServices:                   restfulContainer.RegisteredWebServices(),
-		APIPath:                       "/swagger.json",
+func AddSwagger(container *restful.Container) {
+	cfg := restfulspec.Config{
+		WebServices:                   container.RegisteredWebServices(),
+		APIPath:                       "/bot/swagger.json",
 		PostBuildSwaggerObjectHandler: enrichSwaggerObject,
 	}
-	restfulContainer.Add(restfulspec.NewOpenAPIService(c))
+	container.Add(restfulspec.NewOpenAPIService(cfg))
 }
 
 func enrichSwaggerObject(swo *spec.Swagger) {
