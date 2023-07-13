@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	_ "embed"
 	"encoding/json"
 	"fmt"
@@ -28,7 +27,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"text/template"
 	"time"
 )
 
@@ -42,8 +40,6 @@ func newRouter() *mux.Router {
 	s.HandleFunc("/webhook/{uid1}/{uid2}/{uid3}", webhook).Methods(http.MethodPost)
 	s.HandleFunc("/linkit", postLinkitData)
 	s.HandleFunc("/queue/stats", queueStats)
-	s.HandleFunc("/editor/markdown/{flag}", markdownEditor)
-	s.HandleFunc("/editor/markdown", postMarkdown).Methods(http.MethodPost)
 
 	return s
 }
@@ -580,65 +576,4 @@ func queueStats(rw http.ResponseWriter, _ *http.Request) {
 		return
 	}
 	_, _ = fmt.Fprint(rw, html)
-}
-
-//go:embed extra/page/template/markdown.html
-var editorTemplate string
-
-func markdownEditor(rw http.ResponseWriter, req *http.Request) {
-	vars := mux.Vars(req)
-	flag, _ := vars["flag"]
-
-	p, err := extraStore.Chatbot.ParameterGet(flag)
-	if err != nil {
-		errorResponse(rw, "flag error")
-		return
-	}
-	if p.ExpiredAt.Before(time.Now()) {
-		errorResponse(rw, "page expired")
-		return
-	}
-
-	t, err := template.New("tmpl").Parse(editorTemplate)
-	if err != nil {
-		errorResponse(rw, "page template error")
-		return
-	}
-	buf := bytes.NewBufferString("")
-	data := p.Params
-	err = t.Execute(buf, data)
-
-	_, _ = fmt.Fprint(rw, buf.String())
-}
-
-func postMarkdown(rw http.ResponseWriter, req *http.Request) {
-	// data
-	d, _ := io.ReadAll(req.Body)
-	var data map[string]string
-	err := json.Unmarshal(d, &data)
-	if err != nil {
-		errorResponse(rw, "params error")
-		return
-	}
-
-	uid, _ := data["uid"]
-	markdown, _ := data["markdown"]
-	if uid == "" || markdown == "" {
-		errorResponse(rw, "params error")
-		return
-	}
-
-	// store
-	userUid := types.ParseUserId(uid)
-	botUid, _, _, _, err := store.Users.GetAuthUniqueRecord("basic", "markdown_bot")
-	topic := userUid.P2PName(botUid)
-	payload := bots.StorePage(
-		extraTypes.Context{AsUser: userUid, Original: botUid.UserId()},
-		model.PageMarkdown, "",
-		extraTypes.MarkdownMsg{Raw: markdown})
-
-	// send
-	botSend(topic, botUid, payload)
-
-	_, _ = fmt.Fprint(rw, "ok")
 }
