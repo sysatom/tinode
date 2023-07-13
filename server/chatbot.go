@@ -199,3 +199,7 @@ func hookMounted() {
 func hookQueue() {
 	queue.InitMessageQueue(NewAsyncMessageConsumer())
 }
+
+func hookEvent() {
+	onSendEvent()
+}

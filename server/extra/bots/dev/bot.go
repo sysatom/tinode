@@ -3,11 +3,14 @@ package dev
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/emicklei/go-restful/v3"
 	"github.com/tinode/chat/server/auth"
 	"github.com/tinode/chat/server/extra/bots"
+	"github.com/tinode/chat/server/extra/pkg/event"
 	"github.com/tinode/chat/server/extra/route"
 	"github.com/tinode/chat/server/extra/ruleset/instruct"
+	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
 )
@@ -59,6 +62,14 @@ func (bot) Bootstrap() error {
 	// load setting rule
 	formRules = append(formRules, bots.SettingCovertForm(Name, settingRules))
 
+	return nil
+}
+
+func (bot) OnEvent() error {
+	event.On(event.ExampleEvent, func(data model.JSON) error {
+		fmt.Println(data)
+		return nil
+	})
 	return nil
 }
 

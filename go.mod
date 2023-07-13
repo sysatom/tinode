@@ -33,9 +33,13 @@ require (
 	github.com/adjust/rmq/v5 v5.1.2
 	github.com/bsm/redislock v0.9.3
 	github.com/cavaliergopher/grab/v3 v3.0.1
+	github.com/emicklei/go-restful-openapi/v2 v2.9.1
+	github.com/emicklei/go-restful/v3 v3.10.2
 	github.com/go-echarts/go-echarts/v2 v2.2.6
+	github.com/go-openapi/spec v0.20.9
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/golang-migrate/migrate/v4 v4.16.2
+	github.com/gookit/event v1.1.1
 	github.com/gorilla/mux v1.8.0
 	github.com/influxdata/cron v0.0.0-20201006132531-4bb0a200dcbe
 	github.com/maxence-charriere/go-app/v9 v9.6.7
@@ -66,8 +70,6 @@ require (
 	cloud.google.com/go/longrunning v0.4.1 // indirect
 	cloud.google.com/go/storage v1.29.0 // indirect
 	git.sr.ht/~sbinet/gg v0.4.1 // indirect
-	github.com/PuerkitoBio/purell v1.1.1 // indirect
-	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
 	github.com/ajstarks/svgo v0.0.0-20211024235047-1546f124cd8b // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
@@ -75,15 +77,12 @@ require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
-	github.com/emicklei/go-restful-openapi/v2 v2.9.1 // indirect
-	github.com/emicklei/go-restful/v3 v3.10.2 // indirect
 	github.com/felixge/httpsnoop v1.0.1 // indirect
 	github.com/fogleman/gg v1.3.0 // indirect
 	github.com/go-fonts/liberation v0.3.1 // indirect
 	github.com/go-latex/latex v0.0.0-20230307184459-12ec69307ad9 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
 	github.com/go-openapi/jsonreference v0.20.0 // indirect
-	github.com/go-openapi/spec v0.20.9 // indirect
 	github.com/go-openapi/swag v0.19.15 // indirect
 	github.com/go-pdf/fpdf v0.8.0 // indirect
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect

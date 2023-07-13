@@ -47,6 +47,9 @@ type Handler interface {
 	// AuthLevel authorizations
 	AuthLevel() auth.Level
 
+	// OnEvent event
+	OnEvent() error
+
 	// Help return bot help
 	Help() (map[string][]string, error)
 
@@ -94,6 +97,10 @@ func (Base) Bootstrap() error {
 }
 
 func (Base) WebService() *restful.WebService {
+	return nil
+}
+
+func (Base) OnEvent() error {
 	return nil
 }
 
@@ -931,6 +938,9 @@ func Bootstrap() error {
 			continue
 		}
 		if err := bot.Bootstrap(); err != nil {
+			return err
+		}
+		if err := bot.OnEvent(); err != nil {
 			return err
 		}
 	}

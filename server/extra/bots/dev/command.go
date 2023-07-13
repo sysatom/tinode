@@ -6,12 +6,14 @@ import (
 	_ "embed"
 	"fmt"
 	"github.com/tinode/chat/server/extra/bots"
+	"github.com/tinode/chat/server/extra/pkg/event"
 	"github.com/tinode/chat/server/extra/pkg/parser"
 	"github.com/tinode/chat/server/extra/pkg/queue"
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
+	"github.com/tinode/chat/server/store"
 	serverTypes "github.com/tinode/chat/server/store/types"
 	"gonum.org/v1/plot"
 	"gonum.org/v1/plot/plotutil"
@@ -225,41 +227,24 @@ var commandRules = []command.Rule{
 		Help:   `[example] markdown page`,
 		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			return bots.StorePage(ctx, model.PageMarkdown, "", types.MarkdownMsg{
-				Raw: `# header
-*Italic*
-**Bold**
-# Heading 1
-## Heading 2
-[Link](http://a.com)
-![Image](http://url/a.png)
-> Blockquote
-
-* List
-* List
-* List
-
-1. One
-2. Two
-3. Three
-
-Horizontal rule:
-
----
-
-| foo | bar |
-| --- | --- |
-| baz | bim |
-
-~~Hi~~ Hello, ~there~ world!
-
-Visit www.commonmark.org/help for more information.
-
-- [x] foo
-  - [ ] bar
-  - [x] baz
-- [ ] bim
-`,
+				Raw: markdownText,
 			})
+		},
+	},
+	{
+		Define: "event",
+		Help:   `fire example event`,
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
+			botUid, _, _, _, err := store.Users.GetAuthUniqueRecord("basic", "dev_bot")
+			if err != nil {
+				return types.TextMsg{Text: "error"}
+			}
+			err = event.Emit(event.SendEvent, map[string]interface{}{"topic": ctx.RcptTo, "topic_uid": int64(botUid), "message": "fire send event"})
+			if err != nil {
+				return types.TextMsg{Text: "error"}
+			}
+			event.AsyncEmit(event.ExampleEvent, map[string]interface{}{"now": time.Now().Unix()})
+			return types.TextMsg{Text: "ok"}
 		},
 	},
 }

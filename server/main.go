@@ -656,6 +656,9 @@ func main() {
 	// Queue
 	hookQueue()
 
+	// Event
+	hookEvent()
+
 	// Set up gRPC server, if one is configured
 	if *listenGrpc == "" {
 		*listenGrpc = config.GrpcListen
