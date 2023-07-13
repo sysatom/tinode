@@ -15,7 +15,6 @@ import (
 	"github.com/tinode/chat/server/store"
 	"github.com/tinode/chat/server/store/types"
 	"text/template"
-	"time"
 )
 
 const serviceVersion = "v1"
@@ -31,7 +30,7 @@ func editor(req *restful.Request, resp *restful.Response) {
 		route.ErrorResponse(resp, "flag error")
 		return
 	}
-	if p.ExpiredAt.Before(time.Now()) {
+	if p.IsExpired() {
 		route.ErrorResponse(resp, "page expired")
 		return
 	}
@@ -71,7 +70,7 @@ func saveMarkdown(req *restful.Request, resp *restful.Response) {
 		route.ErrorResponse(resp, "flag error")
 		return
 	}
-	if p.ExpiredAt.Before(time.Now()) {
+	if p.IsExpired() {
 		route.ErrorResponse(resp, "page expired")
 		return
 	}

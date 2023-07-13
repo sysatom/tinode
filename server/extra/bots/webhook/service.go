@@ -10,7 +10,6 @@ import (
 	"github.com/tinode/chat/server/store"
 	"github.com/tinode/chat/server/store/types"
 	"io"
-	"time"
 )
 
 const serviceVersion = "v1"
@@ -23,7 +22,7 @@ func webhook(req *restful.Request, resp *restful.Response) {
 		route.ErrorResponse(resp, "flag error")
 		return
 	}
-	if p.ExpiredAt.Before(time.Now()) {
+	if p.IsExpired() {
 		route.ErrorResponse(resp, "page expired")
 		return
 	}

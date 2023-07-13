@@ -27,7 +27,6 @@ import (
 	"os"
 	"strconv"
 	"strings"
-	"time"
 )
 
 func newRouter() *mux.Router {
@@ -322,7 +321,7 @@ func postLinkitData(rw http.ResponseWriter, req *http.Request) {
 		errorResponse(rw, "error")
 		return
 	}
-	if p.ID <= 0 || p.ExpiredAt.Before(time.Now()) {
+	if p.ID <= 0 || p.IsExpired() {
 		errorResponse(rw, "401")
 		return
 	}
