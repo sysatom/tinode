@@ -425,7 +425,7 @@ func (m HtmlMsg) Convert() (map[string]interface{}, interface{}) {
 }
 
 type MarkdownMsg struct {
-	Raw string
+	Raw string `json:"raw"`
 }
 
 func (m MarkdownMsg) Convert() (map[string]interface{}, interface{}) {

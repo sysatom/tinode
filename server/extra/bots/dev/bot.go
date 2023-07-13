@@ -80,8 +80,8 @@ func (bot) AuthLevel() auth.Level {
 func (bot) WebService() *restful.WebService {
 	return route.WebService(
 		Name, serviceVersion,
-		route.Route("GET", "/example", example, "get example data", nil, nil),
-		route.Route("POST", "/example", example, "create example data", nil, nil),
+		route.Route("GET", "/example", example, "get example data", route.WithReturns(model.Message{}), route.WithWrites(model.Message{})),
+		route.Route("POST", "/example", example, "create example data"),
 	)
 }
 

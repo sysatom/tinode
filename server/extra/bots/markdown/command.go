@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/tinode/chat/server/extra/bots"
 	"github.com/tinode/chat/server/extra/pkg/parser"
+	"github.com/tinode/chat/server/extra/route"
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/types"
@@ -30,7 +31,7 @@ var commandRules = []command.Rule{
 			}
 			return types.LinkMsg{
 				Title: "Markdown Editor",
-				Url:   fmt.Sprintf("%s/extra/editor/markdown/%s", types.AppUrl(), flag),
+				Url:   route.URL(Name, serviceVersion, fmt.Sprintf("editor/%s", flag)),
 			}
 		},
 	},
