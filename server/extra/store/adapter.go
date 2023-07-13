@@ -98,6 +98,8 @@ type Adapter interface {
 	ParameterSet(flag string, params model.JSON, expiredAt time.Time) error
 	// ParameterGet parameter get
 	ParameterGet(flag string) (model.Parameter, error)
+	// ParameterDelete parameter delete
+	ParameterDelete(flag string) error
 
 	GetObjectiveByID(id int64) (*model.Objective, error)
 	GetObjectiveBySequence(uid types.Uid, topic string, sequence int64) (*model.Objective, error)

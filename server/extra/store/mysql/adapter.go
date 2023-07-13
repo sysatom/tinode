@@ -496,6 +496,11 @@ func (a *adapter) ParameterGet(flag string) (model.Parameter, error) {
 	return find, nil
 }
 
+func (a *adapter) ParameterDelete(flag string) error {
+	_, err := dao.Q.Parameter.Where(dao.Parameter.Flag.Eq(flag)).Delete()
+	return err
+}
+
 func (a *adapter) UrlCreate(url model.Url) error {
 	return a.db.Create(&model.Url{
 		Flag:  url.Flag,

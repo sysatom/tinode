@@ -12,11 +12,11 @@ func onSendEvent() {
 	event.On(event.SendEvent, func(data model.JSON) error {
 		topic, ok := data.String("topic")
 		if !ok {
-			return errors.New("error param rcpt_to")
+			return errors.New("error param topic")
 		}
 		topicUid, ok := data.Int64("topic_uid")
 		if !ok {
-			return errors.New("error param uid")
+			return errors.New("error param topic_uid")
 		}
 		message, ok := data.String("message")
 		if !ok {

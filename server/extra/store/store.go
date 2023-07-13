@@ -134,6 +134,7 @@ type ChatbotPersistenceInterface interface {
 	BehaviorIncrease(uid types.Uid, flag string, number int) error
 	ParameterSet(flag string, params model.JSON, expiredAt time.Time) error
 	ParameterGet(flag string) (model.Parameter, error)
+	ParameterDelete(flag string) error
 
 	GetObjectiveByID(id int64) (*model.Objective, error)
 	GetObjectiveBySequence(uid types.Uid, topic string, sequence int64) (*model.Objective, error)
@@ -341,6 +342,10 @@ func (c chatbotMapper) ParameterSet(flag string, params model.JSON, expiredAt ti
 
 func (c chatbotMapper) ParameterGet(flag string) (model.Parameter, error) {
 	return adp.ParameterGet(flag)
+}
+
+func (c chatbotMapper) ParameterDelete(flag string) error {
+	return adp.ParameterDelete(flag)
 }
 
 func (c chatbotMapper) GetObjectiveByID(id int64) (*model.Objective, error) {

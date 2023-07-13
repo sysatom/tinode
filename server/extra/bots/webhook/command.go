@@ -2,13 +2,17 @@ package webhook
 
 import (
 	"fmt"
+	"github.com/tinode/chat/server/extra/bots"
 	"github.com/tinode/chat/server/extra/pkg/parser"
+	"github.com/tinode/chat/server/extra/route"
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/store"
+	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
 	serverTypes "github.com/tinode/chat/server/store/types"
 	"strings"
+	"time"
 )
 
 var commandRules = []command.Rule{
@@ -29,13 +33,10 @@ var commandRules = []command.Rule{
 				return nil
 			}
 
-			topicUid := serverTypes.ParseUserId(ctx.Original)
-
 			m := make(map[string]interface{})
 			for _, item := range items {
-				id := serverTypes.ParseUid(strings.ReplaceAll(item.Key, "webhook:", ""))
-				m[item.Key] = fmt.Sprintf("%s/extra/webhook/%d/%d/%d", types.AppUrl(),
-					uint64(ctx.AsUser), uint64(topicUid), uint64(id))
+				flag := serverTypes.ParseUid(strings.ReplaceAll(item.Key, "webhook:", ""))
+				m[item.Key] = route.URL(Name, serviceVersion, fmt.Sprintf("webhook/%s", flag))
 			}
 
 			return types.InfoMsg{
@@ -48,19 +49,22 @@ var commandRules = []command.Rule{
 		Define: `create`,
 		Help:   `create webhook`,
 		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
-			id := types.Id()
-			err := store.Chatbot.DataSet(ctx.AsUser, ctx.Original,
-				fmt.Sprintf("webhook:%s", id.String()), map[string]interface{}{
+			p := model.JSON{}
+			p["uid"] = ctx.AsUser.UserId()
+			flag, err := bots.StoreParameter(p, time.Now().Add(24*365*time.Hour))
+			if err != nil {
+				return types.TextMsg{Text: "error parameter"}
+			}
+
+			err = store.Chatbot.DataSet(ctx.AsUser, ctx.Original,
+				fmt.Sprintf("webhook:%s", flag), map[string]interface{}{
 					"value": "",
 				})
 			if err != nil {
-				return nil
+				return types.TextMsg{Text: "error create"}
 			}
 
-			topicUid := serverTypes.ParseUserId(ctx.Original)
-
-			return types.TextMsg{Text: fmt.Sprintf("Webhook: %s/extra/webhook/%d/%d/%d", types.AppUrl(),
-				uint64(ctx.AsUser), uint64(topicUid), uint64(id))}
+			return types.TextMsg{Text: fmt.Sprintf("Webhook: %s", route.URL(Name, serviceVersion, fmt.Sprintf("webhook/%s", flag)))}
 		},
 	},
 	{
@@ -69,7 +73,13 @@ var commandRules = []command.Rule{
 		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			flag, _ := tokens[1].Value.String()
 
-			err := store.Chatbot.DataDelete(ctx.AsUser, ctx.Original, fmt.Sprintf("webhook:%s", flag))
+			err := store.Chatbot.ParameterDelete(flag)
+			if err != nil {
+				logs.Err.Println(err)
+				return types.TextMsg{Text: "failed"}
+			}
+
+			err = store.Chatbot.DataDelete(ctx.AsUser, ctx.Original, fmt.Sprintf("webhook:%s", flag))
 			if err != nil {
 				logs.Err.Println(err)
 				return types.TextMsg{Text: "failed"}

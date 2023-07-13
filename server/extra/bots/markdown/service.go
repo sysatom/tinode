@@ -11,6 +11,7 @@ import (
 	extraStore "github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/store/model"
 	extraTypes "github.com/tinode/chat/server/extra/types"
+	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/store"
 	"github.com/tinode/chat/server/store/types"
 	"text/template"
@@ -95,6 +96,7 @@ func saveMarkdown(req *restful.Request, resp *restful.Response) {
 		"message":   message,
 	})
 	if err != nil {
+		logs.Err.Println(err)
 		_, _ = resp.Write([]byte("send error"))
 		return
 	}

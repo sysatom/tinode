@@ -3,7 +3,9 @@ package webhook
 import (
 	"encoding/json"
 	"errors"
+	"github.com/emicklei/go-restful/v3"
 	"github.com/tinode/chat/server/extra/bots"
+	"github.com/tinode/chat/server/extra/route"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
 )
@@ -49,6 +51,18 @@ func (bot) Init(jsonconf json.RawMessage) error {
 
 func (bot) IsReady() bool {
 	return handler.initialized
+}
+
+func (bot) WebService() *restful.WebService {
+	return route.WebService(
+		Name, serviceVersion,
+		route.Route("POST", "/webhook/{flag}", webhook, "trigger webhook", route.WithParam(&route.Param{
+			Type:        route.PathParamType,
+			Name:        "flag",
+			Description: "flag param",
+			DataType:    "string",
+		})),
+	)
 }
 
 func (b bot) Command(ctx types.Context, content interface{}) (types.MsgPayload, error) {
