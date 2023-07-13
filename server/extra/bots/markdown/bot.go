@@ -5,7 +5,7 @@ import (
 	"errors"
 	"github.com/emicklei/go-restful/v3"
 	"github.com/tinode/chat/server/extra/bots"
-	"github.com/tinode/chat/server/extra/route"
+	"github.com/tinode/chat/server/extra/pkg/route"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
 )

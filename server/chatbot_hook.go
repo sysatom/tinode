@@ -6,7 +6,7 @@ import (
 	"github.com/tinode/chat/server/extra/channels"
 	"github.com/tinode/chat/server/extra/pkg/cache"
 	"github.com/tinode/chat/server/extra/pkg/queue"
-	"github.com/tinode/chat/server/extra/route"
+	"github.com/tinode/chat/server/extra/pkg/route"
 	extraStore "github.com/tinode/chat/server/extra/store"
 	extraTypes "github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/vendors"

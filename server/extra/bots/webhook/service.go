@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/emicklei/go-restful/v3"
 	"github.com/tinode/chat/server/extra/pkg/event"
-	"github.com/tinode/chat/server/extra/route"
+	"github.com/tinode/chat/server/extra/pkg/route"
 	extraStore "github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/store"
