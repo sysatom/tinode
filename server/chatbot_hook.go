@@ -3,8 +3,8 @@ package main
 import (
 	"encoding/json"
 	"github.com/tinode/chat/server/extra/bots"
-	"github.com/tinode/chat/server/extra/channels"
 	"github.com/tinode/chat/server/extra/pkg/cache"
+	"github.com/tinode/chat/server/extra/pkg/channels"
 	"github.com/tinode/chat/server/extra/pkg/queue"
 	"github.com/tinode/chat/server/extra/pkg/route"
 	extraStore "github.com/tinode/chat/server/extra/store"
