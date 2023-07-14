@@ -11,6 +11,6 @@ const (
 )
 
 var settingRules = setting.Rule([]setting.Row{
-	{secretSettingKey, types.FormFieldText, "Key", ""},
-	{numberSettingKey, types.FormFieldNumber, "Number", ""},
+	{Key: secretSettingKey, Type: types.FormFieldText, Title: "Key"},
+	{Key: numberSettingKey, Type: types.FormFieldNumber, Title: "Number"},
 })

@@ -155,7 +155,7 @@ func (c *Okr) Render() app.UI {
 				app.Div().Class("okr-item-title").Text("Progress"),
 				app.Div().Class("okr-progress").Body(
 					app.Div().Class("progress-bg-line progress-bg").Body(
-						app.Div().Class("progress-line progress-inner").Style("width", fmt.Sprintf("%d%%", ratio)),
+						app.Div().Class("progress-line progress-inner").Style("width", fmt.Sprintf("%.2f%%", ratio)),
 					),
 					app.Div().Class("ratio").Text(ratio),
 				),

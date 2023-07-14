@@ -10,5 +10,5 @@ const (
 )
 
 var settingRules = setting.Rule([]setting.Row{
-	{repoSettingKey, types.FormFieldText, "Repo", ""},
+	{Key: repoSettingKey, Type: types.FormFieldText, Title: "Repo"},
 })

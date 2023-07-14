@@ -11,6 +11,6 @@ const (
 )
 
 var settingRules = setting.Rule([]setting.Row{
-	{tokenSettingKey, types.FormFieldText, "Internal Integration Token", ""},
-	{importPageIdSettingKey, types.FormFieldText, "MindCache page id", ""},
+	{Key: tokenSettingKey, Type: types.FormFieldText, Title: "Internal Integration Token"},
+	{Key: importPageIdSettingKey, Type: types.FormFieldText, Title: "MindCache page id"},
 })
