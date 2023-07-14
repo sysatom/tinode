@@ -1036,6 +1036,6 @@ func (a *adapter) UpdateInstruct(instruct *model.Instruct) error {
 		}).Error
 }
 
-func init() {
+func Init() {
 	store.RegisterAdapter(&adapter{})
 }

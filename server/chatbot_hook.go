@@ -8,6 +8,7 @@ import (
 	"github.com/tinode/chat/server/extra/pkg/queue"
 	"github.com/tinode/chat/server/extra/pkg/route"
 	extraStore "github.com/tinode/chat/server/extra/store"
+	extraMysql "github.com/tinode/chat/server/extra/store/mysql"
 	extraTypes "github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/vendors"
 	"github.com/tinode/chat/server/logs"
@@ -52,9 +53,6 @@ import (
 	// push
 	_ "github.com/tinode/chat/server/extra/pkg/bark"
 
-	// store
-	_ "github.com/tinode/chat/server/extra/store/mysql"
-
 	// cache
 	_ "github.com/tinode/chat/server/extra/pkg/cache"
 )
@@ -82,7 +80,9 @@ func hookMux() *http.ServeMux {
 func hookStore() {
 	// init cache
 	cache.InitCache()
-	// open database
+	// init database
+	extraMysql.Init()
+	extraStore.Init()
 	err := extraStore.Store.Open()
 	if err != nil {
 		panic(err)
