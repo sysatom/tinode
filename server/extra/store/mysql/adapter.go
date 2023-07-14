@@ -933,6 +933,66 @@ func (a *adapter) DeleteTodoBySequence(uid types.Uid, topic string, sequence int
 		Delete(&model.Todo{}).Error
 }
 
+func (a *adapter) CreateView(review *model.Review) (int64, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (a *adapter) UpdateReview(review *model.Review) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (a *adapter) ListReviews(uid types.Uid, topic string) ([]*model.Review, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (a *adapter) GetReviewByID(id int64) (*model.Review, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (a *adapter) CreateReviewEvaluation(evaluation *model.ReviewEvaluation) (int64, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (a *adapter) UpdateReviewEvaluation(evaluation *model.ReviewEvaluation) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (a *adapter) ListReviewEvaluations(uid types.Uid, topic string, reviewID int64) ([]*model.ReviewEvaluation, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (a *adapter) GetReviewEvaluationByID(id int64) (*model.ReviewEvaluation, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (a *adapter) CreateCycle(cycle *model.Cycle) (int64, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (a *adapter) UpdateCycle(cycle *model.Cycle) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (a *adapter) ListCycles(uid types.Uid, topic string) ([]*model.Cycle, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (a *adapter) GetCycleByID(id int64) (*model.Cycle, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (a *adapter) CreateCounter(counter *model.Counter) (int64, error) {
 	err := a.db.Create(&counter)
 	if err != nil {
