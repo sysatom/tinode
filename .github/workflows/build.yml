@@ -36,6 +36,11 @@ jobs:
         with:
           path: ${{ env.go-mod }}
           key: ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}
+          args: --timeout=10m --config=./server/extra/.golangci.yaml
+
+      - name: Setup mod
+        run: |
+          go mod download
 
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
