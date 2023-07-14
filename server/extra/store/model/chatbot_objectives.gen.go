@@ -29,6 +29,7 @@ type Objective struct {
 	CreatedData  time.Time    `gorm:"column:created_data;not null" json:"created_data"`
 	UpdatedDate  time.Time    `gorm:"column:updated_date;not null" json:"updated_date"`
 	KeyResults   []*KeyResult `gorm:"foreignKey:objective_id" json:"key_results"`
+	Reviews      []*Review    `gorm:"foreignKey:objective_id" json:"reviews"`
 }
 
 // TableName Objective's table name

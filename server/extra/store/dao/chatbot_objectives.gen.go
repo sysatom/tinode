@@ -68,6 +68,17 @@ func newObjective(db *gorm.DB, opts ...gen.DOOption) objective {
 		},
 	}
 
+	_objective.Reviews = objectiveHasManyReviews{
+		db: db.Session(&gorm.Session{}),
+
+		RelationField: field.NewRelation("Reviews", "model.Review"),
+		Evaluations: struct {
+			field.RelationField
+		}{
+			RelationField: field.NewRelation("Reviews.Evaluations", "model.ReviewEvaluation"),
+		},
+	}
+
 	_objective.fillFieldMap()
 
 	return _objective
@@ -94,6 +105,8 @@ type objective struct {
 	CreatedData  field.Time
 	UpdatedDate  field.Time
 	KeyResults   objectiveHasManyKeyResults
+
+	Reviews objectiveHasManyReviews
 
 	fieldMap map[string]field.Expr
 }
@@ -142,7 +155,7 @@ func (o *objective) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (o *objective) fillFieldMap() {
-	o.fieldMap = make(map[string]field.Expr, 17)
+	o.fieldMap = make(map[string]field.Expr, 18)
 	o.fieldMap["id"] = o.ID
 	o.fieldMap["uid"] = o.UID
 	o.fieldMap["topic"] = o.Topic
@@ -250,6 +263,81 @@ func (a objectiveHasManyKeyResultsTx) Clear() error {
 }
 
 func (a objectiveHasManyKeyResultsTx) Count() int64 {
+	return a.tx.Count()
+}
+
+type objectiveHasManyReviews struct {
+	db *gorm.DB
+
+	field.RelationField
+
+	Evaluations struct {
+		field.RelationField
+	}
+}
+
+func (a objectiveHasManyReviews) Where(conds ...field.Expr) *objectiveHasManyReviews {
+	if len(conds) == 0 {
+		return &a
+	}
+
+	exprs := make([]clause.Expression, 0, len(conds))
+	for _, cond := range conds {
+		exprs = append(exprs, cond.BeCond().(clause.Expression))
+	}
+	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
+	return &a
+}
+
+func (a objectiveHasManyReviews) WithContext(ctx context.Context) *objectiveHasManyReviews {
+	a.db = a.db.WithContext(ctx)
+	return &a
+}
+
+func (a objectiveHasManyReviews) Session(session *gorm.Session) *objectiveHasManyReviews {
+	a.db = a.db.Session(session)
+	return &a
+}
+
+func (a objectiveHasManyReviews) Model(m *model.Objective) *objectiveHasManyReviewsTx {
+	return &objectiveHasManyReviewsTx{a.db.Model(m).Association(a.Name())}
+}
+
+type objectiveHasManyReviewsTx struct{ tx *gorm.Association }
+
+func (a objectiveHasManyReviewsTx) Find() (result []*model.Review, err error) {
+	return result, a.tx.Find(&result)
+}
+
+func (a objectiveHasManyReviewsTx) Append(values ...*model.Review) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Append(targetValues...)
+}
+
+func (a objectiveHasManyReviewsTx) Replace(values ...*model.Review) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Replace(targetValues...)
+}
+
+func (a objectiveHasManyReviewsTx) Delete(values ...*model.Review) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Delete(targetValues...)
+}
+
+func (a objectiveHasManyReviewsTx) Clear() error {
+	return a.tx.Clear()
+}
+
+func (a objectiveHasManyReviewsTx) Count() int64 {
 	return a.tx.Count()
 }
 

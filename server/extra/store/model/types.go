@@ -97,3 +97,20 @@ const (
 	ValueAvgMode  ValueModeType = "avg"
 	ValueMaxMode  ValueModeType = "max"
 )
+
+type CycleState int
+
+const (
+	CycleStateUnknown CycleState = iota
+	CycleStart
+	CycleDone
+	CycleCancel
+)
+
+type ReviewType int
+
+const (
+	ReviewTypeUnknown ReviewType = iota
+	ReviewMid
+	ReviewEnd
+)
