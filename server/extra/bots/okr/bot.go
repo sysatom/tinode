@@ -51,6 +51,13 @@ func (bot) IsReady() bool {
 	return handler.initialized
 }
 
+func (b bot) Rules() []interface{} {
+	return []interface{}{
+		commandRules,
+		formRules,
+	}
+}
+
 func (b bot) Command(ctx types.Context, content interface{}) (types.MsgPayload, error) {
 	return bots.RunCommand(commandRules, ctx, content)
 }

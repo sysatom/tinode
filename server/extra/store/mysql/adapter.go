@@ -8,6 +8,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/bsm/redislock"
 	"github.com/tinode/chat/server/db/mysql"
 	"github.com/tinode/chat/server/extra/pkg/locker"
 	"github.com/tinode/chat/server/extra/store"
@@ -36,10 +37,10 @@ func (a *adapter) Open() error {
 	newLogger := logger.New(
 		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
 		logger.Config{
-			SlowThreshold:             time.Second, // Slow SQL threshold
-			LogLevel:                  logger.Warn, // Log level
-			IgnoreRecordNotFoundError: true,        // Ignore ErrRecordNotFound error for logger
-			Colorful:                  true,        // Disable color
+			SlowThreshold:             200 * time.Millisecond, // Slow SQL threshold
+			LogLevel:                  logger.Warn,            // Log level
+			IgnoreRecordNotFoundError: true,                   // Ignore ErrRecordNotFound error for logger
+			Colorful:                  true,                   // Disable color
 		},
 	)
 	db, err := gorm.Open(mysqlDriver.New(mysqlDriver.Config{Conn: mysql.RawDB}), &gorm.Config{
@@ -600,14 +601,16 @@ func (a *adapter) ListObjectives(uid types.Uid, topic string) ([]*model.Objectiv
 func (a *adapter) CreateObjective(objective *model.Objective) (int64, error) {
 	ctx := context.Background()
 	l := locker.NewLocker()
-	lock, err := l.Acquire(ctx, "chatbot:objective:create", 10*time.Second)
+	lock, err := l.Acquire(ctx, fmt.Sprintf("chatbot:objective:create:%s", objective.UID), 10*time.Second)
 	if err != nil {
 		return 0, err
 	}
-	defer lock.Release(ctx)
+	defer func(lock *redislock.Lock, ctx context.Context) {
+		_ = lock.Release(ctx)
+	}(lock, ctx)
 
 	// sequence
-	sequence := int64(0)
+	sequence := int32(0)
 	var max model.Objective
 	err = a.db.Where("`uid` = ? AND `topic` = ?", objective.UID, objective.Topic).Order("sequence DESC").Take(&max).Error
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -618,6 +621,12 @@ func (a *adapter) CreateObjective(objective *model.Objective) (int64, error) {
 	}
 	sequence += 1
 
+	if objective.CreatedData.IsZero() {
+		objective.CreatedData = time.Now()
+	}
+	if objective.UpdatedDate.IsZero() {
+		objective.UpdatedDate = time.Now()
+	}
 	objective.Sequence = sequence
 	err = a.db.Create(&objective).Error
 	if err != nil {
@@ -696,14 +705,16 @@ func (a *adapter) ListKeyResultsByObjectiveId(objectiveId int64) ([]*model.KeyRe
 func (a *adapter) CreateKeyResult(keyResult *model.KeyResult) (int64, error) {
 	ctx := context.Background()
 	l := locker.NewLocker()
-	lock, err := l.Acquire(ctx, "chatbot:key_result:create", 10*time.Second)
+	lock, err := l.Acquire(ctx, fmt.Sprintf("chatbot:key_result:create:%s", keyResult.UID), 10*time.Second)
 	if err != nil {
 		return 0, err
 	}
-	defer lock.Release(ctx)
+	defer func(lock *redislock.Lock, ctx context.Context) {
+		_ = lock.Release(ctx)
+	}(lock, ctx)
 
 	// sequence
-	sequence := int64(0)
+	sequence := int32(0)
 	var max model.KeyResult
 	err = a.db.Where("`uid` = ? AND `topic` = ?", keyResult.UID, keyResult.Topic).Order("sequence DESC").Take(&max).Error
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -816,14 +827,16 @@ func (a *adapter) GetKeyResultValues(keyResultId int64) ([]*model.KeyResultValue
 func (a *adapter) CreateTodo(todo *model.Todo) (int64, error) {
 	ctx := context.Background()
 	l := locker.NewLocker()
-	lock, err := l.Acquire(ctx, "chatbot:todo:create", 10*time.Second)
+	lock, err := l.Acquire(ctx, fmt.Sprintf("chatbot:todo:create:%s", todo.UID), 10*time.Second)
 	if err != nil {
 		return 0, err
 	}
-	defer lock.Release(ctx)
+	defer func(lock *redislock.Lock, ctx context.Context) {
+		_ = lock.Release(ctx)
+	}(lock, ctx)
 
 	// sequence
-	sequence := int64(0)
+	sequence := int32(0)
 	var max model.Todo
 	err = a.db.Where("`uid` = ? AND `topic` = ?", todo.UID, todo.Topic).Order("sequence DESC").Take(&max).Error
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {

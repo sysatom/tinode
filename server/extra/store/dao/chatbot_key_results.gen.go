@@ -42,6 +42,11 @@ func newKeyResult(db *gorm.DB, opts ...gen.DOOption) keyResult {
 	_keyResult.Tag = field.NewString(tableName, "tag")
 	_keyResult.CreatedAt = field.NewTime(tableName, "created_at")
 	_keyResult.UpdatedAt = field.NewTime(tableName, "updated_at")
+	_keyResult.KeyResultValues = keyResultHasManyKeyResultValues{
+		db: db.Session(&gorm.Session{}),
+
+		RelationField: field.NewRelation("KeyResultValues", "model.KeyResultValue"),
+	}
 
 	_keyResult.fillFieldMap()
 
@@ -51,21 +56,22 @@ func newKeyResult(db *gorm.DB, opts ...gen.DOOption) keyResult {
 type keyResult struct {
 	keyResultDo
 
-	ALL          field.Asterisk
-	ID           field.Int32
-	UID          field.String
-	Topic        field.String
-	ObjectiveID  field.Int32
-	Sequence     field.Int32
-	Title        field.String
-	Memo         field.String
-	InitialValue field.Int32
-	TargetValue  field.Int32
-	CurrentValue field.Int32
-	ValueMode    field.Field
-	Tag          field.String
-	CreatedAt    field.Time
-	UpdatedAt    field.Time
+	ALL             field.Asterisk
+	ID              field.Int32
+	UID             field.String
+	Topic           field.String
+	ObjectiveID     field.Int32
+	Sequence        field.Int32
+	Title           field.String
+	Memo            field.String
+	InitialValue    field.Int32
+	TargetValue     field.Int32
+	CurrentValue    field.Int32
+	ValueMode       field.Field
+	Tag             field.String
+	CreatedAt       field.Time
+	UpdatedAt       field.Time
+	KeyResultValues keyResultHasManyKeyResultValues
 
 	fieldMap map[string]field.Expr
 }
@@ -112,7 +118,7 @@ func (k *keyResult) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (k *keyResult) fillFieldMap() {
-	k.fieldMap = make(map[string]field.Expr, 14)
+	k.fieldMap = make(map[string]field.Expr, 15)
 	k.fieldMap["id"] = k.ID
 	k.fieldMap["uid"] = k.UID
 	k.fieldMap["topic"] = k.Topic
@@ -127,6 +133,7 @@ func (k *keyResult) fillFieldMap() {
 	k.fieldMap["tag"] = k.Tag
 	k.fieldMap["created_at"] = k.CreatedAt
 	k.fieldMap["updated_at"] = k.UpdatedAt
+
 }
 
 func (k keyResult) clone(db *gorm.DB) keyResult {
@@ -137,6 +144,77 @@ func (k keyResult) clone(db *gorm.DB) keyResult {
 func (k keyResult) replaceDB(db *gorm.DB) keyResult {
 	k.keyResultDo.ReplaceDB(db)
 	return k
+}
+
+type keyResultHasManyKeyResultValues struct {
+	db *gorm.DB
+
+	field.RelationField
+}
+
+func (a keyResultHasManyKeyResultValues) Where(conds ...field.Expr) *keyResultHasManyKeyResultValues {
+	if len(conds) == 0 {
+		return &a
+	}
+
+	exprs := make([]clause.Expression, 0, len(conds))
+	for _, cond := range conds {
+		exprs = append(exprs, cond.BeCond().(clause.Expression))
+	}
+	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
+	return &a
+}
+
+func (a keyResultHasManyKeyResultValues) WithContext(ctx context.Context) *keyResultHasManyKeyResultValues {
+	a.db = a.db.WithContext(ctx)
+	return &a
+}
+
+func (a keyResultHasManyKeyResultValues) Session(session *gorm.Session) *keyResultHasManyKeyResultValues {
+	a.db = a.db.Session(session)
+	return &a
+}
+
+func (a keyResultHasManyKeyResultValues) Model(m *model.KeyResult) *keyResultHasManyKeyResultValuesTx {
+	return &keyResultHasManyKeyResultValuesTx{a.db.Model(m).Association(a.Name())}
+}
+
+type keyResultHasManyKeyResultValuesTx struct{ tx *gorm.Association }
+
+func (a keyResultHasManyKeyResultValuesTx) Find() (result []*model.KeyResultValue, err error) {
+	return result, a.tx.Find(&result)
+}
+
+func (a keyResultHasManyKeyResultValuesTx) Append(values ...*model.KeyResultValue) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Append(targetValues...)
+}
+
+func (a keyResultHasManyKeyResultValuesTx) Replace(values ...*model.KeyResultValue) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Replace(targetValues...)
+}
+
+func (a keyResultHasManyKeyResultValuesTx) Delete(values ...*model.KeyResultValue) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Delete(targetValues...)
+}
+
+func (a keyResultHasManyKeyResultValuesTx) Clear() error {
+	return a.tx.Clear()
+}
+
+func (a keyResultHasManyKeyResultValuesTx) Count() int64 {
+	return a.tx.Count()
 }
 
 type keyResultDo struct{ gen.DO }

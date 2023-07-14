@@ -6,6 +6,7 @@ import (
 	"github.com/urfave/cli/v2"
 	"gorm.io/driver/mysql"
 	"gorm.io/gen"
+	"gorm.io/gen/field"
 	"gorm.io/gorm"
 	"os"
 )
@@ -82,12 +83,26 @@ func GenerationAction(c *cli.Context) error {
 		gen.FieldType("content", "JSON"),
 		gen.FieldType("priority", "InstructPriority"),
 		gen.FieldType("state", "InstructState")))
-	g.ApplyInterface(func(Querier) {}, g.GenerateModelAs("chatbot_key_result_values", "KeyResultValue"))
-	g.ApplyInterface(func(Querier) {}, g.GenerateModelAs("chatbot_key_results", "KeyResult",
-		gen.FieldType("value_mode", "ValueModeType")))
 	g.ApplyInterface(func(Querier) {}, g.GenerateModelAs("chatbot_oauth", "OAuth",
 		gen.FieldType("extra", "JSON")))
-	g.ApplyInterface(func(Querier) {}, g.GenerateModelAs("chatbot_objectives", "Objective"))
+
+	// OKR
+	keyResultValues := g.GenerateModelAs("chatbot_key_result_values", "KeyResultValue")
+	keyResults := g.GenerateModelAs("chatbot_key_results", "KeyResult",
+		gen.FieldType("value_mode", "ValueModeType"),
+		gen.FieldRelate(field.HasMany, "KeyResultValues", keyResultValues, &field.RelateConfig{
+			RelateSlicePointer: true,
+			GORMTag:            map[string]string{"foreignKey": "key_result_id"},
+		}))
+	objectives := g.GenerateModelAs("chatbot_objectives", "Objective",
+		gen.FieldRelate(field.HasMany, "KeyResults", keyResults, &field.RelateConfig{
+			RelateSlicePointer: true,
+			GORMTag:            map[string]string{"foreignKey": "objective_id"},
+		}))
+	g.ApplyInterface(func(Querier) {}, objectives)
+	g.ApplyInterface(func(Querier) {}, keyResults)
+	g.ApplyInterface(func(Querier) {}, keyResultValues)
+
 	g.ApplyInterface(func(Querier) {}, g.GenerateModelAs("chatbot_page", "Page",
 		gen.FieldType("type", "PageType"),
 		gen.FieldType("schema", "JSON"),

@@ -44,6 +44,16 @@ func newObjective(db *gorm.DB, opts ...gen.DOOption) objective {
 	_objective.Tag = field.NewString(tableName, "tag")
 	_objective.CreatedData = field.NewTime(tableName, "created_data")
 	_objective.UpdatedDate = field.NewTime(tableName, "updated_date")
+	_objective.KeyResults = objectiveHasManyKeyResults{
+		db: db.Session(&gorm.Session{}),
+
+		RelationField: field.NewRelation("KeyResults", "model.KeyResult"),
+		KeyResultValues: struct {
+			field.RelationField
+		}{
+			RelationField: field.NewRelation("KeyResults.KeyResultValues", "model.KeyResultValue"),
+		},
+	}
 
 	_objective.fillFieldMap()
 
@@ -70,6 +80,7 @@ type objective struct {
 	Tag          field.String
 	CreatedData  field.Time
 	UpdatedDate  field.Time
+	KeyResults   objectiveHasManyKeyResults
 
 	fieldMap map[string]field.Expr
 }
@@ -118,7 +129,7 @@ func (o *objective) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (o *objective) fillFieldMap() {
-	o.fieldMap = make(map[string]field.Expr, 16)
+	o.fieldMap = make(map[string]field.Expr, 17)
 	o.fieldMap["id"] = o.ID
 	o.fieldMap["uid"] = o.UID
 	o.fieldMap["topic"] = o.Topic
@@ -135,6 +146,7 @@ func (o *objective) fillFieldMap() {
 	o.fieldMap["tag"] = o.Tag
 	o.fieldMap["created_data"] = o.CreatedData
 	o.fieldMap["updated_date"] = o.UpdatedDate
+
 }
 
 func (o objective) clone(db *gorm.DB) objective {
@@ -145,6 +157,81 @@ func (o objective) clone(db *gorm.DB) objective {
 func (o objective) replaceDB(db *gorm.DB) objective {
 	o.objectiveDo.ReplaceDB(db)
 	return o
+}
+
+type objectiveHasManyKeyResults struct {
+	db *gorm.DB
+
+	field.RelationField
+
+	KeyResultValues struct {
+		field.RelationField
+	}
+}
+
+func (a objectiveHasManyKeyResults) Where(conds ...field.Expr) *objectiveHasManyKeyResults {
+	if len(conds) == 0 {
+		return &a
+	}
+
+	exprs := make([]clause.Expression, 0, len(conds))
+	for _, cond := range conds {
+		exprs = append(exprs, cond.BeCond().(clause.Expression))
+	}
+	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
+	return &a
+}
+
+func (a objectiveHasManyKeyResults) WithContext(ctx context.Context) *objectiveHasManyKeyResults {
+	a.db = a.db.WithContext(ctx)
+	return &a
+}
+
+func (a objectiveHasManyKeyResults) Session(session *gorm.Session) *objectiveHasManyKeyResults {
+	a.db = a.db.Session(session)
+	return &a
+}
+
+func (a objectiveHasManyKeyResults) Model(m *model.Objective) *objectiveHasManyKeyResultsTx {
+	return &objectiveHasManyKeyResultsTx{a.db.Model(m).Association(a.Name())}
+}
+
+type objectiveHasManyKeyResultsTx struct{ tx *gorm.Association }
+
+func (a objectiveHasManyKeyResultsTx) Find() (result []*model.KeyResult, err error) {
+	return result, a.tx.Find(&result)
+}
+
+func (a objectiveHasManyKeyResultsTx) Append(values ...*model.KeyResult) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Append(targetValues...)
+}
+
+func (a objectiveHasManyKeyResultsTx) Replace(values ...*model.KeyResult) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Replace(targetValues...)
+}
+
+func (a objectiveHasManyKeyResultsTx) Delete(values ...*model.KeyResult) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Delete(targetValues...)
+}
+
+func (a objectiveHasManyKeyResultsTx) Clear() error {
+	return a.tx.Clear()
+}
+
+func (a objectiveHasManyKeyResultsTx) Count() int64 {
+	return a.tx.Count()
 }
 
 type objectiveDo struct{ gen.DO }

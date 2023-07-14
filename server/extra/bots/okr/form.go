@@ -55,7 +55,7 @@ var formRules = []form.Rule{
 			for key, value := range values {
 				switch key {
 				case "sequence":
-					objective.Sequence = value.(int64)
+					objective.Sequence = value.(int32)
 				case "title":
 					objective.Title = value.(string)
 				case "memo":
@@ -120,7 +120,7 @@ var formRules = []form.Rule{
 			if keyResult.InitialValue > 0 {
 				keyResult.CurrentValue = keyResult.InitialValue
 			}
-			keyResult.ObjectiveID = int64(objective.ID)
+			keyResult.ObjectiveID = objective.ID
 			keyResult.UID = ctx.AsUser.UserId()
 			keyResult.Topic = ctx.Original
 			_, err = store.Chatbot.CreateKeyResult(&keyResult)
@@ -144,7 +144,7 @@ var formRules = []form.Rule{
 			for key, value := range values {
 				switch key {
 				case "sequence":
-					keyResult.Sequence = value.(int64)
+					keyResult.Sequence = value.(int32)
 				case "title":
 					keyResult.Title = value.(string)
 				case "memo":
@@ -175,7 +175,7 @@ var formRules = []form.Rule{
 			}
 
 			// update value
-			reply, err := store.Chatbot.GetKeyResultBySequence(ctx.AsUser, ctx.Original, keyResult.Sequence)
+			reply, err := store.Chatbot.GetKeyResultBySequence(ctx.AsUser, ctx.Original, int64(keyResult.Sequence))
 			if err != nil {
 				return nil
 			}
@@ -205,7 +205,7 @@ var formRules = []form.Rule{
 			if err != nil {
 				return nil
 			}
-			err = store.Chatbot.AggregateObjectiveValue(keyResult.ObjectiveID)
+			err = store.Chatbot.AggregateObjectiveValue(int64(keyResult.ObjectiveID))
 			if err != nil {
 				return nil
 			}
@@ -226,7 +226,7 @@ var formRules = []form.Rule{
 				case "remark":
 					todo.Remark = value.(string)
 				case "priority":
-					todo.Priority = value.(int64)
+					todo.Priority = value.(int32)
 				}
 			}
 
@@ -248,7 +248,7 @@ var formRules = []form.Rule{
 			for key, value := range values {
 				switch key {
 				case "sequence":
-					todo.Sequence = value.(int64)
+					todo.Sequence = value.(int32)
 				case "content":
 					todo.Content = value.(string)
 				case "category":
@@ -256,7 +256,7 @@ var formRules = []form.Rule{
 				case "remark":
 					todo.Remark = value.(string)
 				case "priority":
-					todo.Priority = value.(int64)
+					todo.Priority = value.(int32)
 				}
 			}
 			todo.UID = ctx.AsUser.UserId()
