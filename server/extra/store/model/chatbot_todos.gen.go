@@ -15,6 +15,8 @@ type Todo struct {
 	ID             int32     `gorm:"column:id;primaryKey;autoIncrement:true" json:"id"`
 	UID            string    `gorm:"column:uid;not null" json:"uid"`
 	Topic          string    `gorm:"column:topic;not null" json:"topic"`
+	KeyResultID    int32     `gorm:"column:key_result_id;not null" json:"key_result_id"`
+	ParentID       int32     `gorm:"column:parent_id;not null" json:"parent_id"`
 	Sequence       int32     `gorm:"column:sequence;not null" json:"sequence"`
 	Content        string    `gorm:"column:content;not null" json:"content"`
 	Category       string    `gorm:"column:category;not null" json:"category"`
@@ -28,6 +30,7 @@ type Todo struct {
 	Complete       int32     `gorm:"column:complete;not null" json:"complete"`
 	CreatedAt      time.Time `gorm:"column:created_at;not null" json:"created_at"`
 	UpdatedAt      time.Time `gorm:"column:updated_at;not null" json:"updated_at"`
+	SubTodos       []*Todo   `gorm:"foreignKey:parent_id" json:"sub_todos"`
 }
 
 // TableName Todo's table name

@@ -53,6 +53,19 @@ func newObjective(db *gorm.DB, opts ...gen.DOOption) objective {
 		}{
 			RelationField: field.NewRelation("KeyResults.KeyResultValues", "model.KeyResultValue"),
 		},
+		Todos: struct {
+			field.RelationField
+			SubTodos struct {
+				field.RelationField
+			}
+		}{
+			RelationField: field.NewRelation("KeyResults.Todos", "model.Todo"),
+			SubTodos: struct {
+				field.RelationField
+			}{
+				RelationField: field.NewRelation("KeyResults.Todos.SubTodos", "model.Todo"),
+			},
+		},
 	}
 
 	_objective.fillFieldMap()
@@ -166,6 +179,12 @@ type objectiveHasManyKeyResults struct {
 
 	KeyResultValues struct {
 		field.RelationField
+	}
+	Todos struct {
+		field.RelationField
+		SubTodos struct {
+			field.RelationField
+		}
 	}
 }
 

@@ -31,6 +31,8 @@ func newTodo(db *gorm.DB, opts ...gen.DOOption) todo {
 	_todo.ID = field.NewInt32(tableName, "id")
 	_todo.UID = field.NewString(tableName, "uid")
 	_todo.Topic = field.NewString(tableName, "topic")
+	_todo.KeyResultID = field.NewInt32(tableName, "key_result_id")
+	_todo.ParentID = field.NewInt32(tableName, "parent_id")
 	_todo.Sequence = field.NewInt32(tableName, "sequence")
 	_todo.Content = field.NewString(tableName, "content")
 	_todo.Category = field.NewString(tableName, "category")
@@ -44,6 +46,11 @@ func newTodo(db *gorm.DB, opts ...gen.DOOption) todo {
 	_todo.Complete = field.NewInt32(tableName, "complete")
 	_todo.CreatedAt = field.NewTime(tableName, "created_at")
 	_todo.UpdatedAt = field.NewTime(tableName, "updated_at")
+	_todo.SubTodos = todoHasManySubTodos{
+		db: db.Session(&gorm.Session{}),
+
+		RelationField: field.NewRelation("SubTodos", "model.Todo"),
+	}
 
 	_todo.fillFieldMap()
 
@@ -57,6 +64,8 @@ type todo struct {
 	ID             field.Int32
 	UID            field.String
 	Topic          field.String
+	KeyResultID    field.Int32
+	ParentID       field.Int32
 	Sequence       field.Int32
 	Content        field.String
 	Category       field.String
@@ -70,6 +79,7 @@ type todo struct {
 	Complete       field.Int32
 	CreatedAt      field.Time
 	UpdatedAt      field.Time
+	SubTodos       todoHasManySubTodos
 
 	fieldMap map[string]field.Expr
 }
@@ -89,6 +99,8 @@ func (t *todo) updateTableName(table string) *todo {
 	t.ID = field.NewInt32(table, "id")
 	t.UID = field.NewString(table, "uid")
 	t.Topic = field.NewString(table, "topic")
+	t.KeyResultID = field.NewInt32(table, "key_result_id")
+	t.ParentID = field.NewInt32(table, "parent_id")
 	t.Sequence = field.NewInt32(table, "sequence")
 	t.Content = field.NewString(table, "content")
 	t.Category = field.NewString(table, "category")
@@ -118,10 +130,12 @@ func (t *todo) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (t *todo) fillFieldMap() {
-	t.fieldMap = make(map[string]field.Expr, 16)
+	t.fieldMap = make(map[string]field.Expr, 19)
 	t.fieldMap["id"] = t.ID
 	t.fieldMap["uid"] = t.UID
 	t.fieldMap["topic"] = t.Topic
+	t.fieldMap["key_result_id"] = t.KeyResultID
+	t.fieldMap["parent_id"] = t.ParentID
 	t.fieldMap["sequence"] = t.Sequence
 	t.fieldMap["content"] = t.Content
 	t.fieldMap["category"] = t.Category
@@ -135,6 +149,7 @@ func (t *todo) fillFieldMap() {
 	t.fieldMap["complete"] = t.Complete
 	t.fieldMap["created_at"] = t.CreatedAt
 	t.fieldMap["updated_at"] = t.UpdatedAt
+
 }
 
 func (t todo) clone(db *gorm.DB) todo {
@@ -145,6 +160,77 @@ func (t todo) clone(db *gorm.DB) todo {
 func (t todo) replaceDB(db *gorm.DB) todo {
 	t.todoDo.ReplaceDB(db)
 	return t
+}
+
+type todoHasManySubTodos struct {
+	db *gorm.DB
+
+	field.RelationField
+}
+
+func (a todoHasManySubTodos) Where(conds ...field.Expr) *todoHasManySubTodos {
+	if len(conds) == 0 {
+		return &a
+	}
+
+	exprs := make([]clause.Expression, 0, len(conds))
+	for _, cond := range conds {
+		exprs = append(exprs, cond.BeCond().(clause.Expression))
+	}
+	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
+	return &a
+}
+
+func (a todoHasManySubTodos) WithContext(ctx context.Context) *todoHasManySubTodos {
+	a.db = a.db.WithContext(ctx)
+	return &a
+}
+
+func (a todoHasManySubTodos) Session(session *gorm.Session) *todoHasManySubTodos {
+	a.db = a.db.Session(session)
+	return &a
+}
+
+func (a todoHasManySubTodos) Model(m *model.Todo) *todoHasManySubTodosTx {
+	return &todoHasManySubTodosTx{a.db.Model(m).Association(a.Name())}
+}
+
+type todoHasManySubTodosTx struct{ tx *gorm.Association }
+
+func (a todoHasManySubTodosTx) Find() (result []*model.Todo, err error) {
+	return result, a.tx.Find(&result)
+}
+
+func (a todoHasManySubTodosTx) Append(values ...*model.Todo) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Append(targetValues...)
+}
+
+func (a todoHasManySubTodosTx) Replace(values ...*model.Todo) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Replace(targetValues...)
+}
+
+func (a todoHasManySubTodosTx) Delete(values ...*model.Todo) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Delete(targetValues...)
+}
+
+func (a todoHasManySubTodosTx) Clear() error {
+	return a.tx.Clear()
+}
+
+func (a todoHasManySubTodosTx) Count() int64 {
+	return a.tx.Count()
 }
 
 type todoDo struct{ gen.DO }

@@ -48,6 +48,17 @@ func newKeyResult(db *gorm.DB, opts ...gen.DOOption) keyResult {
 		RelationField: field.NewRelation("KeyResultValues", "model.KeyResultValue"),
 	}
 
+	_keyResult.Todos = keyResultHasManyTodos{
+		db: db.Session(&gorm.Session{}),
+
+		RelationField: field.NewRelation("Todos", "model.Todo"),
+		SubTodos: struct {
+			field.RelationField
+		}{
+			RelationField: field.NewRelation("Todos.SubTodos", "model.Todo"),
+		},
+	}
+
 	_keyResult.fillFieldMap()
 
 	return _keyResult
@@ -72,6 +83,8 @@ type keyResult struct {
 	CreatedAt       field.Time
 	UpdatedAt       field.Time
 	KeyResultValues keyResultHasManyKeyResultValues
+
+	Todos keyResultHasManyTodos
 
 	fieldMap map[string]field.Expr
 }
@@ -118,7 +131,7 @@ func (k *keyResult) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (k *keyResult) fillFieldMap() {
-	k.fieldMap = make(map[string]field.Expr, 15)
+	k.fieldMap = make(map[string]field.Expr, 16)
 	k.fieldMap["id"] = k.ID
 	k.fieldMap["uid"] = k.UID
 	k.fieldMap["topic"] = k.Topic
@@ -214,6 +227,81 @@ func (a keyResultHasManyKeyResultValuesTx) Clear() error {
 }
 
 func (a keyResultHasManyKeyResultValuesTx) Count() int64 {
+	return a.tx.Count()
+}
+
+type keyResultHasManyTodos struct {
+	db *gorm.DB
+
+	field.RelationField
+
+	SubTodos struct {
+		field.RelationField
+	}
+}
+
+func (a keyResultHasManyTodos) Where(conds ...field.Expr) *keyResultHasManyTodos {
+	if len(conds) == 0 {
+		return &a
+	}
+
+	exprs := make([]clause.Expression, 0, len(conds))
+	for _, cond := range conds {
+		exprs = append(exprs, cond.BeCond().(clause.Expression))
+	}
+	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
+	return &a
+}
+
+func (a keyResultHasManyTodos) WithContext(ctx context.Context) *keyResultHasManyTodos {
+	a.db = a.db.WithContext(ctx)
+	return &a
+}
+
+func (a keyResultHasManyTodos) Session(session *gorm.Session) *keyResultHasManyTodos {
+	a.db = a.db.Session(session)
+	return &a
+}
+
+func (a keyResultHasManyTodos) Model(m *model.KeyResult) *keyResultHasManyTodosTx {
+	return &keyResultHasManyTodosTx{a.db.Model(m).Association(a.Name())}
+}
+
+type keyResultHasManyTodosTx struct{ tx *gorm.Association }
+
+func (a keyResultHasManyTodosTx) Find() (result []*model.Todo, err error) {
+	return result, a.tx.Find(&result)
+}
+
+func (a keyResultHasManyTodosTx) Append(values ...*model.Todo) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Append(targetValues...)
+}
+
+func (a keyResultHasManyTodosTx) Replace(values ...*model.Todo) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Replace(targetValues...)
+}
+
+func (a keyResultHasManyTodosTx) Delete(values ...*model.Todo) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Delete(targetValues...)
+}
+
+func (a keyResultHasManyTodosTx) Clear() error {
+	return a.tx.Clear()
+}
+
+func (a keyResultHasManyTodosTx) Count() int64 {
 	return a.tx.Count()
 }
 

@@ -27,6 +27,7 @@ type KeyResult struct {
 	CreatedAt       time.Time         `gorm:"column:created_at;not null" json:"created_at"`
 	UpdatedAt       time.Time         `gorm:"column:updated_at;not null" json:"updated_at"`
 	KeyResultValues []*KeyResultValue `gorm:"foreignKey:key_result_id" json:"key_result_values"`
+	Todos           []*Todo           `gorm:"foreignKey:key_result_id" json:"todos"`
 }
 
 // TableName KeyResult's table name

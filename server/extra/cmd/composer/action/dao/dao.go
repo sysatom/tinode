@@ -87,10 +87,19 @@ func GenerationAction(c *cli.Context) error {
 		gen.FieldType("extra", "JSON")))
 
 	// OKR
+	todos := g.GenerateModelAs("chatbot_todos", "Todo", gen.FieldRelate(field.HasMany, "SubTodos",
+		g.GenerateModelAs("chatbot_todos", "Todo"), &field.RelateConfig{
+			RelateSlicePointer: true,
+			GORMTag:            map[string]string{"foreignKey": "parent_id"},
+		}))
 	keyResultValues := g.GenerateModelAs("chatbot_key_result_values", "KeyResultValue")
 	keyResults := g.GenerateModelAs("chatbot_key_results", "KeyResult",
 		gen.FieldType("value_mode", "ValueModeType"),
 		gen.FieldRelate(field.HasMany, "KeyResultValues", keyResultValues, &field.RelateConfig{
+			RelateSlicePointer: true,
+			GORMTag:            map[string]string{"foreignKey": "key_result_id"},
+		}),
+		gen.FieldRelate(field.HasMany, "Todos", todos, &field.RelateConfig{
 			RelateSlicePointer: true,
 			GORMTag:            map[string]string{"foreignKey": "key_result_id"},
 		}))
@@ -99,9 +108,7 @@ func GenerationAction(c *cli.Context) error {
 			RelateSlicePointer: true,
 			GORMTag:            map[string]string{"foreignKey": "objective_id"},
 		}))
-	g.ApplyInterface(func(Querier) {}, objectives)
-	g.ApplyInterface(func(Querier) {}, keyResults)
-	g.ApplyInterface(func(Querier) {}, keyResultValues)
+	g.ApplyInterface(func(Querier) {}, objectives, keyResults, keyResultValues, todos)
 
 	g.ApplyInterface(func(Querier) {}, g.GenerateModelAs("chatbot_page", "Page",
 		gen.FieldType("type", "PageType"),
@@ -113,7 +120,6 @@ func GenerationAction(c *cli.Context) error {
 		gen.FieldType("init", "JSON"),
 		gen.FieldType("values", "JSON"),
 		gen.FieldType("state", "SessionState")))
-	g.ApplyInterface(func(Querier) {}, g.GenerateModelAs("chatbot_todos", "Todo"))
 	g.ApplyInterface(func(Querier) {}, g.GenerateModelAs("chatbot_url", "Url",
 		gen.FieldType("state", "UrlState")))
 	g.ApplyInterface(func(Querier) {}, g.GenerateModelAs("chatbot_workflow", "Workflow",

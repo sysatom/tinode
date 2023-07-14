@@ -223,6 +223,8 @@ CREATE TABLE `chatbot_todos`
     `id`                int unsigned                                                  NOT NULL AUTO_INCREMENT,
     `uid`               char(25) COLLATE utf8mb4_unicode_ci                           NOT NULL,
     `topic`             char(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci     NOT NULL,
+    `key_result_id`     INT(10) NOT NULL DEFAULT '0',
+    `parent_id`         INT(10) NOT NULL DEFAULT '0',
     `sequence`          int                                                           NOT NULL,
     `content`           varchar(1000) COLLATE utf8mb4_unicode_ci                      NOT NULL,
     `category`          varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -237,7 +239,9 @@ CREATE TABLE `chatbot_todos`
     `created_at`        datetime                                                      NOT NULL,
     `updated_at`        datetime                                                      NOT NULL,
     PRIMARY KEY (`id`),
-    KEY `uid` (`uid`, `topic`)
+    KEY `uid` (`uid`, `topic`),
+    INDEX `key_result_id` (`parent_id`) USING BTREE,
+    INDEX `parent_id` (`parent_id`) USING BTREE
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;
