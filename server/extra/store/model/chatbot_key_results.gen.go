@@ -15,8 +15,8 @@ type KeyResult struct {
 	ID           int32         `gorm:"column:id;primaryKey;autoIncrement:true" json:"id"`
 	UID          string        `gorm:"column:uid;not null" json:"uid"`
 	Topic        string        `gorm:"column:topic;not null" json:"topic"`
-	ObjectiveID  int64         `gorm:"column:objective_id;not null" json:"objective_id"`
-	Sequence     int64         `gorm:"column:sequence;not null" json:"sequence"`
+	ObjectiveID  int32         `gorm:"column:objective_id;not null" json:"objective_id"`
+	Sequence     int32         `gorm:"column:sequence;not null" json:"sequence"`
 	Title        string        `gorm:"column:title;not null" json:"title"`
 	Memo         string        `gorm:"column:memo;not null" json:"memo"`
 	InitialValue int32         `gorm:"column:initial_value;not null" json:"initial_value"`

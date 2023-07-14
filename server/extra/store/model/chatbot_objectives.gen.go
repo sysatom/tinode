@@ -15,7 +15,7 @@ type Objective struct {
 	ID           int32     `gorm:"column:id;primaryKey;autoIncrement:true" json:"id"`
 	UID          string    `gorm:"column:uid;not null" json:"uid"`
 	Topic        string    `gorm:"column:topic;not null" json:"topic"`
-	Sequence     int64     `gorm:"column:sequence;not null" json:"sequence"`
+	Sequence     int32     `gorm:"column:sequence;not null" json:"sequence"`
 	Title        string    `gorm:"column:title;not null" json:"title"`
 	Memo         string    `gorm:"column:memo;not null" json:"memo"`
 	Motive       string    `gorm:"column:motive;not null" json:"motive"`

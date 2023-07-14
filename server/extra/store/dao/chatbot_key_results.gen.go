@@ -31,8 +31,8 @@ func newKeyResult(db *gorm.DB, opts ...gen.DOOption) keyResult {
 	_keyResult.ID = field.NewInt32(tableName, "id")
 	_keyResult.UID = field.NewString(tableName, "uid")
 	_keyResult.Topic = field.NewString(tableName, "topic")
-	_keyResult.ObjectiveID = field.NewInt64(tableName, "objective_id")
-	_keyResult.Sequence = field.NewInt64(tableName, "sequence")
+	_keyResult.ObjectiveID = field.NewInt32(tableName, "objective_id")
+	_keyResult.Sequence = field.NewInt32(tableName, "sequence")
 	_keyResult.Title = field.NewString(tableName, "title")
 	_keyResult.Memo = field.NewString(tableName, "memo")
 	_keyResult.InitialValue = field.NewInt32(tableName, "initial_value")
@@ -55,8 +55,8 @@ type keyResult struct {
 	ID           field.Int32
 	UID          field.String
 	Topic        field.String
-	ObjectiveID  field.Int64
-	Sequence     field.Int64
+	ObjectiveID  field.Int32
+	Sequence     field.Int32
 	Title        field.String
 	Memo         field.String
 	InitialValue field.Int32
@@ -85,8 +85,8 @@ func (k *keyResult) updateTableName(table string) *keyResult {
 	k.ID = field.NewInt32(table, "id")
 	k.UID = field.NewString(table, "uid")
 	k.Topic = field.NewString(table, "topic")
-	k.ObjectiveID = field.NewInt64(table, "objective_id")
-	k.Sequence = field.NewInt64(table, "sequence")
+	k.ObjectiveID = field.NewInt32(table, "objective_id")
+	k.Sequence = field.NewInt32(table, "sequence")
 	k.Title = field.NewString(table, "title")
 	k.Memo = field.NewString(table, "memo")
 	k.InitialValue = field.NewInt32(table, "initial_value")

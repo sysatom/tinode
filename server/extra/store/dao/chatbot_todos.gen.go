@@ -31,11 +31,11 @@ func newTodo(db *gorm.DB, opts ...gen.DOOption) todo {
 	_todo.ID = field.NewInt32(tableName, "id")
 	_todo.UID = field.NewString(tableName, "uid")
 	_todo.Topic = field.NewString(tableName, "topic")
-	_todo.Sequence = field.NewInt64(tableName, "sequence")
+	_todo.Sequence = field.NewInt32(tableName, "sequence")
 	_todo.Content = field.NewString(tableName, "content")
 	_todo.Category = field.NewString(tableName, "category")
 	_todo.Remark = field.NewString(tableName, "remark")
-	_todo.Priority = field.NewInt64(tableName, "priority")
+	_todo.Priority = field.NewInt32(tableName, "priority")
 	_todo.IsRemindAtTime = field.NewInt32(tableName, "is_remind_at_time")
 	_todo.RemindAt = field.NewInt64(tableName, "remind_at")
 	_todo.RepeatMethod = field.NewString(tableName, "repeat_method")
@@ -57,11 +57,11 @@ type todo struct {
 	ID             field.Int32
 	UID            field.String
 	Topic          field.String
-	Sequence       field.Int64
+	Sequence       field.Int32
 	Content        field.String
 	Category       field.String
 	Remark         field.String
-	Priority       field.Int64
+	Priority       field.Int32
 	IsRemindAtTime field.Int32
 	RemindAt       field.Int64
 	RepeatMethod   field.String
@@ -89,11 +89,11 @@ func (t *todo) updateTableName(table string) *todo {
 	t.ID = field.NewInt32(table, "id")
 	t.UID = field.NewString(table, "uid")
 	t.Topic = field.NewString(table, "topic")
-	t.Sequence = field.NewInt64(table, "sequence")
+	t.Sequence = field.NewInt32(table, "sequence")
 	t.Content = field.NewString(table, "content")
 	t.Category = field.NewString(table, "category")
 	t.Remark = field.NewString(table, "remark")
-	t.Priority = field.NewInt64(table, "priority")
+	t.Priority = field.NewInt32(table, "priority")
 	t.IsRemindAtTime = field.NewInt32(table, "is_remind_at_time")
 	t.RemindAt = field.NewInt64(table, "remind_at")
 	t.RepeatMethod = field.NewString(table, "repeat_method")

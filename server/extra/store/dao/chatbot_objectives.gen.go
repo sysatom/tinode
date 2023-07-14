@@ -31,7 +31,7 @@ func newObjective(db *gorm.DB, opts ...gen.DOOption) objective {
 	_objective.ID = field.NewInt32(tableName, "id")
 	_objective.UID = field.NewString(tableName, "uid")
 	_objective.Topic = field.NewString(tableName, "topic")
-	_objective.Sequence = field.NewInt64(tableName, "sequence")
+	_objective.Sequence = field.NewInt32(tableName, "sequence")
 	_objective.Title = field.NewString(tableName, "title")
 	_objective.Memo = field.NewString(tableName, "memo")
 	_objective.Motive = field.NewString(tableName, "motive")
@@ -57,7 +57,7 @@ type objective struct {
 	ID           field.Int32
 	UID          field.String
 	Topic        field.String
-	Sequence     field.Int64
+	Sequence     field.Int32
 	Title        field.String
 	Memo         field.String
 	Motive       field.String
@@ -89,7 +89,7 @@ func (o *objective) updateTableName(table string) *objective {
 	o.ID = field.NewInt32(table, "id")
 	o.UID = field.NewString(table, "uid")
 	o.Topic = field.NewString(table, "topic")
-	o.Sequence = field.NewInt64(table, "sequence")
+	o.Sequence = field.NewInt32(table, "sequence")
 	o.Title = field.NewString(table, "title")
 	o.Memo = field.NewString(table, "memo")
 	o.Motive = field.NewString(table, "motive")
