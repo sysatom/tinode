@@ -55,9 +55,8 @@ func GenerationAction(c *cli.Context) error {
 	}
 
 	g := gen.NewGenerator(gen.Config{
-		OutPath:      "./server/extra/store/dao",
-		ModelPkgPath: "./server/extra/store/model",
-		Mode:         gen.WithoutContext | gen.WithDefaultQuery,
+		OutPath: "./server/extra/store/dao",
+		Mode:    gen.WithoutContext | gen.WithDefaultQuery,
 	})
 
 	g.UseDB(db)
