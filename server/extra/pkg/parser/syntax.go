@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"errors"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -21,7 +20,7 @@ func NewSyntax(text []rune) *Syntax {
 }
 
 func (l *Syntax) error() error {
-	return errors.New(fmt.Sprintf("Syntax error on '%s' line: %d column: %d", string(l.CurrentChar), l.LineNo, l.Column))
+	return fmt.Errorf("syntax error on '%s' line: %d column: %d", string(l.CurrentChar), l.LineNo, l.Column)
 }
 
 func (l *Syntax) Advance() {

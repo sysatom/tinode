@@ -44,6 +44,10 @@ func editor(req *restful.Request, resp *restful.Response) {
 	p.Params["flag"] = flag
 	data := p.Params
 	err = t.Execute(buf, data)
+	if err != nil {
+		route.ErrorResponse(resp, "error execute")
+		return
+	}
 
 	_, _ = resp.Write(buf.Bytes())
 }
@@ -57,9 +61,9 @@ func saveMarkdown(req *restful.Request, resp *restful.Response) {
 		return
 	}
 
-	uid, _ := data["uid"]
-	flag, _ := data["flag"]
-	markdown, _ := data["markdown"]
+	uid := data["uid"]
+	flag := data["flag"]
+	markdown := data["markdown"]
 	if uid == "" || flag == "" || markdown == "" {
 		route.ErrorResponse(resp, "params error")
 		return
@@ -78,6 +82,10 @@ func saveMarkdown(req *restful.Request, resp *restful.Response) {
 	// store
 	userUid := types.ParseUserId(uid)
 	botUid, _, _, _, err := store.Users.GetAuthUniqueRecord("basic", fmt.Sprintf("%s_bot", Name))
+	if err != nil {
+		route.ErrorResponse(resp, "error bot")
+		return
+	}
 	topic := userUid.P2PName(botUid)
 	payload := bots.StorePage(
 		extraTypes.Context{AsUser: userUid, Original: botUid.UserId()},

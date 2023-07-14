@@ -33,7 +33,7 @@ func MigrationAction(c *cli.Context) error {
 		if info.IsDir() {
 			continue
 		}
-		reg, err := regexp.Compile("\\d{6}")
+		reg, err := regexp.Compile(`\d{6}`)
 		if err != nil {
 			panic(err)
 		}

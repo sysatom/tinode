@@ -133,8 +133,7 @@ var commandRules = []command.Rule{
 			// rand number
 			big, _ := rand.Int(rand.Reader, big.NewInt(1000))
 
-			var initValue model.JSON
-			initValue = map[string]interface{}{"number": big.Int64()}
+			var initValue model.JSON = map[string]interface{}{"number": big.Int64()}
 			return bots.SessionMsg(ctx, guessSessionID, initValue)
 		},
 	},

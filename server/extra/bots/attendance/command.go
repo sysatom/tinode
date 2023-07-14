@@ -43,11 +43,7 @@ var commandRules = []command.Rule{
 					continue
 				}
 				topic := keys[1]
-				if _, ok := topics[topic]; ok {
-					topics[topic] += 1
-				} else {
-					topics[topic] = 1
-				}
+				topics[topic] += 1
 			}
 
 			var texts []string
@@ -65,8 +61,7 @@ var commandRules = []command.Rule{
 			summary, _ := tokens[2].Value.String()
 			today := time.Now().Format("2006-01-02")
 			key := fmt.Sprintf("%s:%s:%d", today, topic, time.Now().Unix())
-			var value model.JSON
-			value = map[string]interface{}{"summary": summary}
+			var value model.JSON = map[string]interface{}{"summary": summary}
 			err := store.Chatbot.DataSet(ctx.AsUser, ctx.Original, key, value)
 			if err != nil {
 				return types.TextMsg{Text: "error"}
@@ -96,11 +91,7 @@ var commandRules = []command.Rule{
 				if keys[1] != topic {
 					continue
 				}
-				if _, ok := counts[keys[0]]; ok {
-					counts[keys[0]] += 1
-				} else {
-					counts[keys[0]] = 1
-				}
+				counts[keys[0]] += 1
 			}
 
 			// heatmap

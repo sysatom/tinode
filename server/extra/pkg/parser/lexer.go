@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"errors"
 	"fmt"
 	"unicode"
 )
@@ -32,7 +31,7 @@ func NewLexer(text []rune) *Lexer {
 }
 
 func (l *Lexer) error() error {
-	return errors.New(fmt.Sprintf("Lexer error on '%s' line: %d column: %d", string(l.CurrentChar), l.LineNo, l.Column))
+	return fmt.Errorf("lexer error on '%s' line: %d column: %d", string(l.CurrentChar), l.LineNo, l.Column)
 }
 
 func (l *Lexer) Advance() {

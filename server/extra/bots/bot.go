@@ -738,8 +738,7 @@ func SessionStart(ctx types.Context, initValues model.JSON) error {
 	if sess.ID > 0 && sess.State == model.SessionStart {
 		return errors.New("already a session started")
 	}
-	var values model.JSON
-	values = map[string]interface{}{"val": nil}
+	var values model.JSON = map[string]interface{}{"val": nil}
 	_ = store.Chatbot.SessionCreate(model.Session{
 		UID:    ctx.AsUser.UserId(),
 		Topic:  ctx.Original,

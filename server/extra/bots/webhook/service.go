@@ -30,6 +30,10 @@ func webhook(req *restful.Request, resp *restful.Response) {
 	uid, _ := p.Params.String("uid")
 	userUid := types.ParseUserId(uid)
 	botUid, _, _, _, err := store.Users.GetAuthUniqueRecord("basic", fmt.Sprintf("%s_bot", Name))
+	if err != nil {
+		route.ErrorResponse(resp, "error bot")
+		return
+	}
 	topic := userUid.P2PName(botUid)
 
 	d, _ := io.ReadAll(req.Request.Body)

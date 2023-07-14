@@ -2,11 +2,13 @@
 
 ## ENV
 
+```shell
 CHANNEL_PATH=/subscribe
 REDIS_ADDR=127.0.0.1:6379
 REDIS_PASSWORD=123456
 TINODE_URL=http://127.0.0.1:6060
 DOWNLOAD_PATH=/download
+```
 
 ## extra json config
 
@@ -25,4 +27,14 @@ go run github.com/tinode/chat/server/extra/cmd/composer migrate import
 
 # Migration file cli
 go run github.com/tinode/chat/server/extra/cmd/composer migrate migration -name file_name
+```
+
+## Lint
+
+```shell
+# install
+go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+
+# check
+golangci-lint run --timeout=10m --config=./server/extra/.golangci.yaml ./server/extra/...
 ```

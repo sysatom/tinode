@@ -82,8 +82,8 @@ func (r Rule) Run() []map[string]string {
 			if err != nil {
 				return ""
 			}
-			k, _ := args["k"]
-			v, _ := args["v"]
+			k := args["k"]
+			v := args["v"]
 
 			rx, err := regexp.Compile(k)
 			if err != nil {
