@@ -41,9 +41,10 @@ jobs:
         uses: golangci/golangci-lint-action@v3
         with:
           version: v1.53.3
+          working-directory: ./server/extra
+          args: --timeout=10m --config=./server/extra/.golangci.yaml
 
       - name: Build
         run: |
           go env
-          golangci-lint run --timeout=10m --config=./server/extra/.golangci.yaml ./server/extra/...
           go build -tags mysql -o tmp github.com/tinode/chat/server
