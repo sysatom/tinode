@@ -42,7 +42,7 @@ require (
 	github.com/gookit/event v1.1.1
 	github.com/gorilla/mux v1.8.0
 	github.com/influxdata/cron v0.0.0-20201006132531-4bb0a200dcbe
-	github.com/maxence-charriere/go-app/v9 v9.6.7
+	github.com/maxence-charriere/go-app/v9 v9.7.2
 	github.com/mmcdole/gofeed v1.2.1
 	github.com/nikolaydubina/calendarheatmap v1.7.0
 	github.com/redis/go-redis/v9 v9.0.5
