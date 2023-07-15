@@ -246,4 +246,16 @@ var commandRules = []command.Rule{
 			return types.TextMsg{Text: "ok"}
 		},
 	},
+	{
+		Define: "page",
+		Help:   `[example] dev page`,
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
+			url, err := bots.PageURL(ctx, devPageId, nil, time.Hour)
+			if err != nil {
+				return types.TextMsg{Text: "error"}
+			}
+
+			return types.LinkMsg{Url: url}
+		},
+	},
 }

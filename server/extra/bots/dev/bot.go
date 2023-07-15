@@ -93,6 +93,7 @@ func (b bot) Rules() []interface{} {
 		actionRules,
 		instructRules,
 		sessionRules,
+		pageRules,
 	}
 }
 
@@ -134,4 +135,8 @@ func (b bot) Session(ctx types.Context, content interface{}) (types.MsgPayload, 
 
 func (b bot) Instruct() (instruct.Ruleset, error) {
 	return instructRules, nil
+}
+
+func (b bot) Page(ctx types.Context, flag string) (string, error) {
+	return bots.RunPage(pageRules, ctx, flag)
 }

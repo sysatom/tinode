@@ -2,6 +2,7 @@ package page
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 	"github.com/tinode/chat/server/extra/page/component"
 	"github.com/tinode/chat/server/extra/store/model"
@@ -151,4 +152,8 @@ func RenderMarkdown(page model.Page) app.UI {
 		Schema: msg,
 	}
 	return comp
+}
+
+func Render(comp app.UI) string {
+	return fmt.Sprintf(Layout, app.HTMLString(comp))
 }

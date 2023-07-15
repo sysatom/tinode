@@ -61,6 +61,8 @@ type Context struct {
 	WorkflowVersion int
 	// workflow step index
 	WorkflowStepIndex int
+	// page rule id
+	PageRuleId string
 }
 
 func Id() types.Uid {

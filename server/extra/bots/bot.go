@@ -15,6 +15,7 @@ import (
 	"github.com/tinode/chat/server/extra/ruleset/event"
 	"github.com/tinode/chat/server/extra/ruleset/form"
 	"github.com/tinode/chat/server/extra/ruleset/instruct"
+	"github.com/tinode/chat/server/extra/ruleset/page"
 	"github.com/tinode/chat/server/extra/ruleset/session"
 	"github.com/tinode/chat/server/extra/ruleset/setting"
 	"github.com/tinode/chat/server/extra/ruleset/workflow"
@@ -88,6 +89,9 @@ type Handler interface {
 
 	// Instruct return instruct list
 	Instruct() (instruct.Ruleset, error)
+
+	// Page return page
+	Page(ctx types.Context, flag string) (string, error)
 }
 
 type Base struct{}
@@ -158,6 +162,10 @@ func (Base) Agent(_ types.Context, _ interface{}) (types.MsgPayload, error) {
 
 func (Base) Instruct() (instruct.Ruleset, error) {
 	return nil, nil
+}
+
+func (Base) Page(_ types.Context, _ string) (string, error) {
+	return "", nil
 }
 
 type configType struct {
@@ -460,6 +468,24 @@ func RunForm(formRules []form.Rule, ctx types.Context, values map[string]interfa
 	}
 
 	return payload, nil
+}
+
+func RunPage(pageRules []page.Rule, ctx types.Context, flag string) (string, error) {
+	rs := page.Ruleset(pageRules)
+	return rs.ProcessPage(ctx, flag)
+}
+
+func PageURL(ctx types.Context, pageRuleId string, param model.JSON, expiredDuration time.Duration) (string, error) {
+	if param != nil {
+		param["topic"] = ctx.RcptTo
+		param["uid"] = ctx.AsUser.UserId()
+	}
+	flag, err := StoreParameter(param, time.Now().Add(expiredDuration))
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("%s/extra/p/%s/%s", types.AppUrl(), pageRuleId, flag), nil
 }
 
 func RunAction(actionRules []action.Rule, ctx types.Context, option string) (types.MsgPayload, error) {

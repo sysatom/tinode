@@ -10,10 +10,11 @@ import (
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 	"github.com/tinode/chat/server/auth"
 	"github.com/tinode/chat/server/extra/bots"
-	"github.com/tinode/chat/server/extra/page"
+	compPage "github.com/tinode/chat/server/extra/page"
 	"github.com/tinode/chat/server/extra/pkg/queue"
 	"github.com/tinode/chat/server/extra/ruleset/agent"
 	"github.com/tinode/chat/server/extra/ruleset/form"
+	"github.com/tinode/chat/server/extra/ruleset/page"
 	extraStore "github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/store/model"
 	extraTypes "github.com/tinode/chat/server/extra/types"
@@ -38,6 +39,7 @@ func newRouter() *mux.Router {
 	s.HandleFunc("/page/{id}", getPage)
 	s.HandleFunc("/form", postForm).Methods(http.MethodPost)
 	s.HandleFunc("/queue/stats", queueStats)
+	s.HandleFunc("/p/{id}/{flag}", renderPage)
 	// bot
 	s.HandleFunc("/linkit", postLinkitData)
 
@@ -114,19 +116,19 @@ func getPage(rw http.ResponseWriter, req *http.Request) {
 	switch p.Type {
 	case model.PageForm:
 		f, _ := extraStore.Chatbot.FormGet(p.PageID)
-		comp = page.RenderForm(p, f)
+		comp = compPage.RenderForm(p, f)
 	case model.PageOkr:
-		comp = page.RenderOkr(p)
+		comp = compPage.RenderOkr(p)
 	case model.PageTable:
-		comp = page.RenderTable(p)
+		comp = compPage.RenderTable(p)
 	case model.PageShare:
-		comp = page.RenderShare(p)
+		comp = compPage.RenderShare(p)
 	case model.PageJson:
-		comp = page.RenderJson(p)
+		comp = compPage.RenderJson(p)
 	case model.PageHtml:
-		comp = page.RenderHtml(p)
+		comp = compPage.RenderHtml(p)
 	case model.PageMarkdown:
-		comp = page.RenderMarkdown(p)
+		comp = compPage.RenderMarkdown(p)
 	case model.PageChart:
 		d, err := json.Marshal(p.Schema)
 		if err != nil {
@@ -158,7 +160,54 @@ func getPage(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	_, _ = rw.Write([]byte(fmt.Sprintf(page.Layout, app.HTMLString(comp))))
+	_, _ = rw.Write([]byte(fmt.Sprintf(compPage.Layout, app.HTMLString(comp))))
+}
+
+func renderPage(rw http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	pageRuleId := vars["id"]
+	flag := vars["flag"]
+
+	p, err := extraStore.Chatbot.ParameterGet(flag)
+	if err != nil {
+		errorResponse(rw, "flag error")
+		return
+	}
+	if p.IsExpired() {
+		errorResponse(rw, "page expired")
+		return
+	}
+
+	topic, _ := p.Params.String("topic")
+	uid, _ := p.Params.String("uid")
+
+	ctx := extraTypes.Context{
+		RcptTo:     topic,
+		AsUser:     types.ParseUserId(uid),
+		PageRuleId: pageRuleId,
+	}
+
+	var botHandler bots.Handler
+	for _, handler := range bots.List() {
+		for _, item := range handler.Rules() {
+			switch v := item.(type) {
+			case []page.Rule:
+				for _, rule := range v {
+					if rule.Id == pageRuleId {
+						botHandler = handler
+					}
+				}
+			}
+		}
+	}
+
+	if botHandler == nil {
+		rw.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	html, err := botHandler.Page(ctx, flag)
+	_, _ = rw.Write([]byte(html))
 }
 
 func postForm(rw http.ResponseWriter, req *http.Request) {
