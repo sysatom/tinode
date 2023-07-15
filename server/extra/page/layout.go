@@ -7,6 +7,7 @@ import (
 	"github.com/tinode/chat/server/extra/page/component"
 	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/types"
+	"strings"
 )
 
 const Layout = `
@@ -19,10 +20,12 @@ const Layout = `
      	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.15.12/dist/css/uikit.min.css" />
 		<script src="https://cdn.jsdelivr.net/npm/uikit@3.15.12/dist/js/uikit.min.js"></script>
 		<script src="https://cdn.jsdelivr.net/npm/uikit@3.15.12/dist/js/uikit-icons.min.js"></script>
+		%s
     </head>
 
     <body>
         <div id="app" style="padding: 20px">%s</div>
+		%s
     </body>
 </html>
 `
@@ -154,6 +157,14 @@ func RenderMarkdown(page model.Page) app.UI {
 	return comp
 }
 
-func Render(comp app.UI) string {
-	return fmt.Sprintf(Layout, app.HTMLString(comp))
+func Render(comp app.UI, styles []app.UI, scripts []app.HTMLScript) string {
+	stylesStr := strings.Builder{}
+	for _, style := range styles {
+		stylesStr.WriteString(app.HTMLString(style))
+	}
+	scriptsStr := strings.Builder{}
+	for _, script := range scripts {
+		scriptsStr.WriteString(app.HTMLString(script))
+	}
+	return fmt.Sprintf(Layout, stylesStr.String(), app.HTMLString(comp), scriptsStr.String())
 }

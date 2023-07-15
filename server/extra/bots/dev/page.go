@@ -1,6 +1,7 @@
 package dev
 
 import (
+	_ "embed"
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 	"github.com/tinode/chat/server/extra/page/uikit"
 	"github.com/tinode/chat/server/extra/ruleset/page"
@@ -12,9 +13,23 @@ const (
 	devPageId = "dev"
 )
 
+//go:embed static/example.css
+var exampleCss string
+
+//go:embed static/example.js
+var exampleJs string
+
 var pageRules = []page.Rule{
 	{
 		Id: devPageId,
+		CSS: []app.UI{
+			uikit.Style("https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown.min.css"),
+			uikit.Css(exampleCss),
+		},
+		JS: []app.HTMLScript{
+			uikit.Script("https://cdn.jsdelivr.net/npm/axios@1.4.0/dist/axios.min.js"),
+			uikit.Js(exampleJs),
+		},
 		UI: func(ctx types.Context, flag string) (app.UI, error) {
 			return uikit.Container(
 				uikit.Grid(

@@ -9,8 +9,10 @@ import (
 )
 
 type Rule struct {
-	Id string
-	UI func(ctx types.Context, flag string) (app.UI, error)
+	Id  string
+	CSS []app.UI
+	JS  []app.HTMLScript
+	UI  func(ctx types.Context, flag string) (app.UI, error)
 }
 
 type Ruleset []Rule
@@ -22,7 +24,7 @@ func (r Ruleset) ProcessPage(ctx types.Context, flag string) (string, error) {
 			if err != nil {
 				return "", err
 			}
-			return page.Render(ui), nil
+			return page.Render(ui, rule.CSS, rule.JS), nil
 		}
 	}
 	return "", fmt.Errorf("%d not found", http.StatusNotFound)

@@ -34,3 +34,19 @@ func Div(elems ...app.UI) app.HTMLDiv {
 func Text(v interface{}) app.HTMLDiv {
 	return app.Div().Text(v)
 }
+
+func Style(url string) app.HTMLLink {
+	return app.Link().Rel("stylesheet").Href(url)
+}
+
+func Css(css string) app.HTMLStyle {
+	return app.Style().Text(css)
+}
+
+func Script(url string) app.HTMLScript {
+	return app.Script().Src(url)
+}
+
+func Js(js string) app.HTMLScript {
+	return app.Script().Text(js)
+}
