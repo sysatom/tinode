@@ -6,6 +6,7 @@ import (
 	"github.com/tinode/chat/server/extra/page/library"
 	"github.com/tinode/chat/server/extra/page/uikit"
 	"github.com/tinode/chat/server/extra/ruleset/page"
+	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/types"
 	"time"
 )
@@ -23,7 +24,12 @@ var exampleJs string
 var pageRules = []page.Rule{
 	{
 		Id: devPageId,
-		UI: func(ctx types.Context, flag string) (types.UI, error) {
+		UI: func(ctx types.Context, flag string) (*types.UI, error) {
+			p, err := store.Chatbot.ParameterGet(flag)
+			if err != nil {
+				return nil, err
+			}
+
 			css := []app.UI{
 				uikit.Style(library.GithubMarkdownCss),
 				uikit.Css(exampleCss),
@@ -54,6 +60,7 @@ var pageRules = []page.Rule{
 				uikit.Modal("example_modal", "modal", uikit.Text("content......")),
 				uikit.Placeholder("Lorem ipsum dolor sit amet, consectetur adipiscing elit."),
 				uikit.Progress(10, 100),
+				uikit.Button("click event").Attr("@click", "greet"),
 				uikit.Table(
 					uikit.THead(
 						uikit.Tr(
@@ -76,13 +83,14 @@ var pageRules = []page.Rule{
 						),
 					),
 				).Class(uikit.TableDividerClass, uikit.TableHoverClass),
-				uikit.Countdown(time.Now().AddDate(1, 2, 3)),
+				uikit.Countdown(p.ExpiredAt),
 			)
 
-			return types.UI{
-				App: app,
-				CSS: css,
-				JS:  js,
+			return &types.UI{
+				App:    app,
+				CSS:    css,
+				JS:     js,
+				Global: p.Params,
 			}, nil
 		},
 	},

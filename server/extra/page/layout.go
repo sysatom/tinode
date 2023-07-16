@@ -8,6 +8,7 @@ import (
 	"github.com/tinode/chat/server/extra/page/library"
 	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/types"
+	"github.com/tinode/chat/server/logs"
 	"html"
 	"strings"
 )
@@ -158,12 +159,34 @@ func RenderMarkdown(page model.Page) app.UI {
 	return comp
 }
 
-func Render(comp types.UI) string {
+func Render(comp *types.UI) string {
 	stylesStr := strings.Builder{}
 	for _, style := range comp.CSS {
 		stylesStr.WriteString(app.HTMLString(style))
 	}
 	scriptsStr := strings.Builder{}
+	if len(comp.Global) > 0 {
+		scriptsStr.WriteString("<script>")
+		scriptsStr.WriteString("let Global = {};")
+		for key, value := range comp.Global {
+			switch v := value.(type) {
+			case string:
+				scriptsStr.WriteString(fmt.Sprintf(`Global.%s = "%s";`, key, v))
+			case int, uint, int32, uint32, int64, uint64:
+				scriptsStr.WriteString(fmt.Sprintf(`Global.%s = %d;`, key, v))
+			case float32, float64:
+				scriptsStr.WriteString(fmt.Sprintf(`Global.%s = %f;`, key, v))
+			case map[string]interface{}:
+				j, err := json.Marshal(v)
+				if err != nil {
+					logs.Err.Println(err)
+					continue
+				}
+				scriptsStr.WriteString(fmt.Sprintf(`Global.%s = %s;`, key, string(j)))
+			}
+		}
+		scriptsStr.WriteString("</script>")
+	}
 	for _, script := range comp.JS {
 		scriptsStr.WriteString(html.UnescapeString(app.HTMLString(script)))
 	}

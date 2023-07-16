@@ -9,7 +9,7 @@ import (
 
 type Rule struct {
 	Id string
-	UI func(ctx types.Context, flag string) (types.UI, error)
+	UI func(ctx types.Context, flag string) (*types.UI, error)
 }
 
 type Ruleset []Rule

@@ -476,10 +476,11 @@ func RunPage(pageRules []page.Rule, ctx types.Context, flag string) (string, err
 }
 
 func PageURL(ctx types.Context, pageRuleId string, param model.JSON, expiredDuration time.Duration) (string, error) {
-	if param != nil {
-		param["topic"] = ctx.RcptTo
-		param["uid"] = ctx.AsUser.UserId()
+	if param == nil {
+		param = model.JSON{}
 	}
+	param["topic"] = ctx.RcptTo
+	param["uid"] = ctx.AsUser.UserId()
 	flag, err := StoreParameter(param, time.Now().Add(expiredDuration))
 	if err != nil {
 		return "", err
