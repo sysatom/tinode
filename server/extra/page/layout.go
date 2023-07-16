@@ -7,6 +7,7 @@ import (
 	"github.com/tinode/chat/server/extra/page/component"
 	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/types"
+	"html"
 	"strings"
 )
 
@@ -164,7 +165,7 @@ func Render(comp app.UI, styles []app.UI, scripts []app.HTMLScript) string {
 	}
 	scriptsStr := strings.Builder{}
 	for _, script := range scripts {
-		scriptsStr.WriteString(app.HTMLString(script))
+		scriptsStr.WriteString(html.UnescapeString(app.HTMLString(script)))
 	}
 	return fmt.Sprintf(Layout, stylesStr.String(), app.HTMLString(comp), scriptsStr.String())
 }

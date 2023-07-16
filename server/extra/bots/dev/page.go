@@ -33,6 +33,7 @@ var pageRules = []page.Rule{
 		},
 		UI: func(ctx types.Context, flag string) (app.UI, error) {
 			return uikit.App(
+				uikit.H1("{{ message }}").Class(uikit.TextCenterClass),
 				uikit.Grid(
 					uikit.Card("One", app.Div().Text("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.")),
 					uikit.Card("Two", app.Div().Text("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.")),
