@@ -250,7 +250,7 @@ var commandRules = []command.Rule{
 		Define: "page",
 		Help:   `[example] dev page`,
 		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
-			url, err := bots.PageURL(ctx, devPageId, nil, time.Hour)
+			url, err := bots.PageURL(ctx, devPageId, nil, 24*time.Hour)
 			if err != nil {
 				return types.TextMsg{Text: "error"}
 			}

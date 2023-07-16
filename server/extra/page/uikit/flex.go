@@ -3,7 +3,8 @@ package uikit
 import "github.com/maxence-charriere/go-app/v9/pkg/app"
 
 const (
-	FlexClass = "uk-flex"
+	FlexClass       = "uk-flex"
+	FlexInlineClass = "uk-flex-inline"
 
 	FlexLeftClass    = "uk-flex-left"
 	FlexCenterClass  = "uk-flex-center"
@@ -22,9 +23,5 @@ const (
 )
 
 func Flex(elems ...app.UI) app.HTMLDiv {
-	return app.Div().Class("uk-flex").Body(elems...)
-}
-
-func FlexInline(elems ...app.UI) app.HTMLDiv {
 	return app.Div().Class("uk-flex").Body(elems...)
 }

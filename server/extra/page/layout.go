@@ -24,7 +24,7 @@ const Layout = `
     </head>
 
     <body>
-        <div id="app" style="padding: 20px">%s</div>
+        %s
 		%s
     </body>
 </html>

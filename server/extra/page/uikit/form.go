@@ -2,8 +2,25 @@ package uikit
 
 import "github.com/maxence-charriere/go-app/v9/pkg/app"
 
+const (
+	FormStackedClass    = "uk-form-stacked"
+	FormHorizontalClass = "uk-form-horizontal"
+)
+
 func Form(elems ...app.UI) app.HTMLForm {
 	return app.Form().Body(elems...)
+}
+
+func FormLabel(text string, forId string) app.HTMLLabel {
+	return app.Label().Class("uk-form-label").For(forId).Text(text)
+}
+
+func FormControls(elems ...app.UI) app.HTMLDiv {
+	return app.Div().Class("uk-form-controls").Body(elems...)
+}
+
+func FormCustom(elems ...app.UI) app.HTMLDiv {
+	return app.Div().Attr("uk-form-custom", "").Body(elems...)
 }
 
 func Fieldset(elems ...app.UI) app.HTMLFieldSet {
@@ -28,4 +45,8 @@ func Checkbox() app.HTMLInput {
 
 func Range() app.HTMLInput {
 	return app.Input().Class("uk-range").Type("range")
+}
+
+func InputHidden(key, value string) app.HTMLInput {
+	return app.Input().Hidden(true).Type("text").Name(key).Value(value)
 }

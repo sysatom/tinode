@@ -27,11 +27,12 @@ var pageRules = []page.Rule{
 			uikit.Css(exampleCss),
 		},
 		JS: []app.HTMLScript{
+			uikit.Script("https://unpkg.com/vue@3/dist/vue.global.js"),
 			uikit.Script("https://cdn.jsdelivr.net/npm/axios@1.4.0/dist/axios.min.js"),
 			uikit.Js(exampleJs),
 		},
 		UI: func(ctx types.Context, flag string) (app.UI, error) {
-			return uikit.Container(
+			return uikit.App(
 				uikit.Grid(
 					uikit.Card("One", app.Div().Text("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.")),
 					uikit.Card("Two", app.Div().Text("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.")),
