@@ -81,7 +81,7 @@ func (bot) WebService() *restful.WebService {
 	return route.WebService(
 		Name, serviceVersion,
 		route.Route("GET", "/example", example, "get example data", route.WithReturns(model.Message{}), route.WithWrites(model.Message{})),
-		route.Route("POST", "/example", example, "create example data"),
+		route.Route("POST", "/example", example, "create example data"), // POST /bot/dev/v1/example
 	)
 }
 

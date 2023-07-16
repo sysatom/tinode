@@ -17,3 +17,7 @@ const VueJs = "https://unpkg.com/vue@3/dist/vue.global.js"
 // axios
 
 const AxiosJs = "https://cdn.jsdelivr.net/npm/axios@1.4.0/dist/axios.min.js"
+
+// joi
+
+const JoiJs = "https://cdn.jsdelivr.net/npm/joi@17.9.2/dist/joi-browser.min.js"

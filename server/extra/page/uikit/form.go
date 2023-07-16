@@ -27,8 +27,16 @@ func Fieldset(elems ...app.UI) app.HTMLFieldSet {
 	return app.FieldSet().Class("uk-fieldset").Body(elems...)
 }
 
+func Input() app.HTMLInput {
+	return app.Input().Class("uk-input")
+}
+
 func Select(elems ...app.UI) app.HTMLSelect {
 	return app.Select().Class("uk-select").Body(elems...)
+}
+
+func Option(text string) app.HTMLOption {
+	return app.Option().Text(text)
 }
 
 func Textarea(elems ...app.UI) app.HTMLTextarea {

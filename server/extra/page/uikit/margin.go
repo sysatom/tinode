@@ -11,5 +11,5 @@ const (
 )
 
 func Margin(elems ...app.UI) app.HTMLDiv {
-	return app.Div().Class("uk-margin")
+	return app.Div().Class("uk-margin").Body(elems...)
 }

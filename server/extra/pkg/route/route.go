@@ -40,8 +40,6 @@ func newWebService(group string, version string) *restful.WebService {
 	path := "/" + prefix + "/" + group + "/" + version
 	ws.Path(path)
 	ws.Doc(fmt.Sprintf("API at %s", path))
-	ws.Consumes(restful.MIME_JSON)
-	ws.Produces(restful.MIME_JSON)
 	return ws
 }
 

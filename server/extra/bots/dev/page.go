@@ -8,6 +8,7 @@ import (
 	"github.com/tinode/chat/server/extra/ruleset/page"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/types"
+	"net/http"
 	"time"
 )
 
@@ -37,14 +38,15 @@ var pageRules = []page.Rule{
 			js := []app.HTMLScript{
 				uikit.Script(library.VueJs),
 				uikit.Script(library.AxiosJs),
+				uikit.Script(library.JoiJs),
 				uikit.Js(exampleJs),
 			}
 
 			app := uikit.App(
 				uikit.H1("{{ message }}").Class(uikit.TextCenterClass),
 				uikit.Grid(
-					uikit.Card("One", app.Div().Text("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.")),
-					uikit.Card("Two", app.Div().Text("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.")),
+					uikit.Card("One", app.Div().Text("Lorem ipsum dolor sit amet, consectetur adipiscing elit")),
+					uikit.Card("Two", app.Div().Text("Lorem ipsum dolor sit amet, consectetur adipiscing elit")),
 				).Class(uikit.FlexClass, uikit.FlexCenterClass),
 				uikit.Icon("home"),
 				uikit.Div(
@@ -54,10 +56,32 @@ var pageRules = []page.Rule{
 					uikit.Label("Four").Class(uikit.LabelDangerClass),
 				),
 				uikit.Article("title", time.Now().Format(time.DateTime), uikit.Text("article......")),
-				uikit.Image("https://images.unsplash.com/photo-1490822180406-880c226c150b?fit=crop&w=650&h=433&q=80"),
 				uikit.DividerIcon(),
-				uikit.ModalToggle("example_modal", "modal"),
-				uikit.Modal("example_modal", "modal", uikit.Text("content......")),
+				uikit.Form(
+					uikit.Margin(
+						uikit.FormLabel("text", "f1"),
+						uikit.FormControls(
+							uikit.Input().Name("text").ID("f1").Attr("v-model", "form.text"),
+						),
+					),
+					uikit.Margin(
+						uikit.FormLabel("select", "f2"),
+						uikit.FormControls(
+							uikit.Select(
+								uikit.Option("Option 01"),
+								uikit.Option("Option 02"),
+							).Name("select").ID("f2").Attr("v-model", "form.select"),
+						),
+					),
+					uikit.Margin(
+						uikit.FormLabel("radio", "f3"),
+						uikit.FormControls(
+							app.Label().Body(uikit.Radio().Name("radio").Attr("v-model", "form.radio"), uikit.Text("option 1").Class(uikit.InlineClass)),
+							app.Label().Body(uikit.Radio().Name("radio").Attr("v-model", "form.radio"), uikit.Text("option 2").Class(uikit.InlineClass)),
+						),
+					),
+					uikit.Button("Submit").Type("button").Attr("@click", "submit"),
+				).Method(http.MethodPost).Action("/bot/dev/v1/example"),
 				uikit.Placeholder("Lorem ipsum dolor sit amet, consectetur adipiscing elit."),
 				uikit.Progress(10, 100),
 				uikit.Button("click event").Attr("@click", "greet"),
@@ -83,6 +107,9 @@ var pageRules = []page.Rule{
 						),
 					),
 				).Class(uikit.TableDividerClass, uikit.TableHoverClass),
+				uikit.ModalToggle("example_modal", "modal"),
+				uikit.Modal("example_modal", "modal", uikit.Text("content......")),
+				uikit.Image("https://images.unsplash.com/photo-1490822180406-880c226c150b?fit=crop&w=650&h=433&q=80"),
 				uikit.Countdown(p.ExpiredAt),
 			)
 
