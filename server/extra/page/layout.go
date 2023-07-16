@@ -69,24 +69,6 @@ func RenderTable(page model.Page) app.UI {
 	return comp
 }
 
-func RenderOkr(page model.Page) app.UI {
-	d, err := json.Marshal(page.Schema)
-	if err != nil {
-		return nil
-	}
-	var msg types.OkrMsg
-	err = json.Unmarshal(d, &msg)
-	if err != nil {
-		return nil
-	}
-
-	comp := &component.Okr{
-		Page:   page,
-		Schema: msg,
-	}
-	return comp
-}
-
 func RenderShare(page model.Page) app.UI {
 	d, err := json.Marshal(page.Schema)
 	if err != nil {

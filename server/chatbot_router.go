@@ -121,8 +121,6 @@ func getPage(rw http.ResponseWriter, req *http.Request) {
 	case model.PageForm:
 		f, _ := extraStore.Chatbot.FormGet(p.PageID)
 		comp = compPage.RenderForm(p, f)
-	case model.PageOkr:
-		comp = compPage.RenderOkr(p)
 	case model.PageTable:
 		comp = compPage.RenderTable(p)
 	case model.PageShare:
