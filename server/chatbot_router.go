@@ -3,6 +3,7 @@ package main
 import (
 	_ "embed"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/go-echarts/go-echarts/v2/charts"
 	"github.com/go-echarts/go-echarts/v2/opts"
@@ -12,6 +13,7 @@ import (
 	"github.com/tinode/chat/server/extra/bots"
 	compPage "github.com/tinode/chat/server/extra/page"
 	"github.com/tinode/chat/server/extra/page/library"
+	"github.com/tinode/chat/server/extra/page/uikit"
 	"github.com/tinode/chat/server/extra/pkg/queue"
 	"github.com/tinode/chat/server/extra/ruleset/agent"
 	"github.com/tinode/chat/server/extra/ruleset/form"
@@ -24,6 +26,7 @@ import (
 	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/store"
 	"github.com/tinode/chat/server/store/types"
+	"gorm.io/gorm"
 	"io"
 	"net/http"
 	"os"
@@ -161,9 +164,9 @@ func getPage(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	_, _ = rw.Write([]byte(fmt.Sprintf(compPage.Layout,
+	_, _ = rw.Write([]byte(fmt.Sprintf(compPage.Layout, "Page",
 		library.UIKitCss, library.UIKitJs, library.UIKitIconJs,
-		"", app.HTMLString(comp), "")))
+		"", app.HTMLString(uikit.Container(comp)), "")))
 }
 
 func renderPage(rw http.ResponseWriter, req *http.Request) {
@@ -181,10 +184,12 @@ func renderPage(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	original, _ := p.Params.String("original")
 	topic, _ := p.Params.String("topic")
 	uid, _ := p.Params.String("uid")
 
 	ctx := extraTypes.Context{
+		Original:   original,
 		RcptTo:     topic,
 		AsUser:     types.ParseUserId(uid),
 		PageRuleId: pageRuleId,
@@ -210,6 +215,16 @@ func renderPage(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	html, err := botHandler.Page(ctx, flag)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			rw.WriteHeader(http.StatusNotFound)
+			_, _ = rw.Write([]byte("404 not found"))
+			return
+		}
+		rw.WriteHeader(http.StatusBadRequest)
+		_, _ = rw.Write([]byte("error page"))
+		return
+	}
 	_, _ = rw.Write([]byte(html))
 }
 

@@ -17,7 +17,7 @@ const Layout = `
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Page</title>
+        <title>%s</title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
      	<link rel="stylesheet" href="%s" />
@@ -191,6 +191,7 @@ func Render(comp *types.UI) string {
 		scriptsStr.WriteString(html.UnescapeString(app.HTMLString(script)))
 	}
 	return fmt.Sprintf(Layout,
+		comp.Title,
 		library.UIKitCss, library.UIKitJs, library.UIKitIconJs,
 		stylesStr.String(), app.HTMLString(comp.App), scriptsStr.String())
 }

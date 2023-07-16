@@ -479,6 +479,7 @@ func PageURL(ctx types.Context, pageRuleId string, param model.JSON, expiredDura
 	if param == nil {
 		param = model.JSON{}
 	}
+	param["original"] = ctx.Original
 	param["topic"] = ctx.RcptTo
 	param["uid"] = ctx.AsUser.UserId()
 	flag, err := StoreParameter(param, time.Now().Add(expiredDuration))

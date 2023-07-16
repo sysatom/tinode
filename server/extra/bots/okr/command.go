@@ -12,6 +12,7 @@ import (
 	"github.com/tinode/chat/server/logs"
 	"gorm.io/gorm"
 	"strconv"
+	"time"
 )
 
 var commandRules = []command.Rule{
@@ -51,26 +52,16 @@ var commandRules = []command.Rule{
 		Define: `obj [number]`,
 		Help:   `View objective`,
 		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
+			param := model.JSON{}
 			sequence, _ := tokens[1].Value.Int64()
+			param["sequence"] = sequence
 
-			objective, err := store.Chatbot.GetObjectiveBySequence(ctx.AsUser, ctx.Original, sequence)
+			url, err := bots.PageURL(ctx, okrPageId, param, 24*time.Hour)
 			if err != nil {
-				logs.Err.Println(err)
-				return nil
+				return types.TextMsg{Text: "error"}
 			}
 
-			keyResult, err := store.Chatbot.ListKeyResultsByObjectiveId(int64(objective.ID))
-			if err != nil {
-				logs.Err.Println(err)
-				return nil
-			}
-
-			title := fmt.Sprintf("Objective #%d", objective.Sequence)
-			return bots.StorePage(ctx, model.PageOkr, title, types.OkrMsg{
-				Title:     title,
-				Objective: objective,
-				KeyResult: keyResult,
-			})
+			return types.LinkMsg{Url: url}
 		},
 	},
 	{

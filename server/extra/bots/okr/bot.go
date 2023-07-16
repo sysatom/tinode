@@ -55,6 +55,7 @@ func (b bot) Rules() []interface{} {
 	return []interface{}{
 		commandRules,
 		formRules,
+		pageRules,
 	}
 }
 
@@ -64,4 +65,8 @@ func (b bot) Command(ctx types.Context, content interface{}) (types.MsgPayload, 
 
 func (b bot) Form(ctx types.Context, values map[string]interface{}) (types.MsgPayload, error) {
 	return bots.RunForm(formRules, ctx, values)
+}
+
+func (b bot) Page(ctx types.Context, flag string) (string, error) {
+	return bots.RunPage(pageRules, ctx, flag)
 }
