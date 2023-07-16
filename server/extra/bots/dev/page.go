@@ -3,6 +3,7 @@ package dev
 import (
 	_ "embed"
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
+	"github.com/tinode/chat/server/extra/page/library"
 	"github.com/tinode/chat/server/extra/page/uikit"
 	"github.com/tinode/chat/server/extra/ruleset/page"
 	"github.com/tinode/chat/server/extra/types"
@@ -22,17 +23,18 @@ var exampleJs string
 var pageRules = []page.Rule{
 	{
 		Id: devPageId,
-		CSS: []app.UI{
-			uikit.Style("https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown.min.css"),
-			uikit.Css(exampleCss),
-		},
-		JS: []app.HTMLScript{
-			uikit.Script("https://unpkg.com/vue@3/dist/vue.global.js"),
-			uikit.Script("https://cdn.jsdelivr.net/npm/axios@1.4.0/dist/axios.min.js"),
-			uikit.Js(exampleJs),
-		},
-		UI: func(ctx types.Context, flag string) (app.UI, error) {
-			return uikit.App(
+		UI: func(ctx types.Context, flag string) (types.UI, error) {
+			css := []app.UI{
+				uikit.Style(library.GithubMarkdownCss),
+				uikit.Css(exampleCss),
+			}
+			js := []app.HTMLScript{
+				uikit.Script(library.VueJs),
+				uikit.Script(library.AxiosJs),
+				uikit.Js(exampleJs),
+			}
+
+			app := uikit.App(
 				uikit.H1("{{ message }}").Class(uikit.TextCenterClass),
 				uikit.Grid(
 					uikit.Card("One", app.Div().Text("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.")),
@@ -75,7 +77,13 @@ var pageRules = []page.Rule{
 					),
 				).Class(uikit.TableDividerClass, uikit.TableHoverClass),
 				uikit.Countdown(time.Now().AddDate(1, 2, 3)),
-			), nil
+			)
+
+			return types.UI{
+				App: app,
+				CSS: css,
+				JS:  js,
+			}, nil
 		},
 	},
 }

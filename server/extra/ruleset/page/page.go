@@ -2,17 +2,14 @@ package page
 
 import (
 	"fmt"
-	"github.com/maxence-charriere/go-app/v9/pkg/app"
 	"github.com/tinode/chat/server/extra/page"
 	"github.com/tinode/chat/server/extra/types"
 	"net/http"
 )
 
 type Rule struct {
-	Id  string
-	CSS []app.UI
-	JS  []app.HTMLScript
-	UI  func(ctx types.Context, flag string) (app.UI, error)
+	Id string
+	UI func(ctx types.Context, flag string) (types.UI, error)
 }
 
 type Ruleset []Rule
@@ -24,7 +21,7 @@ func (r Ruleset) ProcessPage(ctx types.Context, flag string) (string, error) {
 			if err != nil {
 				return "", err
 			}
-			return page.Render(ui, rule.CSS, rule.JS), nil
+			return page.Render(ui), nil
 		}
 	}
 	return "", fmt.Errorf("%d not found", http.StatusNotFound)

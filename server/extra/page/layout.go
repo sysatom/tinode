@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 	"github.com/tinode/chat/server/extra/page/component"
+	"github.com/tinode/chat/server/extra/page/library"
 	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/types"
 	"html"
@@ -18,12 +19,11 @@ const Layout = `
         <title>Page</title>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-     	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.15.12/dist/css/uikit.min.css" />
-		<script src="https://cdn.jsdelivr.net/npm/uikit@3.15.12/dist/js/uikit.min.js"></script>
-		<script src="https://cdn.jsdelivr.net/npm/uikit@3.15.12/dist/js/uikit-icons.min.js"></script>
+     	<link rel="stylesheet" href="%s" />
+		<script src="%s"></script>
+		<script src="%s"></script>
 		%s
     </head>
-
     <body>
         %s
 		%s
@@ -158,14 +158,16 @@ func RenderMarkdown(page model.Page) app.UI {
 	return comp
 }
 
-func Render(comp app.UI, styles []app.UI, scripts []app.HTMLScript) string {
+func Render(comp types.UI) string {
 	stylesStr := strings.Builder{}
-	for _, style := range styles {
+	for _, style := range comp.CSS {
 		stylesStr.WriteString(app.HTMLString(style))
 	}
 	scriptsStr := strings.Builder{}
-	for _, script := range scripts {
+	for _, script := range comp.JS {
 		scriptsStr.WriteString(html.UnescapeString(app.HTMLString(script)))
 	}
-	return fmt.Sprintf(Layout, stylesStr.String(), app.HTMLString(comp), scriptsStr.String())
+	return fmt.Sprintf(Layout,
+		library.UIKitCss, library.UIKitJs, library.UIKitIconJs,
+		stylesStr.String(), app.HTMLString(comp.App), scriptsStr.String())
 }

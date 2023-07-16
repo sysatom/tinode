@@ -11,6 +11,7 @@ import (
 	"github.com/tinode/chat/server/auth"
 	"github.com/tinode/chat/server/extra/bots"
 	compPage "github.com/tinode/chat/server/extra/page"
+	"github.com/tinode/chat/server/extra/page/library"
 	"github.com/tinode/chat/server/extra/pkg/queue"
 	"github.com/tinode/chat/server/extra/ruleset/agent"
 	"github.com/tinode/chat/server/extra/ruleset/form"
@@ -160,7 +161,9 @@ func getPage(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	_, _ = rw.Write([]byte(fmt.Sprintf(compPage.Layout, "", app.HTMLString(comp), "")))
+	_, _ = rw.Write([]byte(fmt.Sprintf(compPage.Layout,
+		library.UIKitCss, library.UIKitJs, library.UIKitIconJs,
+		"", app.HTMLString(comp), "")))
 }
 
 func renderPage(rw http.ResponseWriter, req *http.Request) {
