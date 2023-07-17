@@ -468,7 +468,7 @@ type InstructMsg struct {
 	Object   model.InstructObject
 	Bot      string
 	Flag     string
-	Content  model.JSON
+	Content  KV
 	Priority model.InstructPriority
 	State    model.InstructState
 	ExpireAt time.Time

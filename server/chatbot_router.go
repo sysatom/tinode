@@ -86,7 +86,7 @@ func storeOAuth(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	// store
-	extra := model.JSON{}
+	extra := extraTypes.KV{}
 	_ = extra.Scan(tk["extra"])
 	err = extraStore.Chatbot.OAuthSet(model.OAuth{
 		UID:   types.Uid(ui1).UserId(),
@@ -94,7 +94,7 @@ func storeOAuth(rw http.ResponseWriter, req *http.Request) {
 		Name:  category,
 		Type:  category,
 		Token: tk["token"].(string),
-		Extra: extra,
+		Extra: model.JSON(extra),
 	})
 	if err != nil {
 		logs.Err.Println("router oauth", err)
@@ -182,9 +182,10 @@ func renderPage(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	original, _ := p.Params.String("original")
-	topic, _ := p.Params.String("topic")
-	uid, _ := p.Params.String("uid")
+	kv := extraTypes.KV(p.Params)
+	original, _ := kv.String("original")
+	topic, _ := kv.String("topic")
+	uid, _ := kv.String("uid")
 
 	ctx := extraTypes.Context{
 		Original:   original,
@@ -310,7 +311,7 @@ func postForm(rw http.ResponseWriter, req *http.Request) {
 	_, authLvl, _, _, _ := store.Users.GetAuthRecord(userUid, "basic")
 
 	// get bot handler
-	formRuleId, ok := formData.Schema.String("id")
+	formRuleId, ok := extraTypes.KV(formData.Schema).String("id")
 	if !ok {
 		logs.Err.Printf("form %s %s", formId, "error form rule id")
 		return
@@ -361,8 +362,8 @@ func postForm(rw http.ResponseWriter, req *http.Request) {
 		botSend(topic, topicUid, payload)
 
 		// workflow form step
-		workflowFlag, _ := formData.Extra.String("workflow_flag")
-		workflowVersion, _ := formData.Extra.Int64("workflow_version")
+		workflowFlag, _ := extraTypes.KV(formData.Extra).String("workflow_flag")
+		workflowVersion, _ := extraTypes.KV(formData.Extra).Int64("workflow_version")
 		nextWorkflow(ctx, workflowFlag, int(workflowVersion), topic, topicUid)
 	}
 
@@ -391,7 +392,7 @@ func postLinkitData(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	ui1, _ := p.Params.String("uid")
+	ui1, _ := extraTypes.KV(p.Params).String("uid")
 	uid1 := types.ParseUserId(ui1)
 	if uid1.IsZero() {
 		errorResponse(rw, "401")

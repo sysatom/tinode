@@ -4,7 +4,6 @@ import (
 	"github.com/tinode/chat/server/extra/ruleset/agent"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/types"
-	"github.com/tinode/chat/server/extra/utils"
 )
 
 const (
@@ -19,7 +18,11 @@ var agentRules = []agent.Rule{
 		Help: "import anki stats",
 		Args: []string{"html"},
 		Handler: func(ctx types.Context, content interface{}) types.MsgPayload {
-			j, err := utils.ConvertJSON(content)
+			j := types.KV{}
+			err := j.Scan(content)
+			if err != nil {
+				return nil
+			}
 			if err != nil {
 				return nil
 			}
@@ -38,7 +41,11 @@ var agentRules = []agent.Rule{
 		Help: "import anki review count",
 		Args: []string{"num"},
 		Handler: func(ctx types.Context, content interface{}) types.MsgPayload {
-			j, err := utils.ConvertJSON(content)
+			j := types.KV{}
+			err := j.Scan(content)
+			if err != nil {
+				return nil
+			}
 			if err != nil {
 				return nil
 			}

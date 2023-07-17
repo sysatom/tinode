@@ -3,13 +3,12 @@ package main
 import (
 	"errors"
 	"github.com/tinode/chat/server/extra/pkg/event"
-	"github.com/tinode/chat/server/extra/store/model"
 	extraTypes "github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/store/types"
 )
 
 func onSendEvent() {
-	event.On(event.SendEvent, func(data model.JSON) error {
+	event.On(event.SendEvent, func(data extraTypes.KV) error {
 		topic, ok := data.String("topic")
 		if !ok {
 			return errors.New("error param topic")

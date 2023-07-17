@@ -161,7 +161,7 @@ func (a *adapter) GetCredentials() ([]*model.Credential, error) {
 	return find, nil
 }
 
-func (a *adapter) DataSet(uid types.Uid, topic, key string, value model.JSON) error {
+func (a *adapter) DataSet(uid types.Uid, topic, key string, value extraTypes.KV) error {
 	var find model.Data
 	err := a.db.Where("`uid` = ? AND `topic` = ? AND `key` = ?", uid.UserId(), topic, key).First(&find).Error
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -177,18 +177,18 @@ func (a *adapter) DataSet(uid types.Uid, topic, key string, value model.JSON) er
 			UID:   uid.UserId(),
 			Topic: topic,
 			Key:   key,
-			Value: value,
+			Value: model.JSON(value),
 		}).Error
 	}
 }
 
-func (a *adapter) DataGet(uid types.Uid, topic, key string) (model.JSON, error) {
+func (a *adapter) DataGet(uid types.Uid, topic, key string) (extraTypes.KV, error) {
 	var find model.Data
 	err := a.db.Where("`uid` = ? AND `topic` = ? AND `key` = ?", uid.UserId(), topic, key).First(&find).Error
 	if err != nil {
 		return nil, err
 	}
-	return find.Value, nil
+	return extraTypes.KV(find.Value), nil
 }
 
 func (a *adapter) DataList(uid types.Uid, topic string, filter extraTypes.DataFilter) ([]*model.Data, error) {
@@ -214,7 +214,7 @@ func (a *adapter) DataDelete(uid types.Uid, topic string, key string) error {
 	return a.db.Where("`uid` = ? AND `topic` = ? AND `key` = ?", uid.UserId(), topic, key).Delete(&model.Data{}).Error
 }
 
-func (a *adapter) ConfigSet(uid types.Uid, topic, key string, value model.JSON) error {
+func (a *adapter) ConfigSet(uid types.Uid, topic, key string, value extraTypes.KV) error {
 	var find model.Config
 	err := a.db.Where("`uid` = ? AND `topic` = ? AND `key` = ?", uid.UserId(), topic, key).First(&find).Error
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -230,18 +230,18 @@ func (a *adapter) ConfigSet(uid types.Uid, topic, key string, value model.JSON) 
 			UID:   uid.UserId(),
 			Topic: topic,
 			Key:   key,
-			Value: value,
+			Value: model.JSON(value),
 		}).Error
 	}
 }
 
-func (a *adapter) ConfigGet(uid types.Uid, topic, key string) (model.JSON, error) {
+func (a *adapter) ConfigGet(uid types.Uid, topic, key string) (extraTypes.KV, error) {
 	var find model.Config
 	err := a.db.Where("`uid` = ? AND `topic` = ? AND `key` = ?", uid.UserId(), topic, key).First(&find).Error
 	if err != nil {
 		return nil, err
 	}
-	return find.Value, nil
+	return extraTypes.KV(find.Value), nil
 }
 
 func (a *adapter) OAuthSet(oauth model.OAuth) error {
@@ -468,7 +468,7 @@ func (a *adapter) BehaviorIncrease(uid types.Uid, flag string, number int) error
 		UpdateColumn("count", gorm.Expr("count + ?", number)).Error
 }
 
-func (a *adapter) ParameterSet(flag string, params model.JSON, expiredAt time.Time) error {
+func (a *adapter) ParameterSet(flag string, params extraTypes.KV, expiredAt time.Time) error {
 	var find model.Parameter
 	err := a.db.Where("`flag` = ?", flag).First(&find).Error
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -482,7 +482,7 @@ func (a *adapter) ParameterSet(flag string, params model.JSON, expiredAt time.Ti
 	} else {
 		return a.db.Create(&model.Parameter{
 			Flag:      flag,
-			Params:    params,
+			Params:    model.JSON(params),
 			ExpiredAt: expiredAt,
 		}).Error
 	}

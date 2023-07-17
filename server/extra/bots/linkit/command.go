@@ -6,7 +6,6 @@ import (
 	"github.com/tinode/chat/server/extra/pkg/parser"
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/store"
-	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/utils"
 	"github.com/tinode/chat/server/logs"
@@ -48,7 +47,7 @@ var commandRules = []command.Rule{
 					logs.Err.Println(err)
 					return types.TextMsg{Text: "set token error"}
 				}
-				data := model.JSON{}
+				data := types.KV{}
 				data["uid"] = ctx.AsUser.UserId()
 				err = store.Chatbot.ParameterSet(idValue, data, time.Now().AddDate(1, 0, 0))
 				if err != nil {
@@ -74,7 +73,7 @@ var commandRules = []command.Rule{
 				return nil
 			}
 			// expire old token
-			err = store.Chatbot.ParameterSet(idValue, model.JSON{}, time.Now())
+			err = store.Chatbot.ParameterSet(idValue, types.KV{}, time.Now())
 			if err != nil {
 				return nil
 			}
@@ -94,7 +93,7 @@ var commandRules = []command.Rule{
 				logs.Err.Println(err)
 				return types.TextMsg{Text: "set token error"}
 			}
-			data := model.JSON{}
+			data := types.KV{}
 			data["uid"] = ctx.AsUser.UserId()
 			err = store.Chatbot.ParameterSet(idValue, data, time.Now().AddDate(1, 0, 0))
 			if err != nil {

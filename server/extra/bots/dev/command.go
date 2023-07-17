@@ -133,7 +133,7 @@ var commandRules = []command.Rule{
 			// rand number
 			big, _ := rand.Int(rand.Reader, big.NewInt(1000))
 
-			var initValue model.JSON = map[string]interface{}{"number": big.Int64()}
+			var initValue types.KV = map[string]interface{}{"number": big.Int64()}
 			return bots.SessionMsg(ctx, guessSessionID, initValue)
 		},
 	},
@@ -199,7 +199,7 @@ var commandRules = []command.Rule{
 		Define: "instruct",
 		Help:   `[example] create instruct`,
 		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
-			data := model.JSON{}
+			data := types.KV{}
 			data["txt"] = "example"
 			return bots.InstructMsg(ctx, ExampleInstructID, data)
 		},

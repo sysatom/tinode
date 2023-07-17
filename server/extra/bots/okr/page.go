@@ -30,7 +30,7 @@ var pageRules = []page.Rule{
 				return nil, err
 			}
 
-			sequence, _ := p.Params.Int64("sequence")
+			sequence, _ := types.KV(p.Params).Int64("sequence")
 			objective, err := store.Chatbot.GetObjectiveBySequence(ctx.AsUser, ctx.Original, sequence)
 			if err != nil {
 				return nil, err

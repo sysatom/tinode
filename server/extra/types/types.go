@@ -2,7 +2,6 @@ package types
 
 import (
 	"encoding/json"
-	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/utils"
 	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/store/types"
@@ -48,9 +47,9 @@ type Context struct {
 	// session Rule id
 	SessionRuleId string
 	// session init values
-	SessionInitValues model.JSON
+	SessionInitValues KV
 	// session last values
-	SessionLastValues model.JSON
+	SessionLastValues KV
 	// group event
 	GroupEvent GroupEvent
 	// workflow flag id

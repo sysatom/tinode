@@ -113,12 +113,12 @@ type Adapter interface {
 	GetMessage(topic string, seqId int) (model.Message, error)
 	GetCredentials() ([]*model.Credential, error)
 
-	DataSet(uid types.Uid, topic, key string, value model.JSON) error
-	DataGet(uid types.Uid, topic, key string) (model.JSON, error)
+	DataSet(uid types.Uid, topic, key string, value extraTypes.KV) error
+	DataGet(uid types.Uid, topic, key string) (extraTypes.KV, error)
 	DataList(uid types.Uid, topic string, filter extraTypes.DataFilter) ([]*model.Data, error)
 	DataDelete(uid types.Uid, topic, key string) error
-	ConfigSet(uid types.Uid, topic, key string, value model.JSON) error
-	ConfigGet(uid types.Uid, topic, key string) (model.JSON, error)
+	ConfigSet(uid types.Uid, topic, key string, value extraTypes.KV) error
+	ConfigGet(uid types.Uid, topic, key string) (extraTypes.KV, error)
 	OAuthSet(oauth model.OAuth) error
 	OAuthGet(uid types.Uid, topic, t string) (model.OAuth, error)
 	OAuthGetAvailable(t string) ([]model.OAuth, error)
@@ -145,7 +145,7 @@ type Adapter interface {
 	BehaviorGet(uid types.Uid, flag string) (model.Behavior, error)
 	BehaviorList(uid types.Uid) ([]*model.Behavior, error)
 	BehaviorIncrease(uid types.Uid, flag string, number int) error
-	ParameterSet(flag string, params model.JSON, expiredAt time.Time) error
+	ParameterSet(flag string, params extraTypes.KV, expiredAt time.Time) error
 	ParameterGet(flag string) (model.Parameter, error)
 	ParameterDelete(flag string) error
 

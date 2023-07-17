@@ -8,7 +8,6 @@ import (
 	"github.com/tinode/chat/server/extra/pkg/parser"
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/store"
-	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
 	"golang.org/x/image/font"
@@ -61,7 +60,7 @@ var commandRules = []command.Rule{
 			summary, _ := tokens[2].Value.String()
 			today := time.Now().Format("2006-01-02")
 			key := fmt.Sprintf("%s:%s:%d", today, topic, time.Now().Unix())
-			var value model.JSON = map[string]interface{}{"summary": summary}
+			var value types.KV = map[string]interface{}{"summary": summary}
 			err := store.Chatbot.DataSet(ctx.AsUser, ctx.Original, key, value)
 			if err != nil {
 				return types.TextMsg{Text: "error"}

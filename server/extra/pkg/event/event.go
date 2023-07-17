@@ -2,10 +2,10 @@ package event
 
 import (
 	"github.com/gookit/event"
-	"github.com/tinode/chat/server/extra/store/model"
+	"github.com/tinode/chat/server/extra/types"
 )
 
-type ListenerFunc func(data model.JSON) error
+type ListenerFunc func(data types.KV) error
 
 func eventName(name string) string {
 	return name
@@ -17,11 +17,11 @@ func On(name string, listener ListenerFunc) {
 	}))
 }
 
-func Emit(name string, params model.JSON) error {
+func Emit(name string, params types.KV) error {
 	err, _ := event.Std().Fire(eventName(name), params)
 	return err
 }
 
-func AsyncEmit(name string, params model.JSON) {
+func AsyncEmit(name string, params types.KV) {
 	event.Std().FireC(eventName(name), params)
 }

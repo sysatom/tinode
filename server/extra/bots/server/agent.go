@@ -4,7 +4,6 @@ import (
 	"github.com/tinode/chat/server/extra/ruleset/agent"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/types"
-	"github.com/tinode/chat/server/extra/utils"
 	"github.com/tinode/chat/server/logs"
 )
 
@@ -19,7 +18,8 @@ var agentRules = []agent.Rule{
 		Help: "upload server status",
 		Args: []string{"cpu", "memory", "info"},
 		Handler: func(ctx types.Context, content interface{}) types.MsgPayload {
-			j, err := utils.ConvertJSON(content)
+			j := types.KV{}
+			err := j.Scan(content)
 			if err != nil {
 				return nil
 			}

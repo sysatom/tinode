@@ -475,9 +475,9 @@ func RunPage(pageRules []page.Rule, ctx types.Context, flag string) (string, err
 	return rs.ProcessPage(ctx, flag)
 }
 
-func PageURL(ctx types.Context, pageRuleId string, param model.JSON, expiredDuration time.Duration) (string, error) {
+func PageURL(ctx types.Context, pageRuleId string, param types.KV, expiredDuration time.Duration) (string, error) {
 	if param == nil {
-		param = model.JSON{}
+		param = types.KV{}
 	}
 	param["original"] = ctx.Original
 	param["topic"] = ctx.RcptTo
@@ -603,14 +603,14 @@ func StoreForm(ctx types.Context, payload types.MsgPayload) types.MsgPayload {
 		logs.Err.Println(err)
 		return types.TextMsg{Text: "store form error"}
 	}
-	schema := model.JSON{}
+	schema := types.KV{}
 	err = schema.Scan(d)
 	if err != nil {
 		logs.Err.Println(err)
 		return types.TextMsg{Text: "store form error"}
 	}
 
-	var values model.JSON = make(map[string]interface{})
+	var values types.KV = make(map[string]interface{})
 	if v, ok := payload.(types.FormMsg); ok {
 		for _, field := range v.Field {
 			values[field.Key] = nil
@@ -618,7 +618,7 @@ func StoreForm(ctx types.Context, payload types.MsgPayload) types.MsgPayload {
 	}
 
 	// set extra
-	var extra model.JSON = make(map[string]interface{})
+	var extra types.KV = make(map[string]interface{})
 	if ctx.WorkflowFlag != "" {
 		extra["workflow_flag"] = ctx.WorkflowFlag
 		extra["workflow_version"] = ctx.WorkflowVersion
@@ -629,9 +629,9 @@ func StoreForm(ctx types.Context, payload types.MsgPayload) types.MsgPayload {
 		FormID: formId,
 		UID:    ctx.AsUser.UserId(),
 		Topic:  ctx.Original,
-		Schema: schema,
-		Values: values,
-		Extra:  extra,
+		Schema: model.JSON(schema),
+		Values: model.JSON(values),
+		Extra:  model.JSON(extra),
 		State:  model.FormStateCreated,
 	})
 	if err != nil {
@@ -645,7 +645,7 @@ func StoreForm(ctx types.Context, payload types.MsgPayload) types.MsgPayload {
 		UID:    ctx.AsUser.UserId(),
 		Topic:  ctx.Original,
 		Type:   model.PageForm,
-		Schema: schema,
+		Schema: model.JSON(schema),
 		State:  model.PageStateCreated,
 	})
 	if err != nil {
@@ -659,7 +659,7 @@ func StoreForm(ctx types.Context, payload types.MsgPayload) types.MsgPayload {
 	}
 }
 
-func StoreParameter(params model.JSON, expiredAt time.Time) (string, error) {
+func StoreParameter(params types.KV, expiredAt time.Time) (string, error) {
 	flag := strings.ToLower(types.Id().String())
 	return flag, store.Chatbot.ParameterSet(flag, params, expiredAt)
 }
@@ -698,7 +698,7 @@ func StorePage(ctx types.Context, category model.PageType, title string, payload
 		logs.Err.Println(err)
 		return types.TextMsg{Text: "store form error"}
 	}
-	schema := model.JSON{}
+	schema := types.KV{}
 	err = schema.Scan(d)
 	if err != nil {
 		logs.Err.Println(err)
@@ -711,7 +711,7 @@ func StorePage(ctx types.Context, category model.PageType, title string, payload
 		UID:    ctx.AsUser.UserId(),
 		Topic:  ctx.Original,
 		Type:   category,
-		Schema: schema,
+		Schema: model.JSON(schema),
 		State:  model.PageStateCreated,
 	})
 	if err != nil {
@@ -758,7 +758,7 @@ func SessionMsg(ctx types.Context, id string, data map[string]interface{}) types
 	return types.TextMsg{Text: title}
 }
 
-func SessionStart(ctx types.Context, initValues model.JSON) error {
+func SessionStart(ctx types.Context, initValues types.KV) error {
 	sess, err := store.Chatbot.SessionGet(ctx.AsUser, ctx.Original)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return err
@@ -766,13 +766,13 @@ func SessionStart(ctx types.Context, initValues model.JSON) error {
 	if sess.ID > 0 && sess.State == model.SessionStart {
 		return errors.New("already a session started")
 	}
-	var values model.JSON = map[string]interface{}{"val": nil}
+	var values types.KV = map[string]interface{}{"val": nil}
 	_ = store.Chatbot.SessionCreate(model.Session{
 		UID:    ctx.AsUser.UserId(),
 		Topic:  ctx.Original,
 		RuleID: ctx.SessionRuleId,
-		Init:   initValues,
-		Values: values,
+		Init:   model.JSON(initValues),
+		Values: model.JSON(values),
 		State:  model.SessionStart,
 	})
 	return nil
@@ -855,7 +855,7 @@ func StoreInstruct(ctx types.Context, payload types.MsgPayload) types.MsgPayload
 		Object:   msg.Object,
 		Bot:      msg.Bot,
 		Flag:     msg.Flag,
-		Content:  msg.Content,
+		Content:  model.JSON(msg.Content),
 		Priority: msg.Priority,
 		State:    msg.State,
 		ExpireAt: msg.ExpireAt,
@@ -897,7 +897,7 @@ func SettingCovertForm(id string, rule setting.Rule) form.Rule {
 	return result
 }
 
-func SettingGet(ctx types.Context, id string, key string) (model.JSON, error) {
+func SettingGet(ctx types.Context, id string, key string) (types.KV, error) {
 	return store.Chatbot.ConfigGet(ctx.AsUser, ctx.Original, fmt.Sprintf("%s_%s", id, key))
 }
 

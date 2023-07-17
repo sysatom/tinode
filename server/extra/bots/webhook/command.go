@@ -7,7 +7,6 @@ import (
 	"github.com/tinode/chat/server/extra/pkg/route"
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/store"
-	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
 	serverTypes "github.com/tinode/chat/server/store/types"
@@ -49,7 +48,7 @@ var commandRules = []command.Rule{
 		Define: `create`,
 		Help:   `create webhook`,
 		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
-			p := model.JSON{}
+			p := types.KV{}
 			p["uid"] = ctx.AsUser.UserId()
 			flag, err := bots.StoreParameter(p, time.Now().Add(24*365*time.Hour))
 			if err != nil {

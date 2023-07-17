@@ -66,7 +66,7 @@ func (bot) Bootstrap() error {
 }
 
 func (bot) OnEvent() error {
-	event.On(event.ExampleEvent, func(data model.JSON) error {
+	event.On(event.ExampleEvent, func(data types.KV) error {
 		fmt.Println(data)
 		return nil
 	})

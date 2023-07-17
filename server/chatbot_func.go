@@ -296,8 +296,8 @@ func botIncomingMessage(t *Topic, msg *ClientComMessage) {
 				}
 				if !isCancel {
 					ctx.SessionRuleId = sess.RuleID
-					ctx.SessionInitValues = sess.Init
-					ctx.SessionLastValues = sess.Values
+					ctx.SessionInitValues = extraTypes.KV(sess.Init)
+					ctx.SessionLastValues = extraTypes.KV(sess.Values)
 
 					// get action handler
 					var botHandler bots.Handler
@@ -358,7 +358,7 @@ func botIncomingMessage(t *Topic, msg *ClientComMessage) {
 							logs.Err.Println(err)
 						}
 						actionRuleId := ""
-						if src, ok := message.Content.Map("src"); ok {
+						if src, ok := extraTypes.KV(message.Content).Map("src"); ok {
 							if id, ok := src["id"]; ok {
 								actionRuleId = id.(string)
 							}
@@ -393,8 +393,8 @@ func botIncomingMessage(t *Topic, msg *ClientComMessage) {
 								botSend(msg.RcptTo, botUid, payload, extraTypes.WithContext(ctx))
 
 								// workflow action step
-								workflowFlag, _ := message.Head.String("x-workflow-flag")
-								workflowVersion, _ := message.Head.Int64("x-workflow-version")
+								workflowFlag, _ := extraTypes.KV(message.Head).String("x-workflow-flag")
+								workflowVersion, _ := extraTypes.KV(message.Head).Int64("x-workflow-version")
 								nextWorkflow(ctx, workflowFlag, int(workflowVersion), msg.RcptTo, botUid)
 								return
 							}
@@ -490,8 +490,8 @@ func botIncomingMessage(t *Topic, msg *ClientComMessage) {
 						}
 
 						if message.ID > 0 {
-							src, _ := message.Content.Map("src")
-							tye, _ := message.Content.String("tye")
+							src, _ := extraTypes.KV(message.Content).Map("src")
+							tye, _ := extraTypes.KV(message.Content).String("tye")
 							d, _ := json.Marshal(src)
 							pl := extraTypes.ToPayload(tye, d)
 							ctx.Condition = tye
@@ -614,8 +614,8 @@ func groupIncomingMessage(t *Topic, msg *ClientComMessage, event extraTypes.Grou
 					}
 
 					if message.ID > 0 {
-						src, _ := message.Content.Map("src")
-						tye, _ := message.Content.String("tye")
+						src, _ := extraTypes.KV(message.Content).Map("src")
+						tye, _ := extraTypes.KV(message.Content).String("tye")
 						d, _ := json.Marshal(src)
 						pl := extraTypes.ToPayload(tye, d)
 						ctx.Condition = tye

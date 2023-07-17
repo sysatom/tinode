@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"reflect"
 )
 
 type JSON map[string]interface{}
@@ -36,73 +35,4 @@ func (j JSON) Value() (driver.Value, error) {
 		return nil, nil
 	}
 	return json.Marshal(j)
-}
-
-func (j JSON) String(key string) (string, bool) {
-	if v, ok := j.get(key); ok {
-		if t, ok := v.(string); ok {
-			return t, ok
-		}
-	}
-	return "", false
-}
-
-func (j JSON) Int64(key string) (int64, bool) {
-	if v, ok := j.get(key); ok {
-		switch n := v.(type) {
-		case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
-			return reflect.ValueOf(n).Convert(reflect.TypeOf(int64(0))).Int(), true
-		case float32, float64:
-			return reflect.ValueOf(n).Convert(reflect.TypeOf(int64(0))).Int(), true
-		}
-	}
-	return 0, false
-}
-
-func (j JSON) Uint64(key string) (uint64, bool) {
-	if v, ok := j.get(key); ok {
-		if t, ok := v.(float64); ok {
-			return uint64(t), ok
-		}
-	}
-	return 0, false
-}
-
-func (j JSON) Float64(key string) (float64, bool) {
-	if v, ok := j.get(key); ok {
-		if t, ok := v.(float64); ok {
-			return t, ok
-		}
-	}
-	return 0, false
-}
-
-func (j JSON) Map(key string) (map[string]interface{}, bool) {
-	if v, ok := j.get(key); ok {
-		if t, ok := v.(map[string]interface{}); ok {
-			return t, ok
-		}
-	}
-	return nil, false
-}
-
-func (j JSON) get(key string) (interface{}, bool) {
-	v, ok := j[key]
-	return v, ok
-}
-
-func (j JSON) StringValue() (string, bool) {
-	return j.String("value")
-}
-
-func (j JSON) Int64Value() (int64, bool) {
-	return j.Int64("value")
-}
-
-func (j JSON) Uint64Value() (uint64, bool) {
-	return j.Uint64("value")
-}
-
-func (j JSON) Float64Value() (float64, bool) {
-	return j.Float64("value")
 }

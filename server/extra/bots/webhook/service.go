@@ -6,6 +6,7 @@ import (
 	"github.com/tinode/chat/server/extra/pkg/event"
 	"github.com/tinode/chat/server/extra/pkg/route"
 	extraStore "github.com/tinode/chat/server/extra/store"
+	extraTypes "github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/store"
 	"github.com/tinode/chat/server/store/types"
@@ -27,7 +28,7 @@ func webhook(req *restful.Request, resp *restful.Response) {
 		return
 	}
 
-	uid, _ := p.Params.String("uid")
+	uid, _ := extraTypes.KV(p.Params).String("uid")
 	userUid := types.ParseUserId(uid)
 	botUid, _, _, _, err := store.Users.GetAuthUniqueRecord("basic", fmt.Sprintf("%s_bot", Name))
 	if err != nil {

@@ -3,7 +3,6 @@ package clipboard
 import (
 	"github.com/tinode/chat/server/extra/ruleset/agent"
 	"github.com/tinode/chat/server/extra/types"
-	"github.com/tinode/chat/server/extra/utils"
 )
 
 const (
@@ -17,7 +16,8 @@ var agentRules = []agent.Rule{
 		Help: "update clipboard",
 		Args: []string{"txt"},
 		Handler: func(ctx types.Context, content interface{}) types.MsgPayload {
-			j, err := utils.ConvertJSON(content)
+			j := types.KV{}
+			err := j.Scan(content)
 			if err != nil {
 				return nil
 			}

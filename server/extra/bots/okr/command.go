@@ -52,7 +52,7 @@ var commandRules = []command.Rule{
 		Define: `obj [number]`,
 		Help:   `View objective`,
 		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
-			param := model.JSON{}
+			param := types.KV{}
 			sequence, _ := tokens[1].Value.Int64()
 			param["sequence"] = sequence
 

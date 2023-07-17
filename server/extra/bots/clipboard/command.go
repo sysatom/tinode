@@ -22,7 +22,7 @@ var commandRules = []command.Rule{
 		Help:   `share clipboard to linkit`,
 		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			txt, _ := tokens[1].Value.String()
-			data := model.JSON{}
+			data := types.KV{}
 			data["txt"] = txt
 			return bots.StoreInstruct(ctx, types.InstructMsg{
 				No:       types.Id().String(),
