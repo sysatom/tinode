@@ -101,7 +101,6 @@ var commandRules = []command.Rule{
 						ValueType: types.FormFieldValueInt64,
 						Value:     item.Sequence,
 						Label:     "Sequence",
-						Hidden:    true,
 					},
 					{
 						Key:       "title",
@@ -320,7 +319,6 @@ var commandRules = []command.Rule{
 						ValueType: types.FormFieldValueInt64,
 						Label:     "Sequence",
 						Value:     item.Sequence,
-						Hidden:    true,
 					},
 					{
 						Key:       "title",
@@ -488,7 +486,6 @@ var commandRules = []command.Rule{
 						ValueType: types.FormFieldValueInt64,
 						Label:     "Sequence",
 						Value:     item.Sequence,
-						Hidden:    true,
 					},
 					{
 						Key:       "content",

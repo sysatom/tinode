@@ -30,7 +30,6 @@ var formRules = []form.Rule{
 				Value:       "",
 				Label:       "Password",
 				Placeholder: "Input password",
-				Required:    true,
 			},
 			{
 				Key:         "number",

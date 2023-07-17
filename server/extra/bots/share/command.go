@@ -31,7 +31,6 @@ var commandRules = []command.Rule{
 						Value:       "",
 						Label:       "Content",
 						Placeholder: "Input content",
-						Required:    true,
 					},
 				},
 			})

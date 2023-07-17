@@ -27,6 +27,7 @@ const (
 	FormFieldRange    FormFieldType = "range"
 	FormFieldSelect   FormFieldType = "select"
 	FormFieldTextarea FormFieldType = "textarea"
+	FormFieldHidden   FormFieldType = "hidden"
 )
 
 type FormFieldValueType string
@@ -76,11 +77,10 @@ type FormField struct {
 	Key         string             `json:"key"`
 	Value       interface{}        `json:"value"`
 	ValueType   FormFieldValueType `json:"value_type"`
-	Required    bool               `json:"required"`
 	Label       string             `json:"label"`
 	Placeholder string             `json:"placeholder"`
 	Option      []string           `json:"option"`
-	Hidden      bool               `json:"hidden"`
+	Rule        string             `json:"rule"`
 }
 
 type ImageMsg struct {

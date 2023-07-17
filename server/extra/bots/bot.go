@@ -875,10 +875,9 @@ func SettingCovertForm(id string, rule setting.Rule) form.Rule {
 
 	for _, row := range rule {
 		result.Field = append(result.Field, types.FormField{
-			Key:      row.Key,
-			Type:     row.Type,
-			Required: true,
-			Label:    row.Title,
+			Key:   row.Key,
+			Type:  row.Type,
+			Label: row.Title,
 		})
 	}
 
