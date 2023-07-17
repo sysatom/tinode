@@ -12,6 +12,7 @@ import (
 	"github.com/tinode/chat/server/auth"
 	"github.com/tinode/chat/server/extra/bots"
 	compPage "github.com/tinode/chat/server/extra/page"
+	form2 "github.com/tinode/chat/server/extra/page/form"
 	"github.com/tinode/chat/server/extra/page/library"
 	"github.com/tinode/chat/server/extra/page/uikit"
 	"github.com/tinode/chat/server/extra/pkg/queue"
@@ -297,6 +298,14 @@ func postForm(rw http.ResponseWriter, req *http.Request) {
 				values[field.Key], _ = strconv.ParseFloat(value, 64)
 			}
 		}
+	}
+
+	formBuilder := form2.NewBuilder(formMsg.Field)
+	formBuilder.Data = values
+	err = formBuilder.Validate()
+	if err != nil {
+		_, _ = rw.Write([]byte(err.Error()))
+		return
 	}
 
 	ctx := extraTypes.Context{

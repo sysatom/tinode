@@ -1,10 +1,13 @@
 package form
 
 import (
+	"errors"
 	"fmt"
+	"github.com/go-playground/validator/v10"
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 	"github.com/tinode/chat/server/extra/page/uikit"
 	"github.com/tinode/chat/server/extra/types"
+	"strings"
 )
 
 type Builder struct {
@@ -102,8 +105,24 @@ func (b Builder) UI() (app.UI, error) {
 		Body(elems...), nil
 }
 
-func (b Builder) Validate() (types.KV, error) {
-	return nil, nil
+func (b Builder) Validate() error {
+	rules := make(map[string]interface{}, len(b.Field))
+	for _, field := range b.Field {
+		if field.Rule != "" {
+			rules[field.Key] = field.Rule
+		}
+	}
+
+	validate := validator.New()
+	errs := validate.ValidateMap(b.Data, rules)
+	for key, val := range errs {
+		if err, ok := val.(error); ok {
+			errStr := strings.ReplaceAll(err.Error(), "''", key)
+			return errors.New(errStr)
+		}
+	}
+
+	return nil
 }
 
 func fixInt64Value(t types.FormFieldValueType, v interface{}) interface{} {

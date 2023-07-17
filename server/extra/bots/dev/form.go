@@ -22,6 +22,7 @@ var formRules = []form.Rule{
 				Value:       "",
 				Label:       "Text",
 				Placeholder: "Input text",
+				Rule:        "required",
 			},
 			{
 				Key:         "password",
@@ -30,6 +31,7 @@ var formRules = []form.Rule{
 				Value:       "",
 				Label:       "Password",
 				Placeholder: "Input password",
+				Rule:        "required",
 			},
 			{
 				Key:         "number",
@@ -38,6 +40,7 @@ var formRules = []form.Rule{
 				Value:       "",
 				Label:       "Number",
 				Placeholder: "Input number",
+				Rule:        "gte=0,lte=130",
 			},
 			{
 				Key:         "bool",
@@ -64,6 +67,7 @@ var formRules = []form.Rule{
 				Value:       "",
 				Label:       "Textarea",
 				Placeholder: "Input textarea",
+				Rule:        "required",
 			},
 			{
 				Key:         "select",
