@@ -94,6 +94,7 @@ func (b bot) Rules() []interface{} {
 		instructRules,
 		sessionRules,
 		pageRules,
+		agentRules,
 	}
 }
 
