@@ -91,3 +91,13 @@ func SHA1(txt string) string {
 	h.Write(StringToBytes(txt))
 	return hex.EncodeToString(h.Sum(nil))
 }
+
+func MarkdownTitle(txt string) string {
+	lines := strings.Split(txt, "\n")
+	if len(lines) > 0 {
+		first := strings.TrimLeft(lines[0], "#")
+		first = strings.TrimSpace(first)
+		return first
+	}
+	return ""
+}

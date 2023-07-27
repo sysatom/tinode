@@ -11,6 +11,7 @@ import (
 	extraStore "github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/store/model"
 	extraTypes "github.com/tinode/chat/server/extra/types"
+	"github.com/tinode/chat/server/extra/utils"
 	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/store"
 	"github.com/tinode/chat/server/store/types"
@@ -86,11 +87,12 @@ func saveMarkdown(req *restful.Request, resp *restful.Response) {
 		route.ErrorResponse(resp, "error bot")
 		return
 	}
+	title := utils.MarkdownTitle(markdown)
 	topic := userUid.P2PName(botUid)
 	payload := bots.StorePage(
 		extraTypes.Context{AsUser: userUid, Original: botUid.UserId()},
-		model.PageMarkdown, "",
-		extraTypes.MarkdownMsg{Raw: markdown})
+		model.PageMarkdown, title,
+		extraTypes.MarkdownMsg{Title: title, Raw: markdown})
 	message := ""
 	if link, ok := payload.(extraTypes.LinkMsg); ok {
 		message = link.Url

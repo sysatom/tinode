@@ -70,3 +70,38 @@ func TestSHA1(t *testing.T) {
 		})
 	}
 }
+
+func TestMarkdownTitle(t *testing.T) {
+	type args struct {
+		m string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "empty",
+			args: args{
+				m: "",
+			},
+			want: "",
+		},
+		{
+			name: "title",
+			args: args{
+				m: `# test title
+> line 1
+> line 2`,
+			},
+			want: "test title",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := MarkdownTitle(tt.args.m); got != tt.want {
+				t.Errorf("MarkdownTitle() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

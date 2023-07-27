@@ -40,5 +40,5 @@ func (c *Markdown) Render() app.UI {
 
 	return app.Raw(fmt.Sprintf(`
 <link rel="stylesheet" href="%s" />
-<div class="markdown-body">%s</div>`, library.GithubMarkdownCss, buf.String()))
+<div class="markdown-body" style="margin-top: 20px;">%s</div>`, library.GithubMarkdownCss, buf.String()))
 }

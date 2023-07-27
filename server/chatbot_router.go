@@ -117,6 +117,10 @@ func getPage(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	title, _ := extraTypes.KV(p.Schema).String("title")
+	if title == "" {
+		title = "Page"
+	}
 	var comp app.UI
 	switch p.Type {
 	case model.PageForm:
@@ -163,7 +167,7 @@ func getPage(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	_, _ = rw.Write([]byte(fmt.Sprintf(compPage.Layout, "Page",
+	_, _ = rw.Write([]byte(fmt.Sprintf(compPage.Layout, title,
 		library.UIKitCss, library.UIKitJs, library.UIKitIconJs,
 		"", app.HTMLString(uikit.Container(comp)), "")))
 }
