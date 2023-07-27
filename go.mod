@@ -30,12 +30,12 @@ require (
 
 require (
 	github.com/PuerkitoBio/goquery v1.8.1
-	github.com/adjust/rmq/v5 v5.1.2
-	github.com/bsm/redislock v0.9.3
+	github.com/adjust/rmq/v5 v5.2.0
+	github.com/bsm/redislock v0.9.4
 	github.com/cavaliergopher/grab/v3 v3.0.1
 	github.com/emicklei/go-restful-openapi/v2 v2.9.1
 	github.com/emicklei/go-restful/v3 v3.10.2
-	github.com/go-echarts/go-echarts/v2 v2.2.6
+	github.com/go-echarts/go-echarts/v2 v2.2.7
 	github.com/go-openapi/spec v0.20.9
 	github.com/go-playground/validator/v10 v10.14.1
 	github.com/go-resty/resty/v2 v2.7.0
@@ -44,22 +44,22 @@ require (
 	github.com/gookit/event v1.1.1
 	github.com/gorilla/mux v1.8.0
 	github.com/influxdata/cron v0.0.0-20201006132531-4bb0a200dcbe
-	github.com/maxence-charriere/go-app/v9 v9.7.2
+	github.com/maxence-charriere/go-app/v9 v9.7.3
 	github.com/mmcdole/gofeed v1.2.1
 	github.com/nikolaydubina/calendarheatmap v1.7.0
 	github.com/redis/go-redis/v9 v9.0.5
 	github.com/stretchr/testify v1.8.4
 	github.com/tidwall/gjson v1.14.4
 	github.com/urfave/cli/v2 v2.25.7
-	github.com/yeqown/go-qrcode/v2 v2.2.1
+	github.com/yeqown/go-qrcode/v2 v2.2.2
 	github.com/yeqown/go-qrcode/writer/standard v1.2.1
-	github.com/yuin/goldmark v1.5.4
+	github.com/yuin/goldmark v1.5.5
 	golang.org/x/image v0.7.0
 	gonum.org/v1/plot v0.13.0
 	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/driver/mysql v1.5.1
-	gorm.io/gen v0.3.22
-	gorm.io/gorm v1.25.1
+	gorm.io/gen v0.3.23
+	gorm.io/gorm v1.25.2
 	gorm.io/plugin/dbresolver v1.4.1
 )
 
@@ -73,6 +73,8 @@ require (
 	cloud.google.com/go/storage v1.29.0 // indirect
 	git.sr.ht/~sbinet/gg v0.4.1 // indirect
 	github.com/ajstarks/svgo v0.0.0-20211024235047-1546f124cd8b // indirect
+	github.com/alicebob/gopher-json v0.0.0-20230218143504-906a9b012302 // indirect
+	github.com/alicebob/miniredis/v2 v2.30.4 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
@@ -135,6 +137,7 @@ require (
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	github.com/yeqown/reedsolomon v1.0.0 // indirect
 	github.com/youmark/pkcs8 v0.0.0-20181117223130-1be2e3e5546d // indirect
+	github.com/yuin/gopher-lua v1.1.0 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	golang.org/x/mod v0.10.0 // indirect
