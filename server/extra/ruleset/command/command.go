@@ -16,7 +16,7 @@ type Rule struct {
 type Ruleset []Rule
 
 func (r Ruleset) Help(in string) (types.MsgPayload, error) {
-	if strings.ToLower(in) == "help" {
+	if strings.ToLower(in) == "help" || strings.ToLower(in) == "h" {
 		m := make(map[string]interface{})
 		for _, rule := range r {
 			m[fmt.Sprintf("/%s", rule.Define)] = rule.Help

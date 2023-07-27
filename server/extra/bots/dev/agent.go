@@ -3,6 +3,7 @@ package dev
 import (
 	"github.com/tinode/chat/server/extra/ruleset/agent"
 	"github.com/tinode/chat/server/extra/types"
+	"github.com/tinode/chat/server/logs"
 )
 
 const (
@@ -16,7 +17,8 @@ var agentRules = []agent.Rule{
 		Help: "agent example",
 		Args: []string{},
 		Handler: func(ctx types.Context, content interface{}) types.MsgPayload {
-			return types.TextMsg{Text: "imported"}
+			logs.Info.Println(content)
+			return nil
 		},
 	},
 }
