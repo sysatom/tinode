@@ -13,7 +13,8 @@ import (
 )
 
 const (
-	devPageId = "dev"
+	devPageId  = "dev"
+	jsonPageId = "json"
 )
 
 //go:embed static/example.css
@@ -21,6 +22,9 @@ var exampleCss string
 
 //go:embed static/example.js
 var exampleJs string
+
+//go:embed static/json.js
+var jsonJs string
 
 var pageRules = []page.Rule{
 	{
@@ -118,6 +122,30 @@ var pageRules = []page.Rule{
 				CSS:    css,
 				JS:     js,
 				Global: p.Params,
+			}, nil
+		},
+	},
+	{
+		Id: jsonPageId,
+		UI: func(ctx types.Context, flag string) (*types.UI, error) {
+			css := []app.UI{
+				uikit.Style(library.JsonFormatterCss),
+			}
+			js := []app.HTMLScript{
+				uikit.Script(library.JsonFormatterJs),
+				uikit.Js(jsonJs),
+			}
+
+			app := uikit.App(
+				uikit.H1("JSON Formatter").Class(uikit.TextCenterClass),
+				uikit.Textarea().ID("data"),
+				uikit.Div().ID("view"),
+			)
+
+			return &types.UI{
+				App: app,
+				CSS: css,
+				JS:  js,
 			}, nil
 		},
 	},
