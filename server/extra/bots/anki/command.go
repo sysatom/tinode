@@ -18,13 +18,6 @@ var commandRules = []command.Rule{
 		},
 	},
 	{
-		Define: "agent",
-		Help:   `agent url`,
-		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
-			return bots.AgentURI(ctx)
-		},
-	},
-	{
 		Define: "stats",
 		Help:   `Anki collection statistics`,
 		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {

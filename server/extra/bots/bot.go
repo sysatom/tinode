@@ -786,13 +786,6 @@ func SessionCancel(ctx types.Context) {
 	_ = store.Chatbot.SessionState(ctx.AsUser, ctx.Original, model.SessionCancel)
 }
 
-func AgentURI(ctx types.Context) types.MsgPayload {
-	return types.LinkMsg{
-		Title: "Agent",
-		Url:   fmt.Sprintf("%s/extra/agent/%d/%d", types.AppUrl(), ctx.AsUser, serverTypes.ParseUserId(ctx.Original)),
-	}
-}
-
 func CreateShortUrl(text string) (string, error) {
 	if utils.IsUrl(text) {
 		url, err := store.Chatbot.UrlGetByUrl(text)

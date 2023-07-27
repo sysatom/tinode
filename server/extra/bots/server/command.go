@@ -11,7 +11,6 @@ import (
 
 	"github.com/redis/go-redis/v9"
 	"github.com/tinode/chat/server/extra"
-	"github.com/tinode/chat/server/extra/bots"
 	"github.com/tinode/chat/server/extra/pkg/cache"
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/store"
@@ -104,13 +103,6 @@ var commandRules = []command.Rule{
 			}
 
 			return types.TextListMsg{Texts: texts}
-		},
-	},
-	{
-		Define: "agent",
-		Help:   `agent url`,
-		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
-			return bots.AgentURI(ctx)
 		},
 	},
 }

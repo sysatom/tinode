@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	_ "embed"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/tinode/chat/server/extra/bots"
 	"github.com/tinode/chat/server/extra/pkg/event"
 	"github.com/tinode/chat/server/extra/pkg/parser"
@@ -12,6 +13,7 @@ import (
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/types"
+	"github.com/tinode/chat/server/extra/utils"
 	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/store"
 	serverTypes "github.com/tinode/chat/server/store/types"
@@ -66,6 +68,29 @@ var commandRules = []command.Rule{
 		},
 	},
 	{
+		Define: "md5 [string]",
+		Help:   `md5 encode`,
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
+			txt, _ := tokens[1].Value.String()
+			return types.TextMsg{Text: utils.MD5(txt)}
+		},
+	},
+	{
+		Define: "sha1 [string]",
+		Help:   `sha1 encode`,
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
+			txt, _ := tokens[1].Value.String()
+			return types.TextMsg{Text: utils.SHA1(txt)}
+		},
+	},
+	{
+		Define: "uuid",
+		Help:   `UUID Generator`,
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
+			return types.TextMsg{Text: uuid.New().String()}
+		},
+	},
+	{
 		Define: "uid [string]",
 		Help:   `Decode UID string`,
 		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
@@ -92,24 +117,11 @@ var commandRules = []command.Rule{
 		},
 	},
 	{
-		Define: "messages",
-		Help:   `[example] messages`,
+		Define: "echo [any]",
+		Help:   "print",
 		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
-			return types.TextMsg{Text: "msg1"}
-		},
-	},
-	{
-		Define: `qr [string]`,
-		Help:   `Generate QR code`,
-		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
-			return types.TextMsg{Text: "msg1"}
-		},
-	},
-	{
-		Define: `pinyin [string]`,
-		Help:   "chinese pinyin conversion",
-		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
-			return types.TextMsg{Text: "msg1"}
+			val := tokens[1].Value.Source
+			return types.TextMsg{Text: fmt.Sprintf("%v", val)}
 		},
 	},
 	{
@@ -135,21 +147,6 @@ var commandRules = []command.Rule{
 
 			var initValue types.KV = map[string]interface{}{"number": big.Int64()}
 			return bots.SessionMsg(ctx, guessSessionID, initValue)
-		},
-	},
-	{
-		Define: "echo [any]",
-		Help:   "print",
-		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
-			val := tokens[1].Value.Source
-			return types.TextMsg{Text: fmt.Sprintf("%v", val)}
-		},
-	},
-	{
-		Define: "agent",
-		Help:   `agent url`,
-		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
-			return bots.AgentURI(ctx)
 		},
 	},
 	{
