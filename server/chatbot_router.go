@@ -8,6 +8,7 @@ import (
 	"github.com/go-echarts/go-echarts/v2/charts"
 	"github.com/go-echarts/go-echarts/v2/opts"
 	"github.com/gorilla/mux"
+	"github.com/gorilla/websocket"
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 	"github.com/tinode/chat/server/auth"
 	"github.com/tinode/chat/server/extra/bots"
@@ -33,6 +34,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func newRouter() *mux.Router {
@@ -46,7 +48,8 @@ func newRouter() *mux.Router {
 	s.HandleFunc("/queue/stats", queueStats)
 	s.HandleFunc("/p/{id}/{flag}", renderPage)
 	// bot
-	s.HandleFunc("/linkit", postLinkitData)
+	s.HandleFunc("/linkit", linkitData)
+	s.HandleFunc("/session", wbSession)
 
 	return s
 }
@@ -383,7 +386,7 @@ func postForm(rw http.ResponseWriter, req *http.Request) {
 	_, _ = rw.Write([]byte("ok"))
 }
 
-func postLinkitData(rw http.ResponseWriter, req *http.Request) {
+func linkitData(rw http.ResponseWriter, req *http.Request) {
 	rw.Header().Set("Access-Control-Allow-Origin", "*")
 	rw.Header().Set("Access-Control-Allow-Headers", "*")
 	if req.Method == http.MethodOptions {
@@ -620,4 +623,52 @@ func queueStats(rw http.ResponseWriter, _ *http.Request) {
 		return
 	}
 	_, _ = fmt.Fprint(rw, html)
+}
+
+// globals session
+var sessionStore = NewExtraSessionStore(idleSessionTimeout + 15*time.Second)
+
+func wbSession(wrt http.ResponseWriter, req *http.Request) {
+	uid, isValid := checkAccessToken(getAccessToken(req))
+	if !isValid {
+		wrt.WriteHeader(http.StatusForbidden)
+		_ = json.NewEncoder(wrt).Encode(ErrMessage(http.StatusForbidden, "Missing, invalid or expired access token"))
+		logs.Err.Println("ws: Missing, invalid or expired API key")
+		return
+	}
+
+	if req.Method != http.MethodGet {
+		wrt.WriteHeader(http.StatusMethodNotAllowed)
+		_ = json.NewEncoder(wrt).Encode(ErrMessage(http.StatusBadRequest, "invalid http method"))
+		logs.Err.Println("ws: Invalid HTTP method", req.Method)
+		return
+	}
+
+	ws, err := upgrader.Upgrade(wrt, req, nil)
+	if errors.As(err, &websocket.HandshakeError{}) {
+		logs.Err.Println("ws: Not a websocket handshake")
+		return
+	} else if err != nil {
+		logs.Err.Println("ws: failed to Upgrade ", err)
+		return
+	}
+
+	sess, count := sessionStore.NewSession(ws, "")
+	if globals.useXForwardedFor {
+		sess.remoteAddr = req.Header.Get("X-Forwarded-For")
+		if !isRoutableIP(sess.remoteAddr) {
+			sess.remoteAddr = ""
+		}
+	}
+	if sess.remoteAddr == "" {
+		sess.remoteAddr = req.RemoteAddr
+	}
+	sess.uid = uid
+
+	logs.Info.Println("linkit: session started", sess.sid, sess.remoteAddr, count)
+
+	// Do work in goroutines to return from serveWebSocket() to release file pointers.
+	// Otherwise, "too many open files" will happen.
+	go sess.writeLoop()
+	go sess.readLoopExtra()
 }

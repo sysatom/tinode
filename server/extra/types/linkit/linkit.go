@@ -15,3 +15,15 @@ const (
 	Bots  Action = "bots"
 	Help  Action = "help"
 )
+
+// ClientComMessage is a wrapper for client messages.
+type ClientComMessage struct {
+	Data Data `json:"data"`
+}
+
+// ServerComMessage is a wrapper for server-side messages.
+type ServerComMessage struct {
+	Code    int         `json:"code"`
+	Message string      `json:"message"`
+	Data    interface{} `json:"data"`
+}
