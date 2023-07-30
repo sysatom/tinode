@@ -16,7 +16,7 @@ var agentRules = []agent.Rule{
 		Id:   ImportAgentID,
 		Help: "agent example",
 		Args: []string{},
-		Handler: func(ctx types.Context, content interface{}) types.MsgPayload {
+		Handler: func(ctx types.Context, content types.KV) types.MsgPayload {
 			logs.Info.Println(content)
 			return nil
 		},

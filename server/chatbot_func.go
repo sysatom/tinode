@@ -3,10 +3,12 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/tinode/chat/server/extra/ruleset/action"
 	"github.com/tinode/chat/server/extra/ruleset/session"
 	"github.com/tinode/chat/server/extra/ruleset/workflow"
+	"github.com/tinode/chat/server/extra/types/linkit"
 	"net/http"
 	"strconv"
 	"strings"
@@ -784,4 +786,125 @@ func (c *AsyncMessageConsumer) Consume(delivery rmq.Delivery) {
 		logs.Err.Printf("failed to ack %s: %s\n", payload, err)
 		return
 	}
+}
+
+func linkitAction(uid types.Uid, data linkit.Data) (interface{}, error) {
+	switch data.Action {
+	case linkit.Agent:
+		userUid := uid
+
+		id, ok := data.Content.String("id")
+		if !ok {
+			return nil, errors.New("error agent id")
+		}
+
+		subs, err := store.Users.FindSubs(userUid, [][]string{{"bot"}}, nil, true)
+		if err != nil {
+			return nil, err
+		}
+
+		// user auth record
+		_, authLvl, _, _, _ := store.Users.GetAuthRecord(userUid, "basic")
+
+		for _, sub := range subs {
+			if !isBot(sub) {
+				continue
+			}
+
+			topic := sub.User
+			topicUid := types.ParseUid(topic)
+
+			// bot name
+			name := botName(sub)
+			handle, ok := bots.List()[name]
+			if !ok {
+				continue
+			}
+
+			if !handle.IsReady() {
+				logs.Info.Printf("bot %s unavailable", topic)
+				continue
+			}
+
+			switch handle.AuthLevel() {
+			case auth.LevelRoot:
+				if authLvl != auth.LevelRoot {
+					// Unauthorized
+					continue
+				}
+			}
+
+			ctx := extraTypes.Context{
+				Original:     topicUid.UserId(),
+				RcptTo:       topic,
+				AsUser:       userUid,
+				AgentId:      id,
+				AgentVersion: data.Version,
+			}
+			payload, err := handle.Agent(ctx, data.Content)
+			if err != nil {
+				logs.Warn.Printf("topic[%s]: failed to agent bot: %v", topic, err)
+				continue
+			}
+
+			// stats
+			statsInc("BotRunAgentTotal", 1)
+
+			// send message
+			if payload == nil {
+				continue
+			}
+
+			botSend(uid.P2PName(topicUid), topicUid, payload)
+		}
+	case linkit.Pull:
+		list, err := extraStore.Chatbot.ListInstruct(uid, false)
+		if err != nil {
+			return nil, err
+		}
+		var instruct []map[string]interface{}
+		instruct = []map[string]interface{}{}
+		for _, item := range list {
+			instruct = append(instruct, map[string]interface{}{
+				"no":        item.No,
+				"bot":       item.Bot,
+				"flag":      item.Flag,
+				"content":   item.Content,
+				"expire_at": item.ExpireAt,
+			})
+		}
+		return instruct, nil
+	case linkit.Info:
+		user, err := store.Users.Get(uid)
+		if err != nil {
+			return nil, err
+		}
+		return utils.Fn(user.Public), nil
+	case linkit.Bots:
+		var list []map[string]interface{}
+		for name, bot := range bots.List() {
+			instruct, err := bot.Instruct()
+			if err != nil {
+				continue
+			}
+			if len(instruct) <= 0 {
+				continue
+			}
+			list = append(list, map[string]interface{}{
+				"id":   name,
+				"name": name,
+			})
+		}
+		return list, nil
+	case linkit.Help:
+		if id, ok := data.Content.String("id"); ok {
+			if bot, ok := bots.List()[id]; ok {
+				return bot.Help()
+			}
+			return map[string]interface{}{}, nil
+		}
+	case linkit.Ack:
+
+	}
+	return nil, nil
 }

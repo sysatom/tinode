@@ -9,12 +9,12 @@ type Rule struct {
 	Id      string
 	Help    string
 	Args    []string
-	Handler func(ctx types.Context, content interface{}) types.MsgPayload
+	Handler func(ctx types.Context, content types.KV) types.MsgPayload
 }
 
 type Ruleset []Rule
 
-func (r Ruleset) ProcessAgent(agentVersion int, ctx types.Context, content interface{}) (types.MsgPayload, error) {
+func (r Ruleset) ProcessAgent(agentVersion int, ctx types.Context, content types.KV) (types.MsgPayload, error) {
 	if agentVersion > ctx.AgentVersion {
 		return nil, errors.New("agent version too low")
 	}
@@ -25,9 +25,4 @@ func (r Ruleset) ProcessAgent(agentVersion int, ctx types.Context, content inter
 		}
 	}
 	return result, nil
-}
-
-type Data struct {
-	Id      string      `json:"id"`
-	Content interface{} `json:"content"`
 }

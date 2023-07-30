@@ -10,6 +10,7 @@ import (
 	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/store/types"
 	"net/http"
+	"strings"
 	"sync/atomic"
 	"time"
 )
@@ -34,6 +35,8 @@ func (s *Session) queueOutExtra(msg *linkit.ServerComMessage) bool {
 	if atomic.LoadInt32(&s.terminating) > 0 {
 		return true
 	}
+
+	logs.Info.Println("s.queueOutExtra: msg send", s.sid, s.uid)
 
 	data, err := json.Marshal(msg)
 	if err != nil {
@@ -119,27 +122,13 @@ func (s *Session) dispatchRawExtra(raw []byte) {
 }
 
 func (s *Session) dispatchExtra(msg *linkit.ClientComMessage) {
-	switch msg.Data.Action {
-	case linkit.Pull:
-		// pull
-		instructs, err := extraStore.Chatbot.ListInstruct(s.uid, false)
-		if err != nil {
-			s.queueOutExtra(ErrMessage(400, err.Error()))
-			return
-		}
-		var instruct []map[string]interface{}
-		instruct = []map[string]interface{}{}
-		for _, item := range instructs {
-			instruct = append(instruct, map[string]interface{}{
-				"no":        item.No,
-				"bot":       item.Bot,
-				"flag":      item.Flag,
-				"content":   item.Content,
-				"expire_at": item.ExpireAt,
-			})
-		}
-
-		s.queueOutExtra(OkMessage(instruct))
+	result, err := linkitAction(s.uid, msg.Data)
+	if err != nil {
+		logs.Err.Println(err)
+		return
+	}
+	if result != nil {
+		s.queueOutExtra(OkMessage(result))
 	}
 }
 
@@ -163,6 +152,12 @@ func ErrMessage(code int, message string) *linkit.ServerComMessage {
 func getAccessToken(req *http.Request) string {
 	// Check header.
 	apikey := req.Header.Get("X-AccessToken")
+	if apikey != "" {
+		return apikey
+	}
+	authorization := req.Header.Get("Authorization")
+	authorization = strings.TrimSpace(authorization)
+	apikey = strings.ReplaceAll(authorization, "Bearer ", "")
 	if apikey != "" {
 		return apikey
 	}

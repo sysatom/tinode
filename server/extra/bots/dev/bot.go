@@ -126,7 +126,7 @@ func (b bot) Group(ctx types.Context, head map[string]interface{}, content inter
 	return bots.RunGroup(eventRules, ctx, head, content)
 }
 
-func (b bot) Agent(ctx types.Context, content interface{}) (types.MsgPayload, error) {
+func (b bot) Agent(ctx types.Context, content types.KV) (types.MsgPayload, error) {
 	return bots.RunAgent(AgentVersion, agentRules, ctx, content)
 }
 

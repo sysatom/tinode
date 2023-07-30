@@ -15,7 +15,7 @@ var agentRules = []agent.Rule{
 		Id:   UploadAgentID,
 		Help: "update clipboard",
 		Args: []string{"txt"},
-		Handler: func(ctx types.Context, content interface{}) types.MsgPayload {
+		Handler: func(ctx types.Context, content types.KV) types.MsgPayload {
 			j := types.KV{}
 			err := j.Scan(content)
 			if err != nil {

@@ -17,7 +17,7 @@ var agentRules = []agent.Rule{
 		Id:   StatsAgentID,
 		Help: "import anki stats",
 		Args: []string{"html"},
-		Handler: func(ctx types.Context, content interface{}) types.MsgPayload {
+		Handler: func(ctx types.Context, content types.KV) types.MsgPayload {
 			j := types.KV{}
 			err := j.Scan(content)
 			if err != nil {
@@ -40,7 +40,7 @@ var agentRules = []agent.Rule{
 		Id:   ReviewAgentID,
 		Help: "import anki review count",
 		Args: []string{"num"},
-		Handler: func(ctx types.Context, content interface{}) types.MsgPayload {
+		Handler: func(ctx types.Context, content types.KV) types.MsgPayload {
 			j := types.KV{}
 			err := j.Scan(content)
 			if err != nil {

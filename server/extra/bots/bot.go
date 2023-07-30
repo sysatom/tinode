@@ -86,7 +86,7 @@ type Handler interface {
 	Workflow(ctx types.Context, head map[string]interface{}, content interface{}, operate types.WorkflowOperate) (types.MsgPayload, string, int, error)
 
 	// Agent return group result
-	Agent(ctx types.Context, content interface{}) (types.MsgPayload, error)
+	Agent(ctx types.Context, content types.KV) (types.MsgPayload, error)
 
 	// Instruct return instruct list
 	Instruct() (instruct.Ruleset, error)
@@ -157,7 +157,7 @@ func (Base) Workflow(_ types.Context, _ map[string]interface{}, _ interface{}, _
 	return nil, "", 0, nil
 }
 
-func (Base) Agent(_ types.Context, _ interface{}) (types.MsgPayload, error) {
+func (Base) Agent(_ types.Context, _ types.KV) (types.MsgPayload, error) {
 	return nil, nil
 }
 
@@ -542,7 +542,7 @@ func RunCondition(conditionRules []condition.Rule, ctx types.Context, forwarded 
 	return rs.ProcessCondition(ctx, forwarded)
 }
 
-func RunAgent(agentVersion int, agentRules []agent.Rule, ctx types.Context, content interface{}) (types.MsgPayload, error) {
+func RunAgent(agentVersion int, agentRules []agent.Rule, ctx types.Context, content types.KV) (types.MsgPayload, error) {
 	rs := agent.Ruleset(agentRules)
 	return rs.ProcessAgent(agentVersion, ctx, content)
 }

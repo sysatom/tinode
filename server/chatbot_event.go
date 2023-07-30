@@ -43,14 +43,11 @@ func onPushInstruct() {
 
 		sessionStore.Range(func(sid string, s *Session) bool {
 			if s.uid == uid {
-
 				s.queueOutExtra(&linkit.ServerComMessage{
 					Code:    http.StatusOK,
 					Message: "",
 					Data:    data,
 				})
-
-				return false
 			}
 			return true
 		})

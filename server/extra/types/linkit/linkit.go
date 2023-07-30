@@ -1,9 +1,11 @@
 package linkit
 
+import "github.com/tinode/chat/server/extra/types"
+
 type Data struct {
-	Action  Action      `json:"action"`
-	Version int         `json:"version"`
-	Content interface{} `json:"content"`
+	Action  Action   `json:"action"`
+	Version int      `json:"version"`
+	Content types.KV `json:"content"`
 }
 
 type Action string

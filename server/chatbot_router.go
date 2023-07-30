@@ -17,14 +17,12 @@ import (
 	"github.com/tinode/chat/server/extra/page/library"
 	"github.com/tinode/chat/server/extra/page/uikit"
 	"github.com/tinode/chat/server/extra/pkg/queue"
-	"github.com/tinode/chat/server/extra/ruleset/agent"
 	"github.com/tinode/chat/server/extra/ruleset/form"
 	"github.com/tinode/chat/server/extra/ruleset/page"
 	extraStore "github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/store/model"
 	extraTypes "github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/types/linkit"
-	"github.com/tinode/chat/server/extra/utils"
 	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/store"
 	"github.com/tinode/chat/server/store/types"
@@ -33,7 +31,6 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -394,23 +391,8 @@ func linkitData(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	// authorization
-	token := req.Header.Get("Authorization")
-	token = strings.TrimSpace(token)
-	token = strings.ReplaceAll(token, "Bearer ", "")
-
-	p, err := extraStore.Chatbot.ParameterGet(token)
-	if err != nil {
-		errorResponse(rw, "error")
-		return
-	}
-	if p.ID <= 0 || p.IsExpired() {
-		errorResponse(rw, "401")
-		return
-	}
-
-	ui1, _ := extraTypes.KV(p.Params).String("uid")
-	uid1 := types.ParseUserId(ui1)
-	if uid1.IsZero() {
+	uid, isValid := checkAccessToken(getAccessToken(req))
+	if !isValid {
 		errorResponse(rw, "401")
 		return
 	}
@@ -428,170 +410,17 @@ func linkitData(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	switch data.Action {
-	case linkit.Agent:
-		userUid := uid1
-
-		d, err := json.Marshal(data.Content)
-		if err != nil {
-			errorResponse(rw, "error")
-			return
-		}
-		a := agent.Data{}
-		err = json.Unmarshal(d, &a)
-		if err != nil {
-			errorResponse(rw, "error")
-			return
-		}
-
-		subs, err := store.Users.FindSubs(userUid, [][]string{{"bot"}}, nil, true)
-		if err != nil {
-			errorResponse(rw, "error")
-			return
-		}
-
-		// user auth record
-		_, authLvl, _, _, _ := store.Users.GetAuthRecord(userUid, "basic")
-
-		for _, sub := range subs {
-			if !isBot(sub) {
-				continue
-			}
-
-			topic := sub.User
-			topicUid := types.ParseUid(topic)
-
-			// bot name
-			name := botName(sub)
-			handle, ok := bots.List()[name]
-			if !ok {
-				continue
-			}
-
-			if !handle.IsReady() {
-				logs.Info.Printf("bot %s unavailable", topic)
-				continue
-			}
-
-			switch handle.AuthLevel() {
-			case auth.LevelRoot:
-				if authLvl != auth.LevelRoot {
-					// Unauthorized
-					continue
-				}
-			}
-
-			ctx := extraTypes.Context{
-				Original:     topicUid.UserId(),
-				RcptTo:       topic,
-				AsUser:       userUid,
-				AgentId:      a.Id,
-				AgentVersion: data.Version,
-			}
-			payload, err := handle.Agent(ctx, data.Content)
-			if err != nil {
-				logs.Warn.Printf("topic[%s]: failed to agent bot: %v", topic, err)
-				continue
-			}
-
-			// stats
-			statsInc("BotRunAgentTotal", 1)
-
-			// send message
-			if payload == nil {
-				continue
-			}
-
-			botSend(uid1.P2PName(topicUid), topicUid, payload)
-		}
-	case linkit.Pull:
-		list, err := extraStore.Chatbot.ListInstruct(uid1, false)
-		if err != nil {
-			errorResponse(rw, "error")
-			return
-		}
-		var instruct []map[string]interface{}
-		instruct = []map[string]interface{}{}
-		for _, item := range list {
-			instruct = append(instruct, map[string]interface{}{
-				"no":        item.No,
-				"bot":       item.Bot,
-				"flag":      item.Flag,
-				"content":   item.Content,
-				"expire_at": item.ExpireAt,
-			})
-		}
-
-		res, _ := json.Marshal(map[string]interface{}{
-			"instruct": instruct,
-		})
-		rw.Header().Set("Content-Type", "application/json")
-		_, _ = rw.Write(res)
+	result, err := linkitAction(uid, data)
+	if err != nil {
+		errorResponse(rw, "error")
 		return
-	case linkit.Info:
-		user, err := store.Users.Get(uid1)
-		if err != nil {
-			errorResponse(rw, "error")
-			return
-		}
-
-		result := map[string]interface{}{
-			"version":  1,
-			"username": utils.Fn(user.Public),
-		}
-		res, _ := json.Marshal(result)
-		rw.Header().Set("Content-Type", "application/json")
-		_, _ = rw.Write(res)
-		return
-	case linkit.Bots:
-		var data []map[string]interface{}
-		for name, bot := range bots.List() {
-			instruct, err := bot.Instruct()
-			if err != nil {
-				continue
-			}
-			if len(instruct) <= 0 {
-				continue
-			}
-			data = append(data, map[string]interface{}{
-				"id":   name,
-				"name": name,
-			})
-		}
-
-		result, err := json.Marshal(map[string]interface{}{
-			"bots": data,
-		})
-		if err != nil {
-			errorResponse(rw, "error")
-			return
-		}
-
-		rw.Header().Set("Content-Type", "application/json")
-		_, _ = rw.Write(result)
-		return
-	case linkit.Help:
-		if id, ok := data.Content.(string); ok {
-			if bot, ok := bots.List()[id]; ok {
-				result, err := bot.Help()
-				if err != nil {
-					errorResponse(rw, "error")
-					return
-				}
-				d, _ := json.Marshal(result)
-				rw.Header().Set("Content-Type", "application/json")
-				_, _ = rw.Write(d)
-				return
-			}
-			_, _ = rw.Write([]byte("{}"))
-			return
-		} else {
-			errorResponse(rw, "error")
-			return
-		}
 	}
-
-	_, _ = rw.Write([]byte("ok"))
+	res, _ := json.Marshal(linkit.ServerComMessage{
+		Code: http.StatusOK,
+		Data: result,
+	})
+	rw.Header().Set("Content-Type", "application/json")
+	_, _ = rw.Write(res)
 }
 
 func urlRedirect(rw http.ResponseWriter, req *http.Request) {
