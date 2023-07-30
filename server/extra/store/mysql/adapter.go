@@ -1073,15 +1073,19 @@ func (a *adapter) CreateInstruct(instruct *model.Instruct) (int64, error) {
 
 func (a *adapter) ListInstruct(uid types.Uid, isExpire bool) ([]*model.Instruct, error) {
 	var items []*model.Instruct
-	builder := a.db.Where("`uid` = ?", uid.UserId())
+	builder := a.db.
+		Where("`uid` = ?", uid.UserId()).
+		Where("state = ?", model.InstructCreate)
 	if isExpire {
 		builder.Where("expire_at < ?", time.Now())
 	} else {
 		builder.Where("expire_at >= ?", time.Now())
 	}
 
-	err := builder.Order("priority DESC").
-		Order("updated_at DESC").Find(&items).Error
+	err := builder.
+		Order("priority DESC").
+		Order("updated_at DESC").
+		Find(&items).Error
 	if err != nil {
 		return nil, err
 	}

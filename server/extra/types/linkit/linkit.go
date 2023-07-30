@@ -14,6 +14,7 @@ const (
 	Agent Action = "agent"
 	Bots  Action = "bots"
 	Help  Action = "help"
+	Ack   Action = "ack"
 )
 
 // ClientComMessage is a wrapper for client messages.

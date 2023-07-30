@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/emicklei/go-restful/v3"
 	"github.com/tinode/chat/server/auth"
+	pkgEvent "github.com/tinode/chat/server/extra/pkg/event"
 	"github.com/tinode/chat/server/extra/pkg/parser"
 	"github.com/tinode/chat/server/extra/ruleset/action"
 	"github.com/tinode/chat/server/extra/ruleset/agent"
@@ -855,6 +856,21 @@ func StoreInstruct(ctx types.Context, payload types.MsgPayload) types.MsgPayload
 	})
 	if err != nil {
 		return types.TextMsg{Text: "store instruct error"}
+	}
+
+	// event
+	err = pkgEvent.Emit(pkgEvent.InstructEvent, types.KV{
+		"uid":       ctx.AsUser.UserId(),
+		"no":        msg.No,
+		"object":    msg.Object,
+		"bot":       msg.Bot,
+		"flag":      msg.Flag,
+		"content":   msg.Content,
+		"state":     msg.State,
+		"expire_at": msg.ExpireAt,
+	})
+	if err != nil {
+		logs.Err.Println(err)
 	}
 
 	return types.TextMsg{Text: fmt.Sprintf("Instruct[%s:%s]", msg.Flag, msg.No)}

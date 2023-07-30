@@ -22,10 +22,6 @@ func NewExtraSessionStore(lifetime time.Duration) *SessionStore {
 
 		sessCache: make(map[string]*Session),
 	}
-
-	//statsRegisterInt("LiveSessions")
-	//statsRegisterInt("TotalSessions")
-
 	return ss
 }
 
@@ -58,6 +54,7 @@ func (s *Session) queueOutExtra(msg *linkit.ServerComMessage) bool {
 	return true
 }
 
+// read loop
 func (s *Session) readLoopExtra() {
 	defer func() {
 		s.closeWS()
@@ -121,29 +118,37 @@ func (s *Session) dispatchRawExtra(raw []byte) {
 	s.dispatchExtra(&msg)
 }
 
-func (s *Session) dispatchExtra(_ *linkit.ClientComMessage) {
-	// pull
-	instructs, err := extraStore.Chatbot.ListInstruct(s.uid, false)
-	if err != nil {
-		s.queueOutExtra(ErrMessage(400, err.Error()))
-		return
-	}
-	var instruct []map[string]interface{}
-	instruct = []map[string]interface{}{}
-	for _, item := range instructs {
-		instruct = append(instruct, map[string]interface{}{
-			"no":        item.No,
-			"bot":       item.Bot,
-			"flag":      item.Flag,
-			"content":   item.Content,
-			"expire_at": item.ExpireAt,
-		})
-	}
+func (s *Session) dispatchExtra(msg *linkit.ClientComMessage) {
+	switch msg.Data.Action {
+	case linkit.Pull:
+		// pull
+		instructs, err := extraStore.Chatbot.ListInstruct(s.uid, false)
+		if err != nil {
+			s.queueOutExtra(ErrMessage(400, err.Error()))
+			return
+		}
+		var instruct []map[string]interface{}
+		instruct = []map[string]interface{}{}
+		for _, item := range instructs {
+			instruct = append(instruct, map[string]interface{}{
+				"no":        item.No,
+				"bot":       item.Bot,
+				"flag":      item.Flag,
+				"content":   item.Content,
+				"expire_at": item.ExpireAt,
+			})
+		}
 
-	s.queueOutExtra(&linkit.ServerComMessage{
+		s.queueOutExtra(OkMessage(instruct))
+	}
+}
+
+// OkMessage success message with data
+func OkMessage(data interface{}) *linkit.ServerComMessage {
+	return &linkit.ServerComMessage{
 		Code: http.StatusOK,
-		Data: instruct,
-	})
+		Data: data,
+	}
 }
 
 // ErrMessage error message with code.
@@ -182,6 +187,7 @@ func getAccessToken(req *http.Request) string {
 	return apikey
 }
 
+// check access token valid
 func checkAccessToken(accessToken string) (uid types.Uid, isValid bool) {
 	p, err := extraStore.Chatbot.ParameterGet(accessToken)
 	if err != nil {

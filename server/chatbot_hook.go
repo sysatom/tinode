@@ -202,4 +202,5 @@ func hookQueue() {
 
 func hookEvent() {
 	onSendEvent()
+	onPushInstruct()
 }
