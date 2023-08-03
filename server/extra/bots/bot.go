@@ -491,6 +491,10 @@ func PageURL(ctx types.Context, pageRuleId string, param types.KV, expiredDurati
 	return fmt.Sprintf("%s/extra/p/%s/%s", types.AppUrl(), pageRuleId, flag), nil
 }
 
+func ServiceURL(group, version, path string) string {
+	return fmt.Sprintf("%s/bot/%s/%s%s", types.AppUrl(), group, version, path)
+}
+
 func RunAction(actionRules []action.Rule, ctx types.Context, option string) (types.MsgPayload, error) {
 	// check action
 	exAction, err := store.Chatbot.ActionGet(ctx.RcptTo, ctx.SeqId)
