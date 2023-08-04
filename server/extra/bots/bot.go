@@ -1,6 +1,7 @@
 package bots
 
 import (
+	"embed"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -27,6 +28,8 @@ import (
 	"github.com/tinode/chat/server/logs"
 	serverTypes "github.com/tinode/chat/server/store/types"
 	"gorm.io/gorm"
+	"io/fs"
+	"net/http"
 	"strings"
 	"time"
 )
@@ -491,8 +494,19 @@ func PageURL(ctx types.Context, pageRuleId string, param types.KV, expiredDurati
 	return fmt.Sprintf("%s/extra/p/%s/%s", types.AppUrl(), pageRuleId, flag), nil
 }
 
-func ServiceURL(group, version, path string) string {
-	return fmt.Sprintf("%s/bot/%s/%s%s", types.AppUrl(), group, version, path)
+func ServiceURL(ctx types.Context, group, version, path string, param types.KV) string {
+	if param == nil {
+		param = types.KV{}
+	}
+	param["original"] = ctx.Original
+	param["topic"] = ctx.RcptTo
+	param["uid"] = ctx.AsUser.UserId()
+	flag, err := StoreParameter(param, time.Now().Add(time.Hour))
+	if err != nil {
+		return ""
+	}
+
+	return fmt.Sprintf("%s/bot/%s/%s%s?p=%s", types.AppUrl(), group, version, path, flag)
 }
 
 func RunAction(actionRules []action.Rule, ctx types.Context, option string) (types.MsgPayload, error) {
@@ -787,10 +801,6 @@ func SessionDone(ctx types.Context) {
 	_ = store.Chatbot.SessionState(ctx.AsUser, ctx.Original, model.SessionDone)
 }
 
-func SessionCancel(ctx types.Context) {
-	_ = store.Chatbot.SessionState(ctx.AsUser, ctx.Original, model.SessionCancel)
-}
-
 func CreateShortUrl(text string) (string, error) {
 	if utils.IsUrl(text) {
 		url, err := store.Chatbot.UrlGetByUrl(text)
@@ -936,6 +946,66 @@ func Behavior(uid serverTypes.Uid, flag string, number int) {
 			Count_: int32(number),
 		})
 	}
+}
+
+func ServeFile(req *restful.Request, resp *restful.Response, dist embed.FS, dir string) {
+	s := fs.FS(dist)
+	h, err := fs.Sub(s, dir)
+	if err != nil {
+		_ = resp.WriteError(http.StatusNotFound, errors.New("file not found"))
+		return
+	}
+
+	subpath := req.PathParameter("subpath")
+	if subpath == "" {
+		subpath = "index.html"
+	}
+
+	if strings.HasSuffix(subpath, "html") {
+		resp.ResponseWriter.Header().Set("Content-Type", "text/html; charset=utf-8")
+	}
+	if strings.HasSuffix(subpath, "css") {
+		resp.ResponseWriter.Header().Set("Content-Type", "text/css; charset=utf-8")
+	}
+	if strings.HasSuffix(subpath, "js") {
+		resp.ResponseWriter.Header().Set("Content-Type", "text/javascript; charset=utf-8")
+	}
+	if strings.HasSuffix(subpath, "svg") {
+		resp.ResponseWriter.Header().Set("Content-Type", "image/svg+xml")
+	}
+
+	content, err := fs.ReadFile(h, subpath)
+	if err != nil {
+		_ = resp.WriteError(http.StatusNotFound, err)
+		return
+	}
+
+	if subpath == "index.html" {
+		flag := req.QueryParameter("p")
+		if flag == "" {
+			_ = resp.WriteError(http.StatusForbidden, errors.New("token not found"))
+			return
+		}
+
+		param, err := store.Chatbot.ParameterGet(flag)
+		if err != nil {
+			_ = resp.WriteError(http.StatusForbidden, errors.New("token not found"))
+			return
+		}
+
+		original, _ := types.KV(param.Params).String("original")
+		topic, _ := types.KV(param.Params).String("topic")
+		uid, _ := types.KV(param.Params).String("uid")
+
+		jsScript := fmt.Sprintf(`
+<body><script>let Global = {};Global.original = '%s';Global.topic = '%s';Global.uid = '%s';Global.flag = '%s';</script>
+`, original, topic, uid, flag)
+
+		html := strings.ReplaceAll(utils.BytesToString(content), "<body>", jsScript)
+		content = utils.StringToBytes(html)
+	}
+
+	_, _ = resp.Write(content)
 }
 
 // Init initializes registered handlers.

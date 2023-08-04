@@ -4,7 +4,7 @@ import (
 	"embed"
 	"fmt"
 	"github.com/emicklei/go-restful/v3"
-	"github.com/tinode/chat/server/extra/utils"
+	"github.com/tinode/chat/server/extra/bots"
 	"io"
 )
 
@@ -21,5 +21,5 @@ func example(req *restful.Request, resp *restful.Response) {
 var dist embed.FS
 
 func webapp(req *restful.Request, resp *restful.Response) {
-	utils.ServeFile(req, resp, dist, "webapp/build")
+	bots.ServeFile(req, resp, dist, "webapp/build")
 }
