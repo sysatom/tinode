@@ -399,42 +399,42 @@ func (a *adapter) SessionGet(uid types.Uid, topic string) (model.Session, error)
 	return find, nil
 }
 
-func (a *adapter) WorkflowCreate(workflow model.Workflow) error {
-	return a.db.Create(&model.Workflow{
-		UID:     workflow.UID,
-		Topic:   workflow.Topic,
-		Flag:    workflow.Flag,
-		RuleID:  workflow.RuleID,
-		Version: workflow.Version,
-		Step:    workflow.Step,
-		Values:  workflow.Values,
-		State:   workflow.State,
+func (a *adapter) PipelineCreate(pipeline model.Pipeline) error {
+	return a.db.Create(&model.Pipeline{
+		UID:     pipeline.UID,
+		Topic:   pipeline.Topic,
+		Flag:    pipeline.Flag,
+		RuleID:  pipeline.RuleID,
+		Version: pipeline.Version,
+		Stage:   pipeline.Stage,
+		Values:  pipeline.Values,
+		State:   pipeline.State,
 	}).Error
 }
 
-func (a *adapter) WorkflowState(uid types.Uid, topic string, workflow model.Workflow) error {
+func (a *adapter) PipelineState(uid types.Uid, topic string, pipeline model.Pipeline) error {
 	return a.db.
-		Model(&model.Workflow{}).
-		Where("`uid` = ? AND `topic` = ? AND `flag` = ?", uid.UserId(), topic, workflow.Flag).
+		Model(&model.Pipeline{}).
+		Where("`uid` = ? AND `topic` = ? AND `flag` = ?", uid.UserId(), topic, pipeline.Flag).
 		Updates(map[string]interface{}{
-			"state": workflow.State,
+			"state": pipeline.State,
 		}).Error
 }
 
-func (a *adapter) WorkflowStep(uid types.Uid, topic string, workflow model.Workflow) error {
+func (a *adapter) PipelineStep(uid types.Uid, topic string, pipeline model.Pipeline) error {
 	return a.db.
-		Model(&model.Workflow{}).
-		Where("`uid` = ? AND `topic` = ? AND `flag` = ?", uid.UserId(), topic, workflow.Flag).
+		Model(&model.Pipeline{}).
+		Where("`uid` = ? AND `topic` = ? AND `flag` = ?", uid.UserId(), topic, pipeline.Flag).
 		Updates(map[string]interface{}{
-			"step": workflow.Step,
+			"stage": pipeline.Stage,
 		}).Error
 }
 
-func (a *adapter) WorkflowGet(uid types.Uid, topic string, flag string) (model.Workflow, error) {
-	var find model.Workflow
+func (a *adapter) PipelineGet(uid types.Uid, topic string, flag string) (model.Pipeline, error) {
+	var find model.Pipeline
 	err := a.db.Where("`uid` = ? AND `topic` = ? AND `flag` = ?", uid.UserId(), topic, flag).Order("created_at DESC").First(&find).Error
 	if err != nil {
-		return model.Workflow{}, err
+		return model.Pipeline{}, err
 	}
 	return find, nil
 }

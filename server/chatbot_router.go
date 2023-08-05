@@ -374,10 +374,10 @@ func postForm(rw http.ResponseWriter, req *http.Request) {
 
 		botSend(topic, topicUid, payload)
 
-		// workflow form step
-		workflowFlag, _ := extraTypes.KV(formData.Extra).String("workflow_flag")
-		workflowVersion, _ := extraTypes.KV(formData.Extra).Int64("workflow_version")
-		nextWorkflow(ctx, workflowFlag, int(workflowVersion), topic, topicUid)
+		// pipeline form stage
+		pipelineFlag, _ := extraTypes.KV(formData.Extra).String("pipeline_flag")
+		pipelineVersion, _ := extraTypes.KV(formData.Extra).Int64("pipeline_version")
+		nextPipeline(ctx, pipelineFlag, int(pipelineVersion), topic, topicUid)
 	}
 
 	_, _ = rw.Write([]byte("ok"))

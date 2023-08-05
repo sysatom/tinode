@@ -156,10 +156,6 @@ func (d deviceDo) Where(conds ...gen.Condition) *deviceDo {
 	return d.withDO(d.DO.Where(conds...))
 }
 
-func (d deviceDo) Exists(subquery interface{ UnderlyingDB() *gorm.DB }) *deviceDo {
-	return d.Where(field.CompareSubQuery(field.ExistsOp, nil, subquery.UnderlyingDB()))
-}
-
 func (d deviceDo) Order(conds ...field.Expr) *deviceDo {
 	return d.withDO(d.DO.Order(conds...))
 }

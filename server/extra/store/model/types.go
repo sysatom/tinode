@@ -79,13 +79,13 @@ const (
 	InstructPriorityLow     InstructPriority = 1
 )
 
-type WorkflowState int
+type PipelineState int
 
 const (
-	WorkflowStateUnknown WorkflowState = iota
-	WorkflowStart
-	WorkflowDone
-	WorkflowCancel
+	PipelineStateUnknown PipelineState = iota
+	PipelineStart
+	PipelineDone
+	PipelineCancel
 )
 
 type ValueModeType string

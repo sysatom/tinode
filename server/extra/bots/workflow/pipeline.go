@@ -1,21 +1,21 @@
 package workflow
 
 import (
-	"github.com/tinode/chat/server/extra/ruleset/workflow"
+	"github.com/tinode/chat/server/extra/ruleset/pipeline"
 	"github.com/tinode/chat/server/extra/types/schema"
 )
 
 const (
-	exampleWorkflowId = "example_workflow"
+	examplePipelineId = "example_pipeline"
 )
 
-var workflowRules = []workflow.Rule{
+var pipelineRules = []pipeline.Rule{
 	{
-		Id:      exampleWorkflowId,
+		Id:      examplePipelineId,
 		Version: 1,
-		Help:    "example workflow",
+		Help:    "example pipeline",
 		Trigger: schema.CommandTrigger("example [string]"),
-		Step: schema.Step(
+		Step: schema.Stage(
 			schema.Form("dev_form"),
 			schema.Action("dev_action"),
 			schema.Command(schema.Bot("dev"), "rand", "1", "100"),

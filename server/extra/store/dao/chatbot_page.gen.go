@@ -218,10 +218,6 @@ func (p pageDo) Where(conds ...gen.Condition) *pageDo {
 	return p.withDO(p.DO.Where(conds...))
 }
 
-func (p pageDo) Exists(subquery interface{ UnderlyingDB() *gorm.DB }) *pageDo {
-	return p.Where(field.CompareSubQuery(field.ExistsOp, nil, subquery.UnderlyingDB()))
-}
-
 func (p pageDo) Order(conds ...field.Expr) *pageDo {
 	return p.withDO(p.DO.Order(conds...))
 }

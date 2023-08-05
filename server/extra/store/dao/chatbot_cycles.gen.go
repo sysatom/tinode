@@ -218,10 +218,6 @@ func (c cycleDo) Where(conds ...gen.Condition) *cycleDo {
 	return c.withDO(c.DO.Where(conds...))
 }
 
-func (c cycleDo) Exists(subquery interface{ UnderlyingDB() *gorm.DB }) *cycleDo {
-	return c.Where(field.CompareSubQuery(field.ExistsOp, nil, subquery.UnderlyingDB()))
-}
-
 func (c cycleDo) Order(conds ...field.Expr) *cycleDo {
 	return c.withDO(c.DO.Order(conds...))
 }

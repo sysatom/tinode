@@ -140,10 +140,6 @@ func (k kvmetumDo) Where(conds ...gen.Condition) *kvmetumDo {
 	return k.withDO(k.DO.Where(conds...))
 }
 
-func (k kvmetumDo) Exists(subquery interface{ UnderlyingDB() *gorm.DB }) *kvmetumDo {
-	return k.Where(field.CompareSubQuery(field.ExistsOp, nil, subquery.UnderlyingDB()))
-}
-
 func (k kvmetumDo) Order(conds ...field.Expr) *kvmetumDo {
 	return k.withDO(k.DO.Order(conds...))
 }

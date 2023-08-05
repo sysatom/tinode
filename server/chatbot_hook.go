@@ -132,7 +132,7 @@ func hookBot(jsconfig json.RawMessage, vc json.RawMessage) {
 	statsRegisterInt("BotRunConditionTotal")
 	statsRegisterInt("BotRunCronTotal")
 	statsRegisterInt("BotRunFormTotal")
-	statsRegisterInt("BotTriggerWorkflowTotal")
+	statsRegisterInt("BotTriggerPipelineTotal")
 
 	statsSet("BotTotal", int64(len(bots.List())))
 }

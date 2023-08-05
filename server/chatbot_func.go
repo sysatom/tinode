@@ -5,15 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/tinode/chat/server/extra/ruleset/action"
-	"github.com/tinode/chat/server/extra/ruleset/session"
-	"github.com/tinode/chat/server/extra/ruleset/workflow"
-	"github.com/tinode/chat/server/extra/types/linkit"
-	"net/http"
-	"strconv"
-	"strings"
-	"time"
-
 	"github.com/adjust/rmq/v5"
 	"github.com/redis/go-redis/v9"
 	"github.com/tinode/chat/server/auth"
@@ -21,9 +12,13 @@ import (
 	botGithub "github.com/tinode/chat/server/extra/bots/github"
 	botPocket "github.com/tinode/chat/server/extra/bots/pocket"
 	"github.com/tinode/chat/server/extra/pkg/cache"
+	"github.com/tinode/chat/server/extra/ruleset/action"
+	"github.com/tinode/chat/server/extra/ruleset/pipeline"
+	"github.com/tinode/chat/server/extra/ruleset/session"
 	extraStore "github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/store/model"
 	extraTypes "github.com/tinode/chat/server/extra/types"
+	"github.com/tinode/chat/server/extra/types/linkit"
 	"github.com/tinode/chat/server/extra/utils"
 	"github.com/tinode/chat/server/extra/vendors"
 	"github.com/tinode/chat/server/extra/vendors/dropbox"
@@ -32,6 +27,10 @@ import (
 	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/store"
 	"github.com/tinode/chat/server/store/types"
+	"net/http"
+	"strconv"
+	"strings"
+	"time"
 )
 
 const BotFather = "BotFather"
@@ -178,11 +177,11 @@ func botSend(rcptTo string, uid types.Uid, out extraTypes.MsgPayload, option ...
 			switch v := item.(type) {
 			case extraTypes.Context:
 				if head != nil {
-					if v.WorkflowFlag != "" {
-						head["x-workflow-flag"] = v.WorkflowFlag
+					if v.PipelineFlag != "" {
+						head["x-pipeline-flag"] = v.PipelineFlag
 					}
-					if v.WorkflowVersion > 0 {
-						head["x-workflow-version"] = v.WorkflowVersion
+					if v.PipelineVersion > 0 {
+						head["x-pipeline-version"] = v.PipelineVersion
 					}
 				}
 			}
@@ -394,10 +393,10 @@ func botIncomingMessage(t *Topic, msg *ClientComMessage) {
 								botUid := types.ParseUserId(msg.Original)
 								botSend(msg.RcptTo, botUid, payload, extraTypes.WithContext(ctx))
 
-								// workflow action step
-								workflowFlag, _ := extraTypes.KV(message.Head).String("x-workflow-flag")
-								workflowVersion, _ := extraTypes.KV(message.Head).Int64("x-workflow-version")
-								nextWorkflow(ctx, workflowFlag, int(workflowVersion), msg.RcptTo, botUid)
+								// pipeline action stage
+								pipelineFlag, _ := extraTypes.KV(message.Head).String("x-pipeline-flag")
+								pipelineVersion, _ := extraTypes.KV(message.Head).Int64("x-pipeline-version")
+								nextPipeline(ctx, pipelineFlag, int(pipelineVersion), msg.RcptTo, botUid)
 								return
 							}
 						}
@@ -434,7 +433,7 @@ func botIncomingMessage(t *Topic, msg *ClientComMessage) {
 					}
 				}
 			}
-			// workflow command trigger
+			// pipeline command trigger
 			if payload == nil {
 				var content interface{}
 				if msg.Pub.Head == nil {
@@ -449,22 +448,22 @@ func botIncomingMessage(t *Topic, msg *ClientComMessage) {
 				}
 				// check "~" prefix
 				if in, ok := content.(string); ok && strings.HasPrefix(in, "~") {
-					var workflowFlag string
-					var workflowVersion int
+					var pipelineFlag string
+					var pipelineVersion int
 					in = strings.Replace(in, "~", "", 1)
-					payload, workflowFlag, workflowVersion, err = handle.Workflow(ctx, msg.Pub.Head, in, extraTypes.WorkflowCommandTriggerOperate)
+					payload, pipelineFlag, pipelineVersion, err = handle.Pipeline(ctx, msg.Pub.Head, in, extraTypes.PipelineCommandTriggerOperate)
 					if err != nil {
 						logs.Warn.Printf("topic[%s]: failed to run bot: %v", t.name, err)
 					}
-					ctx.WorkflowFlag = workflowFlag
-					ctx.WorkflowVersion = workflowVersion
+					ctx.PipelineFlag = pipelineFlag
+					ctx.PipelineVersion = pipelineVersion
 
 					// stats
-					statsInc("BotTriggerWorkflowTotal", 1)
+					statsInc("BotTriggerPipelineTotal", 1)
 
 					// error message
 					if payload == nil {
-						payload = extraTypes.TextMsg{Text: "error workflow"}
+						payload = extraTypes.TextMsg{Text: "error pipeline"}
 					}
 				}
 			}
@@ -662,9 +661,9 @@ func groupIncomingMessage(t *Topic, msg *ClientComMessage, event extraTypes.Grou
 	}
 }
 
-func nextWorkflow(ctx extraTypes.Context, workflowFlag string, workflowVersion int, rcptTo string, botUid types.Uid) {
-	if workflowFlag != "" && workflowVersion > 0 {
-		workflowData, err := extraStore.Chatbot.WorkflowGet(ctx.AsUser, ctx.Original, workflowFlag)
+func nextPipeline(ctx extraTypes.Context, pipelineFlag string, pipelineVersion int, rcptTo string, botUid types.Uid) {
+	if pipelineFlag != "" && pipelineVersion > 0 {
+		pipelineData, err := extraStore.Chatbot.PipelineGet(ctx.AsUser, ctx.Original, pipelineFlag)
 		if err != nil {
 			logs.Err.Println(err)
 			return
@@ -672,14 +671,14 @@ func nextWorkflow(ctx extraTypes.Context, workflowFlag string, workflowVersion i
 		for _, handler := range bots.List() {
 			for _, item := range handler.Rules() {
 				switch v := item.(type) {
-				case []workflow.Rule:
+				case []pipeline.Rule:
 					for _, rule := range v {
-						if rule.Id == workflowData.RuleID {
-							ctx.WorkflowFlag = workflowFlag
-							ctx.WorkflowVersion = workflowVersion
-							ctx.WorkflowRuleId = workflowData.RuleID
-							ctx.WorkflowStepIndex = int(workflowData.Step)
-							payload, _, _, err := handler.Workflow(ctx, nil, nil, extraTypes.WorkflowNextOperate)
+						if rule.Id == pipelineData.RuleID {
+							ctx.PipelineFlag = pipelineFlag
+							ctx.PipelineVersion = pipelineVersion
+							ctx.PipelineRuleId = pipelineData.RuleID
+							ctx.PipelineStepIndex = int(pipelineData.Stage)
+							payload, _, _, err := handler.Pipeline(ctx, nil, nil, extraTypes.PipelineNextOperate)
 							if err != nil {
 								logs.Err.Println(err)
 								return

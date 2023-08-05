@@ -207,7 +207,7 @@ CREATE TABLE `chatbot_instruct`
   COLLATE = utf8mb4_unicode_ci;
 
 
-CREATE TABLE `chatbot_workflow`
+CREATE TABLE `chatbot_pipelines`
 (
     `id`         int unsigned                                                  NOT NULL AUTO_INCREMENT,
     `uid`        char(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci     NOT NULL,
@@ -215,7 +215,7 @@ CREATE TABLE `chatbot_workflow`
     `flag`       char(25) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci     NOT NULL,
     `rule_id`    varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
     `version`    int                                                           NOT NULL,
-    `step`       int                                                           NOT NULL,
+    `stage`       int                                                           NOT NULL,
     `values`     json DEFAULT NULL,
     `state`      tinyint                                                       NOT NULL,
     `created_at` datetime                                                      NOT NULL,

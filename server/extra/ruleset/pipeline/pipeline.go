@@ -1,4 +1,4 @@
-package workflow
+package pipeline
 
 import (
 	"errors"
@@ -13,7 +13,7 @@ type Rule struct {
 	Version int
 	Help    string
 	Trigger types.Trigger
-	Step    []types.Step
+	Step    []types.Stage
 }
 
 type Ruleset []Rule
@@ -29,14 +29,14 @@ func (r Ruleset) Help(in string) (types.MsgPayload, error) {
 		}
 
 		return types.InfoMsg{
-			Title: "Workflow",
+			Title: "Pipeline",
 			Model: m,
 		}, nil
 	}
 	return nil, nil
 }
 
-func (r Ruleset) TriggerWorkflow(_ types.Context, triggerType types.TriggerType, in string) (Rule, error) {
+func (r Ruleset) TriggerPipeline(_ types.Context, triggerType types.TriggerType, in string) (Rule, error) {
 	switch triggerType {
 	case types.TriggerCommandType:
 		for _, rule := range r {

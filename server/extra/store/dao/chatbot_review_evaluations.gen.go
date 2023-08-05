@@ -218,10 +218,6 @@ func (r reviewEvaluationDo) Where(conds ...gen.Condition) *reviewEvaluationDo {
 	return r.withDO(r.DO.Where(conds...))
 }
 
-func (r reviewEvaluationDo) Exists(subquery interface{ UnderlyingDB() *gorm.DB }) *reviewEvaluationDo {
-	return r.Where(field.CompareSubQuery(field.ExistsOp, nil, subquery.UnderlyingDB()))
-}
-
 func (r reviewEvaluationDo) Order(conds ...field.Expr) *reviewEvaluationDo {
 	return r.withDO(r.DO.Order(conds...))
 }

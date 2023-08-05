@@ -160,10 +160,6 @@ func (f fileuploadDo) Where(conds ...gen.Condition) *fileuploadDo {
 	return f.withDO(f.DO.Where(conds...))
 }
 
-func (f fileuploadDo) Exists(subquery interface{ UnderlyingDB() *gorm.DB }) *fileuploadDo {
-	return f.Where(field.CompareSubQuery(field.ExistsOp, nil, subquery.UnderlyingDB()))
-}
-
 func (f fileuploadDo) Order(conds ...field.Expr) *fileuploadDo {
 	return f.withDO(f.DO.Order(conds...))
 }

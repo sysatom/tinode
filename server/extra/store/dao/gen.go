@@ -40,6 +40,7 @@ var (
 	Objective        *objective
 	Page             *page
 	Parameter        *parameter
+	Pipeline         *pipeline
 	Review           *review
 	ReviewEvaluation *reviewEvaluation
 	SchemaMigration  *schemaMigration
@@ -51,7 +52,6 @@ var (
 	Url              *url
 	User             *user
 	Usertag          *usertag
-	Workflow         *workflow
 )
 
 func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
@@ -79,6 +79,7 @@ func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	Objective = &Q.Objective
 	Page = &Q.Page
 	Parameter = &Q.Parameter
+	Pipeline = &Q.Pipeline
 	Review = &Q.Review
 	ReviewEvaluation = &Q.ReviewEvaluation
 	SchemaMigration = &Q.SchemaMigration
@@ -90,7 +91,6 @@ func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	Url = &Q.Url
 	User = &Q.User
 	Usertag = &Q.Usertag
-	Workflow = &Q.Workflow
 }
 
 func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
@@ -119,6 +119,7 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 		Objective:        newObjective(db, opts...),
 		Page:             newPage(db, opts...),
 		Parameter:        newParameter(db, opts...),
+		Pipeline:         newPipeline(db, opts...),
 		Review:           newReview(db, opts...),
 		ReviewEvaluation: newReviewEvaluation(db, opts...),
 		SchemaMigration:  newSchemaMigration(db, opts...),
@@ -130,7 +131,6 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 		Url:              newUrl(db, opts...),
 		User:             newUser(db, opts...),
 		Usertag:          newUsertag(db, opts...),
-		Workflow:         newWorkflow(db, opts...),
 	}
 }
 
@@ -160,6 +160,7 @@ type Query struct {
 	Objective        objective
 	Page             page
 	Parameter        parameter
+	Pipeline         pipeline
 	Review           review
 	ReviewEvaluation reviewEvaluation
 	SchemaMigration  schemaMigration
@@ -171,7 +172,6 @@ type Query struct {
 	Url              url
 	User             user
 	Usertag          usertag
-	Workflow         workflow
 }
 
 func (q *Query) Available() bool { return q.db != nil }
@@ -202,6 +202,7 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		Objective:        q.Objective.clone(db),
 		Page:             q.Page.clone(db),
 		Parameter:        q.Parameter.clone(db),
+		Pipeline:         q.Pipeline.clone(db),
 		Review:           q.Review.clone(db),
 		ReviewEvaluation: q.ReviewEvaluation.clone(db),
 		SchemaMigration:  q.SchemaMigration.clone(db),
@@ -213,7 +214,6 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		Url:              q.Url.clone(db),
 		User:             q.User.clone(db),
 		Usertag:          q.Usertag.clone(db),
-		Workflow:         q.Workflow.clone(db),
 	}
 }
 
@@ -251,6 +251,7 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 		Objective:        q.Objective.replaceDB(db),
 		Page:             q.Page.replaceDB(db),
 		Parameter:        q.Parameter.replaceDB(db),
+		Pipeline:         q.Pipeline.replaceDB(db),
 		Review:           q.Review.replaceDB(db),
 		ReviewEvaluation: q.ReviewEvaluation.replaceDB(db),
 		SchemaMigration:  q.SchemaMigration.replaceDB(db),
@@ -262,7 +263,6 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 		Url:              q.Url.replaceDB(db),
 		User:             q.User.replaceDB(db),
 		Usertag:          q.Usertag.replaceDB(db),
-		Workflow:         q.Workflow.replaceDB(db),
 	}
 }
 
@@ -290,6 +290,7 @@ type queryCtx struct {
 	Objective        *objectiveDo
 	Page             *pageDo
 	Parameter        *parameterDo
+	Pipeline         *pipelineDo
 	Review           *reviewDo
 	ReviewEvaluation *reviewEvaluationDo
 	SchemaMigration  *schemaMigrationDo
@@ -301,7 +302,6 @@ type queryCtx struct {
 	Url              *urlDo
 	User             *userDo
 	Usertag          *usertagDo
-	Workflow         *workflowDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
@@ -329,6 +329,7 @@ func (q *Query) WithContext(ctx context.Context) *queryCtx {
 		Objective:        q.Objective.WithContext(ctx),
 		Page:             q.Page.WithContext(ctx),
 		Parameter:        q.Parameter.WithContext(ctx),
+		Pipeline:         q.Pipeline.WithContext(ctx),
 		Review:           q.Review.WithContext(ctx),
 		ReviewEvaluation: q.ReviewEvaluation.WithContext(ctx),
 		SchemaMigration:  q.SchemaMigration.WithContext(ctx),
@@ -340,7 +341,6 @@ func (q *Query) WithContext(ctx context.Context) *queryCtx {
 		Url:              q.Url.WithContext(ctx),
 		User:             q.User.WithContext(ctx),
 		Usertag:          q.Usertag.WithContext(ctx),
-		Workflow:         q.Workflow.WithContext(ctx),
 	}
 }
 

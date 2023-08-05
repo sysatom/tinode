@@ -172,10 +172,6 @@ func (c credentialDo) Where(conds ...gen.Condition) *credentialDo {
 	return c.withDO(c.DO.Where(conds...))
 }
 
-func (c credentialDo) Exists(subquery interface{ UnderlyingDB() *gorm.DB }) *credentialDo {
-	return c.Where(field.CompareSubQuery(field.ExistsOp, nil, subquery.UnderlyingDB()))
-}
-
 func (c credentialDo) Order(conds ...field.Expr) *credentialDo {
 	return c.withDO(c.DO.Order(conds...))
 }

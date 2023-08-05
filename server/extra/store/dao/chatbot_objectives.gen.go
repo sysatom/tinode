@@ -440,10 +440,6 @@ func (o objectiveDo) Where(conds ...gen.Condition) *objectiveDo {
 	return o.withDO(o.DO.Where(conds...))
 }
 
-func (o objectiveDo) Exists(subquery interface{ UnderlyingDB() *gorm.DB }) *objectiveDo {
-	return o.Where(field.CompareSubQuery(field.ExistsOp, nil, subquery.UnderlyingDB()))
-}
-
 func (o objectiveDo) Order(conds ...field.Expr) *objectiveDo {
 	return o.withDO(o.DO.Order(conds...))
 }

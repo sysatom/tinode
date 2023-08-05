@@ -52,14 +52,14 @@ type Context struct {
 	SessionLastValues KV
 	// group event
 	GroupEvent GroupEvent
-	// workflow flag id
-	WorkflowFlag string
-	// workflow rule id
-	WorkflowRuleId string
-	// workflow version
-	WorkflowVersion int
-	// workflow step index
-	WorkflowStepIndex int
+	// pipeline flag id
+	PipelineFlag string
+	// pipeline rule id
+	PipelineRuleId string
+	// pipeline version
+	PipelineVersion int
+	// pipeline stage index
+	PipelineStepIndex int
 	// page rule id
 	PageRuleId string
 }

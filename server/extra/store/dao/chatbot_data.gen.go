@@ -210,10 +210,6 @@ func (d dataDo) Where(conds ...gen.Condition) *dataDo {
 	return d.withDO(d.DO.Where(conds...))
 }
 
-func (d dataDo) Exists(subquery interface{ UnderlyingDB() *gorm.DB }) *dataDo {
-	return d.Where(field.CompareSubQuery(field.ExistsOp, nil, subquery.UnderlyingDB()))
-}
-
 func (d dataDo) Order(conds ...field.Expr) *dataDo {
 	return d.withDO(d.DO.Order(conds...))
 }

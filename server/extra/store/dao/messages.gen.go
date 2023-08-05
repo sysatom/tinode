@@ -169,10 +169,6 @@ func (m messageDo) Where(conds ...gen.Condition) *messageDo {
 	return m.withDO(m.DO.Where(conds...))
 }
 
-func (m messageDo) Exists(subquery interface{ UnderlyingDB() *gorm.DB }) *messageDo {
-	return m.Where(field.CompareSubQuery(field.ExistsOp, nil, subquery.UnderlyingDB()))
-}
-
 func (m messageDo) Order(conds ...field.Expr) *messageDo {
 	return m.withDO(m.DO.Order(conds...))
 }

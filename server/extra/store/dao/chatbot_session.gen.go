@@ -218,10 +218,6 @@ func (s sessionDo) Where(conds ...gen.Condition) *sessionDo {
 	return s.withDO(s.DO.Where(conds...))
 }
 
-func (s sessionDo) Exists(subquery interface{ UnderlyingDB() *gorm.DB }) *sessionDo {
-	return s.Where(field.CompareSubQuery(field.ExistsOp, nil, subquery.UnderlyingDB()))
-}
-
 func (s sessionDo) Order(conds ...field.Expr) *sessionDo {
 	return s.withDO(s.DO.Order(conds...))
 }

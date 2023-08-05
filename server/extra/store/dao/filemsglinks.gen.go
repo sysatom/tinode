@@ -152,10 +152,6 @@ func (f filemsglinkDo) Where(conds ...gen.Condition) *filemsglinkDo {
 	return f.withDO(f.DO.Where(conds...))
 }
 
-func (f filemsglinkDo) Exists(subquery interface{ UnderlyingDB() *gorm.DB }) *filemsglinkDo {
-	return f.Where(field.CompareSubQuery(field.ExistsOp, nil, subquery.UnderlyingDB()))
-}
-
 func (f filemsglinkDo) Order(conds ...field.Expr) *filemsglinkDo {
 	return f.withDO(f.DO.Order(conds...))
 }

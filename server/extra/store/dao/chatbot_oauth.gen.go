@@ -218,10 +218,6 @@ func (o oAuthDo) Where(conds ...gen.Condition) *oAuthDo {
 	return o.withDO(o.DO.Where(conds...))
 }
 
-func (o oAuthDo) Exists(subquery interface{ UnderlyingDB() *gorm.DB }) *oAuthDo {
-	return o.Where(field.CompareSubQuery(field.ExistsOp, nil, subquery.UnderlyingDB()))
-}
-
 func (o oAuthDo) Order(conds ...field.Expr) *oAuthDo {
 	return o.withDO(o.DO.Order(conds...))
 }

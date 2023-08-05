@@ -404,10 +404,6 @@ func (k keyResultDo) Where(conds ...gen.Condition) *keyResultDo {
 	return k.withDO(k.DO.Where(conds...))
 }
 
-func (k keyResultDo) Exists(subquery interface{ UnderlyingDB() *gorm.DB }) *keyResultDo {
-	return k.Where(field.CompareSubQuery(field.ExistsOp, nil, subquery.UnderlyingDB()))
-}
-
 func (k keyResultDo) Order(conds ...field.Expr) *keyResultDo {
 	return k.withDO(k.DO.Order(conds...))
 }

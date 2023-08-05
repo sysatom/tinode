@@ -332,10 +332,6 @@ func (t todoDo) Where(conds ...gen.Condition) *todoDo {
 	return t.withDO(t.DO.Where(conds...))
 }
 
-func (t todoDo) Exists(subquery interface{ UnderlyingDB() *gorm.DB }) *todoDo {
-	return t.Where(field.CompareSubQuery(field.ExistsOp, nil, subquery.UnderlyingDB()))
-}
-
 func (t todoDo) Order(conds ...field.Expr) *todoDo {
 	return t.withDO(t.DO.Order(conds...))
 }

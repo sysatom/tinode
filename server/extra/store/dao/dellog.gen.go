@@ -152,10 +152,6 @@ func (d dellogDo) Where(conds ...gen.Condition) *dellogDo {
 	return d.withDO(d.DO.Where(conds...))
 }
 
-func (d dellogDo) Exists(subquery interface{ UnderlyingDB() *gorm.DB }) *dellogDo {
-	return d.Where(field.CompareSubQuery(field.ExistsOp, nil, subquery.UnderlyingDB()))
-}
-
 func (d dellogDo) Order(conds ...field.Expr) *dellogDo {
 	return d.withDO(d.DO.Order(conds...))
 }

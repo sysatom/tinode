@@ -214,10 +214,6 @@ func (c counterDo) Where(conds ...gen.Condition) *counterDo {
 	return c.withDO(c.DO.Where(conds...))
 }
 
-func (c counterDo) Exists(subquery interface{ UnderlyingDB() *gorm.DB }) *counterDo {
-	return c.Where(field.CompareSubQuery(field.ExistsOp, nil, subquery.UnderlyingDB()))
-}
-
 func (c counterDo) Order(conds ...field.Expr) *counterDo {
 	return c.withDO(c.DO.Order(conds...))
 }

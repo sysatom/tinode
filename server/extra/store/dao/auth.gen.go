@@ -156,10 +156,6 @@ func (a authDo) Where(conds ...gen.Condition) *authDo {
 	return a.withDO(a.DO.Where(conds...))
 }
 
-func (a authDo) Exists(subquery interface{ UnderlyingDB() *gorm.DB }) *authDo {
-	return a.Where(field.CompareSubQuery(field.ExistsOp, nil, subquery.UnderlyingDB()))
-}
-
 func (a authDo) Order(conds ...field.Expr) *authDo {
 	return a.withDO(a.DO.Order(conds...))
 }

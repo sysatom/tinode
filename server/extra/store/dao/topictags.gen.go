@@ -140,10 +140,6 @@ func (t topictagDo) Where(conds ...gen.Condition) *topictagDo {
 	return t.withDO(t.DO.Where(conds...))
 }
 
-func (t topictagDo) Exists(subquery interface{ UnderlyingDB() *gorm.DB }) *topictagDo {
-	return t.Where(field.CompareSubQuery(field.ExistsOp, nil, subquery.UnderlyingDB()))
-}
-
 func (t topictagDo) Order(conds ...field.Expr) *topictagDo {
 	return t.withDO(t.DO.Order(conds...))
 }

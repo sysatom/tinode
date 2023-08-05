@@ -18,9 +18,9 @@ import (
 	"github.com/tinode/chat/server/extra/ruleset/form"
 	"github.com/tinode/chat/server/extra/ruleset/instruct"
 	"github.com/tinode/chat/server/extra/ruleset/page"
+	"github.com/tinode/chat/server/extra/ruleset/pipeline"
 	"github.com/tinode/chat/server/extra/ruleset/session"
 	"github.com/tinode/chat/server/extra/ruleset/setting"
-	"github.com/tinode/chat/server/extra/ruleset/workflow"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/types"
@@ -85,8 +85,8 @@ type Handler interface {
 	// Group return group result
 	Group(ctx types.Context, head map[string]interface{}, content interface{}) (types.MsgPayload, error)
 
-	// Workflow return workflow result
-	Workflow(ctx types.Context, head map[string]interface{}, content interface{}, operate types.WorkflowOperate) (types.MsgPayload, string, int, error)
+	// Pipeline return pipeline result
+	Pipeline(ctx types.Context, head map[string]interface{}, content interface{}, operate types.PipelineOperate) (types.MsgPayload, string, int, error)
 
 	// Agent return group result
 	Agent(ctx types.Context, content types.KV) (types.MsgPayload, error)
@@ -156,7 +156,7 @@ func (Base) Group(_ types.Context, _ map[string]interface{}, _ interface{}) (typ
 	return nil, nil
 }
 
-func (Base) Workflow(_ types.Context, _ map[string]interface{}, _ interface{}, _ types.WorkflowOperate) (types.MsgPayload, string, int, error) {
+func (Base) Pipeline(_ types.Context, _ map[string]interface{}, _ interface{}, _ types.PipelineOperate) (types.MsgPayload, string, int, error) {
 	return nil, "", 0, nil
 }
 
@@ -246,8 +246,8 @@ func RunGroup(eventRules []event.Rule, ctx types.Context, head map[string]interf
 	return nil, nil
 }
 
-func HelpWorkflow(workflowRules []workflow.Rule, _ types.Context, _ map[string]interface{}, content interface{}) (types.MsgPayload, error) {
-	rs := workflow.Ruleset(workflowRules)
+func HelpPipeline(pipelineRules []pipeline.Rule, _ types.Context, _ map[string]interface{}, content interface{}) (types.MsgPayload, error) {
+	rs := pipeline.Ruleset(pipelineRules)
 	in, ok := content.(string)
 	if ok {
 		payload, err := rs.Help(in)
@@ -261,55 +261,55 @@ func HelpWorkflow(workflowRules []workflow.Rule, _ types.Context, _ map[string]i
 	return nil, nil
 }
 
-func TriggerWorkflow(workflowRules []workflow.Rule, ctx types.Context, _ map[string]interface{}, content interface{}, trigger types.TriggerType) (string, workflow.Rule, error) {
-	rs := workflow.Ruleset(workflowRules)
+func TriggerPipeline(pipelineRules []pipeline.Rule, ctx types.Context, _ map[string]interface{}, content interface{}, trigger types.TriggerType) (string, pipeline.Rule, error) {
+	rs := pipeline.Ruleset(pipelineRules)
 	in, ok := content.(string)
 	if ok {
-		rule, err := rs.TriggerWorkflow(ctx, trigger, in)
+		rule, err := rs.TriggerPipeline(ctx, trigger, in)
 		if err != nil {
-			return "", workflow.Rule{}, err
+			return "", pipeline.Rule{}, err
 		}
 
-		workflowFlag := ""
-		if ctx.WorkflowFlag == "" {
-			// store workflow
-			flag, err := StoreWorkflow(ctx, rule, 0)
+		pipelineFlag := ""
+		if ctx.PipelineFlag == "" {
+			// store pipeline
+			flag, err := StorePipeline(ctx, rule, 0)
 			if err != nil {
 				logs.Err.Println(err)
-				return "", workflow.Rule{}, err
+				return "", pipeline.Rule{}, err
 			}
-			workflowFlag = flag
+			pipelineFlag = flag
 		}
 
-		return workflowFlag, rule, nil
+		return pipelineFlag, rule, nil
 	}
-	return "", workflow.Rule{}, errors.New("error trigger")
+	return "", pipeline.Rule{}, errors.New("error trigger")
 }
 
-func ProcessWorkflow(ctx types.Context, workflowRule workflow.Rule, index int) (types.MsgPayload, error) {
-	if index < 0 || index > len(workflowRule.Step) {
-		return nil, errors.New("error workflow step index")
+func ProcessPipeline(ctx types.Context, pipelineRule pipeline.Rule, index int) (types.MsgPayload, error) {
+	if index < 0 || index > len(pipelineRule.Step) {
+		return nil, errors.New("error pipeline stage index")
 	}
-	if index == len(workflowRule.Step) {
-		return types.TextMsg{Text: "Workflow Done"}, SetWorkflowState(ctx, ctx.WorkflowFlag, model.WorkflowDone)
+	if index == len(pipelineRule.Step) {
+		return types.TextMsg{Text: "Pipeline Done"}, SetPipelineState(ctx, ctx.PipelineFlag, model.PipelineDone)
 	}
 	var payload types.MsgPayload
-	step := workflowRule.Step[index]
-	switch step.Type {
-	case types.FormStep:
-		payload = FormMsg(ctx, step.Flag)
-	case types.ActionStep:
-		payload = ActionMsg(ctx, step.Flag)
-	case types.CommandStep:
+	stage := pipelineRule.Step[index]
+	switch stage.Type {
+	case types.FormStage:
+		payload = FormMsg(ctx, stage.Flag)
+	case types.ActionStage:
+		payload = ActionMsg(ctx, stage.Flag)
+	case types.CommandStage:
 		for name, handler := range List() {
-			if step.Bot != types.Bot(name) {
+			if stage.Bot != types.Bot(name) {
 				continue
 			}
 			for _, item := range handler.Rules() {
 				switch v := item.(type) {
 				case []command.Rule:
 					for _, rule := range v {
-						tokens, err := parser.ParseString(strings.Join(step.Args, " "))
+						tokens, err := parser.ParseString(strings.Join(stage.Args, " "))
 						if err != nil {
 							return nil, err
 						}
@@ -325,86 +325,86 @@ func ProcessWorkflow(ctx types.Context, workflowRule workflow.Rule, index int) (
 				}
 			}
 		}
-	case types.InstructStep:
+	case types.InstructStage:
 		data := make(map[string]interface{}) // fixme
-		for i, arg := range step.Args {
+		for i, arg := range stage.Args {
 			data[fmt.Sprintf("val%d", i+1)] = arg
 		}
-		payload = InstructMsg(ctx, step.Flag, data)
-	case types.SessionStep:
+		payload = InstructMsg(ctx, stage.Flag, data)
+	case types.SessionStage:
 		data := make(map[string]interface{}) // fixme
-		for i, arg := range step.Args {
+		for i, arg := range stage.Args {
 			data[fmt.Sprintf("val%d", i+1)] = arg
 		}
-		payload = SessionMsg(ctx, step.Flag, data)
+		payload = SessionMsg(ctx, stage.Flag, data)
 	}
 
 	if payload != nil {
 		return payload, nil
 	}
-	return nil, errors.New("error workflow process")
+	return nil, errors.New("error pipeline process")
 }
 
-func RunWorkflow(workflowRules []workflow.Rule, ctx types.Context, head map[string]interface{}, content interface{}, operate types.WorkflowOperate) (types.MsgPayload, string, int, error) {
+func RunPipeline(pipelineRules []pipeline.Rule, ctx types.Context, head map[string]interface{}, content interface{}, operate types.PipelineOperate) (types.MsgPayload, string, int, error) {
 	switch operate {
-	case types.WorkflowCommandTriggerOperate:
-		payload, err := HelpWorkflow(workflowRules, ctx, head, content)
+	case types.PipelineCommandTriggerOperate:
+		payload, err := HelpPipeline(pipelineRules, ctx, head, content)
 		if err != nil {
 			return nil, "", 0, err
 		}
 		if payload != nil {
 			return payload, "", 0, nil
 		}
-		flag, rule, err := TriggerWorkflow(workflowRules, ctx, head, content, types.TriggerCommandType)
+		flag, rule, err := TriggerPipeline(pipelineRules, ctx, head, content, types.TriggerCommandType)
 		if err != nil {
 			return nil, "", 0, err
 		}
-		ctx.WorkflowFlag = flag
-		ctx.WorkflowVersion = rule.Version
-		payload, err = ProcessWorkflow(ctx, rule, 0)
+		ctx.PipelineFlag = flag
+		ctx.PipelineVersion = rule.Version
+		payload, err = ProcessPipeline(ctx, rule, 0)
 		if err != nil {
 			return nil, "", 0, err
 		}
-		return payload, flag, rule.Version, SetWorkflowStep(ctx, flag, 1)
-	case types.WorkflowProcessOperate:
-	case types.WorkflowNextOperate:
-		for _, rule := range workflowRules {
-			if rule.Id == ctx.WorkflowRuleId {
-				payload, err := ProcessWorkflow(ctx, rule, ctx.WorkflowStepIndex)
+		return payload, flag, rule.Version, SetPipelineStep(ctx, flag, 1)
+	case types.PipelineProcessOperate:
+	case types.PipelineNextOperate:
+		for _, rule := range pipelineRules {
+			if rule.Id == ctx.PipelineRuleId {
+				payload, err := ProcessPipeline(ctx, rule, ctx.PipelineStepIndex)
 				if err != nil {
 					return nil, "", 0, err
 				}
-				return payload, ctx.WorkflowFlag, ctx.WorkflowVersion, SetWorkflowStep(ctx, ctx.WorkflowFlag, ctx.WorkflowStepIndex+1)
+				return payload, ctx.PipelineFlag, ctx.PipelineVersion, SetPipelineStep(ctx, ctx.PipelineFlag, ctx.PipelineStepIndex+1)
 			}
 		}
 	}
 	return nil, "", 0, nil
 }
 
-func StoreWorkflow(ctx types.Context, workflowRule workflow.Rule, index int) (string, error) {
+func StorePipeline(ctx types.Context, pipelineRule pipeline.Rule, index int) (string, error) {
 	flag := types.Id().String()
-	return flag, store.Chatbot.WorkflowCreate(model.Workflow{
+	return flag, store.Chatbot.PipelineCreate(model.Pipeline{
 		UID:     ctx.AsUser.UserId(),
 		Topic:   ctx.Original,
 		Flag:    flag,
-		RuleID:  workflowRule.Id,
-		Version: int32(workflowRule.Version),
-		Step:    int32(index),
-		State:   model.WorkflowStart,
+		RuleID:  pipelineRule.Id,
+		Version: int32(pipelineRule.Version),
+		Stage:   int32(index),
+		State:   model.PipelineStart,
 	})
 }
 
-func SetWorkflowState(ctx types.Context, flag string, state model.WorkflowState) error {
-	return store.Chatbot.WorkflowState(ctx.AsUser, ctx.Original, model.Workflow{
+func SetPipelineState(ctx types.Context, flag string, state model.PipelineState) error {
+	return store.Chatbot.PipelineState(ctx.AsUser, ctx.Original, model.Pipeline{
 		Flag:  flag,
 		State: state,
 	})
 }
 
-func SetWorkflowStep(ctx types.Context, flag string, index int) error {
-	return store.Chatbot.WorkflowStep(ctx.AsUser, ctx.Original, model.Workflow{
-		Flag: flag,
-		Step: int32(index),
+func SetPipelineStep(ctx types.Context, flag string, index int) error {
+	return store.Chatbot.PipelineStep(ctx.AsUser, ctx.Original, model.Pipeline{
+		Flag:  flag,
+		Stage: int32(index),
 	})
 }
 
@@ -638,9 +638,9 @@ func StoreForm(ctx types.Context, payload types.MsgPayload) types.MsgPayload {
 
 	// set extra
 	var extra types.KV = make(map[string]interface{})
-	if ctx.WorkflowFlag != "" {
-		extra["workflow_flag"] = ctx.WorkflowFlag
-		extra["workflow_version"] = ctx.WorkflowVersion
+	if ctx.PipelineFlag != "" {
+		extra["pipeline_flag"] = ctx.PipelineFlag
+		extra["pipeline_version"] = ctx.PipelineVersion
 	}
 
 	// store form

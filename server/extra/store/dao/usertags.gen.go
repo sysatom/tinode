@@ -140,10 +140,6 @@ func (u usertagDo) Where(conds ...gen.Condition) *usertagDo {
 	return u.withDO(u.DO.Where(conds...))
 }
 
-func (u usertagDo) Exists(subquery interface{ UnderlyingDB() *gorm.DB }) *usertagDo {
-	return u.Where(field.CompareSubQuery(field.ExistsOp, nil, subquery.UnderlyingDB()))
-}
-
 func (u usertagDo) Order(conds ...field.Expr) *usertagDo {
 	return u.withDO(u.DO.Order(conds...))
 }

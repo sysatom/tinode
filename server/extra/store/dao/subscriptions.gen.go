@@ -176,10 +176,6 @@ func (s subscriptionDo) Where(conds ...gen.Condition) *subscriptionDo {
 	return s.withDO(s.DO.Where(conds...))
 }
 
-func (s subscriptionDo) Exists(subquery interface{ UnderlyingDB() *gorm.DB }) *subscriptionDo {
-	return s.Where(field.CompareSubQuery(field.ExistsOp, nil, subquery.UnderlyingDB()))
-}
-
 func (s subscriptionDo) Order(conds ...field.Expr) *subscriptionDo {
 	return s.withDO(s.DO.Order(conds...))
 }

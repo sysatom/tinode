@@ -56,7 +56,7 @@ func (bot) IsReady() bool {
 func (b bot) Rules() []interface{} {
 	return []interface{}{
 		commandRules,
-		workflowRules,
+		pipelineRules,
 	}
 }
 
@@ -71,6 +71,6 @@ func (b bot) Command(ctx types.Context, content interface{}) (types.MsgPayload, 
 	return bots.RunCommand(commandRules, ctx, content)
 }
 
-func (b bot) Workflow(ctx types.Context, head map[string]interface{}, content interface{}, operate types.WorkflowOperate) (types.MsgPayload, string, int, error) {
-	return bots.RunWorkflow(workflowRules, ctx, head, content, operate)
+func (b bot) Pipeline(ctx types.Context, head map[string]interface{}, content interface{}, operate types.PipelineOperate) (types.MsgPayload, string, int, error) {
+	return bots.RunPipeline(pipelineRules, ctx, head, content, operate)
 }

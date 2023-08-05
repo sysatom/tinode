@@ -90,7 +90,9 @@ func GenerationAction(c *cli.Context) error {
 	todos := g.GenerateModelAs("chatbot_todos", "Todo", gen.FieldRelate(field.HasMany, "SubTodos",
 		g.GenerateModelAs("chatbot_todos", "Todo"), &field.RelateConfig{
 			RelateSlicePointer: true,
-			GORMTag:            map[string]string{"foreignKey": "parent_id"},
+			GORMTag: map[string][]string{
+				"foreignKey": {"parent_id"},
+			},
 		}))
 	keyResultValues := g.GenerateModelAs("chatbot_key_result_values", "KeyResultValue")
 	reviewEvaluations := g.GenerateModelAs("chatbot_review_evaluations", "ReviewEvaluation")
@@ -98,27 +100,37 @@ func GenerationAction(c *cli.Context) error {
 		gen.FieldType("type", "ReviewType"),
 		gen.FieldRelate(field.HasMany, "Evaluations", reviewEvaluations, &field.RelateConfig{
 			RelateSlicePointer: true,
-			GORMTag:            map[string]string{"foreignKey": "review_id"},
+			GORMTag: map[string][]string{
+				"foreignKey": {"review_id"},
+			},
 		}))
 	cycles := g.GenerateModelAs("chatbot_cycles", "Cycle", gen.FieldType("state", "CycleState"))
 	keyResults := g.GenerateModelAs("chatbot_key_results", "KeyResult",
 		gen.FieldType("value_mode", "ValueModeType"),
 		gen.FieldRelate(field.HasMany, "KeyResultValues", keyResultValues, &field.RelateConfig{
 			RelateSlicePointer: true,
-			GORMTag:            map[string]string{"foreignKey": "key_result_id"},
+			GORMTag: map[string][]string{
+				"foreignKey": {"key_result_id"},
+			},
 		}),
 		gen.FieldRelate(field.HasMany, "Todos", todos, &field.RelateConfig{
 			RelateSlicePointer: true,
-			GORMTag:            map[string]string{"foreignKey": "key_result_id"},
+			GORMTag: map[string][]string{
+				"foreignKey": {"key_result_id"},
+			},
 		}))
 	objectives := g.GenerateModelAs("chatbot_objectives", "Objective",
 		gen.FieldRelate(field.HasMany, "KeyResults", keyResults, &field.RelateConfig{
 			RelateSlicePointer: true,
-			GORMTag:            map[string]string{"foreignKey": "objective_id"},
+			GORMTag: map[string][]string{
+				"foreignKey": {"objective_id"},
+			},
 		}),
 		gen.FieldRelate(field.HasMany, "Reviews", reviews, &field.RelateConfig{
 			RelateSlicePointer: true,
-			GORMTag:            map[string]string{"foreignKey": "objective_id"},
+			GORMTag: map[string][]string{
+				"foreignKey": {"objective_id"},
+			},
 		}))
 	g.ApplyInterface(func(Querier) {}, objectives, keyResults, keyResultValues, todos, cycles, reviews, reviewEvaluations)
 
@@ -134,9 +146,9 @@ func GenerationAction(c *cli.Context) error {
 		gen.FieldType("state", "SessionState")))
 	g.ApplyInterface(func(Querier) {}, g.GenerateModelAs("chatbot_url", "Url",
 		gen.FieldType("state", "UrlState")))
-	g.ApplyInterface(func(Querier) {}, g.GenerateModelAs("chatbot_workflow", "Workflow",
+	g.ApplyInterface(func(Querier) {}, g.GenerateModelAs("chatbot_pipelines", "Pipeline",
 		gen.FieldType("values", "JSON"),
-		gen.FieldType("state", "WorkflowState")))
+		gen.FieldType("state", "PipelineState")))
 
 	// tinode table
 	g.ApplyBasic(g.GenerateModel("users",
