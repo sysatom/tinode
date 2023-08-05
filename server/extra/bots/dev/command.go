@@ -44,6 +44,13 @@ var commandRules = []command.Rule{
 		},
 	},
 	{
+		Define: "webapp",
+		Help:   `webapp`,
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
+			return types.LinkMsg{Url: bots.ServiceURL(ctx, Name, serviceVersion, "/app/", nil), Title: "webapp"}
+		},
+	},
+	{
 		Define: "rand [number] [number]",
 		Help:   `Generate random numbers`,
 		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
@@ -265,13 +272,6 @@ var commandRules = []command.Rule{
 			}
 
 			return types.LinkMsg{Url: url}
-		},
-	},
-	{
-		Define: "webapp",
-		Help:   `webapp`,
-		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
-			return types.LinkMsg{Url: bots.ServiceURL(ctx, Name, serviceVersion, "/app/", nil), Title: "webapp"}
 		},
 	},
 }

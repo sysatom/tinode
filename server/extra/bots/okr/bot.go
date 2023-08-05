@@ -3,7 +3,9 @@ package okr
 import (
 	"encoding/json"
 	"errors"
+	"github.com/emicklei/go-restful/v3"
 	"github.com/tinode/chat/server/extra/bots"
+	"github.com/tinode/chat/server/extra/pkg/route"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
 )
@@ -57,6 +59,13 @@ func (b bot) Rules() []interface{} {
 		formRules,
 		pageRules,
 	}
+}
+
+func (bot) WebService() *restful.WebService {
+	return route.WebService(
+		Name, serviceVersion,
+		route.Route("GET", "/app/{subpath:*}", webapp, "webapp"),
+	)
 }
 
 func (b bot) Command(ctx types.Context, content interface{}) (types.MsgPayload, error) {

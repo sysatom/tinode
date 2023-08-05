@@ -24,6 +24,13 @@ var commandRules = []command.Rule{
 		},
 	},
 	{
+		Define: "webapp",
+		Help:   `webapp`,
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
+			return types.LinkMsg{Url: bots.ServiceURL(ctx, Name, serviceVersion, "/app/", nil), Title: "webapp"}
+		},
+	},
+	{
 		Define: `obj list`,
 		Help:   `List objectives`,
 		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
