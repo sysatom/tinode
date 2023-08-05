@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/bot/okr/v1/app/static/css/main.964fdded.css",
-    "main.js": "/bot/okr/v1/app/static/js/main.d134626a.js",
+    "main.css": "/bot/okr/v1/app/static/css/main.2ce2629a.css",
+    "main.js": "/bot/okr/v1/app/static/js/main.2068313c.js",
     "static/js/787.994511a4.chunk.js": "/bot/okr/v1/app/static/js/787.994511a4.chunk.js",
     "index.html": "/bot/okr/v1/app/index.html",
-    "main.964fdded.css.map": "/bot/okr/v1/app/static/css/main.964fdded.css.map",
-    "main.d134626a.js.map": "/bot/okr/v1/app/static/js/main.d134626a.js.map",
+    "main.2ce2629a.css.map": "/bot/okr/v1/app/static/css/main.2ce2629a.css.map",
+    "main.2068313c.js.map": "/bot/okr/v1/app/static/js/main.2068313c.js.map",
     "787.994511a4.chunk.js.map": "/bot/okr/v1/app/static/js/787.994511a4.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.964fdded.css",
-    "static/js/main.d134626a.js"
+    "static/css/main.2ce2629a.css",
+    "static/js/main.2068313c.js"
   ]
 }
