@@ -1,9 +1,7 @@
 package okr
 
 import (
-	"embed"
 	"github.com/emicklei/go-restful/v3"
-	"github.com/tinode/chat/server/extra/bots"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/store/model"
 	extraTypes "github.com/tinode/chat/server/extra/types"
@@ -13,13 +11,6 @@ import (
 )
 
 const serviceVersion = "v1"
-
-//go:embed webapp/build
-var dist embed.FS
-
-func webapp(rw http.ResponseWriter, req *http.Request) {
-	bots.ServeFile(rw, req, dist, "webapp/build")
-}
 
 func objectiveList(req *restful.Request, resp *restful.Response) {
 	uid, _ := req.Attribute("uid").(types.Uid)
