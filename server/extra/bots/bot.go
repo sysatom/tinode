@@ -6,9 +6,11 @@ import (
 	"errors"
 	"fmt"
 	"github.com/emicklei/go-restful/v3"
+	"github.com/gorilla/mux"
 	"github.com/tinode/chat/server/auth"
 	pkgEvent "github.com/tinode/chat/server/extra/pkg/event"
 	"github.com/tinode/chat/server/extra/pkg/parser"
+	"github.com/tinode/chat/server/extra/pkg/route"
 	"github.com/tinode/chat/server/extra/ruleset/action"
 	"github.com/tinode/chat/server/extra/ruleset/agent"
 	"github.com/tinode/chat/server/extra/ruleset/command"
@@ -21,6 +23,7 @@ import (
 	"github.com/tinode/chat/server/extra/ruleset/pipeline"
 	"github.com/tinode/chat/server/extra/ruleset/session"
 	"github.com/tinode/chat/server/extra/ruleset/setting"
+	"github.com/tinode/chat/server/extra/ruleset/webservice"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/types"
@@ -45,9 +48,6 @@ type Handler interface {
 
 	// Bootstrap Lifecycle hook
 	Bootstrap() error
-
-	// WebService restful web service
-	WebService() *restful.WebService
 
 	// AuthLevel authorizations
 	AuthLevel() auth.Level
@@ -96,6 +96,12 @@ type Handler interface {
 
 	// Page return page
 	Page(ctx types.Context, flag string) (string, error)
+
+	// Webservice return webservice routes
+	Webservice() *restful.WebService
+
+	// Webapp return webapp
+	Webapp() func(rw http.ResponseWriter, req *http.Request)
 }
 
 type Base struct{}
@@ -170,6 +176,14 @@ func (Base) Instruct() (instruct.Ruleset, error) {
 
 func (Base) Page(_ types.Context, _ string) (string, error) {
 	return "", nil
+}
+
+func (Base) Webservice() *restful.WebService {
+	return nil
+}
+
+func (Base) Webapp() func(rw http.ResponseWriter, req *http.Request) {
+	return nil
 }
 
 type configType struct {
@@ -507,6 +521,21 @@ func ServiceURL(ctx types.Context, group, version, path string, param types.KV) 
 	}
 
 	return fmt.Sprintf("%s/bot/%s/%s%s?p=%s", types.AppUrl(), group, version, path, flag)
+}
+
+func AppURL(ctx types.Context, name string, param types.KV) string {
+	if param == nil {
+		param = types.KV{}
+	}
+	param["original"] = ctx.Original
+	param["topic"] = ctx.RcptTo
+	param["uid"] = ctx.AsUser.UserId()
+	flag, err := StoreParameter(param, time.Now().Add(time.Hour))
+	if err != nil {
+		return ""
+	}
+
+	return fmt.Sprintf("%s/app/%s/?p=%s", types.AppUrl(), name, flag)
 }
 
 func RunAction(actionRules []action.Rule, ctx types.Context, option string) (types.MsgPayload, error) {
@@ -948,48 +977,49 @@ func Behavior(uid serverTypes.Uid, flag string, number int) {
 	}
 }
 
-func ServeFile(req *restful.Request, resp *restful.Response, dist embed.FS, dir string) {
+func ServeFile(rw http.ResponseWriter, req *http.Request, dist embed.FS, dir string) {
 	s := fs.FS(dist)
 	h, err := fs.Sub(s, dir)
 	if err != nil {
-		_ = resp.WriteError(http.StatusNotFound, errors.New("file not found"))
+		rw.WriteHeader(http.StatusNotFound)
 		return
 	}
 
-	subpath := req.PathParameter("subpath")
+	vars := mux.Vars(req)
+	subpath, _ := vars["subpath"]
 	if subpath == "" {
 		subpath = "index.html"
 	}
 
 	if strings.HasSuffix(subpath, "html") {
-		resp.ResponseWriter.Header().Set("Content-Type", "text/html; charset=utf-8")
+		rw.Header().Set("Content-Type", "text/html; charset=utf-8")
 	}
 	if strings.HasSuffix(subpath, "css") {
-		resp.ResponseWriter.Header().Set("Content-Type", "text/css; charset=utf-8")
+		rw.Header().Set("Content-Type", "text/css; charset=utf-8")
 	}
 	if strings.HasSuffix(subpath, "js") {
-		resp.ResponseWriter.Header().Set("Content-Type", "text/javascript; charset=utf-8")
+		rw.Header().Set("Content-Type", "text/javascript; charset=utf-8")
 	}
 	if strings.HasSuffix(subpath, "svg") {
-		resp.ResponseWriter.Header().Set("Content-Type", "image/svg+xml")
+		rw.Header().Set("Content-Type", "image/svg+xml")
 	}
 
 	content, err := fs.ReadFile(h, subpath)
 	if err != nil {
-		_ = resp.WriteError(http.StatusNotFound, err)
+		rw.WriteHeader(http.StatusNotFound)
 		return
 	}
 
 	if subpath == "index.html" {
-		flag := req.QueryParameter("p")
+		flag := req.URL.Query().Get("p")
 		if flag == "" {
-			_ = resp.WriteError(http.StatusForbidden, errors.New("token not found"))
+			rw.WriteHeader(http.StatusForbidden)
 			return
 		}
 
 		param, err := store.Chatbot.ParameterGet(flag)
 		if err != nil {
-			_ = resp.WriteError(http.StatusForbidden, errors.New("token not found"))
+			rw.WriteHeader(http.StatusForbidden)
 			return
 		}
 
@@ -1005,7 +1035,18 @@ func ServeFile(req *restful.Request, resp *restful.Response, dist embed.FS, dir 
 		content = utils.StringToBytes(html)
 	}
 
-	_, _ = resp.Write(content)
+	_, _ = rw.Write(content)
+}
+
+func Webservice(name, version string, ruleset webservice.Ruleset) *restful.WebService {
+	if len(ruleset) == 0 {
+		return nil
+	}
+	var routes []*route.Router
+	for _, rule := range ruleset {
+		routes = append(routes, route.Route(rule.Method, rule.Path, rule.Function, rule.Documentation, rule.Option...))
+	}
+	return route.WebService(name, version, routes...)
 }
 
 // Init initializes registered handlers.

@@ -5,9 +5,9 @@ import (
 	"errors"
 	"github.com/emicklei/go-restful/v3"
 	"github.com/tinode/chat/server/extra/bots"
-	"github.com/tinode/chat/server/extra/pkg/route"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
+	"net/http"
 )
 
 const Name = "okr"
@@ -61,19 +61,12 @@ func (b bot) Rules() []interface{} {
 	}
 }
 
-func (bot) WebService() *restful.WebService {
-	return route.WebService(
-		Name, serviceVersion,
-		route.Route("GET", "/app/{subpath:*}", webapp, "webapp"),
-		route.Route("GET", "/objectives", objectiveList, "objective list", route.WithAuth()),
-		route.Route("GET", "/objective/{sequence}", objectiveDetail, "objective detail",
-			route.WithAuth(), route.WithPathParam("sequence", "id", "integer")),
-		route.Route("POST", "/objective", objectiveCreate, "objective create", route.WithAuth()),
-		route.Route("PUT", "/objective/{sequence}", objectiveUpdate, "objective update",
-			route.WithAuth(), route.WithPathParam("sequence", "id", "integer")),
-		route.Route("DELETE", "/objective/{sequence}", objectiveDelete, "objective delete",
-			route.WithAuth(), route.WithPathParam("sequence", "id", "integer")),
-	)
+func (bot) Webapp() func(rw http.ResponseWriter, req *http.Request) {
+	return webapp
+}
+
+func (bot) Webservice() *restful.WebService {
+	return bots.Webservice(Name, serviceVersion, webserviceRules)
 }
 
 func (b bot) Command(ctx types.Context, content interface{}) (types.MsgPayload, error) {

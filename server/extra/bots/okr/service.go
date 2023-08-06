@@ -17,8 +17,8 @@ const serviceVersion = "v1"
 //go:embed webapp/build
 var dist embed.FS
 
-func webapp(req *restful.Request, resp *restful.Response) {
-	bots.ServeFile(req, resp, dist, "webapp/build")
+func webapp(rw http.ResponseWriter, req *http.Request) {
+	bots.ServeFile(rw, req, dist, "webapp/build")
 }
 
 func objectiveList(req *restful.Request, resp *restful.Response) {

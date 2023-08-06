@@ -8,11 +8,10 @@ import (
 	"github.com/tinode/chat/server/auth"
 	"github.com/tinode/chat/server/extra/bots"
 	"github.com/tinode/chat/server/extra/pkg/event"
-	"github.com/tinode/chat/server/extra/pkg/route"
 	"github.com/tinode/chat/server/extra/ruleset/instruct"
-	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
+	"net/http"
 )
 
 const Name = "dev"
@@ -77,13 +76,12 @@ func (bot) AuthLevel() auth.Level {
 	return auth.LevelRoot
 }
 
-func (bot) WebService() *restful.WebService {
-	return route.WebService(
-		Name, serviceVersion,
-		route.Route("GET", "/example", example, "get example data", route.WithReturns(model.Message{}), route.WithWrites(model.Message{})),
-		route.Route("POST", "/example", example, "create example data"), // POST /bot/dev/v1/example
-		route.Route("GET", "/app/{subpath:*}", webapp, "webapp"),
-	)
+func (bot) Webapp() func(rw http.ResponseWriter, req *http.Request) {
+	return webapp
+}
+
+func (bot) Webservice() *restful.WebService {
+	return bots.Webservice(Name, serviceVersion, webserviceRules)
 }
 
 func (b bot) Rules() []interface{} {
@@ -96,6 +94,7 @@ func (b bot) Rules() []interface{} {
 		sessionRules,
 		pageRules,
 		agentRules,
+		webserviceRules,
 	}
 }
 

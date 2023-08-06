@@ -51,6 +51,17 @@ func newRouter() *mux.Router {
 	return s
 }
 
+func newWebappRouter() *mux.Router {
+	r := mux.NewRouter()
+	s := r.PathPrefix("/app").Subrouter()
+	for name, bot := range bots.List() {
+		if f := bot.Webapp(); f != nil {
+			s.HandleFunc(fmt.Sprintf("/%s/{subpath:.*}", name), f)
+		}
+	}
+	return s
+}
+
 func newUrlRouter() *mux.Router {
 	r := mux.NewRouter()
 	s := r.PathPrefix("/u").Subrouter()

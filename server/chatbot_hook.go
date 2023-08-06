@@ -60,17 +60,18 @@ import (
 // hook
 
 func hookMux() *http.ServeMux {
-	// Bot WebService
+	// Webservice
 	wc := route.NewContainer()
 	for _, bot := range bots.List() {
-		if bot.WebService() != nil {
-			wc.Add(bot.WebService())
+		if ws := bot.Webservice(); ws != nil {
+			wc.Add(ws)
 		}
 	}
 	route.AddSwagger(wc)
 	mux := wc.ServeMux
 
 	mux.Handle("/extra/", newRouter())
+	mux.Handle("/app/", newWebappRouter())
 	mux.Handle("/u/", newUrlRouter())
 	mux.Handle("/d/", newDownloadRouter())
 
