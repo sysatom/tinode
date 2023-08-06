@@ -65,6 +65,14 @@ func (bot) WebService() *restful.WebService {
 	return route.WebService(
 		Name, serviceVersion,
 		route.Route("GET", "/app/{subpath:*}", webapp, "webapp"),
+		route.Route("GET", "/objectives", objectiveList, "objective list", route.WithAuth()),
+		route.Route("GET", "/objective/{sequence}", objectiveDetail, "objective detail",
+			route.WithAuth(), route.WithPathParam("sequence", "id", "integer")),
+		route.Route("POST", "/objective", objectiveCreate, "objective create", route.WithAuth()),
+		route.Route("PUT", "/objective/{sequence}", objectiveUpdate, "objective update",
+			route.WithAuth(), route.WithPathParam("sequence", "id", "integer")),
+		route.Route("DELETE", "/objective/{sequence}", objectiveDelete, "objective delete",
+			route.WithAuth(), route.WithPathParam("sequence", "id", "integer")),
 	)
 }
 

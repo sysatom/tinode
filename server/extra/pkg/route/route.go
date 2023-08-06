@@ -4,10 +4,13 @@ import (
 	"fmt"
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
 	"github.com/emicklei/go-restful/v3"
-	"github.com/tinode/chat/server/extra/types"
+	extraStore "github.com/tinode/chat/server/extra/store"
+	extraTypes "github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/utils"
 	"github.com/tinode/chat/server/logs"
+	"github.com/tinode/chat/server/store/types"
 	"net/http"
+	"strings"
 )
 
 const prefix = "bot"
@@ -66,6 +69,10 @@ func WebService(group, version string, rs ...*Router) *restful.WebService {
 		default:
 			continue
 		}
+		// auth
+		if router.Auth {
+			builder.Filter(authFilter)
+		}
 		// params
 		if len(router.Params) > 0 {
 			for _, param := range router.Params {
@@ -89,6 +96,34 @@ func WebService(group, version string, rs ...*Router) *restful.WebService {
 		logs.Info.Printf("WebService %s \t%s%s \t-> %s", router.Method, path, router.Path, funcName)
 	}
 	return ws
+}
+
+func authFilter(req *restful.Request, resp *restful.Response, chain *restful.FilterChain) {
+	accessToken := GetAccessToken(req.Request)
+	p, err := extraStore.Chatbot.ParameterGet(accessToken)
+	if err != nil {
+		return
+	}
+	if p.ID <= 0 || p.IsExpired() {
+		return
+	}
+
+	topic, _ := extraTypes.KV(p.Params).String("topic")
+	u, _ := extraTypes.KV(p.Params).String("uid")
+	uid := types.ParseUserId(u)
+	isValid := false
+	if !uid.IsZero() {
+		isValid = true
+	}
+
+	if !isValid {
+		_ = resp.WriteErrorString(401, "401: Not Authorized")
+		return
+	}
+	req.SetAttribute("uid", uid)
+	req.SetAttribute("topic", topic)
+	req.SetAttribute("param", extraTypes.KV(p.Params))
+	chain.ProcessFilter(req, resp)
 }
 
 func Route(method string, path string, function restful.RouteFunction, documentation string, options ...Option) *Router {
@@ -125,6 +160,12 @@ func WithParam(param *Param) Option {
 	}
 }
 
+func WithAuth() Option {
+	return func(r *Router) {
+		r.Auth = true
+	}
+}
+
 type Router struct {
 	Method        string
 	Path          string
@@ -133,6 +174,7 @@ type Router struct {
 	ReturnSample  interface{}
 	WriteSample   interface{}
 	Params        []*Param
+	Auth          bool
 }
 
 type ParamType string
@@ -150,11 +192,99 @@ type Param struct {
 	DataType    string
 }
 
+func WithPathParam(name, description, dataType string) Option {
+	return WithParam(PathParam(name, description, dataType))
+}
+
+func PathParam(name, description, dataType string) *Param {
+	return &Param{
+		Type:        PathParamType,
+		Name:        name,
+		Description: description,
+		DataType:    dataType,
+	}
+}
+
+func WithQueryParam(name, description, dataType string) Option {
+	return WithParam(QueryParam(name, description, dataType))
+}
+
+func QueryParam(name, description, dataType string) *Param {
+	return &Param{
+		Type:        QueryParamType,
+		Name:        name,
+		Description: description,
+		DataType:    dataType,
+	}
+}
+
+func WithFormParam(name, description, dataType string) Option {
+	return WithParam(FormParam(name, description, dataType))
+}
+
+func FormParam(name, description, dataType string) *Param {
+	return &Param{
+		Type:        FormParamType,
+		Name:        name,
+		Description: description,
+		DataType:    dataType,
+	}
+}
+
 func ErrorResponse(resp *restful.Response, text string) {
 	resp.WriteHeader(http.StatusBadRequest)
 	_, _ = resp.Write([]byte(text))
 }
 
-func URL(group, version string, path string) string {
-	return fmt.Sprintf("%s/%s/%s/%s/%s", types.AppUrl(), prefix, group, version, path)
+// GetAccessToken Get API key from an HTTP request.
+func GetAccessToken(req *http.Request) string {
+	// Check header.
+	apikey := req.Header.Get("X-AccessToken")
+	if apikey != "" {
+		return apikey
+	}
+	authorization := req.Header.Get("Authorization")
+	authorization = strings.TrimSpace(authorization)
+	apikey = strings.ReplaceAll(authorization, "Bearer ", "")
+	if apikey != "" {
+		return apikey
+	}
+
+	// Check URL query parameters.
+	apikey = req.URL.Query().Get("accessToken")
+	if apikey != "" {
+		return apikey
+	}
+
+	// Check form values.
+	apikey = req.FormValue("accessToken")
+	if apikey != "" {
+		return apikey
+	}
+
+	// Check cookies.
+	if c, err := req.Cookie("accessToken"); err == nil {
+		apikey = c.Value
+	}
+
+	return apikey
+}
+
+// CheckAccessToken check access token valid
+func CheckAccessToken(accessToken string) (uid types.Uid, isValid bool) {
+	p, err := extraStore.Chatbot.ParameterGet(accessToken)
+	if err != nil {
+		return
+	}
+	if p.ID <= 0 || p.IsExpired() {
+		return
+	}
+
+	u, _ := extraTypes.KV(p.Params).String("uid")
+	uid = types.ParseUserId(u)
+	if uid.IsZero() {
+		return
+	}
+	isValid = true
+	return
 }

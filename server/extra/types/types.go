@@ -5,6 +5,7 @@ import (
 	"github.com/tinode/chat/server/extra/utils"
 	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/store/types"
+	"net/http"
 	"os"
 	"time"
 )
@@ -115,4 +116,32 @@ type SendFunc func(rcptTo string, uid types.Uid, out MsgPayload, option ...inter
 
 func WithContext(ctx Context) Context {
 	return ctx
+}
+
+// ClientComMessage is a wrapper for client messages.
+type ClientComMessage struct {
+	Data LinkData `json:"data"`
+}
+
+// ServerComMessage is a wrapper for server-side messages.
+type ServerComMessage struct {
+	Code    int         `json:"code"`
+	Message string      `json:"message"`
+	Data    interface{} `json:"data"`
+}
+
+// OkMessage success message with data
+func OkMessage(data interface{}) *ServerComMessage {
+	return &ServerComMessage{
+		Code: http.StatusOK,
+		Data: data,
+	}
+}
+
+// ErrMessage error message with code.
+func ErrMessage(code int, message string) *ServerComMessage {
+	return &ServerComMessage{
+		Code:    code,
+		Message: message,
+	}
 }

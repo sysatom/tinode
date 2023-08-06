@@ -4,7 +4,6 @@ import (
 	"errors"
 	"github.com/tinode/chat/server/extra/pkg/event"
 	extraTypes "github.com/tinode/chat/server/extra/types"
-	"github.com/tinode/chat/server/extra/types/linkit"
 	"github.com/tinode/chat/server/store/types"
 	"net/http"
 )
@@ -43,7 +42,7 @@ func onPushInstruct() {
 
 		sessionStore.Range(func(sid string, s *Session) bool {
 			if s.uid == uid {
-				s.queueOutExtra(&linkit.ServerComMessage{
+				s.queueOutExtra(&extraTypes.ServerComMessage{
 					Code:    http.StatusOK,
 					Message: "",
 					Data:    data,

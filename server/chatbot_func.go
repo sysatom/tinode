@@ -18,7 +18,6 @@ import (
 	extraStore "github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/store/model"
 	extraTypes "github.com/tinode/chat/server/extra/types"
-	"github.com/tinode/chat/server/extra/types/linkit"
 	"github.com/tinode/chat/server/extra/utils"
 	"github.com/tinode/chat/server/extra/vendors"
 	"github.com/tinode/chat/server/extra/vendors/dropbox"
@@ -787,9 +786,9 @@ func (c *AsyncMessageConsumer) Consume(delivery rmq.Delivery) {
 	}
 }
 
-func linkitAction(uid types.Uid, data linkit.Data) (interface{}, error) {
+func linkitAction(uid types.Uid, data extraTypes.LinkData) (interface{}, error) {
 	switch data.Action {
-	case linkit.Agent:
+	case extraTypes.Agent:
 		userUid := uid
 
 		id, ok := data.Content.String("id")
@@ -856,7 +855,7 @@ func linkitAction(uid types.Uid, data linkit.Data) (interface{}, error) {
 
 			botSend(uid.P2PName(topicUid), topicUid, payload)
 		}
-	case linkit.Pull:
+	case extraTypes.Pull:
 		list, err := extraStore.Chatbot.ListInstruct(uid, false)
 		if err != nil {
 			return nil, err
@@ -873,13 +872,13 @@ func linkitAction(uid types.Uid, data linkit.Data) (interface{}, error) {
 			})
 		}
 		return instruct, nil
-	case linkit.Info:
+	case extraTypes.Info:
 		user, err := store.Users.Get(uid)
 		if err != nil {
 			return nil, err
 		}
 		return utils.Fn(user.Public), nil
-	case linkit.Bots:
+	case extraTypes.Bots:
 		var list []map[string]interface{}
 		for name, bot := range bots.List() {
 			instruct, err := bot.Instruct()
@@ -895,14 +894,14 @@ func linkitAction(uid types.Uid, data linkit.Data) (interface{}, error) {
 			})
 		}
 		return list, nil
-	case linkit.Help:
+	case extraTypes.Help:
 		if id, ok := data.Content.String("id"); ok {
 			if bot, ok := bots.List()[id]; ok {
 				return bot.Help()
 			}
 			return map[string]interface{}{}, nil
 		}
-	case linkit.Ack:
+	case extraTypes.Ack:
 
 	}
 	return nil, nil

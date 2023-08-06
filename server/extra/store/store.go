@@ -179,7 +179,7 @@ type Adapter interface {
 	UpdateTodo(todo *model.Todo) error
 	DeleteTodo(id int64) error
 	DeleteTodoBySequence(uid types.Uid, topic string, sequence int64) error
-	CreateView(review *model.Review) (int64, error)
+	CreateReview(review *model.Review) (int64, error)
 	UpdateReview(review *model.Review)
 	ListReviews(uid types.Uid, topic string) ([]*model.Review, error)
 	GetReviewByID(id int64) (*model.Review, error)

@@ -933,7 +933,7 @@ func (a *adapter) DeleteTodoBySequence(uid types.Uid, topic string, sequence int
 		Delete(&model.Todo{}).Error
 }
 
-func (a *adapter) CreateView(review *model.Review) (int64, error) {
+func (a *adapter) CreateReview(review *model.Review) (int64, error) {
 	//TODO implement me
 	panic("implement me")
 }

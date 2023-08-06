@@ -4,13 +4,9 @@ import (
 	"container/list"
 	"encoding/json"
 	"github.com/gorilla/websocket"
-	extraStore "github.com/tinode/chat/server/extra/store"
 	extraTypes "github.com/tinode/chat/server/extra/types"
-	"github.com/tinode/chat/server/extra/types/linkit"
 	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/store/types"
-	"net/http"
-	"strings"
 	"sync/atomic"
 	"time"
 )
@@ -28,7 +24,7 @@ func NewExtraSessionStore(lifetime time.Duration) *SessionStore {
 
 // queueOut attempts to send a ServerComMessage to a session write loop;
 // it fails, if the send buffer is full.
-func (s *Session) queueOutExtra(msg *linkit.ServerComMessage) bool {
+func (s *Session) queueOutExtra(msg *extraTypes.ServerComMessage) bool {
 	if s == nil {
 		return true
 	}
@@ -89,7 +85,7 @@ func (s *Session) readLoopExtra() {
 // Message received, convert bytes to ClientComMessage and dispatch
 func (s *Session) dispatchRawExtra(raw []byte) {
 	now := types.TimeNow()
-	var msg linkit.ClientComMessage
+	var msg extraTypes.ClientComMessage
 
 	if atomic.LoadInt32(&s.terminating) > 0 {
 		logs.Warn.Println("s.dispatchExtra: message received on a terminating session", s.sid)
@@ -121,82 +117,13 @@ func (s *Session) dispatchRawExtra(raw []byte) {
 	s.dispatchExtra(&msg)
 }
 
-func (s *Session) dispatchExtra(msg *linkit.ClientComMessage) {
+func (s *Session) dispatchExtra(msg *extraTypes.ClientComMessage) {
 	result, err := linkitAction(s.uid, msg.Data)
 	if err != nil {
 		logs.Err.Println(err)
 		return
 	}
 	if result != nil {
-		s.queueOutExtra(OkMessage(result))
+		s.queueOutExtra(extraTypes.OkMessage(result))
 	}
-}
-
-// OkMessage success message with data
-func OkMessage(data interface{}) *linkit.ServerComMessage {
-	return &linkit.ServerComMessage{
-		Code: http.StatusOK,
-		Data: data,
-	}
-}
-
-// ErrMessage error message with code.
-func ErrMessage(code int, message string) *linkit.ServerComMessage {
-	return &linkit.ServerComMessage{
-		Code:    code,
-		Message: message,
-	}
-}
-
-// Get API key from an HTTP request.
-func getAccessToken(req *http.Request) string {
-	// Check header.
-	apikey := req.Header.Get("X-AccessToken")
-	if apikey != "" {
-		return apikey
-	}
-	authorization := req.Header.Get("Authorization")
-	authorization = strings.TrimSpace(authorization)
-	apikey = strings.ReplaceAll(authorization, "Bearer ", "")
-	if apikey != "" {
-		return apikey
-	}
-
-	// Check URL query parameters.
-	apikey = req.URL.Query().Get("accessToken")
-	if apikey != "" {
-		return apikey
-	}
-
-	// Check form values.
-	apikey = req.FormValue("accessToken")
-	if apikey != "" {
-		return apikey
-	}
-
-	// Check cookies.
-	if c, err := req.Cookie("accessToken"); err == nil {
-		apikey = c.Value
-	}
-
-	return apikey
-}
-
-// check access token valid
-func checkAccessToken(accessToken string) (uid types.Uid, isValid bool) {
-	p, err := extraStore.Chatbot.ParameterGet(accessToken)
-	if err != nil {
-		return
-	}
-	if p.ID <= 0 || p.IsExpired() {
-		return
-	}
-
-	u, _ := extraTypes.KV(p.Params).String("uid")
-	uid = types.ParseUserId(u)
-	if uid.IsZero() {
-		return
-	}
-	isValid = true
-	return
 }

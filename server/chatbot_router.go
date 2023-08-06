@@ -17,12 +17,12 @@ import (
 	"github.com/tinode/chat/server/extra/page/library"
 	"github.com/tinode/chat/server/extra/page/uikit"
 	"github.com/tinode/chat/server/extra/pkg/queue"
+	"github.com/tinode/chat/server/extra/pkg/route"
 	"github.com/tinode/chat/server/extra/ruleset/form"
 	"github.com/tinode/chat/server/extra/ruleset/page"
 	extraStore "github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/store/model"
 	extraTypes "github.com/tinode/chat/server/extra/types"
-	"github.com/tinode/chat/server/extra/types/linkit"
 	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/store"
 	"github.com/tinode/chat/server/store/types"
@@ -391,7 +391,7 @@ func linkitData(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	// authorization
-	uid, isValid := checkAccessToken(getAccessToken(req))
+	uid, isValid := route.CheckAccessToken(route.GetAccessToken(req))
 	if !isValid {
 		errorResponse(rw, "401")
 		return
@@ -403,7 +403,7 @@ func linkitData(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	var data linkit.Data
+	var data extraTypes.LinkData
 	err = json.Unmarshal(body, &data)
 	if err != nil {
 		errorResponse(rw, "error")
@@ -415,7 +415,7 @@ func linkitData(rw http.ResponseWriter, req *http.Request) {
 		errorResponse(rw, "error")
 		return
 	}
-	res, _ := json.Marshal(linkit.ServerComMessage{
+	res, _ := json.Marshal(extraTypes.ServerComMessage{
 		Code: http.StatusOK,
 		Data: result,
 	})
@@ -458,17 +458,17 @@ func queueStats(rw http.ResponseWriter, _ *http.Request) {
 var sessionStore = NewExtraSessionStore(idleSessionTimeout + 15*time.Second)
 
 func wbSession(wrt http.ResponseWriter, req *http.Request) {
-	uid, isValid := checkAccessToken(getAccessToken(req))
+	uid, isValid := route.CheckAccessToken(route.GetAccessToken(req))
 	if !isValid {
 		wrt.WriteHeader(http.StatusForbidden)
-		_ = json.NewEncoder(wrt).Encode(ErrMessage(http.StatusForbidden, "Missing, invalid or expired access token"))
+		_ = json.NewEncoder(wrt).Encode(extraTypes.ErrMessage(http.StatusForbidden, "Missing, invalid or expired access token"))
 		logs.Err.Println("ws: Missing, invalid or expired API key")
 		return
 	}
 
 	if req.Method != http.MethodGet {
 		wrt.WriteHeader(http.StatusMethodNotAllowed)
-		_ = json.NewEncoder(wrt).Encode(ErrMessage(http.StatusBadRequest, "invalid http method"))
+		_ = json.NewEncoder(wrt).Encode(extraTypes.ErrMessage(http.StatusBadRequest, "invalid http method"))
 		logs.Err.Println("ws: Invalid HTTP method", req.Method)
 		return
 	}

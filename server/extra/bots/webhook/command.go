@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/tinode/chat/server/extra/bots"
 	"github.com/tinode/chat/server/extra/pkg/parser"
-	"github.com/tinode/chat/server/extra/pkg/route"
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/types"
@@ -35,7 +34,7 @@ var commandRules = []command.Rule{
 			m := make(map[string]interface{})
 			for _, item := range items {
 				flag := serverTypes.ParseUid(strings.ReplaceAll(item.Key, "webhook:", ""))
-				m[item.Key] = route.URL(Name, serviceVersion, fmt.Sprintf("webhook/%s", flag))
+				m[item.Key] = bots.ServiceURL(ctx, Name, serviceVersion, fmt.Sprintf("webhook/%s", flag), nil)
 			}
 
 			return types.InfoMsg{
@@ -63,7 +62,7 @@ var commandRules = []command.Rule{
 				return types.TextMsg{Text: "error create"}
 			}
 
-			return types.TextMsg{Text: fmt.Sprintf("Webhook: %s", route.URL(Name, serviceVersion, fmt.Sprintf("webhook/%s", flag)))}
+			return types.TextMsg{Text: fmt.Sprintf("Webhook: %s", bots.ServiceURL(ctx, Name, serviceVersion, fmt.Sprintf("webhook/%s", flag), nil))}
 		},
 	},
 	{
