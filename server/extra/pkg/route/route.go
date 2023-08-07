@@ -29,11 +29,13 @@ func NewContainer() *restful.Container {
 
 	// CORS
 	cors := restful.CrossOriginResourceSharing{
-		AllowedHeaders: []string{"Content-Type", "Accept"},
-		AllowedMethods: []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
+		AllowedHeaders: []string{"*"},
+		AllowedMethods: []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
+		AllowedDomains: []string{".*"},
 		CookiesAllowed: false,
 		Container:      restfulContainer}
 	restfulContainer.Filter(cors.Filter)
+	restfulContainer.Filter(restfulContainer.OPTIONSFilter)
 
 	return restfulContainer
 }
@@ -88,6 +90,8 @@ func WebService(group, version string, rs ...*Router) *restful.WebService {
 		}
 		ws.Route(builder.
 			To(router.Function).
+			Produces(restful.MIME_JSON).
+			Consumes(restful.MIME_JSON).
 			Doc(router.Documentation).
 			Operation(operationName).
 			Metadata(restfulspec.KeyOpenAPITags, tags).
@@ -102,6 +106,7 @@ func authFilter(req *restful.Request, resp *restful.Response, chain *restful.Fil
 	accessToken := GetAccessToken(req.Request)
 	p, err := extraStore.Chatbot.ParameterGet(accessToken)
 	if err != nil {
+		_ = resp.WriteErrorString(401, "401: Not Authorized")
 		return
 	}
 	if p.ID <= 0 || p.IsExpired() {
