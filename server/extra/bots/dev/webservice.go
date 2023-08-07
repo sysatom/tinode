@@ -17,10 +17,4 @@ var webserviceRules = []webservice.Rule{
 			route.WithWrites(model.Message{}),
 		},
 	},
-	{
-		Method:        "POST",
-		Path:          "/example",
-		Function:      example,
-		Documentation: "create example data",
-	},
 }

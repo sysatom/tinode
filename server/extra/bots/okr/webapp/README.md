@@ -44,3 +44,9 @@ You don’t have to ever use `eject`. The curated feature set is suitable for sm
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
 To learn React, check out the [React documentation](https://reactjs.org/).
+
+## Openapi
+
+```shell
+npx openapi --input http://127.0.0.1:6060/bot/swagger.json --output ./src/client --client axios --indent 2 --exportSchemas true --name AppClient
+```

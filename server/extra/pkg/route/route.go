@@ -51,7 +51,7 @@ func WebService(group, version string, rs ...*Router) *restful.WebService {
 	ws := newWebService(group, version)
 	for _, router := range rs {
 		funcName := utils.GetFunctionName(router.Function)
-		_, resource := utils.ParseFunctionName(funcName)
+		_, operationName := utils.ParseFunctionName(funcName)
 		tags := []string{group}
 		var builder *restful.RouteBuilder
 		// method
@@ -89,7 +89,7 @@ func WebService(group, version string, rs ...*Router) *restful.WebService {
 		ws.Route(builder.
 			To(router.Function).
 			Doc(router.Documentation).
-			Operation(router.Method+resource).
+			Operation(operationName).
 			Metadata(restfulspec.KeyOpenAPITags, tags).
 			Returns(http.StatusOK, "OK", router.ReturnSample).
 			Writes(router.WriteSample))
