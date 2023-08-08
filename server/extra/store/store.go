@@ -148,6 +148,9 @@ type Adapter interface {
 	ParameterSet(flag string, params extraTypes.KV, expiredAt time.Time) error
 	ParameterGet(flag string) (model.Parameter, error)
 	ParameterDelete(flag string) error
+	CreateInstruct(instruct *model.Instruct) (int64, error)
+	ListInstruct(uid types.Uid, isExpire bool) ([]*model.Instruct, error)
+	UpdateInstruct(instruct *model.Instruct) error
 
 	GetObjectiveByID(id int64) (*model.Objective, error)
 	GetObjectiveBySequence(uid types.Uid, topic string, sequence int64) (*model.Objective, error)
@@ -199,9 +202,18 @@ type Adapter interface {
 	GetCounter(id int64) (model.Counter, error)
 	GetCounterByFlag(uid types.Uid, topic string, flag string) (model.Counter, error)
 
-	CreateInstruct(instruct *model.Instruct) (int64, error)
-	ListInstruct(uid types.Uid, isExpire bool) ([]*model.Instruct, error)
-	UpdateInstruct(instruct *model.Instruct) error
+	CreateWorkflow(workflow *model.Workflow, dag *model.Dag, triggers []*model.WorkflowTrigger) (int64, error)
+	GetWorkflow(id int64) (*model.Workflow, error)
+	UpdateWorkflowState(id int64, state model.WorkflowState) error
+	ListWorkflows(uid types.Uid, topic string) ([]*model.Workflow, error)
+	IncreaseWorkflowCount(id int64, successful int, failed int, skipped int, canceled int) error
+	DeleteWorkflow(id int64) error
+	GetDag(id int64) (*model.Dag, error)
+	GetJob(id int64) (*model.Job, error)
+	DeleteJob(id int64) error
+	ListJobs(workflowID int64) ([]*model.Job, error)
+	UpdateJobState(id int64, state model.JobState) error
+	UpdateStepState(id int64, state model.StepState) error
 }
 
 var Chatbot Adapter

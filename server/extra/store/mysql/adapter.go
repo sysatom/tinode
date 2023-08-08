@@ -571,6 +571,46 @@ func (a *adapter) PageGet(pageId string) (model.Page, error) {
 	return find, nil
 }
 
+func (a *adapter) CreateInstruct(instruct *model.Instruct) (int64, error) {
+	if instruct.ExpireAt.Before(time.Now()) {
+		return 0, errors.New("expire time error")
+	}
+	err := a.db.Create(&instruct)
+	if err != nil {
+		return 0, nil
+	}
+	return int64(instruct.ID), nil
+}
+
+func (a *adapter) ListInstruct(uid types.Uid, isExpire bool) ([]*model.Instruct, error) {
+	var items []*model.Instruct
+	builder := a.db.
+		Where("`uid` = ?", uid.UserId()).
+		Where("state = ?", model.InstructCreate)
+	if isExpire {
+		builder.Where("expire_at < ?", time.Now())
+	} else {
+		builder.Where("expire_at >= ?", time.Now())
+	}
+
+	err := builder.
+		Order("priority DESC").
+		Order("updated_at DESC").
+		Find(&items).Error
+	if err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+func (a *adapter) UpdateInstruct(instruct *model.Instruct) error {
+	return a.db.Model(&model.Todo{}).
+		Where("`no` = ?", instruct.No).
+		UpdateColumns(map[string]interface{}{
+			"state": instruct.State,
+		}).Error
+}
+
 func (a *adapter) GetObjectiveByID(id int64) (*model.Objective, error) {
 	var objective model.Objective
 	err := a.db.Where("id = ?", id).First(&objective).Error
@@ -1060,44 +1100,64 @@ func (a *adapter) GetCounterByFlag(uid types.Uid, topic string, flag string) (mo
 	return find, nil
 }
 
-func (a *adapter) CreateInstruct(instruct *model.Instruct) (int64, error) {
-	if instruct.ExpireAt.Before(time.Now()) {
-		return 0, errors.New("expire time error")
-	}
-	err := a.db.Create(&instruct)
-	if err != nil {
-		return 0, nil
-	}
-	return int64(instruct.ID), nil
+func (a *adapter) CreateWorkflow(workflow *model.Workflow, dag *model.Dag, triggers []*model.WorkflowTrigger) (int64, error) {
+	//TODO implement me
+	panic("implement me")
 }
 
-func (a *adapter) ListInstruct(uid types.Uid, isExpire bool) ([]*model.Instruct, error) {
-	var items []*model.Instruct
-	builder := a.db.
-		Where("`uid` = ?", uid.UserId()).
-		Where("state = ?", model.InstructCreate)
-	if isExpire {
-		builder.Where("expire_at < ?", time.Now())
-	} else {
-		builder.Where("expire_at >= ?", time.Now())
-	}
-
-	err := builder.
-		Order("priority DESC").
-		Order("updated_at DESC").
-		Find(&items).Error
-	if err != nil {
-		return nil, err
-	}
-	return items, nil
+func (a *adapter) GetWorkflow(id int64) (*model.Workflow, error) {
+	//TODO implement me
+	panic("implement me")
 }
 
-func (a *adapter) UpdateInstruct(instruct *model.Instruct) error {
-	return a.db.Model(&model.Todo{}).
-		Where("`no` = ?", instruct.No).
-		UpdateColumns(map[string]interface{}{
-			"state": instruct.State,
-		}).Error
+func (a *adapter) UpdateWorkflowState(id int64, state model.WorkflowState) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (a *adapter) ListWorkflows(uid types.Uid, topic string) ([]*model.Workflow, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (a *adapter) IncreaseWorkflowCount(id int64, successful int, failed int, skipped int, canceled int) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (a *adapter) DeleteWorkflow(id int64) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (a *adapter) GetDag(id int64) (*model.Dag, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (a *adapter) GetJob(id int64) (*model.Job, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (a *adapter) DeleteJob(id int64) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (a *adapter) ListJobs(workflowID int64) ([]*model.Job, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (a *adapter) UpdateJobState(id int64, state model.JobState) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (a *adapter) UpdateStepState(id int64, state model.StepState) error {
+	//TODO implement me
+	panic("implement me")
 }
 
 func Init() {
