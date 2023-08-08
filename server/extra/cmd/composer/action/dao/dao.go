@@ -134,6 +134,54 @@ func GenerationAction(c *cli.Context) error {
 		}))
 	g.ApplyInterface(func(Querier) {}, objectives, keyResults, keyResultValues, todos, cycles, reviews, reviewEvaluations)
 
+	// workflow
+	dag := g.GenerateModelAs("chatbot_dag", "Dag",
+		gen.FieldType("nodes", "[]*Node"),
+		gen.FieldGORMTag("nodes", func(tag field.GormTag) field.GormTag {
+			return map[string][]string{
+				"column":     {"nodes"},
+				"type":       {"json"},
+				"serializer": {"json"},
+				"not null":   nil,
+			}
+		}),
+		gen.FieldType("edges", "[]*Edge"),
+		gen.FieldGORMTag("edges", func(tag field.GormTag) field.GormTag {
+			return map[string][]string{
+				"column":     {"edges"},
+				"type":       {"json"},
+				"serializer": {"json"},
+				"not null":   nil,
+			}
+		}))
+	workflowTriggers := g.GenerateModelAs("chatbot_workflow_trigger", "WorkflowTrigger",
+		gen.FieldType("type", "TriggerType"))
+	workflows := g.GenerateModelAs("chatbot_workflow", "Workflow",
+		gen.FieldType("state", "WorkflowState"),
+		gen.FieldRelate(field.HasOne, "Dag", dag, &field.RelateConfig{
+			RelateSlicePointer: true,
+			GORMTag: map[string][]string{
+				"foreignKey": {"workflow_id"},
+			},
+		}),
+		gen.FieldRelate(field.HasMany, "Triggers", workflowTriggers, &field.RelateConfig{
+			RelateSlicePointer: true,
+			GORMTag: map[string][]string{
+				"foreignKey": {"workflow_id"},
+			},
+		}))
+	steps := g.GenerateModelAs("chatbot_steps", "Step",
+		gen.FieldType("state", "StepState"))
+	jobs := g.GenerateModelAs("chatbot_jobs", "Job",
+		gen.FieldType("state", "JobState"),
+		gen.FieldRelate(field.HasMany, "Steps", steps, &field.RelateConfig{
+			RelateSlicePointer: true,
+			GORMTag: map[string][]string{
+				"foreignKey": {"job_id"},
+			},
+		}))
+	g.ApplyInterface(func(Querier) {}, workflows, dag, steps, jobs, workflowTriggers)
+
 	g.ApplyInterface(func(Querier) {}, g.GenerateModelAs("chatbot_page", "Page",
 		gen.FieldType("type", "PageType"),
 		gen.FieldType("schema", "JSON"),

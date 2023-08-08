@@ -25,6 +25,7 @@ var (
 	CounterRecord    *counterRecord
 	Credential       *credential
 	Cycle            *cycle
+	Dag              *dag
 	Data             *data
 	Dellog           *dellog
 	Device           *device
@@ -32,6 +33,7 @@ var (
 	Fileupload       *fileupload
 	Form             *form
 	Instruct         *instruct
+	Job              *job
 	KeyResult        *keyResult
 	KeyResultValue   *keyResultValue
 	Kvmetum          *kvmetum
@@ -45,6 +47,7 @@ var (
 	ReviewEvaluation *reviewEvaluation
 	SchemaMigration  *schemaMigration
 	Session          *session
+	Step             *step
 	Subscription     *subscription
 	Todo             *todo
 	Topic            *topic
@@ -52,6 +55,8 @@ var (
 	Url              *url
 	User             *user
 	Usertag          *usertag
+	Workflow         *workflow
+	WorkflowTrigger  *workflowTrigger
 )
 
 func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
@@ -64,6 +69,7 @@ func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	CounterRecord = &Q.CounterRecord
 	Credential = &Q.Credential
 	Cycle = &Q.Cycle
+	Dag = &Q.Dag
 	Data = &Q.Data
 	Dellog = &Q.Dellog
 	Device = &Q.Device
@@ -71,6 +77,7 @@ func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	Fileupload = &Q.Fileupload
 	Form = &Q.Form
 	Instruct = &Q.Instruct
+	Job = &Q.Job
 	KeyResult = &Q.KeyResult
 	KeyResultValue = &Q.KeyResultValue
 	Kvmetum = &Q.Kvmetum
@@ -84,6 +91,7 @@ func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	ReviewEvaluation = &Q.ReviewEvaluation
 	SchemaMigration = &Q.SchemaMigration
 	Session = &Q.Session
+	Step = &Q.Step
 	Subscription = &Q.Subscription
 	Todo = &Q.Todo
 	Topic = &Q.Topic
@@ -91,6 +99,8 @@ func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	Url = &Q.Url
 	User = &Q.User
 	Usertag = &Q.Usertag
+	Workflow = &Q.Workflow
+	WorkflowTrigger = &Q.WorkflowTrigger
 }
 
 func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
@@ -104,6 +114,7 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 		CounterRecord:    newCounterRecord(db, opts...),
 		Credential:       newCredential(db, opts...),
 		Cycle:            newCycle(db, opts...),
+		Dag:              newDag(db, opts...),
 		Data:             newData(db, opts...),
 		Dellog:           newDellog(db, opts...),
 		Device:           newDevice(db, opts...),
@@ -111,6 +122,7 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 		Fileupload:       newFileupload(db, opts...),
 		Form:             newForm(db, opts...),
 		Instruct:         newInstruct(db, opts...),
+		Job:              newJob(db, opts...),
 		KeyResult:        newKeyResult(db, opts...),
 		KeyResultValue:   newKeyResultValue(db, opts...),
 		Kvmetum:          newKvmetum(db, opts...),
@@ -124,6 +136,7 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 		ReviewEvaluation: newReviewEvaluation(db, opts...),
 		SchemaMigration:  newSchemaMigration(db, opts...),
 		Session:          newSession(db, opts...),
+		Step:             newStep(db, opts...),
 		Subscription:     newSubscription(db, opts...),
 		Todo:             newTodo(db, opts...),
 		Topic:            newTopic(db, opts...),
@@ -131,6 +144,8 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 		Url:              newUrl(db, opts...),
 		User:             newUser(db, opts...),
 		Usertag:          newUsertag(db, opts...),
+		Workflow:         newWorkflow(db, opts...),
+		WorkflowTrigger:  newWorkflowTrigger(db, opts...),
 	}
 }
 
@@ -145,6 +160,7 @@ type Query struct {
 	CounterRecord    counterRecord
 	Credential       credential
 	Cycle            cycle
+	Dag              dag
 	Data             data
 	Dellog           dellog
 	Device           device
@@ -152,6 +168,7 @@ type Query struct {
 	Fileupload       fileupload
 	Form             form
 	Instruct         instruct
+	Job              job
 	KeyResult        keyResult
 	KeyResultValue   keyResultValue
 	Kvmetum          kvmetum
@@ -165,6 +182,7 @@ type Query struct {
 	ReviewEvaluation reviewEvaluation
 	SchemaMigration  schemaMigration
 	Session          session
+	Step             step
 	Subscription     subscription
 	Todo             todo
 	Topic            topic
@@ -172,6 +190,8 @@ type Query struct {
 	Url              url
 	User             user
 	Usertag          usertag
+	Workflow         workflow
+	WorkflowTrigger  workflowTrigger
 }
 
 func (q *Query) Available() bool { return q.db != nil }
@@ -187,6 +207,7 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		CounterRecord:    q.CounterRecord.clone(db),
 		Credential:       q.Credential.clone(db),
 		Cycle:            q.Cycle.clone(db),
+		Dag:              q.Dag.clone(db),
 		Data:             q.Data.clone(db),
 		Dellog:           q.Dellog.clone(db),
 		Device:           q.Device.clone(db),
@@ -194,6 +215,7 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		Fileupload:       q.Fileupload.clone(db),
 		Form:             q.Form.clone(db),
 		Instruct:         q.Instruct.clone(db),
+		Job:              q.Job.clone(db),
 		KeyResult:        q.KeyResult.clone(db),
 		KeyResultValue:   q.KeyResultValue.clone(db),
 		Kvmetum:          q.Kvmetum.clone(db),
@@ -207,6 +229,7 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		ReviewEvaluation: q.ReviewEvaluation.clone(db),
 		SchemaMigration:  q.SchemaMigration.clone(db),
 		Session:          q.Session.clone(db),
+		Step:             q.Step.clone(db),
 		Subscription:     q.Subscription.clone(db),
 		Todo:             q.Todo.clone(db),
 		Topic:            q.Topic.clone(db),
@@ -214,6 +237,8 @@ func (q *Query) clone(db *gorm.DB) *Query {
 		Url:              q.Url.clone(db),
 		User:             q.User.clone(db),
 		Usertag:          q.Usertag.clone(db),
+		Workflow:         q.Workflow.clone(db),
+		WorkflowTrigger:  q.WorkflowTrigger.clone(db),
 	}
 }
 
@@ -236,6 +261,7 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 		CounterRecord:    q.CounterRecord.replaceDB(db),
 		Credential:       q.Credential.replaceDB(db),
 		Cycle:            q.Cycle.replaceDB(db),
+		Dag:              q.Dag.replaceDB(db),
 		Data:             q.Data.replaceDB(db),
 		Dellog:           q.Dellog.replaceDB(db),
 		Device:           q.Device.replaceDB(db),
@@ -243,6 +269,7 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 		Fileupload:       q.Fileupload.replaceDB(db),
 		Form:             q.Form.replaceDB(db),
 		Instruct:         q.Instruct.replaceDB(db),
+		Job:              q.Job.replaceDB(db),
 		KeyResult:        q.KeyResult.replaceDB(db),
 		KeyResultValue:   q.KeyResultValue.replaceDB(db),
 		Kvmetum:          q.Kvmetum.replaceDB(db),
@@ -256,6 +283,7 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 		ReviewEvaluation: q.ReviewEvaluation.replaceDB(db),
 		SchemaMigration:  q.SchemaMigration.replaceDB(db),
 		Session:          q.Session.replaceDB(db),
+		Step:             q.Step.replaceDB(db),
 		Subscription:     q.Subscription.replaceDB(db),
 		Todo:             q.Todo.replaceDB(db),
 		Topic:            q.Topic.replaceDB(db),
@@ -263,6 +291,8 @@ func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 		Url:              q.Url.replaceDB(db),
 		User:             q.User.replaceDB(db),
 		Usertag:          q.Usertag.replaceDB(db),
+		Workflow:         q.Workflow.replaceDB(db),
+		WorkflowTrigger:  q.WorkflowTrigger.replaceDB(db),
 	}
 }
 
@@ -275,6 +305,7 @@ type queryCtx struct {
 	CounterRecord    *counterRecordDo
 	Credential       *credentialDo
 	Cycle            *cycleDo
+	Dag              *dagDo
 	Data             *dataDo
 	Dellog           *dellogDo
 	Device           *deviceDo
@@ -282,6 +313,7 @@ type queryCtx struct {
 	Fileupload       *fileuploadDo
 	Form             *formDo
 	Instruct         *instructDo
+	Job              *jobDo
 	KeyResult        *keyResultDo
 	KeyResultValue   *keyResultValueDo
 	Kvmetum          *kvmetumDo
@@ -295,6 +327,7 @@ type queryCtx struct {
 	ReviewEvaluation *reviewEvaluationDo
 	SchemaMigration  *schemaMigrationDo
 	Session          *sessionDo
+	Step             *stepDo
 	Subscription     *subscriptionDo
 	Todo             *todoDo
 	Topic            *topicDo
@@ -302,6 +335,8 @@ type queryCtx struct {
 	Url              *urlDo
 	User             *userDo
 	Usertag          *usertagDo
+	Workflow         *workflowDo
+	WorkflowTrigger  *workflowTriggerDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
@@ -314,6 +349,7 @@ func (q *Query) WithContext(ctx context.Context) *queryCtx {
 		CounterRecord:    q.CounterRecord.WithContext(ctx),
 		Credential:       q.Credential.WithContext(ctx),
 		Cycle:            q.Cycle.WithContext(ctx),
+		Dag:              q.Dag.WithContext(ctx),
 		Data:             q.Data.WithContext(ctx),
 		Dellog:           q.Dellog.WithContext(ctx),
 		Device:           q.Device.WithContext(ctx),
@@ -321,6 +357,7 @@ func (q *Query) WithContext(ctx context.Context) *queryCtx {
 		Fileupload:       q.Fileupload.WithContext(ctx),
 		Form:             q.Form.WithContext(ctx),
 		Instruct:         q.Instruct.WithContext(ctx),
+		Job:              q.Job.WithContext(ctx),
 		KeyResult:        q.KeyResult.WithContext(ctx),
 		KeyResultValue:   q.KeyResultValue.WithContext(ctx),
 		Kvmetum:          q.Kvmetum.WithContext(ctx),
@@ -334,6 +371,7 @@ func (q *Query) WithContext(ctx context.Context) *queryCtx {
 		ReviewEvaluation: q.ReviewEvaluation.WithContext(ctx),
 		SchemaMigration:  q.SchemaMigration.WithContext(ctx),
 		Session:          q.Session.WithContext(ctx),
+		Step:             q.Step.WithContext(ctx),
 		Subscription:     q.Subscription.WithContext(ctx),
 		Todo:             q.Todo.WithContext(ctx),
 		Topic:            q.Topic.WithContext(ctx),
@@ -341,6 +379,8 @@ func (q *Query) WithContext(ctx context.Context) *queryCtx {
 		Url:              q.Url.WithContext(ctx),
 		User:             q.User.WithContext(ctx),
 		Usertag:          q.Usertag.WithContext(ctx),
+		Workflow:         q.Workflow.WithContext(ctx),
+		WorkflowTrigger:  q.WorkflowTrigger.WithContext(ctx),
 	}
 }
 
