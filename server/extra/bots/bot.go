@@ -1028,8 +1028,8 @@ func ServeFile(rw http.ResponseWriter, req *http.Request, dist embed.FS, dir str
 		uid, _ := types.KV(param.Params).String("uid")
 
 		jsScript := fmt.Sprintf(`
-<body><script>let Global = {};Global.original = '%s';Global.topic = '%s';Global.uid = '%s';Global.flag = '%s';</script>
-`, original, topic, uid, flag)
+<body><script>let Global = {};Global.original = '%s';Global.topic = '%s';Global.uid = '%s';Global.flag = '%s';Global.base = '%s';</script>
+`, original, topic, uid, flag, types.AppUrl())
 
 		html := strings.ReplaceAll(utils.BytesToString(content), "<body>", jsScript)
 		content = utils.StringToBytes(html)
