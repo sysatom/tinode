@@ -10,7 +10,7 @@ import (
 var eventRules = []event.Rule{
 	{
 		Event: types.GroupEventJoin,
-		Handler: func(ctx types.Context, head map[string]interface{}, content interface{}) types.MsgPayload {
+		Handler: func(ctx types.Context, head types.KV, content interface{}) types.MsgPayload {
 			txt, err := template.Parse(ctx, "Welcome $username")
 			if err != nil {
 				logs.Err.Println(err)
@@ -21,7 +21,7 @@ var eventRules = []event.Rule{
 	},
 	{
 		Event: types.GroupEventExit,
-		Handler: func(ctx types.Context, head map[string]interface{}, content interface{}) types.MsgPayload {
+		Handler: func(ctx types.Context, head types.KV, content interface{}) types.MsgPayload {
 			txt, err := template.Parse(ctx, "Bye $username")
 			if err != nil {
 				logs.Err.Println(err)
@@ -32,7 +32,7 @@ var eventRules = []event.Rule{
 	},
 	{
 		Event: types.GroupEventReceive,
-		Handler: func(ctx types.Context, head map[string]interface{}, content interface{}) types.MsgPayload {
+		Handler: func(ctx types.Context, head types.KV, content interface{}) types.MsgPayload {
 			return types.TextMsg{Text: "receive something"}
 		},
 	},

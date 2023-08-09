@@ -67,6 +67,6 @@ func (b bot) Command(ctx types.Context, content interface{}) (types.MsgPayload, 
 	return bots.RunCommand(commandRules, ctx, content)
 }
 
-func (b bot) Pipeline(ctx types.Context, head map[string]interface{}, content interface{}, operate types.PipelineOperate) (types.MsgPayload, string, int, error) {
+func (b bot) Pipeline(ctx types.Context, head types.KV, content interface{}, operate types.PipelineOperate) (types.MsgPayload, string, int, error) {
 	return bots.RunPipeline(pipelineRules, ctx, head, content, operate)
 }

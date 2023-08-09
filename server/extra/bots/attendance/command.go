@@ -60,7 +60,7 @@ var commandRules = []command.Rule{
 			summary, _ := tokens[2].Value.String()
 			today := time.Now().Format("2006-01-02")
 			key := fmt.Sprintf("%s:%s:%d", today, topic, time.Now().Unix())
-			var value types.KV = map[string]interface{}{"summary": summary}
+			var value = types.KV{"summary": summary}
 			err := store.Chatbot.DataSet(ctx.AsUser, ctx.Original, key, value)
 			if err != nil {
 				return types.TextMsg{Text: "error"}

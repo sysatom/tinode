@@ -51,7 +51,7 @@ func ImportAction(c *cli.Context) error {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("migrate done")
+	fmt.Println("done")
 	return nil
 }
 

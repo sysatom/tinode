@@ -47,7 +47,7 @@ var commandRules = []command.Rule{
 			old, _ := v.String("value")
 
 			// set
-			err = store.Chatbot.ConfigSet(ctx.AsUser, "", bark.BarkDeviceKey, map[string]interface{}{
+			err = store.Chatbot.ConfigSet(ctx.AsUser, "", bark.BarkDeviceKey, types.KV{
 				"value": key,
 			})
 			if err != nil {

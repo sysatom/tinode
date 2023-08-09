@@ -57,7 +57,7 @@ var commandRules = []command.Rule{
 
 			return types.InfoMsg{
 				Title: "Golang stats",
-				Model: map[string]interface{}{
+				Model: types.KV{
 					"NumGoroutine": numGoroutine,
 				},
 			}

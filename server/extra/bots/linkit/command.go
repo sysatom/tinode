@@ -40,7 +40,7 @@ var commandRules = []command.Rule{
 				idValue = strings.ToLower(idValue)
 				// set token
 				err = store.Chatbot.ConfigSet(ctx.AsUser, "",
-					fmt.Sprintf("linkit:%d:token", uint64(ctx.AsUser)), map[string]interface{}{
+					fmt.Sprintf("linkit:%d:token", uint64(ctx.AsUser)), types.KV{
 						"value": idValue,
 					})
 				if err != nil {
@@ -86,7 +86,7 @@ var commandRules = []command.Rule{
 			idValue = strings.ToLower(idValue)
 			// set token
 			err = store.Chatbot.ConfigSet(ctx.AsUser, "",
-				fmt.Sprintf("linkit:%d:token", uint64(ctx.AsUser)), map[string]interface{}{
+				fmt.Sprintf("linkit:%d:token", uint64(ctx.AsUser)), types.KV{
 					"value": idValue,
 				})
 			if err != nil {

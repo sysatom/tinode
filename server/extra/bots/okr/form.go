@@ -22,7 +22,7 @@ const (
 var formRules = []form.Rule{
 	{
 		Id: CreateObjectiveFormID,
-		Handler: func(ctx types.Context, values map[string]interface{}) types.MsgPayload {
+		Handler: func(ctx types.Context, values types.KV) types.MsgPayload {
 			var objective model.Objective
 			for key, value := range values {
 				switch key {
@@ -50,7 +50,7 @@ var formRules = []form.Rule{
 	},
 	{
 		Id: UpdateObjectiveFormID,
-		Handler: func(ctx types.Context, values map[string]interface{}) types.MsgPayload {
+		Handler: func(ctx types.Context, values types.KV) types.MsgPayload {
 			var objective model.Objective
 			for key, value := range values {
 				switch key {
@@ -80,7 +80,7 @@ var formRules = []form.Rule{
 	},
 	{
 		Id: CreateKeyResultFormID,
-		Handler: func(ctx types.Context, values map[string]interface{}) types.MsgPayload {
+		Handler: func(ctx types.Context, values types.KV) types.MsgPayload {
 			objectiveSequence := int64(0)
 			var keyResult model.KeyResult
 			for key, value := range values {
@@ -139,7 +139,7 @@ var formRules = []form.Rule{
 	},
 	{
 		Id: UpdateKeyResultFormID,
-		Handler: func(ctx types.Context, values map[string]interface{}) types.MsgPayload {
+		Handler: func(ctx types.Context, values types.KV) types.MsgPayload {
 			var keyResult model.KeyResult
 			for key, value := range values {
 				switch key {
@@ -189,7 +189,7 @@ var formRules = []form.Rule{
 	},
 	{
 		Id: CreateKeyResultValueFormID,
-		Handler: func(ctx types.Context, values map[string]interface{}) types.MsgPayload {
+		Handler: func(ctx types.Context, values types.KV) types.MsgPayload {
 			keyResultSequence := values["key_result_sequence"].(int64)
 			value := int32(values["value"].(int64))
 
@@ -215,7 +215,7 @@ var formRules = []form.Rule{
 	},
 	{
 		Id: CreateTodoFormID,
-		Handler: func(ctx types.Context, values map[string]interface{}) types.MsgPayload {
+		Handler: func(ctx types.Context, values types.KV) types.MsgPayload {
 			var todo model.Todo
 			for key, value := range values {
 				switch key {
@@ -243,7 +243,7 @@ var formRules = []form.Rule{
 	},
 	{
 		Id: UpdateTodoFormID,
-		Handler: func(ctx types.Context, values map[string]interface{}) types.MsgPayload {
+		Handler: func(ctx types.Context, values types.KV) types.MsgPayload {
 			var todo model.Todo
 			for key, value := range values {
 				switch key {

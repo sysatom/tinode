@@ -46,7 +46,7 @@ func webhook(req *restful.Request, resp *restful.Response) {
 		txt = fmt.Sprintf("[webhook:%s] %s", flag, string(d))
 	}
 	// send
-	err = event.Emit(event.SendEvent, map[string]interface{}{
+	err = event.Emit(event.SendEvent, extraTypes.KV{
 		"topic":     topic,
 		"topic_uid": int64(botUid),
 		"message":   txt,

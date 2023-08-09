@@ -62,7 +62,7 @@ func (b bot) Command(ctx types.Context, content interface{}) (types.MsgPayload, 
 	return bots.RunCommand(commandRules, ctx, content)
 }
 
-func (b bot) Input(ctx types.Context, _ map[string]interface{}, content interface{}) (types.MsgPayload, error) {
+func (b bot) Input(ctx types.Context, _ types.KV, content interface{}) (types.MsgPayload, error) {
 	filter := ""
 	if s, ok := content.(string); ok {
 		filter = s

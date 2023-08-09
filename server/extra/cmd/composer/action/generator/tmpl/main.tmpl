@@ -52,12 +52,12 @@ func (bot) IsReady() bool {
     return handler.initialized
 }
 {{if .HasInput}}
-func (b bot) Input(_ types.Context, _ map[string]interface{}, _ interface{}) (types.MsgPayload, error) {
+func (b bot) Input(_ types.Context, _ types.KV, _ interface{}) (types.MsgPayload, error) {
     return nil, nil
 }
 {{end}}
 {{if .HasGroup}}
-func (b bot) Group(ctx types.Context, head map[string]interface{}, content interface{}) (types.MsgPayload, error) {
+func (b bot) Group(ctx types.Context, head types.KV, content interface{}) (types.MsgPayload, error) {
     return bots.RunGroup(eventRules, ctx, head, content)
 }
 {{end}}
@@ -67,7 +67,7 @@ func (b bot) Command(ctx types.Context, content interface{}) (types.MsgPayload, 
 }
 {{end}}
 {{if .HasForm}}
-func (b bot) Form(ctx types.Context, values map[string]interface{}) (types.MsgPayload, error) {
+func (b bot) Form(ctx types.Context, values types.KV) (types.MsgPayload, error) {
     return bots.RunForm(formRules, ctx, values)
 }
 {{end}}

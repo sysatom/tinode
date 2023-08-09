@@ -78,7 +78,7 @@ var commandRules = []command.Rule{
 
 			return types.InfoMsg{
 				Title: "User",
-				Model: map[string]interface{}{
+				Model: types.KV{
 					"Login":     *user.Login,
 					"Followers": *user.Followers,
 					"Following": *user.Following,

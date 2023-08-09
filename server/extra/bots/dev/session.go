@@ -35,7 +35,7 @@ var sessionRules = []session.Rule{
 			initNumber := int64(v)
 
 			// store current values
-			_ = store.Chatbot.SessionSet(ctx.AsUser, ctx.Original, model.Session{Values: map[string]interface{}{"number": number}})
+			_ = store.Chatbot.SessionSet(ctx.AsUser, ctx.Original, model.Session{Values: model.JSON{"number": number}})
 
 			if number == initNumber {
 				bots.SessionDone(ctx)

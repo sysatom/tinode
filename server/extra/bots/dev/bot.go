@@ -3,7 +3,6 @@ package dev
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/emicklei/go-restful/v3"
 	"github.com/tinode/chat/server/auth"
 	"github.com/tinode/chat/server/extra/bots"
@@ -66,7 +65,6 @@ func (bot) Bootstrap() error {
 
 func (bot) OnEvent() error {
 	event.On(event.ExampleEvent, func(data types.KV) error {
-		fmt.Println(data)
 		return nil
 	})
 	return nil
@@ -98,7 +96,7 @@ func (b bot) Rules() []interface{} {
 	}
 }
 
-func (b bot) Input(_ types.Context, _ map[string]interface{}, _ interface{}) (types.MsgPayload, error) {
+func (b bot) Input(_ types.Context, _ types.KV, _ interface{}) (types.MsgPayload, error) {
 	return types.TextMsg{Text: "Input"}, nil
 }
 
@@ -106,7 +104,7 @@ func (b bot) Command(ctx types.Context, content interface{}) (types.MsgPayload, 
 	return bots.RunCommand(commandRules, ctx, content)
 }
 
-func (b bot) Form(ctx types.Context, values map[string]interface{}) (types.MsgPayload, error) {
+func (b bot) Form(ctx types.Context, values types.KV) (types.MsgPayload, error) {
 	return bots.RunForm(formRules, ctx, values)
 }
 
@@ -122,7 +120,7 @@ func (b bot) Condition(ctx types.Context, forwarded types.MsgPayload) (types.Msg
 	return bots.RunCondition(conditionRules, ctx, forwarded)
 }
 
-func (b bot) Group(ctx types.Context, head map[string]interface{}, content interface{}) (types.MsgPayload, error) {
+func (b bot) Group(ctx types.Context, head types.KV, content interface{}) (types.MsgPayload, error) {
 	return bots.RunGroup(eventRules, ctx, head, content)
 }
 

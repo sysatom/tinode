@@ -124,7 +124,7 @@ func getPage(rw http.ResponseWriter, req *http.Request) {
 	p, err := extraStore.Chatbot.PageGet(id)
 	if err != nil {
 		logs.Err.Println(err)
-		errorResponse(rw, "page error")
+		errorResponse(rw, "page not found")
 		return
 	}
 
@@ -174,7 +174,7 @@ func getPage(rw http.ResponseWriter, req *http.Request) {
 		_ = line.Render(rw)
 		return
 	default:
-		errorResponse(rw, "page error")
+		errorResponse(rw, "page error type")
 		return
 	}
 

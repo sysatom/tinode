@@ -121,7 +121,7 @@ var pageRules = []page.Rule{
 				App:    app,
 				CSS:    css,
 				JS:     js,
-				Global: p.Params,
+				Global: types.KV(p.Params),
 			}, nil
 		},
 	},

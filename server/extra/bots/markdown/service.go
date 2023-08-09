@@ -99,7 +99,7 @@ func saveMarkdown(req *restful.Request, resp *restful.Response) {
 	}
 
 	// send
-	err = event.Emit(event.SendEvent, map[string]interface{}{
+	err = event.Emit(event.SendEvent, extraTypes.KV{
 		"topic":     topic,
 		"topic_uid": int64(botUid),
 		"message":   message,

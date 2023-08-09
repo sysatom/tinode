@@ -1,16 +1,14 @@
 package dev
 
 import (
-	"fmt"
 	"github.com/emicklei/go-restful/v3"
-	"io"
+	"github.com/tinode/chat/server/extra/types"
 )
 
 const serviceVersion = "v1"
 
-func example(req *restful.Request, resp *restful.Response) {
-	fmt.Println(io.ReadAll(req.Request.Body))
-	_ = resp.WriteAsJson(map[string]interface{}{
+func example(_ *restful.Request, resp *restful.Response) {
+	_ = resp.WriteAsJson(types.KV{
 		"title": "example",
 	})
 }

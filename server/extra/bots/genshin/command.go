@@ -45,7 +45,7 @@ var commandRules = []command.Rule{
 			old, _ := v.Int64("value")
 
 			// set
-			err = store.Chatbot.ConfigSet(ctx.AsUser, ctx.Original, "uid", map[string]interface{}{
+			err = store.Chatbot.ConfigSet(ctx.AsUser, ctx.Original, "uid", types.KV{
 				"value": uid,
 			})
 			if err != nil {

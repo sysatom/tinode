@@ -55,7 +55,7 @@ var commandRules = []command.Rule{
 			}
 
 			err = store.Chatbot.DataSet(ctx.AsUser, ctx.Original,
-				fmt.Sprintf("webhook:%s", flag), map[string]interface{}{
+				fmt.Sprintf("webhook:%s", flag), types.KV{
 					"value": "",
 				})
 			if err != nil {

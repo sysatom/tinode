@@ -65,7 +65,7 @@ func (b bot) Cron(send types.SendFunc) error {
 	return bots.RunCron(cronRules, Name, b.AuthLevel(), send)
 }
 
-func (b bot) Input(ctx types.Context, head map[string]interface{}, content interface{}) (types.MsgPayload, error) {
+func (b bot) Input(ctx types.Context, _ types.KV, content interface{}) (types.MsgPayload, error) {
 	text, err := drafty.PlainText(content)
 	if err != nil {
 		return nil, err

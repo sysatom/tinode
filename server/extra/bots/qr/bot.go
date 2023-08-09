@@ -51,7 +51,7 @@ func (bot) IsReady() bool {
 	return handler.initialized
 }
 
-func (b bot) Input(_ types.Context, _ map[string]interface{}, context interface{}) (types.MsgPayload, error) {
+func (b bot) Input(_ types.Context, _ types.KV, context interface{}) (types.MsgPayload, error) {
 	text := ""
 	if v, ok := context.(string); ok {
 		text = v

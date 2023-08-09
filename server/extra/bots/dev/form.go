@@ -87,8 +87,7 @@ var formRules = []form.Rule{
 				Placeholder: "range value",
 			},
 		},
-		Handler: func(ctx types.Context, values map[string]interface{}) types.MsgPayload {
-			fmt.Println(values)
+		Handler: func(ctx types.Context, values types.KV) types.MsgPayload {
 			return types.TextMsg{Text: fmt.Sprintf("ok, form [%s]", ctx.FormId)}
 		},
 	},

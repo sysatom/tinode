@@ -57,7 +57,7 @@ func (bot) IsReady() bool {
 	return handler.initialized
 }
 
-func (b bot) Input(_ types.Context, _ map[string]interface{}, content interface{}) (types.MsgPayload, error) {
+func (b bot) Input(_ types.Context, _ types.KV, content interface{}) (types.MsgPayload, error) {
 	text := types.ExtractText(content)
 	if utils.IsUrl(text) {
 		url, err := store.Chatbot.UrlGetByUrl(text)

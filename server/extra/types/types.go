@@ -11,7 +11,7 @@ import (
 )
 
 type MsgPayload interface {
-	Convert() (map[string]interface{}, interface{})
+	Convert() (KV, interface{})
 }
 
 type Context struct {

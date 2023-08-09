@@ -75,6 +75,6 @@ func (b bot) Cron(send types.SendFunc) error {
 	return bots.RunCron(cronRules, Name, b.AuthLevel(), send)
 }
 
-func (b bot) Form(ctx types.Context, values map[string]interface{}) (types.MsgPayload, error) {
+func (b bot) Form(ctx types.Context, values types.KV) (types.MsgPayload, error) {
 	return bots.RunForm(formRules, ctx, values)
 }

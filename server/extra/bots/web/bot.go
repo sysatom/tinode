@@ -51,7 +51,7 @@ func (bot) IsReady() bool {
 	return handler.initialized
 }
 
-func (b bot) Input(_ types.Context, _ map[string]interface{}, _ interface{}) (types.MsgPayload, error) {
+func (b bot) Input(_ types.Context, _ types.KV, _ interface{}) (types.MsgPayload, error) {
 	return nil, nil
 }
 

@@ -60,6 +60,6 @@ func MigrationAction(c *cli.Context) error {
 		panic(err)
 	}
 	fmt.Printf("Created %s\n", downName)
-	fmt.Println("All done.")
+	fmt.Println("done")
 	return nil
 }

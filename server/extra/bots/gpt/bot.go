@@ -55,7 +55,7 @@ func (bot) IsReady() bool {
 	return handler.initialized
 }
 
-func (b bot) Input(ctx types.Context, _ map[string]interface{}, context interface{}) (types.MsgPayload, error) {
+func (b bot) Input(ctx types.Context, _ types.KV, context interface{}) (types.MsgPayload, error) {
 	// key
 	v, err := store.Chatbot.ConfigGet(ctx.AsUser, ctx.Original, ApiKey)
 	if err != nil {

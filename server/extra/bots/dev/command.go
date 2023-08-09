@@ -152,7 +152,7 @@ var commandRules = []command.Rule{
 			// rand number
 			big, _ := rand.Int(rand.Reader, big.NewInt(1000))
 
-			var initValue types.KV = map[string]interface{}{"number": big.Int64()}
+			var initValue types.KV = types.KV{"number": big.Int64()}
 			return bots.SessionMsg(ctx, guessSessionID, initValue)
 		},
 	},
@@ -242,11 +242,11 @@ var commandRules = []command.Rule{
 			if err != nil {
 				return types.TextMsg{Text: "error"}
 			}
-			err = event.Emit(event.SendEvent, map[string]interface{}{"topic": ctx.RcptTo, "topic_uid": int64(botUid), "message": "fire send event"})
+			err = event.Emit(event.SendEvent, types.KV{"topic": ctx.RcptTo, "topic_uid": int64(botUid), "message": "fire send event"})
 			if err != nil {
 				return types.TextMsg{Text: "error"}
 			}
-			event.AsyncEmit(event.ExampleEvent, map[string]interface{}{"now": time.Now().Unix()})
+			event.AsyncEmit(event.ExampleEvent, types.KV{"now": time.Now().Unix()})
 			return types.TextMsg{Text: "ok"}
 		},
 	},

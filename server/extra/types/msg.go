@@ -46,7 +46,7 @@ type TextMsg struct {
 	Text string `json:"text"`
 }
 
-func (t TextMsg) Convert() (map[string]interface{}, interface{}) {
+func (t TextMsg) Convert() (KV, interface{}) {
 	return nil, t.Text
 }
 
@@ -54,7 +54,7 @@ type TextListMsg struct {
 	Texts []string
 }
 
-func (m TextListMsg) Convert() (map[string]interface{}, interface{}) {
+func (m TextListMsg) Convert() (KV, interface{}) {
 	builder := MsgBuilder{Payload: m}
 	for _, text := range m.Texts {
 		builder.AppendTextLine(text, TextOption{})
@@ -68,7 +68,7 @@ type FormMsg struct {
 	Field []FormField `json:"field"`
 }
 
-func (a FormMsg) Convert() (map[string]interface{}, interface{}) {
+func (a FormMsg) Convert() (KV, interface{}) {
 	return nil, nil
 }
 
@@ -93,7 +93,7 @@ type ImageMsg struct {
 	ImageBase64 string `json:"-"`
 }
 
-func (i ImageMsg) Convert() (map[string]interface{}, interface{}) {
+func (i ImageMsg) Convert() (KV, interface{}) {
 	builder := MsgBuilder{Payload: i}
 	builder.AppendImage(i.Alt, ImageOption{
 		Mime:        i.Mime,
@@ -110,7 +110,7 @@ type FileMsg struct {
 	Alt string `json:"alt"`
 }
 
-func (i FileMsg) Convert() (map[string]interface{}, interface{}) {
+func (i FileMsg) Convert() (KV, interface{}) {
 	return commonHead, nil //todo
 }
 
@@ -122,7 +122,7 @@ type VideoMsg struct {
 	Duration float64 `json:"duration"`
 }
 
-func (i VideoMsg) Convert() (map[string]interface{}, interface{}) {
+func (i VideoMsg) Convert() (KV, interface{}) {
 	return commonHead, nil //todo
 }
 
@@ -132,7 +132,7 @@ type AudioMsg struct {
 	Duration float64 `json:"duration"`
 }
 
-func (i AudioMsg) Convert() (map[string]interface{}, interface{}) {
+func (i AudioMsg) Convert() (KV, interface{}) {
 	return commonHead, nil //todo
 }
 
@@ -141,7 +141,7 @@ type ScriptMsg struct {
 	Code string `json:"code"`
 }
 
-func (a ScriptMsg) Convert() (map[string]interface{}, interface{}) {
+func (a ScriptMsg) Convert() (KV, interface{}) {
 	return commonHead, nil //todo
 }
 
@@ -152,7 +152,7 @@ type ActionMsg struct {
 	Value  string   `json:"value"`
 }
 
-func (a ActionMsg) Convert() (map[string]interface{}, interface{}) {
+func (a ActionMsg) Convert() (KV, interface{}) {
 	builder := MsgBuilder{Payload: a}
 	builder.AppendTextLine(a.Title, TextOption{IsBold: true})
 	for _, option := range a.Option {
@@ -167,7 +167,7 @@ type LinkMsg struct {
 	Url   string `json:"url"`
 }
 
-func (a LinkMsg) Convert() (map[string]interface{}, interface{}) {
+func (a LinkMsg) Convert() (KV, interface{}) {
 	builder := MsgBuilder{Payload: a}
 	if a.Title != "" {
 		builder.AppendTextLine(a.Title, TextOption{IsBold: true})
@@ -185,7 +185,7 @@ type LocationMsg struct {
 	Address   string  `json:"address"`
 }
 
-func (a LocationMsg) Convert() (map[string]interface{}, interface{}) {
+func (a LocationMsg) Convert() (KV, interface{}) {
 	return commonHead, nil //todo
 }
 
@@ -195,7 +195,7 @@ type TableMsg struct {
 	Row    [][]interface{} `json:"row"`
 }
 
-func (t TableMsg) Convert() (map[string]interface{}, interface{}) {
+func (t TableMsg) Convert() (KV, interface{}) {
 	return nil, nil
 }
 
@@ -204,7 +204,7 @@ type DigitMsg struct {
 	Digit int    `json:"digit"`
 }
 
-func (a DigitMsg) Convert() (map[string]interface{}, interface{}) {
+func (a DigitMsg) Convert() (KV, interface{}) {
 	builder := MsgBuilder{Payload: a}
 	builder.AppendText(fmt.Sprintf("Counter %s : %d", a.Title, a.Digit), TextOption{})
 	return builder.Content()
@@ -216,7 +216,7 @@ type OkrMsg struct {
 	KeyResult []*model.KeyResult `json:"key_result"`
 }
 
-func (o OkrMsg) Convert() (map[string]interface{}, interface{}) {
+func (o OkrMsg) Convert() (KV, interface{}) {
 	return nil, nil
 }
 
@@ -225,7 +225,7 @@ type InfoMsg struct {
 	Model interface{} `json:"model"`
 }
 
-func (i InfoMsg) Convert() (map[string]interface{}, interface{}) {
+func (i InfoMsg) Convert() (KV, interface{}) {
 	builder := MsgBuilder{Payload: i}
 	// title
 	builder.AppendTextLine(i.Title, TextOption{})
@@ -260,7 +260,7 @@ type TodoMsg struct {
 	Todo  []*model.Todo `json:"todo"`
 }
 
-func (t TodoMsg) Convert() (map[string]interface{}, interface{}) {
+func (t TodoMsg) Convert() (KV, interface{}) {
 	if len(t.Todo) == 0 {
 		return nil, "empty"
 	}
@@ -279,12 +279,12 @@ type ChartMsg struct {
 	Series   []float64 `json:"series"`
 }
 
-func (t ChartMsg) Convert() (map[string]interface{}, interface{}) {
+func (t ChartMsg) Convert() (KV, interface{}) {
 	return nil, nil
 }
 
-func Convert(payloads []MsgPayload) ([]map[string]interface{}, []interface{}) {
-	var heads []map[string]interface{}
+func Convert(payloads []MsgPayload) ([]KV, []any) {
+	var heads []KV
 	var contents []interface{}
 	for _, item := range payloads {
 		head, content := item.Convert()
@@ -319,7 +319,7 @@ type RepoMsg struct {
 	Disabled         *bool      `json:"disabled,omitempty"`
 }
 
-func (i RepoMsg) Convert() (map[string]interface{}, interface{}) {
+func (i RepoMsg) Convert() (KV, interface{}) {
 	builder := MsgBuilder{Payload: i}
 	// title
 	builder.AppendTextLine(*i.FullName, TextOption{IsBold: true})
@@ -352,7 +352,7 @@ type CardMsg struct {
 	Text  string
 }
 
-func (m CardMsg) Convert() (map[string]interface{}, interface{}) {
+func (m CardMsg) Convert() (KV, interface{}) {
 	builder := MsgBuilder{Payload: m}
 	builder.AppendText(m.Name, TextOption{IsBold: true})
 	builder.AppendText(" ", TextOption{})
@@ -364,7 +364,7 @@ type CardListMsg struct {
 	Cards []CardMsg
 }
 
-func (m CardListMsg) Convert() (map[string]interface{}, interface{}) {
+func (m CardListMsg) Convert() (KV, interface{}) {
 	builder := MsgBuilder{Payload: m}
 	for _, card := range m.Cards {
 		builder.AppendText(card.Name, TextOption{IsBold: true})
@@ -385,7 +385,7 @@ type CrateMsg struct {
 	Downloads     int    `json:"downloads,omitempty"`
 }
 
-func (c CrateMsg) Convert() (map[string]interface{}, interface{}) {
+func (c CrateMsg) Convert() (KV, interface{}) {
 	builder := MsgBuilder{Payload: c}
 	// title
 	builder.AppendTextLine(c.Name, TextOption{IsBold: true})
@@ -420,7 +420,7 @@ type HtmlMsg struct {
 	Raw string
 }
 
-func (m HtmlMsg) Convert() (map[string]interface{}, interface{}) {
+func (m HtmlMsg) Convert() (KV, interface{}) {
 	return nil, nil
 }
 
@@ -429,7 +429,7 @@ type MarkdownMsg struct {
 	Raw   string `json:"raw"`
 }
 
-func (m MarkdownMsg) Convert() (map[string]interface{}, interface{}) {
+func (m MarkdownMsg) Convert() (KV, interface{}) {
 	return nil, nil
 }
 
@@ -437,7 +437,7 @@ type LinkListMsg struct {
 	Links []LinkMsg
 }
 
-func (m LinkListMsg) Convert() (map[string]interface{}, interface{}) {
+func (m LinkListMsg) Convert() (KV, interface{}) {
 	builder := MsgBuilder{Payload: m}
 	for _, card := range m.Links {
 		builder.AppendText(card.Title, TextOption{IsBold: true})
@@ -455,7 +455,7 @@ type QuestionMsg struct {
 	Source     string
 }
 
-func (m QuestionMsg) Convert() (map[string]interface{}, interface{}) {
+func (m QuestionMsg) Convert() (KV, interface{}) {
 	builder := MsgBuilder{Payload: m}
 	builder.AppendTextLine(fmt.Sprintf("[%s:%d] %s", m.Source, m.Id, m.Title), TextOption{})
 	if m.Source == "leetcode" {
@@ -475,6 +475,6 @@ type InstructMsg struct {
 	ExpireAt time.Time
 }
 
-func (t InstructMsg) Convert() (map[string]interface{}, interface{}) {
+func (t InstructMsg) Convert() (KV, interface{}) {
 	return nil, nil
 }

@@ -7,5 +7,5 @@ type UI struct {
 	App    app.UI
 	CSS    []app.UI
 	JS     []app.HTMLScript
-	Global map[string]interface{}
+	Global KV
 }

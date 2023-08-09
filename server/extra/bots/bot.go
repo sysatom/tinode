@@ -62,13 +62,13 @@ type Handler interface {
 	Rules() []interface{}
 
 	// Input return input result
-	Input(ctx types.Context, head map[string]interface{}, content interface{}) (types.MsgPayload, error)
+	Input(ctx types.Context, head types.KV, content interface{}) (types.MsgPayload, error)
 
 	// Command return bot result
 	Command(ctx types.Context, content interface{}) (types.MsgPayload, error)
 
 	// Form return bot form result
-	Form(ctx types.Context, values map[string]interface{}) (types.MsgPayload, error)
+	Form(ctx types.Context, values types.KV) (types.MsgPayload, error)
 
 	// Action return bot action result
 	Action(ctx types.Context, option string) (types.MsgPayload, error)
@@ -83,10 +83,10 @@ type Handler interface {
 	Condition(ctx types.Context, forwarded types.MsgPayload) (types.MsgPayload, error)
 
 	// Group return group result
-	Group(ctx types.Context, head map[string]interface{}, content interface{}) (types.MsgPayload, error)
+	Group(ctx types.Context, head types.KV, content interface{}) (types.MsgPayload, error)
 
 	// Pipeline return pipeline result
-	Pipeline(ctx types.Context, head map[string]interface{}, content interface{}, operate types.PipelineOperate) (types.MsgPayload, string, int, error)
+	Pipeline(ctx types.Context, head types.KV, content interface{}, operate types.PipelineOperate) (types.MsgPayload, string, int, error)
 
 	// Agent return group result
 	Agent(ctx types.Context, content types.KV) (types.MsgPayload, error)
@@ -130,7 +130,7 @@ func (Base) Rules() []interface{} {
 	return nil
 }
 
-func (Base) Input(_ types.Context, _ map[string]interface{}, _ interface{}) (types.MsgPayload, error) {
+func (Base) Input(_ types.Context, _ types.KV, _ interface{}) (types.MsgPayload, error) {
 	return nil, nil
 }
 
@@ -138,7 +138,7 @@ func (Base) Command(_ types.Context, _ interface{}) (types.MsgPayload, error) {
 	return nil, nil
 }
 
-func (Base) Form(_ types.Context, _ map[string]interface{}) (types.MsgPayload, error) {
+func (Base) Form(_ types.Context, _ types.KV) (types.MsgPayload, error) {
 	return nil, nil
 }
 
@@ -158,11 +158,11 @@ func (Base) Condition(_ types.Context, _ types.MsgPayload) (types.MsgPayload, er
 	return nil, nil
 }
 
-func (Base) Group(_ types.Context, _ map[string]interface{}, _ interface{}) (types.MsgPayload, error) {
+func (Base) Group(_ types.Context, _ types.KV, _ interface{}) (types.MsgPayload, error) {
 	return nil, nil
 }
 
-func (Base) Pipeline(_ types.Context, _ map[string]interface{}, _ interface{}, _ types.PipelineOperate) (types.MsgPayload, string, int, error) {
+func (Base) Pipeline(_ types.Context, _ types.KV, _ interface{}, _ types.PipelineOperate) (types.MsgPayload, string, int, error) {
 	return nil, "", 0, nil
 }
 
@@ -247,7 +247,7 @@ func Help(rules []interface{}) (map[string][]string, error) {
 	return result, nil
 }
 
-func RunGroup(eventRules []event.Rule, ctx types.Context, head map[string]interface{}, content interface{}) (types.MsgPayload, error) {
+func RunGroup(eventRules []event.Rule, ctx types.Context, head types.KV, content interface{}) (types.MsgPayload, error) {
 	rs := event.Ruleset(eventRules)
 	payload, err := rs.ProcessEvent(ctx, head, content)
 	if err != nil {
@@ -260,7 +260,7 @@ func RunGroup(eventRules []event.Rule, ctx types.Context, head map[string]interf
 	return nil, nil
 }
 
-func HelpPipeline(pipelineRules []pipeline.Rule, _ types.Context, _ map[string]interface{}, content interface{}) (types.MsgPayload, error) {
+func HelpPipeline(pipelineRules []pipeline.Rule, _ types.Context, _ types.KV, content interface{}) (types.MsgPayload, error) {
 	rs := pipeline.Ruleset(pipelineRules)
 	in, ok := content.(string)
 	if ok {
@@ -275,7 +275,7 @@ func HelpPipeline(pipelineRules []pipeline.Rule, _ types.Context, _ map[string]i
 	return nil, nil
 }
 
-func TriggerPipeline(pipelineRules []pipeline.Rule, ctx types.Context, _ map[string]interface{}, content interface{}, trigger types.TriggerType) (string, pipeline.Rule, error) {
+func TriggerPipeline(pipelineRules []pipeline.Rule, ctx types.Context, _ types.KV, content interface{}, trigger types.TriggerType) (string, pipeline.Rule, error) {
 	rs := pipeline.Ruleset(pipelineRules)
 	in, ok := content.(string)
 	if ok {
@@ -359,7 +359,7 @@ func ProcessPipeline(ctx types.Context, pipelineRule pipeline.Rule, index int) (
 	return nil, errors.New("error pipeline process")
 }
 
-func RunPipeline(pipelineRules []pipeline.Rule, ctx types.Context, head map[string]interface{}, content interface{}, operate types.PipelineOperate) (types.MsgPayload, string, int, error) {
+func RunPipeline(pipelineRules []pipeline.Rule, ctx types.Context, head types.KV, content interface{}, operate types.PipelineOperate) (types.MsgPayload, string, int, error) {
 	switch operate {
 	case types.PipelineCommandTriggerOperate:
 		payload, err := HelpPipeline(pipelineRules, ctx, head, content)
@@ -444,7 +444,7 @@ func RunCommand(commandRules []command.Rule, ctx types.Context, content interfac
 	return payload, nil
 }
 
-func RunForm(formRules []form.Rule, ctx types.Context, values map[string]interface{}) (types.MsgPayload, error) {
+func RunForm(formRules []form.Rule, ctx types.Context, values types.KV) (types.MsgPayload, error) {
 	// check form
 	exForm, err := store.Chatbot.FormGet(ctx.FormId)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -473,7 +473,7 @@ func RunForm(formRules []form.Rule, ctx types.Context, values map[string]interfa
 	}
 	if !isLongTerm {
 		// store form
-		err = store.Chatbot.FormSet(ctx.FormId, model.Form{Values: values, State: model.FormStateSubmitSuccess})
+		err = store.Chatbot.FormSet(ctx.FormId, model.Form{Values: model.JSON(values), State: model.FormStateSubmitSuccess})
 		if err != nil {
 			return nil, err
 		}
@@ -779,7 +779,7 @@ func StorePage(ctx types.Context, category model.PageType, title string, payload
 	}
 }
 
-func SessionMsg(ctx types.Context, id string, data map[string]interface{}) types.MsgPayload {
+func SessionMsg(ctx types.Context, id string, data types.KV) types.MsgPayload {
 	var title string
 	for _, handler := range List() {
 		for _, item := range handler.Rules() {
@@ -814,7 +814,7 @@ func SessionStart(ctx types.Context, initValues types.KV) error {
 	if sess.ID > 0 && sess.State == model.SessionStart {
 		return errors.New("already a session started")
 	}
-	var values types.KV = map[string]interface{}{"val": nil}
+	var values = types.KV{"val": nil}
 	_ = store.Chatbot.SessionCreate(model.Session{
 		UID:    ctx.AsUser.UserId(),
 		Topic:  ctx.Original,
@@ -853,7 +853,7 @@ func CreateShortUrl(text string) (string, error) {
 	return "", errors.New("error url")
 }
 
-func InstructMsg(ctx types.Context, id string, data map[string]interface{}) types.MsgPayload {
+func InstructMsg(ctx types.Context, id string, data types.KV) types.MsgPayload {
 	var botName string
 	for name, handler := range List() {
 		for _, item := range handler.Rules() {
@@ -933,9 +933,9 @@ func SettingCovertForm(id string, rule setting.Rule) form.Rule {
 		})
 	}
 
-	result.Handler = func(ctx types.Context, values map[string]interface{}) types.MsgPayload {
+	result.Handler = func(ctx types.Context, values types.KV) types.MsgPayload {
 		for key, value := range values {
-			err := store.Chatbot.ConfigSet(ctx.AsUser, ctx.Original, fmt.Sprintf("%s_%s", id, key), map[string]interface{}{
+			err := store.Chatbot.ConfigSet(ctx.AsUser, ctx.Original, fmt.Sprintf("%s_%s", id, key), types.KV{
 				"value": value,
 			})
 			if err != nil {

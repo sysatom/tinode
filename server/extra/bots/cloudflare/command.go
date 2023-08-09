@@ -1,7 +1,6 @@
 package cloudflare
 
 import (
-	"fmt"
 	"github.com/tinode/chat/server/extra/bots"
 	"github.com/tinode/chat/server/extra/pkg/parser"
 	"github.com/tinode/chat/server/extra/ruleset/command"
@@ -44,13 +43,11 @@ var commandRules = []command.Rule{
 			endDate := now.Format(time.RFC3339)
 
 			provider := cloudflare.NewCloudflare(tokenValue, zoneIdValue)
-			resp, err := provider.GetAnalytics(startDate, endDate)
+			_, err := provider.GetAnalytics(startDate, endDate)
 			if err != nil {
 				logs.Err.Println(err)
 				return nil
 			}
-			fmt.Println(resp)
-
 			return nil
 		},
 	},

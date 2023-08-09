@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/emicklei/go-restful/v3"
+	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
 	"net/http"
 	"runtime"
@@ -14,7 +15,7 @@ func logServiceError(serviceError restful.ServiceError, _ *restful.Request, resp
 		logs.Err.Println(serviceError)
 	}
 	resp.WriteHeader(serviceError.Code)
-	_ = resp.WriteAsJson(map[string]interface{}{
+	_ = resp.WriteAsJson(types.KV{
 		"error":   serviceError.Code,
 		"message": serviceError.Message,
 	})
