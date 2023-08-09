@@ -43,6 +43,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/gookit/event v1.1.1
 	github.com/gorilla/mux v1.8.0
+	github.com/heimdalr/dag v1.2.1
 	github.com/influxdata/cron v0.0.0-20201006132531-4bb0a200dcbe
 	github.com/maxence-charriere/go-app/v9 v9.7.3
 	github.com/mmcdole/gofeed v1.2.1
@@ -55,6 +56,8 @@ require (
 	github.com/yeqown/go-qrcode/writer/standard v1.2.1
 	github.com/yuin/goldmark v1.5.5
 	golang.org/x/image v0.7.0
+	golang.org/x/time v0.1.0
+	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2
 	gonum.org/v1/plot v0.13.0
 	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/driver/mysql v1.5.1
@@ -81,6 +84,7 @@ require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
+	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/felixge/httpsnoop v1.0.1 // indirect
 	github.com/fogleman/gg v1.3.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
@@ -144,9 +148,7 @@ require (
 	golang.org/x/net v0.11.0 // indirect
 	golang.org/x/sync v0.3.0 // indirect
 	golang.org/x/sys v0.9.0 // indirect
-	golang.org/x/time v0.1.0 // indirect
 	golang.org/x/tools v0.9.1 // indirect
-	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20230216225411-c8e22ba71e44 // indirect
 	gopkg.in/cenkalti/backoff.v2 v2.2.1 // indirect

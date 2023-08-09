@@ -136,6 +136,8 @@ type StepState int
 
 const (
 	StepStateUnknown StepState = iota
+	StepCreated
+	StepReady
 	StepRunning
 	StepError
 	StepCancel
