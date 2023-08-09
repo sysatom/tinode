@@ -7,6 +7,7 @@ import (
 	"github.com/tinode/chat/server/auth"
 	"github.com/tinode/chat/server/extra/bots"
 	"github.com/tinode/chat/server/extra/pkg/event"
+	"github.com/tinode/chat/server/extra/ruleset/cron"
 	"github.com/tinode/chat/server/extra/ruleset/instruct"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
@@ -112,7 +113,7 @@ func (b bot) Action(ctx types.Context, option string) (types.MsgPayload, error) 
 	return bots.RunAction(actionRules, ctx, option)
 }
 
-func (b bot) Cron(send types.SendFunc) error {
+func (b bot) Cron(send types.SendFunc) (*cron.Ruleset, error) {
 	return bots.RunCron(cronRules, Name, b.AuthLevel(), send)
 }
 

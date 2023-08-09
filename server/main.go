@@ -13,6 +13,8 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"github.com/tinode/chat/server/extra/pkg/channels/crawler"
+	"github.com/tinode/chat/server/extra/ruleset/cron"
 	"math/rand"
 	"net/http"
 	"os"
@@ -203,6 +205,10 @@ var globals struct {
 	// URL of the main endpoint.
 	// TODO: implement file-serving API for gRPC and remove this feature.
 	servingAt string
+
+	// Extra vars
+	crawler     *crawler.Crawler
+	cronRuleset []*cron.Ruleset
 }
 
 // Credential validator config.

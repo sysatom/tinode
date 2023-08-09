@@ -144,6 +144,12 @@ Loop:
 			// Stop updating users cache
 			usersShutdown()
 
+			// Shutdown Extra
+			globals.crawler.Shutdown()
+			for _, ruleset := range globals.cronRuleset {
+				ruleset.Shutdown()
+			}
+
 			break Loop
 
 		case <-httpdone:

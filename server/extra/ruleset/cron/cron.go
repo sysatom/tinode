@@ -25,6 +25,7 @@ type Rule struct {
 }
 
 type Ruleset struct {
+	stop      chan struct{}
 	Type      string
 	AuthLevel auth.Level
 	outCh     chan result
@@ -41,13 +42,13 @@ type result struct {
 
 // NewCronRuleset New returns a cron rule set
 func NewCronRuleset(name string, authLevel auth.Level, rules []Rule) *Ruleset {
-	r := &Ruleset{
+	return &Ruleset{
+		stop:      make(chan struct{}),
 		Type:      name,
 		AuthLevel: authLevel,
-		cronRules: rules,
 		outCh:     make(chan result, 100),
+		cronRules: rules,
 	}
-	return r
 }
 
 func (r *Ruleset) Daemon() {
@@ -61,6 +62,10 @@ func (r *Ruleset) Daemon() {
 	go r.resultWorker()
 }
 
+func (r *Ruleset) Shutdown() {
+	r.stop <- struct{}{}
+}
+
 func (r *Ruleset) ruleWorker(rule Rule) {
 	p, err := cron.ParseUTC(rule.When)
 	if err != nil {
@@ -72,8 +77,16 @@ func (r *Ruleset) ruleWorker(rule Rule) {
 		logs.Err.Println("cron worker", rule.Name, err)
 		return
 	}
+	ticker := time.NewTicker(time.Second)
 	for {
-		if nextTime.Format("2006-01-02 15:04") == time.Now().Format("2006-01-02 15:04") {
+		select {
+		case <-r.stop:
+			logs.Info.Printf("cron %s rule worker stopped", rule.Name)
+			return
+		case <-ticker.C:
+			if nextTime.Format("2006-01-02 15:04") != time.Now().Format("2006-01-02 15:04") {
+				continue
+			}
 			msgs := func() []result {
 				defer func() {
 					if rc := recover(); rc != nil {
@@ -138,22 +151,26 @@ func (r *Ruleset) ruleWorker(rule Rule) {
 					r.outCh <- item
 				}
 			}
+			nextTime, err = p.Next(time.Now())
+			if err != nil {
+				logs.Err.Println("cron worker", rule.Name, err)
+			}
 		}
-		nextTime, err = p.Next(time.Now())
-		if err != nil {
-			logs.Err.Println("cron worker", rule.Name, err)
-			continue
-		}
-		time.Sleep(2 * time.Second)
 	}
 }
 
 func (r *Ruleset) resultWorker() {
-	for out := range r.outCh {
-		// filter
-		res := r.filter(out)
-		// pipeline
-		r.pipeline(res)
+	for {
+		select {
+		case <-r.stop:
+			logs.Info.Printf("cron %s result worker stopped", r.Type)
+			return
+		case out := <-r.outCh:
+			// filter
+			res := r.filter(out)
+			// pipeline
+			r.pipeline(res)
+		}
 	}
 }
 

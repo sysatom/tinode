@@ -287,6 +287,7 @@ func initializeCrawler() error {
 	}
 
 	c := crawler.New()
+	globals.crawler = c
 	c.Send = func(id, name string, out []map[string]string) {
 		if len(out) == 0 {
 			return

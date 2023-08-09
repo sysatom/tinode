@@ -21,6 +21,7 @@ import (
 type Crawler struct {
 	jobs  map[string]Rule
 	outCh chan Result
+	stop  chan struct{}
 
 	Send func(id, name string, out []map[string]string)
 }
@@ -29,6 +30,7 @@ func New() *Crawler {
 	return &Crawler{
 		jobs:  make(map[string]Rule),
 		outCh: make(chan Result, 10),
+		stop:  make(chan struct{}),
 	}
 }
 
@@ -67,6 +69,10 @@ func (s *Crawler) Run() {
 	go s.resultWorker()
 }
 
+func (s *Crawler) Shutdown() {
+	s.stop <- struct{}{}
+}
+
 func (s *Crawler) ruleWorker(name string, r Rule) {
 	logs.Info.Printf("crawler %s start", name)
 	p, err := cron.ParseUTC(r.When)
@@ -79,8 +85,17 @@ func (s *Crawler) ruleWorker(name string, r Rule) {
 		logs.Err.Println(err, name)
 		return
 	}
+
+	ticker := time.NewTicker(time.Second)
 	for {
-		if nextTime.Format("2006-01-02 15:04") == time.Now().Format("2006-01-02 15:04") {
+		select {
+		case <-s.stop:
+			logs.Info.Printf("crawler %s rule worker stopped", name)
+			return
+		case <-ticker.C:
+			if nextTime.Format("2006-01-02 15:04") != time.Now().Format("2006-01-02 15:04") {
+				continue
+			}
 			result := func() []map[string]string {
 				defer func() {
 					if r := recover(); r != nil {
@@ -100,23 +115,26 @@ func (s *Crawler) ruleWorker(name string, r Rule) {
 					Result: result,
 				}
 			}
+			nextTime, err = p.Next(time.Now())
+			if err != nil {
+				logs.Err.Println(err, name)
+			}
 		}
-		nextTime, err = p.Next(time.Now())
-		if err != nil {
-			logs.Err.Println(err, name)
-			time.Sleep(30 * time.Second)
-			continue
-		}
-		time.Sleep(2 * time.Second)
 	}
 }
 
 func (s *Crawler) resultWorker() {
-	for out := range s.outCh {
-		// filter
-		diff := s.filter(out.Name, out.Mode, out.Result)
-		// send
-		s.Send(out.ID, out.Name, diff)
+	for {
+		select {
+		case out := <-s.outCh:
+			// filter
+			diff := s.filter(out.Name, out.Mode, out.Result)
+			// send
+			s.Send(out.ID, out.Name, diff)
+		case <-s.stop:
+			logs.Info.Println("crawler result worker stopped")
+			return
+		}
 	}
 }
 

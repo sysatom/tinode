@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/tinode/chat/server/auth"
 	"github.com/tinode/chat/server/extra/bots"
+	"github.com/tinode/chat/server/extra/ruleset/cron"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
 )
@@ -64,6 +65,6 @@ func (b bot) Agent(ctx types.Context, content types.KV) (types.MsgPayload, error
 	return bots.RunAgent(AgentVersion, agentRules, ctx, content)
 }
 
-func (b bot) Cron(send types.SendFunc) error {
+func (b bot) Cron(send types.SendFunc) (*cron.Ruleset, error) {
 	return bots.RunCron(cronRules, Name, b.AuthLevel(), send)
 }

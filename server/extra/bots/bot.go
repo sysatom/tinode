@@ -77,7 +77,7 @@ type Handler interface {
 	Session(ctx types.Context, content interface{}) (types.MsgPayload, error)
 
 	// Cron cron script daemon
-	Cron(send types.SendFunc) error
+	Cron(send types.SendFunc) (*cron.Ruleset, error)
 
 	// Condition run conditional process
 	Condition(ctx types.Context, forwarded types.MsgPayload) (types.MsgPayload, error)
@@ -150,8 +150,8 @@ func (Base) Session(_ types.Context, _ interface{}) (types.MsgPayload, error) {
 	return nil, nil
 }
 
-func (Base) Cron(_ types.SendFunc) error {
-	return nil
+func (Base) Cron(_ types.SendFunc) (*cron.Ruleset, error) {
+	return nil, nil
 }
 
 func (Base) Condition(_ types.Context, _ types.MsgPayload) (types.MsgPayload, error) {
@@ -577,11 +577,11 @@ func RunAction(actionRules []action.Rule, ctx types.Context, option string) (typ
 	return payload, nil
 }
 
-func RunCron(cronRules []cron.Rule, name string, level auth.Level, send types.SendFunc) error {
+func RunCron(cronRules []cron.Rule, name string, level auth.Level, send types.SendFunc) (*cron.Ruleset, error) {
 	ruleset := cron.NewCronRuleset(name, level, cronRules)
 	ruleset.Send = send
 	ruleset.Daemon()
-	return nil
+	return ruleset, nil
 }
 
 func RunCondition(conditionRules []condition.Rule, ctx types.Context, forwarded types.MsgPayload) (types.MsgPayload, error) {
@@ -1098,13 +1098,18 @@ func Bootstrap() error {
 }
 
 // Cron registered handlers
-func Cron(send func(rcptTo string, uid serverTypes.Uid, out types.MsgPayload, option ...interface{})) error {
+func Cron(send func(rcptTo string, uid serverTypes.Uid, out types.MsgPayload, option ...interface{})) ([]*cron.Ruleset, error) {
+	rss := make([]*cron.Ruleset, 0)
 	for _, bot := range handlers {
-		if err := bot.Cron(send); err != nil {
-			return err
+		rs, err := bot.Cron(send)
+		if err != nil {
+			return nil, err
+		}
+		if rs != nil {
+			rss = append(rss, rs)
 		}
 	}
-	return nil
+	return rss, nil
 }
 
 func List() map[string]Handler {

@@ -119,7 +119,7 @@ func hookBot(jsconfig json.RawMessage, vc json.RawMessage) {
 	}
 
 	// bot cron
-	err = bots.Cron(botSend)
+	globals.cronRuleset, err = bots.Cron(botSend)
 	if err != nil {
 		logs.Err.Fatal("Failed to bot cron:", err)
 	}

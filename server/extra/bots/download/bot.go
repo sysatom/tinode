@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/tinode/chat/server/extra/bots"
 	"github.com/tinode/chat/server/extra/pkg/queue"
+	"github.com/tinode/chat/server/extra/ruleset/cron"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/utils"
 	"github.com/tinode/chat/server/logs"
@@ -77,6 +78,6 @@ func (b bot) Command(ctx types.Context, content interface{}) (types.MsgPayload, 
 	return bots.RunCommand(commandRules, ctx, content)
 }
 
-func (b bot) Cron(send types.SendFunc) error {
+func (b bot) Cron(send types.SendFunc) (*cron.Ruleset, error) {
 	return bots.RunCron(cronRules, Name, b.AuthLevel(), send)
 }
