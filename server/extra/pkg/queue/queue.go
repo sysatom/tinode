@@ -40,22 +40,27 @@ func init() {
 	}
 }
 
-var MessageQueue rmq.Queue
+var messageQueue rmq.Queue
 
 func InitMessageQueue(consumer rmq.Consumer) {
 	var err error
-	MessageQueue, err = connection.OpenQueue("messages")
+	messageQueue, err = connection.OpenQueue("messages")
 	if err != nil {
 		panic(err)
 	}
 
-	if err = MessageQueue.StartConsuming(prefetchLimit, pollDuration); err != nil {
+	if err = messageQueue.StartConsuming(prefetchLimit, pollDuration); err != nil {
 		panic(err)
 	}
 
-	if _, err = MessageQueue.AddConsumer("message", consumer); err != nil {
+	if _, err = messageQueue.AddConsumer("message", consumer); err != nil {
 		panic(err)
 	}
+}
+
+func Shutdown() {
+	<-messageQueue.StopConsuming()
+	logs.Info.Println("message queue stopped")
 }
 
 func logErrors(errChan <-chan error) {
@@ -87,7 +92,7 @@ func AsyncMessage(rcptTo, original string, msg types.MsgPayload) error {
 	if err != nil {
 		return nil
 	}
-	return MessageQueue.PublishBytes(payload)
+	return messageQueue.PublishBytes(payload)
 }
 
 func Stats() (string, error) {

@@ -28,6 +28,10 @@ import (
 	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/store"
 	"github.com/tinode/chat/server/store/types"
+
+	"github.com/tinode/chat/server/extra/pkg/cache"
+	"github.com/tinode/chat/server/extra/pkg/event"
+	"github.com/tinode/chat/server/extra/pkg/queue"
 )
 
 func listenAndServe(addr string, mux *http.ServeMux, tlfConf *tls.Config, stop <-chan bool) error {
@@ -149,6 +153,9 @@ Loop:
 			for _, ruleset := range globals.cronRuleset {
 				ruleset.Shutdown()
 			}
+			event.Shutdown()
+			queue.Shutdown()
+			cache.Shutdown()
 
 			break Loop
 

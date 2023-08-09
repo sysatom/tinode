@@ -3,6 +3,7 @@ package event
 import (
 	"github.com/gookit/event"
 	"github.com/tinode/chat/server/extra/types"
+	"github.com/tinode/chat/server/logs"
 )
 
 type ListenerFunc func(data types.KV) error
@@ -24,4 +25,13 @@ func Emit(name string, params types.KV) error {
 
 func AsyncEmit(name string, params types.KV) {
 	event.Std().FireC(eventName(name), params)
+}
+
+func Shutdown() {
+	err := event.Std().CloseWait()
+	if err != nil {
+		logs.Err.Println(err)
+		return
+	}
+	logs.Info.Println("event stopped")
 }

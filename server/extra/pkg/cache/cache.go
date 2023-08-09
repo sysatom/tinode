@@ -2,6 +2,7 @@ package cache
 
 import (
 	"context"
+	"github.com/tinode/chat/server/logs"
 	"os"
 
 	"github.com/redis/go-redis/v9"
@@ -24,4 +25,13 @@ func InitCache() {
 	if err != nil {
 		panic("redis server error " + err.Error())
 	}
+}
+
+func Shutdown() {
+	err := DB.Close()
+	if err != nil {
+		logs.Err.Println(err)
+		return
+	}
+	logs.Info.Println("cache stopped")
 }

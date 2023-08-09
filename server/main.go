@@ -13,8 +13,6 @@ package main
 import (
 	"encoding/json"
 	"flag"
-	"github.com/tinode/chat/server/extra/pkg/channels/crawler"
-	"github.com/tinode/chat/server/extra/ruleset/cron"
 	"math/rand"
 	"net/http"
 	"os"
@@ -60,6 +58,9 @@ import (
 	// File upload handlers
 	_ "github.com/tinode/chat/server/media/fs"
 	_ "github.com/tinode/chat/server/media/s3"
+
+	"github.com/tinode/chat/server/extra/pkg/channels/crawler"
+	"github.com/tinode/chat/server/extra/ruleset/cron"
 )
 
 const (
