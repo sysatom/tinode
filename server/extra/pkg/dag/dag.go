@@ -4,6 +4,7 @@ import (
 	"fmt"
 	dagLib "github.com/heimdalr/dag"
 	"github.com/tinode/chat/server/extra/store/model"
+	"github.com/tinode/chat/server/extra/types/meta"
 )
 
 type nodeId string
@@ -12,14 +13,7 @@ func (n nodeId) ID() string {
 	return string(n)
 }
 
-type Step struct {
-	DagUID       string
-	NodeId       string
-	DependNodeId []string
-	State        model.StepState
-}
-
-func TopologySort(item *model.Dag) ([]Step, error) {
+func TopologySort(item *model.Dag) ([]meta.Step, error) {
 	d := dagLib.NewDAG()
 	nodeMap := make(map[string]*model.Node)
 	for i, node := range item.Nodes {
@@ -40,7 +34,7 @@ func TopologySort(item *model.Dag) ([]Step, error) {
 	baseRoots := d.GetRoots()
 	roots := baseRoots
 	have := make(map[string]struct{}, len(item.Nodes))
-	var result []Step
+	var result []meta.Step
 	for {
 		if len(roots) == 0 {
 			break
@@ -62,7 +56,7 @@ func TopologySort(item *model.Dag) ([]Step, error) {
 			if ok {
 				state = model.StepReady
 			}
-			result = append(result, Step{
+			result = append(result, meta.Step{
 				DagUID:       item.UID,
 				NodeId:       id,
 				DependNodeId: dependNodeId,

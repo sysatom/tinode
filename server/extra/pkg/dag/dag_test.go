@@ -2,6 +2,7 @@ package dag
 
 import (
 	"github.com/tinode/chat/server/extra/store/model"
+	"github.com/tinode/chat/server/extra/types/meta"
 	"github.com/tinode/chat/server/extra/utils"
 	"testing"
 )
@@ -13,7 +14,7 @@ func TestTopologySort(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		want    []Step
+		want    []meta.Step
 		wantErr bool
 	}{
 		{
@@ -44,7 +45,7 @@ func TestTopologySort(t *testing.T) {
 					},
 				},
 			},
-			want: []Step{
+			want: []meta.Step{
 				{
 					NodeId:       "node1",
 					DependNodeId: []string{},
@@ -102,7 +103,7 @@ func TestTopologySort(t *testing.T) {
 					},
 				},
 			},
-			want: []Step{
+			want: []meta.Step{
 				{
 					NodeId:       "node1",
 					DependNodeId: []string{},
@@ -176,7 +177,7 @@ func TestTopologySort(t *testing.T) {
 					},
 				},
 			},
-			want: []Step{
+			want: []meta.Step{
 				{
 					NodeId:       "node1",
 					DependNodeId: []string{},
