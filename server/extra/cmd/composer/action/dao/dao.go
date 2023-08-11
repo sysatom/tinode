@@ -171,6 +171,7 @@ func GenerationAction(c *cli.Context) error {
 			},
 		}))
 	steps := g.GenerateModelAs("chatbot_steps", "Step",
+		gen.FieldType("depend", "IDList"),
 		gen.FieldType("state", "StepState"))
 	jobs := g.GenerateModelAs("chatbot_jobs", "Job",
 		gen.FieldType("state", "JobState"),

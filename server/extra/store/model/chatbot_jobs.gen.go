@@ -19,8 +19,8 @@ type Job struct {
 	DagID      int32     `gorm:"column:dag_id;not null" json:"dag_id"`
 	TriggerID  int32     `gorm:"column:trigger_id;not null" json:"trigger_id"`
 	State      JobState  `gorm:"column:state;not null" json:"state"`
-	StartedAt  time.Time `gorm:"column:started_at;not null" json:"started_at"`
-	FinishedAt time.Time `gorm:"column:finished_at;not null" json:"finished_at"`
+	StartedAt  time.Time `gorm:"column:started_at" json:"started_at"`
+	FinishedAt time.Time `gorm:"column:finished_at" json:"finished_at"`
 	CreatedAt  time.Time `gorm:"column:created_at;not null" json:"created_at"`
 	UpdatedAt  time.Time `gorm:"column:updated_at;not null" json:"updated_at"`
 	Steps      []*Step   `gorm:"foreignKey:job_id" json:"steps"`

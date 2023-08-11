@@ -32,6 +32,7 @@ func newStep(db *gorm.DB, opts ...gen.DOOption) step {
 	_step.UID = field.NewString(tableName, "uid")
 	_step.Topic = field.NewString(tableName, "topic")
 	_step.JobID = field.NewInt32(tableName, "job_id")
+	_step.Depend = field.NewField(tableName, "depend")
 	_step.Action = field.NewString(tableName, "action")
 	_step.Name = field.NewString(tableName, "name")
 	_step.Describe = field.NewString(tableName, "describe")
@@ -57,6 +58,7 @@ type step struct {
 	UID        field.String
 	Topic      field.String
 	JobID      field.Int32
+	Depend     field.Field
 	Action     field.String
 	Name       field.String
 	Describe   field.String
@@ -88,6 +90,7 @@ func (s *step) updateTableName(table string) *step {
 	s.UID = field.NewString(table, "uid")
 	s.Topic = field.NewString(table, "topic")
 	s.JobID = field.NewInt32(table, "job_id")
+	s.Depend = field.NewField(table, "depend")
 	s.Action = field.NewString(table, "action")
 	s.Name = field.NewString(table, "name")
 	s.Describe = field.NewString(table, "describe")
@@ -115,11 +118,12 @@ func (s *step) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (s *step) fillFieldMap() {
-	s.fieldMap = make(map[string]field.Expr, 15)
+	s.fieldMap = make(map[string]field.Expr, 16)
 	s.fieldMap["id"] = s.ID
 	s.fieldMap["uid"] = s.UID
 	s.fieldMap["topic"] = s.Topic
 	s.fieldMap["job_id"] = s.JobID
+	s.fieldMap["depend"] = s.Depend
 	s.fieldMap["action"] = s.Action
 	s.fieldMap["name"] = s.Name
 	s.fieldMap["describe"] = s.Describe

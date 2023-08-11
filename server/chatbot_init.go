@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"github.com/tinode/chat/server/auth"
@@ -10,6 +11,9 @@ import (
 	"github.com/tinode/chat/server/extra/store/model"
 	extraTypes "github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/utils"
+	"github.com/tinode/chat/server/extra/workflow/manager"
+	"github.com/tinode/chat/server/extra/workflow/scheduler"
+	"github.com/tinode/chat/server/extra/workflow/worker"
 	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/store"
 	"github.com/tinode/chat/server/store/types"
@@ -390,5 +394,17 @@ func initializeCrawler() error {
 		return err
 	}
 	c.Run()
+	return nil
+}
+
+// init workflow
+func initializeWorkflow() error {
+	ctx := context.Background()
+	globals.manager = manager.NewManager()
+	go globals.manager.Run(ctx)
+	globals.scheduler = scheduler.NewScheduler()
+	go globals.scheduler.Run(ctx)
+	globals.worker = worker.NewWorker()
+	go globals.worker.Run(ctx)
 	return nil
 }

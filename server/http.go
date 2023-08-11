@@ -150,6 +150,9 @@ Loop:
 
 			// Shutdown Extra
 			globals.crawler.Shutdown()
+			globals.worker.Shutdown()
+			globals.scheduler.Shutdown()
+			globals.manager.Shutdown()
 			for _, ruleset := range globals.cronRuleset {
 				ruleset.Shutdown()
 			}

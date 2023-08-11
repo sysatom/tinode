@@ -206,14 +206,17 @@ type Adapter interface {
 	GetWorkflow(id int64) (*model.Workflow, error)
 	UpdateWorkflowState(id int64, state model.WorkflowState) error
 	ListWorkflows(uid types.Uid, topic string) ([]*model.Workflow, error)
-	IncreaseWorkflowCount(id int64, successful int, failed int, skipped int, canceled int) error
+	IncreaseWorkflowCount(id int64, successful int, failed int, running int, canceled int) error
 	DeleteWorkflow(id int64) error
 	GetDag(id int64) (*model.Dag, error)
 	GetJob(id int64) (*model.Job, error)
 	DeleteJob(id int64) error
 	ListJobs(workflowID int64) ([]*model.Job, error)
+	GetJobsByState(state model.JobState) ([]*model.Job, error)
 	UpdateJobState(id int64, state model.JobState) error
 	UpdateStepState(id int64, state model.StepState) error
+	CreateStep(step *model.Step) (int64, error)
+	CreateSteps(steps []*model.Step) error
 }
 
 var Chatbot Adapter

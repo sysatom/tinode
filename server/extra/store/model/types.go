@@ -1,5 +1,9 @@
 package model
 
+import (
+	"database/sql/driver"
+)
+
 type FormState int
 
 const (
@@ -122,15 +126,24 @@ const (
 	WorkflowDisable
 )
 
+func (j WorkflowState) Value() (driver.Value, error) {
+	return int64(j), nil
+}
+
 type JobState int
 
 const (
 	JobStateUnknown JobState = iota
+	JobReady
 	JobStart
 	JobDone
 	JobCancel
 	JobError
 )
+
+func (j JobState) Value() (driver.Value, error) {
+	return int64(j), nil
+}
 
 type StepState int
 

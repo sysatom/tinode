@@ -1101,63 +1101,123 @@ func (a *adapter) GetCounterByFlag(uid types.Uid, topic string, flag string) (mo
 }
 
 func (a *adapter) CreateWorkflow(workflow *model.Workflow, dag *model.Dag, triggers []*model.WorkflowTrigger) (int64, error) {
-	//TODO implement me
-	panic("implement me")
+	q := dao.Q
+	err := q.Transaction(func(tx *dao.Query) error {
+		err := tx.Workflow.Create(workflow)
+		if err != nil {
+			return err
+		}
+
+		err = tx.Dag.Create(dag)
+		if err != nil {
+			return err
+		}
+
+		for _, trigger := range triggers {
+			err = tx.WorkflowTrigger.Create(trigger)
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
+	if err != nil {
+		return 0, err
+	}
+	return int64(workflow.ID), nil
 }
 
 func (a *adapter) GetWorkflow(id int64) (*model.Workflow, error) {
-	//TODO implement me
-	panic("implement me")
+	q := dao.Q.Workflow
+	return q.Where(q.ID.Eq(int32(id))).First()
 }
 
 func (a *adapter) UpdateWorkflowState(id int64, state model.WorkflowState) error {
-	//TODO implement me
-	panic("implement me")
+	q := dao.Q.Workflow
+	_, err := q.Where(q.ID.Eq(int32(id))).UpdateSimple(q.State.Value(state))
+	return err
 }
 
 func (a *adapter) ListWorkflows(uid types.Uid, topic string) ([]*model.Workflow, error) {
-	//TODO implement me
-	panic("implement me")
+	q := dao.Q.Workflow
+	return q.Where(q.UID.Eq(uid.UserId())).Where(q.Topic.Eq(topic)).Find()
 }
 
-func (a *adapter) IncreaseWorkflowCount(id int64, successful int, failed int, skipped int, canceled int) error {
-	//TODO implement me
-	panic("implement me")
+func (a *adapter) IncreaseWorkflowCount(id int64, successful int, failed int, running int, canceled int) error {
+	q := dao.Q.Workflow
+	_, err := q.Where(q.ID.Eq(int32(id))).UpdateSimple(
+		q.SuccessfulCount.Value(int32(successful)),
+		q.FailedCount.Value(int32(failed)),
+		q.RunningCount.Value(int32(running)),
+		q.CanceledCount.Value(int32(canceled)))
+	return err
 }
 
 func (a *adapter) DeleteWorkflow(id int64) error {
-	//TODO implement me
-	panic("implement me")
+	q := dao.Q.Workflow
+	_, err := q.Where(q.ID.Eq(int32(id))).Delete()
+	return err
 }
 
 func (a *adapter) GetDag(id int64) (*model.Dag, error) {
-	//TODO implement me
-	panic("implement me")
+	q := dao.Q.Dag
+	return q.Where(q.ID.Eq(int32(id))).First()
 }
 
 func (a *adapter) GetJob(id int64) (*model.Job, error) {
-	//TODO implement me
-	panic("implement me")
+	q := dao.Q.Job
+	return q.Where(q.ID.Eq(int32(id))).First()
 }
 
 func (a *adapter) DeleteJob(id int64) error {
-	//TODO implement me
-	panic("implement me")
+	q := dao.Q.Job
+	_, err := q.Where(q.ID.Eq(int32(id))).Delete()
+	return err
 }
 
 func (a *adapter) ListJobs(workflowID int64) ([]*model.Job, error) {
-	//TODO implement me
-	panic("implement me")
+	q := dao.Q.Job
+	return q.Where(q.WorkflowID.Eq(int32(workflowID))).Find()
+}
+
+func (a *adapter) GetJobsByState(state model.JobState) ([]*model.Job, error) {
+	q := dao.Q.Job
+	return q.Where(q.State.Eq(state)).Find()
 }
 
 func (a *adapter) UpdateJobState(id int64, state model.JobState) error {
-	//TODO implement me
-	panic("implement me")
+	q := dao.Q.Job
+	_, err := q.Where(q.ID.Eq(int32(id))).Update(q.State, state)
+	return err
 }
 
 func (a *adapter) UpdateStepState(id int64, state model.StepState) error {
-	//TODO implement me
-	panic("implement me")
+	q := dao.Q.Step
+	_, err := q.Where(q.ID.Eq(int32(id))).Update(q.State, state)
+	return err
+}
+
+func (a *adapter) CreateStep(step *model.Step) (int64, error) {
+	q := dao.Q.Step
+	err := q.Create(step)
+	if err != nil {
+		return 0, err
+	}
+	return int64(step.ID), nil
+}
+
+func (a *adapter) CreateSteps(steps []*model.Step) error {
+	q := dao.Q
+	return q.Transaction(func(tx *dao.Query) error {
+		for _, step := range steps {
+			err := tx.Step.Create(step)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 }
 
 func Init() {

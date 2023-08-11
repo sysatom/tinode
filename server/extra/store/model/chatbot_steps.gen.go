@@ -16,6 +16,7 @@ type Step struct {
 	UID        string    `gorm:"column:uid;not null" json:"uid"`
 	Topic      string    `gorm:"column:topic;not null" json:"topic"`
 	JobID      int32     `gorm:"column:job_id;not null" json:"job_id"`
+	Depend     IDList    `gorm:"column:depend;not null" json:"depend"`
 	Action     string    `gorm:"column:action;not null" json:"action"`
 	Name       string    `gorm:"column:name;not null" json:"name"`
 	Describe   string    `gorm:"column:describe;not null" json:"describe"`
@@ -23,8 +24,8 @@ type Step struct {
 	Output     string    `gorm:"column:output" json:"output"`
 	Error      string    `gorm:"column:error" json:"error"`
 	State      StepState `gorm:"column:state;not null" json:"state"`
-	StartedAt  time.Time `gorm:"column:started_at;not null" json:"started_at"`
-	FinishedAt time.Time `gorm:"column:finished_at;not null" json:"finished_at"`
+	StartedAt  time.Time `gorm:"column:started_at" json:"started_at"`
+	FinishedAt time.Time `gorm:"column:finished_at" json:"finished_at"`
 	CreatedAt  time.Time `gorm:"column:created_at;not null" json:"created_at"`
 	UpdatedAt  time.Time `gorm:"column:updated_at;not null" json:"updated_at"`
 }

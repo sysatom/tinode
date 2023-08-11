@@ -5,6 +5,7 @@ import (
 	"github.com/tinode/chat/server/extra/types/meta"
 	"github.com/tinode/chat/server/extra/utils/parallelizer"
 	"github.com/tinode/chat/server/logs"
+	"time"
 )
 
 // ScheduleResult represents the result of scheduling a stage.
@@ -32,10 +33,41 @@ type Scheduler struct {
 	nextStartWorkerIndex int
 }
 
+func NewScheduler() *Scheduler {
+	return &Scheduler{
+		NextStep: func() *meta.QueuedStepInfo { // todo
+			return &meta.QueuedStepInfo{
+				StepInfo: &meta.StepInfo{
+					Step: &meta.Step{
+						Name:              "1",
+						UID:               "1",
+						WorkerUID:         "",
+						ResourceVersion:   "",
+						Generation:        0,
+						Finalizers:        nil,
+						DeletionTimestamp: nil,
+						DagUID:            "",
+						NodeId:            "",
+						DependNodeId:      nil,
+						State:             0,
+					},
+					ParseError: nil,
+				},
+				Timestamp:               time.Time{},
+				Attempts:                0,
+				InitialAttemptTimestamp: time.Time{},
+				UnschedulablePlugins:    nil,
+			}
+		},
+		SchedulingQueue: NewSchedulingQueue(nil),
+		stop:            make(chan struct{}),
+	}
+}
+
 func (sched *Scheduler) Run(ctx context.Context) {
 	sched.SchedulingQueue.Run()
 
-	go parallelizer.JitterUntilWithContext(ctx, sched.SchedulingOne, 0, 0.0, true)
+	go parallelizer.JitterUntil(sched.SchedulingOne, time.Second, 0.0, true, sched.stop)
 
 	<-sched.stop
 	logs.Info.Println("scheduler stopped")
@@ -46,7 +78,7 @@ func (sched *Scheduler) Shutdown() {
 	sched.stop <- struct{}{}
 }
 
-func (sched *Scheduler) SchedulingOne(ctx context.Context) {
+func (sched *Scheduler) SchedulingOne() {
 	stepInfo := sched.NextStep()
 
 	if stepInfo == nil || stepInfo.Step == nil {
@@ -62,7 +94,7 @@ func (sched *Scheduler) SchedulingOne(ctx context.Context) {
 
 	// todo bind
 
-	logs.Info.Printf("schedule end step %s", step.UID)
+	logs.Info.Printf("schedule done step %s", step.UID)
 }
 
 func (sched *Scheduler) assume() {

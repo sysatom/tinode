@@ -124,6 +124,12 @@ func hookBot(jsconfig json.RawMessage, vc json.RawMessage) {
 		logs.Err.Fatal("Failed to bot cron:", err)
 	}
 
+	// bot workflow
+	err = initializeWorkflow()
+	if err != nil {
+		logs.Err.Fatal("Failed to initialize workflow:", err)
+	}
+
 	// stats register
 	statsRegisterInt("BotTotal")
 	statsRegisterInt("BotRunInputTotal")
