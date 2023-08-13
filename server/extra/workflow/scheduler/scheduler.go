@@ -34,34 +34,12 @@ type Scheduler struct {
 }
 
 func NewScheduler() *Scheduler {
-	return &Scheduler{
-		NextStep: func() *meta.QueuedStepInfo { // todo
-			return &meta.QueuedStepInfo{
-				StepInfo: &meta.StepInfo{
-					Step: &meta.Step{
-						Name:              "1",
-						UID:               "1",
-						WorkerUID:         "",
-						ResourceVersion:   "",
-						Generation:        0,
-						Finalizers:        nil,
-						DeletionTimestamp: nil,
-						DagUID:            "",
-						NodeId:            "",
-						DependNodeId:      nil,
-						State:             0,
-					},
-					ParseError: nil,
-				},
-				Timestamp:               time.Time{},
-				Attempts:                0,
-				InitialAttemptTimestamp: time.Time{},
-				UnschedulablePlugins:    nil,
-			}
-		},
+	s := &Scheduler{
 		SchedulingQueue: NewSchedulingQueue(nil),
 		stop:            make(chan struct{}),
 	}
+	s.NextStep = s.nextStep
+	return s
 }
 
 func (sched *Scheduler) Run(ctx context.Context) {
@@ -103,6 +81,31 @@ func (sched *Scheduler) assume() {
 
 func (sched *Scheduler) bind() {
 
+}
+
+func (sched *Scheduler) nextStep() *meta.QueuedStepInfo {
+	return &meta.QueuedStepInfo{
+		StepInfo: &meta.StepInfo{
+			Step: &meta.Step{
+				Name:              "1",
+				UID:               "1",
+				WorkerUID:         "",
+				ResourceVersion:   "",
+				Generation:        0,
+				Finalizers:        nil,
+				DeletionTimestamp: nil,
+				DagUID:            "",
+				NodeId:            "",
+				DependNodeId:      nil,
+				State:             0,
+			},
+			ParseError: nil,
+		},
+		Timestamp:               time.Time{},
+		Attempts:                0,
+		InitialAttemptTimestamp: time.Time{},
+		UnschedulablePlugins:    nil,
+	}
 }
 
 func (sched *Scheduler) skipStepSchedule(step *meta.Step) bool {
