@@ -17,7 +17,6 @@ DOWNLOAD_PATH=/download
 ## Dev tools
 
 ```shell
-
 # Generator cli
 go run github.com/tinode/chat/server/extra/cmd/composer generator bot -name example -rule input,group,agent,command,condition,cron,form
 go run github.com/tinode/chat/server/extra/cmd/composer generator vendor -name example
@@ -27,6 +26,15 @@ go run github.com/tinode/chat/server/extra/cmd/composer migrate import
 
 # Migration file cli
 go run github.com/tinode/chat/server/extra/cmd/composer migrate migration -name file_name
+```
+
+### go-mod-outdated
+
+```shell
+# Install
+go install github.com/psampaz/go-mod-outdated@latest
+# Usage
+go list -u -m -json all | go-mod-outdated
 ```
 
 ## Lint
