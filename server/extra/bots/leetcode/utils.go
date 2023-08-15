@@ -3,7 +3,7 @@ package leetcode
 import (
 	"context"
 	_ "embed"
-	"encoding/json"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/tinode/chat/server/extra/pkg/cache"
 	"github.com/tinode/chat/server/logs"
 )
@@ -49,11 +49,13 @@ type Problem struct {
 }
 
 func (i Problem) MarshalBinary() ([]byte, error) {
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	return json.Marshal(i)
 }
 
 func importProblems() error {
 	var result ProblemResult
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	err := json.Unmarshal(problems, &result)
 	if err != nil {
 		return nil

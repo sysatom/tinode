@@ -2,7 +2,8 @@ package main
 
 import (
 	"context"
-	"encoding/json"
+	jsoniter "github.com/json-iterator/go"
+
 	"errors"
 	"fmt"
 	"github.com/adjust/rmq/v5"
@@ -327,6 +328,7 @@ func botIncomingMessage(t *Topic, msg *ClientComMessage) {
 			if payload == nil {
 				if msg.Pub.Head != nil {
 					var cm extraTypes.ChatMessage
+					var json = jsoniter.ConfigCompatibleWithStandardLibrary
 					d, err := json.Marshal(msg.Pub.Content)
 					if err != nil {
 						logs.Err.Println(err)
@@ -492,6 +494,7 @@ func botIncomingMessage(t *Topic, msg *ClientComMessage) {
 						if message.ID > 0 {
 							src, _ := extraTypes.KV(message.Content).Map("src")
 							tye, _ := extraTypes.KV(message.Content).String("tye")
+							var json = jsoniter.ConfigCompatibleWithStandardLibrary
 							d, _ := json.Marshal(src)
 							pl := extraTypes.ToPayload(tye, d)
 							ctx.Condition = tye
@@ -616,6 +619,7 @@ func groupIncomingMessage(t *Topic, msg *ClientComMessage, event extraTypes.Grou
 					if message.ID > 0 {
 						src, _ := extraTypes.KV(message.Content).Map("src")
 						tye, _ := extraTypes.KV(message.Content).String("tye")
+						var json = jsoniter.ConfigCompatibleWithStandardLibrary
 						d, _ := json.Marshal(src)
 						pl := extraTypes.ToPayload(tye, d)
 						ctx.Condition = tye
@@ -767,6 +771,7 @@ func (c *AsyncMessageConsumer) Consume(delivery rmq.Delivery) {
 	payload := delivery.Payload()
 
 	var qp extraTypes.QueuePayload
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	err := json.Unmarshal([]byte(payload), &qp)
 	if err != nil {
 		if err := delivery.Reject(); err != nil {

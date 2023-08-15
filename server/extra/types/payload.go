@@ -2,8 +2,8 @@ package types
 
 import (
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
+	jsoniter "github.com/json-iterator/go"
 	"math"
 	"reflect"
 	"strconv"
@@ -104,6 +104,7 @@ func (c ChatMessage) Content() (map[string]interface{}, interface{}) {
 	if c.IsPlainText {
 		return nil, c.Text
 	}
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	d, err := json.Marshal(c)
 	if err != nil {
 		return nil, ""
@@ -326,6 +327,7 @@ func (m *MsgBuilder) AppendAttachment(fileName string, opt AttachmentOption) {
 // Parse a raw ServerData to friendly ChatMessage
 func (m *MsgBuilder) Parse(message ServerData) (ChatMessage, error) {
 	var chatMsg ChatMessage
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	if strings.Contains(message.Head, "mime") {
 		err := json.Unmarshal([]byte(message.Content), &chatMsg)
 		if err != nil {
@@ -572,6 +574,7 @@ func toString(v interface{}) string {
 }
 
 func ToPayload(typ string, src []byte) MsgPayload {
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	switch typ {
 	case "TextMsg":
 		var r TextMsg

@@ -2,6 +2,7 @@ package types
 
 import (
 	"encoding/json"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/tinode/chat/server/extra/utils"
 	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/store/types"
@@ -94,6 +95,7 @@ type QueuePayload struct {
 }
 
 func ConvertQueuePayload(rcptTo string, uid string, msg MsgPayload) (QueuePayload, error) {
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	data, err := json.Marshal(msg)
 	if err != nil {
 		return QueuePayload{}, err

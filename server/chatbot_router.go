@@ -2,13 +2,13 @@ package main
 
 import (
 	_ "embed"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/go-echarts/go-echarts/v2/charts"
 	"github.com/go-echarts/go-echarts/v2/opts"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 	"github.com/tinode/chat/server/auth"
 	"github.com/tinode/chat/server/extra/bots"
@@ -148,6 +148,7 @@ func getPage(rw http.ResponseWriter, req *http.Request) {
 	case model.PageMarkdown:
 		comp = compPage.RenderMarkdown(p)
 	case model.PageChart:
+		var json = jsoniter.ConfigCompatibleWithStandardLibrary
 		d, err := json.Marshal(p.Schema)
 		if err != nil {
 			return
@@ -264,6 +265,7 @@ func postForm(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	values := make(map[string]interface{})
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	d, err := json.Marshal(formData.Schema)
 	if err != nil {
 		return
@@ -415,6 +417,7 @@ func linkitData(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	var data extraTypes.LinkData
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	err = json.Unmarshal(body, &data)
 	if err != nil {
 		errorResponse(rw, "error")
@@ -469,6 +472,7 @@ func queueStats(rw http.ResponseWriter, _ *http.Request) {
 var sessionStore = NewExtraSessionStore(idleSessionTimeout + 15*time.Second)
 
 func wbSession(wrt http.ResponseWriter, req *http.Request) {
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	uid, isValid := route.CheckAccessToken(route.GetAccessToken(req))
 	if !isValid {
 		wrt.WriteHeader(http.StatusForbidden)

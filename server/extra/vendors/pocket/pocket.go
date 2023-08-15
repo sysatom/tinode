@@ -2,9 +2,9 @@ package pocket
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
+	jsoniter "github.com/json-iterator/go"
 	"net/http"
 	"time"
 
@@ -145,6 +145,7 @@ func (v *Pocket) StoreAccessToken(_ *http.Request) (map[string]interface{}, erro
 			return nil, err
 		}
 
+		var json = jsoniter.ConfigCompatibleWithStandardLibrary
 		extra, err := json.Marshal(&tokenResp)
 		if err != nil {
 			return nil, err

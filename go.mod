@@ -45,6 +45,7 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/heimdalr/dag v1.2.1
 	github.com/influxdata/cron v0.0.0-20201006132531-4bb0a200dcbe
+	github.com/json-iterator/go v1.1.12
 	github.com/maxence-charriere/go-app/v9 v9.7.3
 	github.com/mmcdole/gofeed v1.2.1
 	github.com/nikolaydubina/calendarheatmap v1.7.0
@@ -116,7 +117,6 @@ require (
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
-	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/compress v1.15.11 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/leodido/go-urn v1.2.4 // indirect

@@ -4,18 +4,17 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha1"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"sort"
-	"strconv"
-	"time"
-
 	"github.com/influxdata/cron"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/redis/go-redis/v9"
 	"github.com/tinode/chat/server/extra/pkg/cache"
 	"github.com/tinode/chat/server/extra/utils"
 	"github.com/tinode/chat/server/logs"
+	"sort"
+	"strconv"
+	"time"
 )
 
 type Crawler struct {
@@ -139,6 +138,7 @@ func (s *Crawler) resultWorker() {
 }
 
 func (s *Crawler) filter(name, mode string, latest []map[string]string) []map[string]string {
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	ctx := context.Background()
 	sentKey := fmt.Sprintf("crawler:%s:sent", name)
 	todoKey := fmt.Sprintf("crawler:%s:todo", name)

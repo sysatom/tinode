@@ -1,8 +1,8 @@
 package crawler
 
 import (
-	"encoding/json"
 	"github.com/PuerkitoBio/goquery"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/mmcdole/gofeed"
 	"github.com/tidwall/gjson"
 	"net/http"
@@ -78,7 +78,8 @@ func (r Rule) Run() []map[string]string {
 		// mod func
 		gjson.AddModifier("expand", func(raw, arg string) string {
 			var args map[string]string
-			err := json.Unmarshal([]byte(arg), &args)
+			var json = jsoniter.ConfigCompatibleWithStandardLibrary
+			err = json.Unmarshal([]byte(arg), &args)
 			if err != nil {
 				return ""
 			}

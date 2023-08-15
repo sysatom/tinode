@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/emicklei/go-restful/v3"
 	"github.com/gorilla/mux"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/tinode/chat/server/auth"
 	pkgEvent "github.com/tinode/chat/server/extra/pkg/event"
 	"github.com/tinode/chat/server/extra/pkg/parser"
@@ -646,6 +647,7 @@ func StoreForm(ctx types.Context, payload types.MsgPayload) types.MsgPayload {
 	}
 
 	formId := types.Id().String()
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	d, err := json.Marshal(payload)
 	if err != nil {
 		logs.Err.Println(err)
@@ -741,6 +743,7 @@ func ActionMsg(_ types.Context, id string) types.MsgPayload {
 
 func StorePage(ctx types.Context, category model.PageType, title string, payload types.MsgPayload) types.MsgPayload {
 	pageId := types.Id().String()
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	d, err := json.Marshal(payload)
 	if err != nil {
 		logs.Err.Println(err)
@@ -986,7 +989,7 @@ func ServeFile(rw http.ResponseWriter, req *http.Request, dist embed.FS, dir str
 	}
 
 	vars := mux.Vars(req)
-	subpath, _ := vars["subpath"]
+	subpath := vars["subpath"]
 	if subpath == "" {
 		subpath = "index.html"
 	}

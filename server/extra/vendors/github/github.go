@@ -1,9 +1,9 @@
 package github
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/go-resty/resty/v2"
+	jsoniter "github.com/json-iterator/go"
 	"net/http"
 	"time"
 )
@@ -351,6 +351,7 @@ func (v *Github) StoreAccessToken(req *http.Request) (map[string]interface{}, er
 		return nil, err
 	}
 
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	extra, err := json.Marshal(&tokenResp)
 	if err != nil {
 		return nil, err

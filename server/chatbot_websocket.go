@@ -2,8 +2,8 @@ package main
 
 import (
 	"container/list"
-	"encoding/json"
 	"github.com/gorilla/websocket"
+	jsoniter "github.com/json-iterator/go"
 	extraTypes "github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/store/types"
@@ -34,6 +34,7 @@ func (s *Session) queueOutExtra(msg *extraTypes.ServerComMessage) bool {
 
 	logs.Info.Println("s.queueOutExtra: msg send", s.sid, s.uid)
 
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	data, err := json.Marshal(msg)
 	if err != nil {
 		logs.Err.Println("s.queueOutExtra: msg marshal failed", s.sid)
@@ -107,6 +108,7 @@ func (s *Session) dispatchRawExtra(raw []byte) {
 	}
 	logs.Info.Printf("in: '%s%s' sid='%s' uid='%s'", toLog, truncated, s.sid, s.uid)
 
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	if err := json.Unmarshal(raw, &msg); err != nil {
 		// Malformed message
 		logs.Warn.Println("s.dispatchExtra", err, s.sid)

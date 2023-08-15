@@ -1,9 +1,9 @@
 package types
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
+	jsoniter "github.com/json-iterator/go"
 	"reflect"
 )
 
@@ -12,6 +12,7 @@ type KV map[string]interface{}
 func (j *KV) Scan(value interface{}) error {
 	if bytes, ok := value.([]byte); ok {
 		result := make(map[string]interface{})
+		var json = jsoniter.ConfigCompatibleWithStandardLibrary
 		err := json.Unmarshal(bytes, &result)
 		if err != nil {
 			return err

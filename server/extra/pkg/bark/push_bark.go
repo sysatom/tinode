@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/tinode/chat/server/drafty"
 	"github.com/tinode/chat/server/extra/pkg/cache"
 	"github.com/tinode/chat/server/extra/store"
@@ -178,6 +179,7 @@ func postMessage(config *configType, title, body, group string) error {
 		"icon":       config.Icon,
 		"group":      group,
 	}
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	j, err := json.Marshal(m)
 	if err != nil {
 		return err

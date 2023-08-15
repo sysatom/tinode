@@ -1,9 +1,9 @@
 package dropbox
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/go-resty/resty/v2"
+	jsoniter "github.com/json-iterator/go"
 	"io"
 	"net/http"
 	"time"
@@ -60,6 +60,7 @@ func (v *Dropbox) GetAccessToken(code string) (interface{}, error) {
 
 	if resp.StatusCode() == http.StatusOK {
 		var result TokenResponse
+		var json = jsoniter.ConfigCompatibleWithStandardLibrary
 		err = json.Unmarshal(resp.Body(), &result)
 		if err != nil {
 			return nil, err
@@ -91,6 +92,7 @@ func (v *Dropbox) StoreAccessToken(req *http.Request) (map[string]interface{}, e
 		return nil, err
 	}
 
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	extra, err := json.Marshal(&tokenResp)
 	if err != nil {
 		return nil, err
@@ -104,6 +106,7 @@ func (v *Dropbox) StoreAccessToken(req *http.Request) (map[string]interface{}, e
 }
 
 func (v *Dropbox) Upload(path string, content io.Reader) error {
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	apiArg, err := json.Marshal(map[string]interface{}{
 		"path":            path,
 		"mode":            "add",

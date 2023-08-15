@@ -1,15 +1,14 @@
 package queue
 
 import (
-	"encoding/json"
-	"os"
-	"time"
-
 	"github.com/adjust/rmq/v5"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/redis/go-redis/v9"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
 	serverTypes "github.com/tinode/chat/server/store/types"
+	"os"
+	"time"
 )
 
 const (
@@ -88,6 +87,7 @@ func AsyncMessage(rcptTo, original string, msg types.MsgPayload) error {
 	if err != nil {
 		return nil
 	}
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	payload, err := json.Marshal(qp)
 	if err != nil {
 		return nil

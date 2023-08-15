@@ -1,8 +1,8 @@
 package types
 
 import (
-	"encoding/json"
 	"fmt"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/utils"
 	"sort"
@@ -235,6 +235,7 @@ func (i InfoMsg) Convert() (KV, interface{}) {
 	case map[string]interface{}:
 		m = v
 	default:
+		var json = jsoniter.ConfigCompatibleWithStandardLibrary
 		d, _ := json.Marshal(i.Model)
 		_ = json.Unmarshal(d, &m)
 	}
@@ -325,6 +326,7 @@ func (i RepoMsg) Convert() (KV, interface{}) {
 	builder.AppendTextLine(*i.FullName, TextOption{IsBold: true})
 
 	var m map[string]interface{}
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	d, _ := json.Marshal(i)
 	_ = json.Unmarshal(d, &m)
 
@@ -391,6 +393,7 @@ func (c CrateMsg) Convert() (KV, interface{}) {
 	builder.AppendTextLine(c.Name, TextOption{IsBold: true})
 
 	var m map[string]interface{}
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	d, _ := json.Marshal(c)
 	_ = json.Unmarshal(d, &m)
 
