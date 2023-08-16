@@ -397,7 +397,7 @@ func RunPipeline(pipelineRules []pipeline.Rule, ctx types.Context, head types.KV
 }
 
 func StorePipeline(ctx types.Context, pipelineRule pipeline.Rule, index int) (string, error) {
-	flag := types.Id().String()
+	flag := types.Id()
 	return flag, store.Chatbot.PipelineCreate(model.Pipeline{
 		UID:     ctx.AsUser.UserId(),
 		Topic:   ctx.Original,
@@ -646,7 +646,7 @@ func StoreForm(ctx types.Context, payload types.MsgPayload) types.MsgPayload {
 		return types.TextMsg{Text: "form msg error"}
 	}
 
-	formId := types.Id().String()
+	formId := types.Id()
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	d, err := json.Marshal(payload)
 	if err != nil {
@@ -710,7 +710,7 @@ func StoreForm(ctx types.Context, payload types.MsgPayload) types.MsgPayload {
 }
 
 func StoreParameter(params types.KV, expiredAt time.Time) (string, error) {
-	flag := strings.ToLower(types.Id().String())
+	flag := types.Id()
 	return flag, store.Chatbot.ParameterSet(flag, params, expiredAt)
 }
 
@@ -742,7 +742,7 @@ func ActionMsg(_ types.Context, id string) types.MsgPayload {
 }
 
 func StorePage(ctx types.Context, category model.PageType, title string, payload types.MsgPayload) types.MsgPayload {
-	pageId := types.Id().String()
+	pageId := types.Id()
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	d, err := json.Marshal(payload)
 	if err != nil {
@@ -842,7 +842,7 @@ func CreateShortUrl(text string) (string, error) {
 		if url.ID > 0 {
 			return fmt.Sprintf("%s/u/%s", types.AppUrl(), url.Flag), nil
 		}
-		flag := strings.ToLower(types.Id().String())
+		flag := types.Id()
 		err = store.Chatbot.UrlCreate(model.Url{
 			Flag:  flag,
 			URL:   text,
@@ -872,7 +872,7 @@ func InstructMsg(ctx types.Context, id string, data types.KV) types.MsgPayload {
 	}
 
 	return StoreInstruct(ctx, types.InstructMsg{
-		No:       types.Id().String(),
+		No:       types.Id(),
 		Object:   model.InstructObjectLinkit,
 		Bot:      botName,
 		Flag:     id,

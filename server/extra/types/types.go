@@ -3,8 +3,7 @@ package types
 import (
 	"encoding/json"
 	jsoniter "github.com/json-iterator/go"
-	"github.com/tinode/chat/server/extra/pkg/flog"
-	"github.com/tinode/chat/server/extra/utils"
+	"github.com/rs/xid"
 	"github.com/tinode/chat/server/store/types"
 	"net/http"
 	"os"
@@ -66,21 +65,8 @@ type Context struct {
 	PageRuleId string
 }
 
-func Id() types.Uid {
-	key, err := utils.GenerateRandomString(16)
-	if err != nil {
-		flog.Error(err)
-		return 0
-	}
-
-	uGen := types.UidGenerator{}
-	err = uGen.Init(1, []byte(key))
-	if err != nil {
-		flog.Error(err)
-		return 0
-	}
-
-	return uGen.Get()
+func Id() string {
+	return xid.New().String()
 }
 
 func AppUrl() string {

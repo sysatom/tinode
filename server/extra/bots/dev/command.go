@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"crypto/rand"
 	_ "embed"
-	"errors"
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/tinode/chat/server/extra/bots"
@@ -34,8 +33,6 @@ var commandRules = []command.Rule{
 		Define: "info",
 		Help:   `Bot info`,
 		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
-			flog.Info("test...")
-			flog.Error(errors.New("test rollbar"))
 			return nil
 		},
 	},
@@ -74,7 +71,7 @@ var commandRules = []command.Rule{
 		Define: "id",
 		Help:   `Generate random id`,
 		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
-			return types.TextMsg{Text: types.Id().String()}
+			return types.TextMsg{Text: types.Id()}
 		},
 	},
 	{
