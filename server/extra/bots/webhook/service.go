@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"github.com/emicklei/go-restful/v3"
 	"github.com/tinode/chat/server/extra/pkg/event"
+	"github.com/tinode/chat/server/extra/pkg/flog"
 	"github.com/tinode/chat/server/extra/pkg/route"
 	extraStore "github.com/tinode/chat/server/extra/store"
 	extraTypes "github.com/tinode/chat/server/extra/types"
-	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/store"
 	"github.com/tinode/chat/server/store/types"
 	"io"
@@ -52,7 +52,7 @@ func webhook(req *restful.Request, resp *restful.Response) {
 		"message":   txt,
 	})
 	if err != nil {
-		logs.Err.Println(err)
+		flog.Error(err)
 		_, _ = resp.Write([]byte("send error"))
 		return
 	}

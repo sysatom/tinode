@@ -5,11 +5,11 @@ import (
 	"encoding/base64"
 	"fmt"
 	"github.com/nikolaydubina/calendarheatmap/charts"
+	"github.com/tinode/chat/server/extra/pkg/flog"
 	"github.com/tinode/chat/server/extra/pkg/parser"
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/types"
-	"github.com/tinode/chat/server/logs"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
 	"image/color"
@@ -100,14 +100,14 @@ var commandRules = []command.Rule{
 				Hinting: font.HintingNone,
 			})
 			if err != nil {
-				logs.Err.Println(err)
+				flog.Error(err)
 				return nil
 			}
 
 			var colorscale charts.BasicColorScale
 			colorscale, err = charts.NewBasicColorscaleFromCSV(bytes.NewBuffer(defaultColorScaleBytes))
 			if err != nil {
-				logs.Err.Println(err)
+				flog.Error(err)
 				return nil
 			}
 

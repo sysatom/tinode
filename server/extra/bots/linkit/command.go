@@ -3,12 +3,12 @@ package linkit
 import (
 	"errors"
 	"fmt"
+	"github.com/tinode/chat/server/extra/pkg/flog"
 	"github.com/tinode/chat/server/extra/pkg/parser"
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/utils"
-	"github.com/tinode/chat/server/logs"
 	"gorm.io/gorm"
 	"strings"
 	"time"
@@ -44,14 +44,14 @@ var commandRules = []command.Rule{
 						"value": idValue,
 					})
 				if err != nil {
-					logs.Err.Println(err)
+					flog.Error(err)
 					return types.TextMsg{Text: "set token error"}
 				}
 				data := types.KV{}
 				data["uid"] = ctx.AsUser.UserId()
 				err = store.Chatbot.ParameterSet(idValue, data, time.Now().AddDate(1, 0, 0))
 				if err != nil {
-					logs.Err.Println(err)
+					flog.Error(err)
 					return types.TextMsg{Text: "set token error"}
 				}
 			}
@@ -90,14 +90,14 @@ var commandRules = []command.Rule{
 					"value": idValue,
 				})
 			if err != nil {
-				logs.Err.Println(err)
+				flog.Error(err)
 				return types.TextMsg{Text: "set token error"}
 			}
 			data := types.KV{}
 			data["uid"] = ctx.AsUser.UserId()
 			err = store.Chatbot.ParameterSet(idValue, data, time.Now().AddDate(1, 0, 0))
 			if err != nil {
-				logs.Err.Println(err)
+				flog.Error(err)
 				return types.TextMsg{Text: "set token error"}
 			}
 

@@ -1,10 +1,10 @@
 package download
 
 import (
+	"github.com/tinode/chat/server/extra/pkg/flog"
 	"github.com/tinode/chat/server/extra/ruleset/cron"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/utils"
-	"github.com/tinode/chat/server/logs"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -32,7 +32,7 @@ var cronRules = []cron.Rule{
 				return nil
 			})
 			if err != nil {
-				logs.Err.Println(err)
+				flog.Error(err)
 			}
 
 			return nil

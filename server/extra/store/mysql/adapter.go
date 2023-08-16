@@ -10,12 +10,12 @@ import (
 	"fmt"
 	"github.com/bsm/redislock"
 	"github.com/tinode/chat/server/db/mysql"
+	"github.com/tinode/chat/server/extra/pkg/flog"
 	"github.com/tinode/chat/server/extra/pkg/locker"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/store/dao"
 	"github.com/tinode/chat/server/extra/store/model"
 	extraTypes "github.com/tinode/chat/server/extra/types"
-	"github.com/tinode/chat/server/logs"
 	serverStore "github.com/tinode/chat/server/store"
 	"github.com/tinode/chat/server/store/types"
 	mysqlDriver "gorm.io/driver/mysql"
@@ -23,7 +23,6 @@ import (
 	"gorm.io/gorm/logger"
 	"log"
 	"os"
-	"strconv"
 	"time"
 )
 
@@ -822,7 +821,7 @@ func (a *adapter) AggregateKeyResultValue(id int64) error {
 	if err != nil {
 		return err
 	}
-	var value sql.NullString // fixme
+	var value sql.NullInt64
 	switch keyResult.ValueMode {
 	case model.ValueSumMode:
 		err = a.db.Model(&model.KeyResultValue{}).Where("key_result_id = ?", id).
@@ -841,9 +840,8 @@ func (a *adapter) AggregateKeyResultValue(id int64) error {
 		return err
 	}
 
-	currentValue, _ := strconv.ParseInt(value.String, 10, 64)
 	return a.db.Model(&model.KeyResult{}).Where("id = ?", id).UpdateColumns(map[string]interface{}{
-		"current_value": currentValue,
+		"current_value": value.Int64,
 	}).Error
 }
 
@@ -1078,7 +1076,7 @@ func (a *adapter) record(id, digit int64) {
 	err := a.db.Exec("INSERT INTO `chatbot_counter_records` ( `counter_id`, `digit`, `created_at`) VALUES (?, ?, ?)",
 		id, digit, time.Now()).Error
 	if err != nil {
-		logs.Err.Println(err)
+		flog.Error(err)
 	}
 }
 

@@ -2,11 +2,11 @@ package okr
 
 import (
 	"fmt"
+	"github.com/tinode/chat/server/extra/pkg/flog"
 	"github.com/tinode/chat/server/extra/ruleset/form"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/types"
-	"github.com/tinode/chat/server/logs"
 )
 
 const (
@@ -41,7 +41,7 @@ var formRules = []form.Rule{
 			objective.Topic = ctx.Original
 			_, err := store.Chatbot.CreateObjective(&objective)
 			if err != nil {
-				logs.Err.Println(err)
+				flog.Error(err)
 				return types.TextMsg{Text: fmt.Sprintf("failed, form [%s]", ctx.FormId)}
 			}
 
@@ -71,7 +71,7 @@ var formRules = []form.Rule{
 			objective.Topic = ctx.Original
 			err := store.Chatbot.UpdateObjective(&objective)
 			if err != nil {
-				logs.Err.Println(err)
+				flog.Error(err)
 				return types.TextMsg{Text: fmt.Sprintf("failed, form [%s]", ctx.FormId)}
 			}
 
@@ -234,7 +234,7 @@ var formRules = []form.Rule{
 			todo.Topic = ctx.Original
 			_, err := store.Chatbot.CreateTodo(&todo)
 			if err != nil {
-				logs.Err.Println(err)
+				flog.Error(err)
 				return nil
 			}
 
@@ -263,7 +263,7 @@ var formRules = []form.Rule{
 			todo.Topic = ctx.Original
 			err := store.Chatbot.UpdateTodo(&todo)
 			if err != nil {
-				logs.Err.Println(err)
+				flog.Error(err)
 				return nil
 			}
 

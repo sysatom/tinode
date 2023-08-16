@@ -9,8 +9,8 @@ import (
 	jsoniter "github.com/json-iterator/go"
 	"github.com/tinode/chat/server/drafty"
 	"github.com/tinode/chat/server/extra/pkg/cache"
+	"github.com/tinode/chat/server/extra/pkg/flog"
 	"github.com/tinode/chat/server/extra/store"
-	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/push"
 	serverStore "github.com/tinode/chat/server/store"
 	"github.com/tinode/chat/server/store/types"
@@ -112,7 +112,7 @@ func (barkPush) Stop() {
 func sendPushes(config *configType, rcpt *push.Receipt) {
 	body, err := drafty.PlainText(rcpt.Payload.Content)
 	if err != nil {
-		logs.Err.Println("bark push", err)
+		flog.Error(err)
 		return
 	}
 
@@ -124,14 +124,14 @@ func sendPushes(config *configType, rcpt *push.Receipt) {
 		// check online
 		online := cache.DB.Get(context.Background(), fmt.Sprintf("online:%s", uid.UserId())).Val()
 		if online != "" {
-			logs.Info.Printf("uid %s online %s skip push", uid.UserId(), online)
+			flog.Info("uid %s online %s skip push", uid.UserId(), online)
 			continue
 		}
 
 		// get bark key
 		v, err := store.Chatbot.ConfigGet(uid, "", BarkDeviceKey)
 		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-			logs.Err.Println("bark push", err)
+			flog.Error(err)
 			continue
 		}
 		config.DeviceKey, _ = v.String("value")
@@ -143,7 +143,7 @@ func sendPushes(config *configType, rcpt *push.Receipt) {
 		}
 		fromUser, err := serverStore.Users.Get(from)
 		if err != nil {
-			logs.Err.Println("bark push", err)
+			flog.Error(err)
 			continue
 		}
 		if fromUser != nil && fromUser.Public != nil {
@@ -156,7 +156,7 @@ func sendPushes(config *configType, rcpt *push.Receipt) {
 		// push
 		err = postMessage(config, "", body, rcpt.Payload.Topic)
 		if err != nil {
-			logs.Err.Println("bark push", err)
+			flog.Error(err)
 			return
 		}
 	}
@@ -203,7 +203,7 @@ func postMessage(config *configType, title, body, group string) error {
 	}
 	_, err = io.ReadAll(resp.Body)
 	if err != nil {
-		logs.Err.Println(err)
+		flog.Error(err)
 		return err
 	}
 

@@ -1,10 +1,10 @@
 package server
 
 import (
+	"github.com/tinode/chat/server/extra/pkg/flog"
 	"github.com/tinode/chat/server/extra/ruleset/agent"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/types"
-	"github.com/tinode/chat/server/logs"
 )
 
 const (
@@ -28,7 +28,7 @@ var agentRules = []agent.Rule{
 			// store
 			err = store.Chatbot.DataSet(ctx.AsUser, ctx.Original, "stats", j)
 			if err != nil {
-				logs.Err.Println(err)
+				flog.Error(err)
 				return nil
 			}
 			return nil

@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/tinode/chat/server/extra/bots"
+	"github.com/tinode/chat/server/extra/pkg/flog"
 	"github.com/tinode/chat/server/extra/ruleset/cron"
 	"github.com/tinode/chat/server/extra/types"
-	"github.com/tinode/chat/server/logs"
 )
 
 const Name = "github"
@@ -41,7 +41,7 @@ func (bot) Init(jsonconf json.RawMessage) error {
 	}
 
 	if !Config.Enabled {
-		logs.Info.Printf("bot %s disabled", Name)
+		flog.Info("bot %s disabled", Name)
 		return nil
 	}
 

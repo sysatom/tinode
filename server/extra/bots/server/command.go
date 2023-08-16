@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/tinode/chat/server/extra/pkg/flog"
 	"github.com/tinode/chat/server/extra/pkg/parser"
 	"runtime"
 	"strconv"
@@ -15,7 +16,6 @@ import (
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/types"
-	"github.com/tinode/chat/server/logs"
 )
 
 var commandRules = []command.Rule{
@@ -86,7 +86,7 @@ var commandRules = []command.Rule{
 			keys, err := cache.DB.Keys(ctx_, "online:*").Result()
 			if err != nil {
 				if !errors.Is(err, redis.Nil) {
-					logs.Err.Println(err)
+					flog.Error(err)
 				}
 				return types.TextMsg{Text: "Empty"}
 			}

@@ -8,6 +8,7 @@ import (
 	"github.com/influxdata/cron"
 	"github.com/tinode/chat/server/auth"
 	"github.com/tinode/chat/server/extra/pkg/cache"
+	"github.com/tinode/chat/server/extra/pkg/flog"
 	"github.com/tinode/chat/server/extra/store"
 	extraTypes "github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
@@ -54,7 +55,7 @@ func NewCronRuleset(name string, authLevel auth.Level, rules []Rule) *Ruleset {
 func (r *Ruleset) Daemon() {
 	// process cron
 	for rule := range r.cronRules {
-		logs.Info.Printf("cron %s start", r.cronRules[rule].Name)
+		flog.Info("cron %s start", r.cronRules[rule].Name)
 		go r.ruleWorker(r.cronRules[rule])
 	}
 
@@ -81,7 +82,7 @@ func (r *Ruleset) ruleWorker(rule Rule) {
 	for {
 		select {
 		case <-r.stop:
-			logs.Info.Printf("cron %s rule worker stopped", rule.Name)
+			flog.Info("cron %s rule worker stopped", rule.Name)
 			return
 		case <-ticker.C:
 			if nextTime.Format("2006-01-02 15:04") != time.Now().Format("2006-01-02 15:04") {
@@ -90,7 +91,7 @@ func (r *Ruleset) ruleWorker(rule Rule) {
 			msgs := func() []result {
 				defer func() {
 					if rc := recover(); rc != nil {
-						logs.Warn.Printf("cron %s ruleWorker recover", rule.Name)
+						flog.Warn("cron %s ruleWorker recover", rule.Name)
 						if v, ok := rc.(error); ok {
 							logs.Err.Println(v)
 						}
@@ -103,7 +104,7 @@ func (r *Ruleset) ruleWorker(rule Rule) {
 				// all normal users
 				users, err := store.Chatbot.GetNormalUsers()
 				if err != nil {
-					logs.Err.Println(err)
+					flog.Error(err)
 					return nil
 				}
 
@@ -163,7 +164,7 @@ func (r *Ruleset) resultWorker() {
 	for {
 		select {
 		case <-r.stop:
-			logs.Info.Printf("cron %s result worker stopped", r.Type)
+			flog.Info("cron %s result worker stopped", r.Type)
 			return
 		case out := <-r.outCh:
 			// filter

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/emicklei/go-restful/v3"
+	"github.com/tinode/chat/server/extra/pkg/flog"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
 	"net/http"
@@ -31,7 +32,7 @@ func logStackOnRecover(panicReason interface{}, w http.ResponseWriter) {
 		}
 		buffer.WriteString(fmt.Sprintf("    %s:%d\r\n", file, line))
 	}
-	logs.Info.Println(buffer.String())
+	flog.Info(buffer.String())
 
 	headers := http.Header{}
 	if ct := w.Header().Get("Content-Type"); len(ct) > 0 {

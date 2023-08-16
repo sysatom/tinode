@@ -4,13 +4,13 @@ import (
 	"errors"
 	"fmt"
 	"github.com/tinode/chat/server/extra/bots"
+	"github.com/tinode/chat/server/extra/pkg/flog"
 	"github.com/tinode/chat/server/extra/pkg/parser"
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/vendors"
 	"github.com/tinode/chat/server/extra/vendors/github"
-	"github.com/tinode/chat/server/logs"
 	serverTypes "github.com/tinode/chat/server/store/types"
 	"gorm.io/gorm"
 	"strings"
@@ -38,7 +38,7 @@ var commandRules = []command.Rule{
 			// check oauth token
 			oauth, err := store.Chatbot.OAuthGet(ctx.AsUser, ctx.Original, Name)
 			if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-				logs.Err.Println("bot command github oauth", err)
+				flog.Error(err)
 			}
 			if oauth.Token != "" {
 				return types.TextMsg{Text: "App is authorized"}
@@ -60,7 +60,7 @@ var commandRules = []command.Rule{
 			// get token
 			oauth, err := store.Chatbot.OAuthGet(ctx.AsUser, ctx.Original, Name)
 			if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-				logs.Err.Println("bot command github user", err)
+				flog.Error(err)
 			}
 			if oauth.Token == "" {
 				return types.TextMsg{Text: "App is unauthorized"}
@@ -124,7 +124,7 @@ var commandRules = []command.Rule{
 			// create issue
 			issue, err := client.CreateIssue(*user.Login, repo, github.Issue{Title: &text})
 			if err != nil {
-				logs.Err.Println(err)
+				flog.Error(err)
 				return nil
 			}
 			if *issue.ID == 0 {
@@ -164,7 +164,7 @@ var commandRules = []command.Rule{
 			// get projects
 			projects, err := client.GetUserProjects(*user.Login)
 			if err != nil {
-				logs.Err.Println(err)
+				flog.Error(err)
 				return nil
 			}
 			if len(*projects) == 0 {
@@ -174,7 +174,7 @@ var commandRules = []command.Rule{
 			// get columns
 			columns, err := client.GetProjectColumns(*(*projects)[0].ID)
 			if err != nil {
-				logs.Err.Println(err)
+				flog.Error(err)
 				return nil
 			}
 			if len(*columns) == 0 {
@@ -184,7 +184,7 @@ var commandRules = []command.Rule{
 			// create card
 			card, err := client.CreateCard(*(*columns)[0].ID, github.ProjectCard{Note: &text})
 			if err != nil {
-				logs.Err.Println(err)
+				flog.Error(err)
 				return nil
 			}
 			if *card.ID == 0 {
@@ -216,7 +216,7 @@ var commandRules = []command.Rule{
 			}
 			repo, err := client.GetRepository(repoArr[0], repoArr[1])
 			if err != nil {
-				logs.Err.Println(err)
+				flog.Error(err)
 				return types.TextMsg{Text: "repo error"}
 			}
 
@@ -264,7 +264,7 @@ var commandRules = []command.Rule{
 
 			user, err := client.GetUser(username)
 			if err != nil {
-				logs.Err.Println(err)
+				flog.Error(err)
 				return types.TextMsg{Text: "user error"}
 			}
 

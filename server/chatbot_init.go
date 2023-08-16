@@ -11,6 +11,7 @@ import (
 	"github.com/tinode/chat/server/extra/store/model"
 	extraTypes "github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/utils"
+	"github.com/tinode/chat/server/extra/vendors/rollbar"
 	"github.com/tinode/chat/server/extra/workflow/manager"
 	"github.com/tinode/chat/server/extra/workflow/scheduler"
 	"github.com/tinode/chat/server/extra/workflow/worker"
@@ -407,4 +408,9 @@ func initializeWorkflow() error {
 	globals.worker = worker.NewWorker()
 	go globals.worker.Run(ctx)
 	return nil
+}
+
+// init error tracking
+func initializeErrorTracking() error {
+	return rollbar.Setup()
 }

@@ -2,11 +2,11 @@ package cloudflare
 
 import (
 	"github.com/tinode/chat/server/extra/bots"
+	"github.com/tinode/chat/server/extra/pkg/flog"
 	"github.com/tinode/chat/server/extra/pkg/parser"
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/vendors/cloudflare"
-	"github.com/tinode/chat/server/logs"
 	"time"
 )
 
@@ -45,7 +45,7 @@ var commandRules = []command.Rule{
 			provider := cloudflare.NewCloudflare(tokenValue, zoneIdValue)
 			_, err := provider.GetAnalytics(startDate, endDate)
 			if err != nil {
-				logs.Err.Println(err)
+				flog.Error(err)
 				return nil
 			}
 			return nil

@@ -5,7 +5,7 @@ import (
 	_ "embed"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/tinode/chat/server/extra/pkg/cache"
-	"github.com/tinode/chat/server/logs"
+	"github.com/tinode/chat/server/extra/pkg/flog"
 )
 
 //go:embed problems.json
@@ -93,7 +93,7 @@ func importProblems() error {
 
 	_, err = pipe.Exec(ctx)
 	if err != nil {
-		logs.Err.Println(err)
+		flog.Error(err)
 	}
 	return nil
 }

@@ -7,10 +7,10 @@ import (
 	"github.com/tinode/chat/server/auth"
 	"github.com/tinode/chat/server/extra/bots"
 	"github.com/tinode/chat/server/extra/pkg/event"
+	"github.com/tinode/chat/server/extra/pkg/flog"
 	"github.com/tinode/chat/server/extra/ruleset/cron"
 	"github.com/tinode/chat/server/extra/ruleset/instruct"
 	"github.com/tinode/chat/server/extra/types"
-	"github.com/tinode/chat/server/logs"
 	"net/http"
 )
 
@@ -44,7 +44,7 @@ func (bot) Init(jsonconf json.RawMessage) error {
 	}
 
 	if !config.Enabled {
-		logs.Info.Printf("bot %s disabled", Name)
+		flog.Info("bot %s disabled", Name)
 		return nil
 	}
 

@@ -5,11 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"github.com/tinode/chat/server/extra/bots"
+	"github.com/tinode/chat/server/extra/pkg/flog"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/utils"
-	"github.com/tinode/chat/server/logs"
 	"gorm.io/gorm"
 	"strings"
 )
@@ -44,7 +44,7 @@ func (bot) Init(jsonconf json.RawMessage) error {
 	}
 
 	if !config.Enabled {
-		logs.Info.Printf("bot %s disabled", Name)
+		flog.Info("bot %s disabled", Name)
 		return nil
 	}
 

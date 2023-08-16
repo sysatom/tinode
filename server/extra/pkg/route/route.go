@@ -4,10 +4,10 @@ import (
 	"fmt"
 	restfulspec "github.com/emicklei/go-restful-openapi/v2"
 	"github.com/emicklei/go-restful/v3"
+	"github.com/tinode/chat/server/extra/pkg/flog"
 	extraStore "github.com/tinode/chat/server/extra/store"
 	extraTypes "github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/utils"
-	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/store/types"
 	"net/http"
 	"strings"
@@ -97,7 +97,7 @@ func WebService(group, version string, rs ...*Router) *restful.WebService {
 			Metadata(restfulspec.KeyOpenAPITags, tags).
 			Returns(http.StatusOK, "OK", router.ReturnSample).
 			Writes(router.WriteSample))
-		logs.Info.Printf("WebService %s \t%s%s \t-> %s", router.Method, path, router.Path, funcName)
+		flog.Info("WebService %s \t%s%s \t-> %s", router.Method, path, router.Path, funcName)
 	}
 	return ws
 }

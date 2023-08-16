@@ -2,12 +2,12 @@ package gpt
 
 import (
 	"fmt"
+	"github.com/tinode/chat/server/extra/pkg/flog"
 	"github.com/tinode/chat/server/extra/pkg/parser"
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/utils"
-	"github.com/tinode/chat/server/logs"
 )
 
 var commandRules = []command.Rule{
@@ -25,7 +25,7 @@ var commandRules = []command.Rule{
 			// get
 			v, err := store.Chatbot.ConfigGet(ctx.AsUser, ctx.Original, ApiKey)
 			if err != nil {
-				logs.Err.Println("bot command key", err)
+				flog.Error(err)
 			}
 			key, _ := v.String("value")
 
@@ -41,7 +41,7 @@ var commandRules = []command.Rule{
 			// get
 			v, err := store.Chatbot.ConfigGet(ctx.AsUser, ctx.Original, ApiKey)
 			if err != nil {
-				logs.Err.Println("bot command key [string]", err)
+				flog.Error(err)
 			}
 			old, _ := v.String("value")
 
@@ -50,7 +50,7 @@ var commandRules = []command.Rule{
 				"value": key,
 			})
 			if err != nil {
-				logs.Err.Println("bot command key [string]", err)
+				flog.Error(err)
 			}
 
 			return types.TextMsg{Text: fmt.Sprintf("%s --> %s", old, key)}

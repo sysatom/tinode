@@ -3,6 +3,7 @@ package pocket
 import (
 	"errors"
 	"github.com/tinode/chat/server/extra/bots"
+	"github.com/tinode/chat/server/extra/pkg/flog"
 	"github.com/tinode/chat/server/extra/pkg/parser"
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/store"
@@ -10,7 +11,6 @@ import (
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/vendors"
 	"github.com/tinode/chat/server/extra/vendors/pocket"
-	"github.com/tinode/chat/server/logs"
 	serverTypes "github.com/tinode/chat/server/store/types"
 	"gorm.io/gorm"
 )
@@ -30,7 +30,7 @@ var commandRules = []command.Rule{
 			// check oauth token
 			oauth, err := store.Chatbot.OAuthGet(ctx.AsUser, ctx.Original, Name)
 			if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-				logs.Err.Println("bot command pocket oauth", err)
+				flog.Error(err)
 			}
 			if oauth.Token != "" {
 				return types.TextMsg{Text: "App is authorized"}
@@ -55,7 +55,7 @@ var commandRules = []command.Rule{
 		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
 			oauth, err := store.Chatbot.OAuthGet(ctx.AsUser, ctx.Original, Name)
 			if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-				logs.Err.Println("bot command pocket oauth", err)
+				flog.Error(err)
 			}
 			if oauth.Token == "" {
 				return types.TextMsg{Text: "App is unauthorized"}
@@ -64,7 +64,7 @@ var commandRules = []command.Rule{
 			provider := pocket.NewPocket(Config.ConsumerKey, "", "", oauth.Token)
 			items, err := provider.Retrieve(10)
 			if err != nil {
-				logs.Err.Println(err)
+				flog.Error(err)
 				return types.TextMsg{Text: "retrieve error"}
 			}
 

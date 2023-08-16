@@ -1,6 +1,7 @@
 package scheduler
 
 import (
+	"github.com/tinode/chat/server/extra/pkg/flog"
 	"github.com/tinode/chat/server/extra/types/meta"
 	"github.com/tinode/chat/server/extra/utils/clock"
 	"github.com/tinode/chat/server/extra/utils/heap"
@@ -120,7 +121,7 @@ func MakeNextStepFunc(queue SchedulingQueue) func() *meta.QueuedStepInfo {
 	return func() *meta.QueuedStepInfo {
 		stepInfo, err := queue.Pop()
 		if err == nil {
-			logs.Info.Printf("About to try and schedule step %s %s", stepInfo.Step.Name, stepInfo.Step.UID)
+			flog.Info("About to try and schedule step %s %s", stepInfo.Step.Name, stepInfo.Step.UID)
 			return stepInfo
 		}
 		logs.Err.Printf("%s Error while retrieving next step from scheduling queue", err)
@@ -674,7 +675,7 @@ func (npm *nominator) add(pi *meta.StepInfo, nominatingInfo *meta.NominatingInfo
 		//	return
 		//}
 		//workerName = pi.Step.Status.NominatedWorkerName
-		logs.Info.Printf("%+v", nominatingInfo.Mode())
+		flog.Info("%+v", nominatingInfo.Mode())
 	}
 
 	//if npm.stepLister != nil {
@@ -685,7 +686,7 @@ func (npm *nominator) add(pi *meta.StepInfo, nominatingInfo *meta.NominatingInfo
 	//		return
 	//	}
 	//	if updatedStep.WorkerUID != "" {
-	//		logs.Info.Printf("Step is already scheduled to a worker, aborted adding it to the nominator, %T %s", pi.Step, updatedStep.WorkerUID)
+	//		flog.Info("Step is already scheduled to a worker, aborted adding it to the nominator, %T %s", pi.Step, updatedStep.WorkerUID)
 	//		return
 	//	}
 	//}
@@ -693,7 +694,7 @@ func (npm *nominator) add(pi *meta.StepInfo, nominatingInfo *meta.NominatingInfo
 	npm.nominatedStepToWorker[pi.Step.UID] = workerName
 	for _, npi := range npm.nominatedSteps[workerName] {
 		if npi.Step.UID == pi.Step.UID {
-			logs.Info.Printf("Step already exists in the nominator, %v", npi.Step)
+			flog.Info("Step already exists in the nominator, %v", npi.Step)
 			return
 		}
 	}

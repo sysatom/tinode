@@ -2,12 +2,12 @@ package notion
 
 import (
 	"github.com/tinode/chat/server/extra/bots"
+	"github.com/tinode/chat/server/extra/pkg/flog"
 	"github.com/tinode/chat/server/extra/pkg/parser"
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/vendors/notion"
-	"github.com/tinode/chat/server/logs"
 )
 
 var commandRules = []command.Rule{
@@ -85,7 +85,7 @@ var commandRules = []command.Rule{
 			provider := notion.NewNotion(token)
 			err = provider.AppendBlock(pageId, text)
 			if err != nil {
-				logs.Err.Println(err)
+				flog.Error(err)
 				return types.TextMsg{Text: "import error"}
 			}
 

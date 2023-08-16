@@ -7,12 +7,12 @@ import (
 	"github.com/emicklei/go-restful/v3"
 	"github.com/tinode/chat/server/extra/bots"
 	"github.com/tinode/chat/server/extra/pkg/event"
+	"github.com/tinode/chat/server/extra/pkg/flog"
 	"github.com/tinode/chat/server/extra/pkg/route"
 	extraStore "github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/store/model"
 	extraTypes "github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/utils"
-	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/store"
 	"github.com/tinode/chat/server/store/types"
 	"text/template"
@@ -105,7 +105,7 @@ func saveMarkdown(req *restful.Request, resp *restful.Response) {
 		"message":   message,
 	})
 	if err != nil {
-		logs.Err.Println(err)
+		flog.Error(err)
 		_, _ = resp.Write([]byte("send error"))
 		return
 	}

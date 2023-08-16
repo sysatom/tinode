@@ -4,6 +4,7 @@ import (
 	"github.com/adjust/rmq/v5"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/redis/go-redis/v9"
+	"github.com/tinode/chat/server/extra/pkg/flog"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/logs"
 	serverTypes "github.com/tinode/chat/server/store/types"
@@ -59,7 +60,7 @@ func InitMessageQueue(consumer rmq.Consumer) {
 
 func Shutdown() {
 	<-messageQueue.StopConsuming()
-	logs.Info.Println("message queue stopped")
+	flog.Info("message queue stopped")
 }
 
 func logErrors(errChan <-chan error) {
@@ -78,6 +79,7 @@ func logErrors(errChan <-chan error) {
 		default:
 			logs.Err.Println("other error: ", err)
 		}
+		flog.Error(err)
 	}
 }
 

@@ -2,9 +2,9 @@ package scheduler
 
 import (
 	"context"
+	"github.com/tinode/chat/server/extra/pkg/flog"
 	"github.com/tinode/chat/server/extra/types/meta"
 	"github.com/tinode/chat/server/extra/utils/parallelizer"
-	"github.com/tinode/chat/server/logs"
 	"time"
 )
 
@@ -48,7 +48,7 @@ func (sched *Scheduler) Run(ctx context.Context) {
 	go parallelizer.JitterUntil(sched.SchedulingOne, time.Second, 0.0, true, sched.stop)
 
 	<-sched.stop
-	logs.Info.Println("scheduler stopped")
+	flog.Info("scheduler stopped")
 	sched.SchedulingQueue.Close()
 }
 
@@ -71,8 +71,6 @@ func (sched *Scheduler) SchedulingOne() {
 	// todo assume
 
 	// todo bind
-
-	logs.Info.Printf("schedule done step %s", step.UID)
 }
 
 func (sched *Scheduler) assume() {
@@ -111,7 +109,7 @@ func (sched *Scheduler) nextStep() *meta.QueuedStepInfo {
 func (sched *Scheduler) skipStepSchedule(step *meta.Step) bool {
 	// step is being deleted
 	if step.DeletionTimestamp != nil {
-		logs.Info.Printf("skip step schedule %s", step.UID)
+		flog.Info("skip step schedule %s", step.UID)
 		return true
 	}
 

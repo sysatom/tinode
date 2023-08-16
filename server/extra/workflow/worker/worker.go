@@ -3,9 +3,9 @@ package worker
 import (
 	"context"
 	"fmt"
+	"github.com/tinode/chat/server/extra/pkg/flog"
 	"github.com/tinode/chat/server/extra/utils/parallelizer"
 	"github.com/tinode/chat/server/extra/utils/queue"
-	"github.com/tinode/chat/server/logs"
 	"time"
 )
 
@@ -29,7 +29,7 @@ func (m *Worker) Run(ctx context.Context) {
 	go parallelizer.JitterUntil(m.work, time.Second, 0.0, true, m.stop)
 
 	<-m.stop
-	logs.Info.Println("worker stopped")
+	flog.Info("worker stopped")
 }
 
 func (m *Worker) Shutdown() {

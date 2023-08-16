@@ -2,11 +2,11 @@ package pocket
 
 import (
 	"errors"
+	"github.com/tinode/chat/server/extra/pkg/flog"
 	"github.com/tinode/chat/server/extra/ruleset/cron"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/vendors/pocket"
-	"github.com/tinode/chat/server/logs"
 	"gorm.io/gorm"
 )
 
@@ -17,7 +17,7 @@ var cronRules = []cron.Rule{
 		Action: func(ctx types.Context) []types.MsgPayload {
 			oauth, err := store.Chatbot.OAuthGet(ctx.AsUser, ctx.Original, Name)
 			if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-				logs.Err.Println("bot command pocket oauth", err)
+				flog.Error(err)
 			}
 			if oauth.Token == "" {
 				return nil
@@ -26,7 +26,7 @@ var cronRules = []cron.Rule{
 			provider := pocket.NewPocket(Config.ConsumerKey, "", "", oauth.Token)
 			items, err := provider.Retrieve(10)
 			if err != nil {
-				logs.Err.Println(err)
+				flog.Error(err)
 				return nil
 			}
 

@@ -2,8 +2,8 @@ package event
 
 import (
 	"github.com/gookit/event"
+	"github.com/tinode/chat/server/extra/pkg/flog"
 	"github.com/tinode/chat/server/extra/types"
-	"github.com/tinode/chat/server/logs"
 )
 
 type ListenerFunc func(data types.KV) error
@@ -30,8 +30,8 @@ func AsyncEmit(name string, params types.KV) {
 func Shutdown() {
 	err := event.Std().CloseWait()
 	if err != nil {
-		logs.Err.Println(err)
+		flog.Error(err)
 		return
 	}
-	logs.Info.Println("event stopped")
+	flog.Info("event stopped")
 }

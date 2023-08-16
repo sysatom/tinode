@@ -5,10 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"github.com/tinode/chat/server/extra/bots"
+	"github.com/tinode/chat/server/extra/pkg/flog"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/types"
-	"github.com/tinode/chat/server/logs"
 	serverStore "github.com/tinode/chat/server/store"
 	serverTypes "github.com/tinode/chat/server/store/types"
 	"gorm.io/gorm"
@@ -45,7 +45,7 @@ func (bot) Init(jsonconf json.RawMessage) error {
 	}
 
 	if !config.Enabled {
-		logs.Info.Printf("bot %s disabled", Name)
+		flog.Info("bot %s disabled", Name)
 		return nil
 	}
 
@@ -73,14 +73,14 @@ func (b bot) Input(ctx types.Context, _ types.KV, content interface{}) (types.Ms
 
 	items, err := store.Chatbot.SearchMessages(ctx.AsUser, ctx.RcptTo, filter)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		logs.Err.Println(err)
+		flog.Error(err)
 		return types.TextMsg{Text: "Empty"}, nil
 	}
 
 	// bots
 	botList, err := store.Chatbot.GetBotUsers()
 	if err != nil {
-		logs.Err.Println(err)
+		flog.Error(err)
 		return types.TextMsg{Text: "Empty"}, nil
 	}
 	botsM := make(map[uint64]string)
@@ -91,7 +91,7 @@ func (b bot) Input(ctx types.Context, _ types.KV, content interface{}) (types.Ms
 	// group
 	groupList, err := store.Chatbot.GetGroupTopics(ctx.AsUser)
 	if err != nil {
-		logs.Err.Println(err)
+		flog.Error(err)
 		return types.TextMsg{Text: "Empty"}, nil
 	}
 	groupsM := make(map[string]string)

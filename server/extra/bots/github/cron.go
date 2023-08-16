@@ -1,10 +1,10 @@
 package github
 
 import (
+	"github.com/tinode/chat/server/extra/pkg/flog"
 	"github.com/tinode/chat/server/extra/ruleset/cron"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/vendors/github"
-	"github.com/tinode/chat/server/logs"
 )
 
 var cronRules = []cron.Rule{
@@ -16,7 +16,7 @@ var cronRules = []cron.Rule{
 			client := github.NewGithub("", "", "", ctx.Token)
 			user, err := client.GetAuthenticatedUser()
 			if err != nil {
-				logs.Err.Println("cron github_starred", err)
+				flog.Error(err)
 				return []types.MsgPayload{}
 			}
 			if *user.Login == "" {
@@ -25,7 +25,7 @@ var cronRules = []cron.Rule{
 
 			repos, err := client.GetStarred(*user.Login)
 			if err != nil {
-				logs.Err.Println("cron github_starred", err)
+				flog.Error(err)
 				return []types.MsgPayload{}
 			}
 			reposList := *repos

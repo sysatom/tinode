@@ -10,6 +10,7 @@ import (
 	jsoniter "github.com/json-iterator/go"
 	"github.com/tinode/chat/server/auth"
 	pkgEvent "github.com/tinode/chat/server/extra/pkg/event"
+	"github.com/tinode/chat/server/extra/pkg/flog"
 	"github.com/tinode/chat/server/extra/pkg/parser"
 	"github.com/tinode/chat/server/extra/pkg/route"
 	"github.com/tinode/chat/server/extra/ruleset/action"
@@ -29,7 +30,6 @@ import (
 	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/utils"
-	"github.com/tinode/chat/server/logs"
 	serverTypes "github.com/tinode/chat/server/store/types"
 	"gorm.io/gorm"
 	"io/fs"
@@ -290,7 +290,7 @@ func TriggerPipeline(pipelineRules []pipeline.Rule, ctx types.Context, _ types.K
 			// store pipeline
 			flag, err := StorePipeline(ctx, rule, 0)
 			if err != nil {
-				logs.Err.Println(err)
+				flog.Error(err)
 				return "", pipeline.Rule{}, err
 			}
 			pipelineFlag = flag
@@ -650,13 +650,13 @@ func StoreForm(ctx types.Context, payload types.MsgPayload) types.MsgPayload {
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	d, err := json.Marshal(payload)
 	if err != nil {
-		logs.Err.Println(err)
+		flog.Error(err)
 		return types.TextMsg{Text: "store form error"}
 	}
 	schema := types.KV{}
 	err = schema.Scan(d)
 	if err != nil {
-		logs.Err.Println(err)
+		flog.Error(err)
 		return types.TextMsg{Text: "store form error"}
 	}
 
@@ -685,7 +685,7 @@ func StoreForm(ctx types.Context, payload types.MsgPayload) types.MsgPayload {
 		State:  model.FormStateCreated,
 	})
 	if err != nil {
-		logs.Err.Println(err)
+		flog.Error(err)
 		return types.TextMsg{Text: "store form error"}
 	}
 
@@ -699,7 +699,7 @@ func StoreForm(ctx types.Context, payload types.MsgPayload) types.MsgPayload {
 		State:  model.PageStateCreated,
 	})
 	if err != nil {
-		logs.Err.Println(err)
+		flog.Error(err)
 		return types.TextMsg{Text: "store form error"}
 	}
 
@@ -746,13 +746,13 @@ func StorePage(ctx types.Context, category model.PageType, title string, payload
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	d, err := json.Marshal(payload)
 	if err != nil {
-		logs.Err.Println(err)
+		flog.Error(err)
 		return types.TextMsg{Text: "store form error"}
 	}
 	schema := types.KV{}
 	err = schema.Scan(d)
 	if err != nil {
-		logs.Err.Println(err)
+		flog.Error(err)
 		return types.TextMsg{Text: "store form error"}
 	}
 
@@ -766,7 +766,7 @@ func StorePage(ctx types.Context, category model.PageType, title string, payload
 		State:  model.PageStateCreated,
 	})
 	if err != nil {
-		logs.Err.Println(err)
+		flog.Error(err)
 		return types.TextMsg{Text: "store form error"}
 	}
 
@@ -916,7 +916,7 @@ func StoreInstruct(ctx types.Context, payload types.MsgPayload) types.MsgPayload
 		"expire_at": msg.ExpireAt,
 	})
 	if err != nil {
-		logs.Err.Println(err)
+		flog.Error(err)
 	}
 
 	return types.TextMsg{Text: fmt.Sprintf("Instruct[%s:%s]", msg.Flag, msg.No)}

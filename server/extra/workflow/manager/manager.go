@@ -5,11 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"github.com/tinode/chat/server/extra/pkg/dag"
+	"github.com/tinode/chat/server/extra/pkg/flog"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/utils/parallelizer"
 	"github.com/tinode/chat/server/extra/utils/queue"
-	"github.com/tinode/chat/server/logs"
 	"time"
 )
 
@@ -37,7 +37,7 @@ func (m *Manager) Run(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		case <-m.stop:
-			logs.Info.Println("manager stopped")
+			flog.Info("manager stopped")
 			return
 		default:
 			m.popJob()
@@ -59,13 +59,13 @@ func (m *Manager) pushJob() {
 
 	list, err := store.Chatbot.GetJobsByState(model.JobReady)
 	if err != nil {
-		logs.Err.Println(err)
+		flog.Error(err)
 		return
 	}
 	for _, job := range list {
 		_, exists, err := m.Queue.Get(job)
 		if err != nil {
-			logs.Err.Println(err)
+			flog.Error(err)
 			continue
 		}
 		if exists {
@@ -74,7 +74,7 @@ func (m *Manager) pushJob() {
 
 		err = m.Queue.Add(job)
 		if err != nil {
-			logs.Err.Println(err)
+			flog.Error(err)
 		}
 	}
 }
@@ -94,7 +94,7 @@ func (m *Manager) popJob() {
 		return nil
 	})
 	if err != nil {
-		logs.Err.Println(err)
+		flog.Error(err)
 	}
 }
 

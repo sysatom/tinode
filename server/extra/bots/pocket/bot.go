@@ -5,12 +5,12 @@ import (
 	"errors"
 	"github.com/tinode/chat/server/drafty"
 	"github.com/tinode/chat/server/extra/bots"
+	"github.com/tinode/chat/server/extra/pkg/flog"
 	"github.com/tinode/chat/server/extra/ruleset/cron"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/utils"
 	"github.com/tinode/chat/server/extra/vendors/pocket"
-	"github.com/tinode/chat/server/logs"
 	"gorm.io/gorm"
 )
 
@@ -45,7 +45,7 @@ func (bot) Init(jsonconf json.RawMessage) error {
 	}
 
 	if !Config.Enabled {
-		logs.Info.Printf("bot %s disabled", Name)
+		flog.Info("bot %s disabled", Name)
 		return nil
 	}
 
@@ -76,7 +76,7 @@ func (b bot) Input(ctx types.Context, _ types.KV, content interface{}) (types.Ms
 		url := text
 		oauth, err := store.Chatbot.OAuthGet(ctx.AsUser, ctx.Original, Name)
 		if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-			logs.Err.Println("bot command pocket oauth", err)
+			flog.Error(err)
 		}
 		if oauth.Token == "" {
 			return types.TextMsg{Text: "App is unauthorized"}, nil
@@ -85,7 +85,7 @@ func (b bot) Input(ctx types.Context, _ types.KV, content interface{}) (types.Ms
 		provider := pocket.NewPocket(Config.ConsumerKey, "", "", oauth.Token)
 		_, err = provider.Add(url)
 		if err != nil {
-			logs.Err.Println(err)
+			flog.Error(err)
 			return types.TextMsg{Text: "Add error"}, nil
 		}
 

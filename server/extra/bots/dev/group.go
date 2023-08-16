@@ -1,10 +1,10 @@
 package dev
 
 import (
+	"github.com/tinode/chat/server/extra/pkg/flog"
 	"github.com/tinode/chat/server/extra/pkg/template"
 	"github.com/tinode/chat/server/extra/ruleset/event"
 	"github.com/tinode/chat/server/extra/types"
-	"github.com/tinode/chat/server/logs"
 )
 
 var eventRules = []event.Rule{
@@ -13,7 +13,7 @@ var eventRules = []event.Rule{
 		Handler: func(ctx types.Context, head types.KV, content interface{}) types.MsgPayload {
 			txt, err := template.Parse(ctx, "Welcome $username")
 			if err != nil {
-				logs.Err.Println(err)
+				flog.Error(err)
 				return types.TextMsg{Text: "error user"}
 			}
 			return types.TextMsg{Text: txt}
@@ -24,7 +24,7 @@ var eventRules = []event.Rule{
 		Handler: func(ctx types.Context, head types.KV, content interface{}) types.MsgPayload {
 			txt, err := template.Parse(ctx, "Bye $username")
 			if err != nil {
-				logs.Err.Println(err)
+				flog.Error(err)
 				return types.TextMsg{Text: "error user"}
 			}
 			return types.TextMsg{Text: txt}

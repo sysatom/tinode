@@ -4,17 +4,18 @@ import (
 	"bytes"
 	"crypto/rand"
 	_ "embed"
+	"errors"
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/tinode/chat/server/extra/bots"
 	"github.com/tinode/chat/server/extra/pkg/event"
+	"github.com/tinode/chat/server/extra/pkg/flog"
 	"github.com/tinode/chat/server/extra/pkg/parser"
 	"github.com/tinode/chat/server/extra/pkg/queue"
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/utils"
-	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/store"
 	serverTypes "github.com/tinode/chat/server/store/types"
 	"gonum.org/v1/plot"
@@ -33,6 +34,8 @@ var commandRules = []command.Rule{
 		Define: "info",
 		Help:   `Bot info`,
 		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
+			flog.Info("test...")
+			flog.Error(errors.New("test rollbar"))
 			return nil
 		},
 	},
@@ -59,7 +62,7 @@ var commandRules = []command.Rule{
 
 			nBing, err := rand.Int(rand.Reader, big.NewInt(max+1-min))
 			if err != nil {
-				logs.Err.Println("bot command rand [number] [number]", err)
+				flog.Error(err)
 				return nil
 			}
 			t := nBing.Int64() + min

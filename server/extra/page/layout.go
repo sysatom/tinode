@@ -6,9 +6,9 @@ import (
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 	"github.com/tinode/chat/server/extra/page/component"
 	"github.com/tinode/chat/server/extra/page/library"
+	"github.com/tinode/chat/server/extra/pkg/flog"
 	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/types"
-	"github.com/tinode/chat/server/logs"
 	"html"
 	"strings"
 )
@@ -168,7 +168,7 @@ func Render(comp *types.UI) string {
 				var json = jsoniter.ConfigCompatibleWithStandardLibrary
 				j, err := json.Marshal(v)
 				if err != nil {
-					logs.Err.Println(err)
+					flog.Error(err)
 					continue
 				}
 				scriptsStr.WriteString(fmt.Sprintf(`Global.%s = %s;`, key, string(j)))

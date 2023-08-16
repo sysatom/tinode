@@ -3,8 +3,8 @@ package types
 import (
 	"encoding/json"
 	jsoniter "github.com/json-iterator/go"
+	"github.com/tinode/chat/server/extra/pkg/flog"
 	"github.com/tinode/chat/server/extra/utils"
-	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/store/types"
 	"net/http"
 	"os"
@@ -69,14 +69,14 @@ type Context struct {
 func Id() types.Uid {
 	key, err := utils.GenerateRandomString(16)
 	if err != nil {
-		logs.Err.Println("bot command id", err)
+		flog.Error(err)
 		return 0
 	}
 
 	uGen := types.UidGenerator{}
 	err = uGen.Init(1, []byte(key))
 	if err != nil {
-		logs.Err.Println("bot command id", err)
+		flog.Error(err)
 		return 0
 	}
 

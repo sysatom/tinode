@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/tinode/chat/server/extra/bots"
+	"github.com/tinode/chat/server/extra/pkg/flog"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/vendors/openai"
-	"github.com/tinode/chat/server/logs"
 )
 
 const Name = "gpt"
@@ -42,7 +42,7 @@ func (bot) Init(jsonconf json.RawMessage) error {
 	}
 
 	if !config.Enabled {
-		logs.Info.Printf("bot %s disabled", Name)
+		flog.Info("bot %s disabled", Name)
 		return nil
 	}
 
@@ -59,7 +59,7 @@ func (b bot) Input(ctx types.Context, _ types.KV, context interface{}) (types.Ms
 	// key
 	v, err := store.Chatbot.ConfigGet(ctx.AsUser, ctx.Original, ApiKey)
 	if err != nil {
-		logs.Err.Println("bot command key", err)
+		flog.Error(err)
 	}
 	key, _ := v.String("value")
 

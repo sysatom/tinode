@@ -2,7 +2,7 @@ package cache
 
 import (
 	"context"
-	"github.com/tinode/chat/server/logs"
+	"github.com/tinode/chat/server/extra/pkg/flog"
 	"os"
 
 	"github.com/redis/go-redis/v9"
@@ -30,8 +30,8 @@ func InitCache() {
 func Shutdown() {
 	err := DB.Close()
 	if err != nil {
-		logs.Err.Println(err)
+		flog.Error(err)
 		return
 	}
-	logs.Info.Println("cache stopped")
+	flog.Info("cache stopped")
 }

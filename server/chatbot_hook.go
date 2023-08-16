@@ -94,8 +94,14 @@ func hookBot(jsconfig json.RawMessage, vc json.RawMessage) {
 	// set vendors configs
 	vendors.Configs = vc
 
+	// init error
+	err := initializeErrorTracking()
+	if err != nil {
+		logs.Err.Fatal("Failed to initialize error tracking:", err)
+	}
+
 	// init bots
-	err := bots.Init(jsconfig)
+	err = bots.Init(jsconfig)
 	if err != nil {
 		logs.Err.Fatal("Failed to initialize bot:", err)
 	}

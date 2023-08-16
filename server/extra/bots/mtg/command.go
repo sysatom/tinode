@@ -3,11 +3,11 @@ package mtg
 import (
 	"context"
 	"fmt"
+	"github.com/tinode/chat/server/extra/pkg/flog"
 	"github.com/tinode/chat/server/extra/pkg/parser"
 	"github.com/tinode/chat/server/extra/ruleset/command"
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/vendors/scryfall"
-	"github.com/tinode/chat/server/logs"
 )
 
 var commandRules = []command.Rule{
@@ -26,7 +26,7 @@ var commandRules = []command.Rule{
 			provider := scryfall.NewScryfall()
 			result, err := provider.CardsSearch(context.Background(), fmt.Sprintf("%s lang:zhs", keyword))
 			if err != nil {
-				logs.Err.Println(err)
+				flog.Error(err)
 				return types.TextMsg{Text: "search error"}
 			}
 			if len(result) == 0 {
