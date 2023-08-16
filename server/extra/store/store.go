@@ -183,15 +183,15 @@ type Adapter interface {
 	DeleteTodo(id int64) error
 	DeleteTodoBySequence(uid types.Uid, topic string, sequence int64) error
 	CreateReview(review *model.Review) (int64, error)
-	UpdateReview(review *model.Review)
+	UpdateReview(review *model.Review) error
 	ListReviews(uid types.Uid, topic string) ([]*model.Review, error)
 	GetReviewByID(id int64) (*model.Review, error)
 	CreateReviewEvaluation(evaluation *model.ReviewEvaluation) (int64, error)
-	UpdateReviewEvaluation(evaluation *model.ReviewEvaluation)
+	UpdateReviewEvaluation(evaluation *model.ReviewEvaluation) error
 	ListReviewEvaluations(uid types.Uid, topic string, reviewID int64) ([]*model.ReviewEvaluation, error)
 	GetReviewEvaluationByID(id int64) (*model.ReviewEvaluation, error)
 	CreateCycle(cycle *model.Cycle) (int64, error)
-	UpdateCycle(cycle *model.Cycle)
+	UpdateCycle(cycle *model.Cycle) error
 	ListCycles(uid types.Uid, topic string) ([]*model.Cycle, error)
 	GetCycleByID(id int64) (*model.Cycle, error)
 

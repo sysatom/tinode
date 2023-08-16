@@ -6,16 +6,16 @@ import (
 )
 
 type Step struct {
-	Name              string
-	UID               string
-	WorkerUID         string
-	ResourceVersion   string
-	Generation        int
-	Finalizers        interface{}
-	DeletionTimestamp *time.Time
+	Name              string      `json:"name,omitempty"`
+	UID               string      `json:"uid,omitempty"`
+	WorkerUID         string      `json:"worker_uid,omitempty"`
+	ResourceVersion   string      `json:"resource_version,omitempty"`
+	Generation        int         `json:"generation,omitempty"`
+	Finalizers        interface{} `json:"finalizers,omitempty"`
+	DeletionTimestamp *time.Time  `json:"deletion_timestamp,omitempty"`
 
-	DagUID       string
-	NodeId       string
-	DependNodeId []string
-	State        model.StepState
+	DagUID       string          `json:"dag_uid,omitempty"`
+	NodeId       string          `json:"node_id,omitempty"`
+	DependNodeId []string        `json:"depend_node_id,omitempty"`
+	State        model.StepState `json:"state,omitempty"`
 }

@@ -972,63 +972,81 @@ func (a *adapter) DeleteTodoBySequence(uid types.Uid, topic string, sequence int
 }
 
 func (a *adapter) CreateReview(review *model.Review) (int64, error) {
-	//TODO implement me
-	panic("implement me")
+	q := dao.Q.Review
+	err := q.Create(review)
+	if err != nil {
+		return 0, err
+	}
+	return int64(review.ID), nil
 }
 
-func (a *adapter) UpdateReview(review *model.Review) {
-	//TODO implement me
-	panic("implement me")
+func (a *adapter) UpdateReview(review *model.Review) error {
+	q := dao.Q.Review
+	_, err := q.Updates(review)
+	return err
 }
 
 func (a *adapter) ListReviews(uid types.Uid, topic string) ([]*model.Review, error) {
-	//TODO implement me
-	panic("implement me")
+	q := dao.Q.Review
+	return q.Where(q.UID.Eq(uid.UserId()), q.Topic.Eq(topic)).
+		Order(q.UpdatedAt.Desc()).Find()
 }
 
 func (a *adapter) GetReviewByID(id int64) (*model.Review, error) {
-	//TODO implement me
-	panic("implement me")
+	q := dao.Q.Review
+	return q.Where(q.ID.Eq(int32(id))).First()
 }
 
 func (a *adapter) CreateReviewEvaluation(evaluation *model.ReviewEvaluation) (int64, error) {
-	//TODO implement me
-	panic("implement me")
+	q := dao.Q.ReviewEvaluation
+	err := q.Create(evaluation)
+	if err != nil {
+		return 0, err
+	}
+	return int64(evaluation.ID), nil
 }
 
-func (a *adapter) UpdateReviewEvaluation(evaluation *model.ReviewEvaluation) {
-	//TODO implement me
-	panic("implement me")
+func (a *adapter) UpdateReviewEvaluation(evaluation *model.ReviewEvaluation) error {
+	q := dao.Q.ReviewEvaluation
+	_, err := q.Updates(evaluation)
+	return err
 }
 
 func (a *adapter) ListReviewEvaluations(uid types.Uid, topic string, reviewID int64) ([]*model.ReviewEvaluation, error) {
-	//TODO implement me
-	panic("implement me")
+	q := dao.Q.ReviewEvaluation
+	return q.Where(q.UID.Eq(uid.UserId()), q.Topic.Eq(topic), q.ReviewID.Eq(int32(reviewID))).
+		Order(q.UpdatedAt.Desc()).Find()
 }
 
 func (a *adapter) GetReviewEvaluationByID(id int64) (*model.ReviewEvaluation, error) {
-	//TODO implement me
-	panic("implement me")
+	q := dao.Q.ReviewEvaluation
+	return q.Where(q.ID.Eq(int32(id))).First()
 }
 
 func (a *adapter) CreateCycle(cycle *model.Cycle) (int64, error) {
-	//TODO implement me
-	panic("implement me")
+	q := dao.Q.Cycle
+	err := q.Create(cycle)
+	if err != nil {
+		return 0, err
+	}
+	return int64(cycle.ID), nil
 }
 
-func (a *adapter) UpdateCycle(cycle *model.Cycle) {
-	//TODO implement me
-	panic("implement me")
+func (a *adapter) UpdateCycle(cycle *model.Cycle) error {
+	q := dao.Q.Cycle
+	_, err := q.Updates(cycle)
+	return err
 }
 
 func (a *adapter) ListCycles(uid types.Uid, topic string) ([]*model.Cycle, error) {
-	//TODO implement me
-	panic("implement me")
+	q := dao.Q.Cycle
+	return q.Where(q.UID.Eq(uid.UserId()), q.Topic.Eq(topic)).
+		Order(q.UpdatedAt.Desc()).Find()
 }
 
 func (a *adapter) GetCycleByID(id int64) (*model.Cycle, error) {
-	//TODO implement me
-	panic("implement me")
+	q := dao.Q.Cycle
+	return q.Where(q.ID.Eq(int32(id))).First()
 }
 
 func (a *adapter) CreateCounter(counter *model.Counter) (int64, error) {
