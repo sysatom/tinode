@@ -3,7 +3,7 @@ package channels
 import (
 	"errors"
 	"github.com/tinode/chat/server/extra/pkg/channels/crawler"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 	"io/fs"
 	"os"
 	"path/filepath"
