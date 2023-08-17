@@ -109,15 +109,17 @@ func (m *Manager) splitDag(job *model.Job) error {
 	}
 
 	// create steps
-	steps := make([]*model.Step, len(list))
+	steps := make([]*model.Step, 0, len(list))
 	for _, step := range list {
 		steps = append(steps, &model.Step{
 			UID:    job.UID,
 			Topic:  job.Topic,
 			JobID:  job.ID,
-			Action: "", // todo
+			Action: model.JSON{"bot": "demo", "action": "start"}, // todo
 			Name:   step.Name,
 			State:  step.State,
+			NodeID: step.NodeId,
+			Depend: step.Depend,
 		})
 	}
 	err = store.Chatbot.CreateSteps(steps)

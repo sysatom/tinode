@@ -47,7 +47,7 @@ func TopologySort(item *model.Dag) ([]meta.Step, error) {
 			if err != nil {
 				return nil, err
 			}
-			var dependNodeId []string
+			dependNodeId := make([]string, 0)
 			for pid := range parents {
 				dependNodeId = append(dependNodeId, pid)
 			}
@@ -57,10 +57,10 @@ func TopologySort(item *model.Dag) ([]meta.Step, error) {
 				state = model.StepReady
 			}
 			result = append(result, meta.Step{
-				DagUID:       item.UID,
-				NodeId:       id,
-				DependNodeId: dependNodeId,
-				State:        state,
+				DagUID: item.UID,
+				NodeId: id,
+				Depend: dependNodeId,
+				State:  state,
 			})
 			have[id] = struct{}{}
 		}

@@ -171,7 +171,20 @@ func GenerationAction(c *cli.Context) error {
 			},
 		}))
 	steps := g.GenerateModelAs("chatbot_steps", "Step",
-		gen.FieldType("depend", "IDList"),
+		gen.FieldType("depend", "[]string"),
+		gen.FieldGORMTag("depend", func(tag field.GormTag) field.GormTag {
+			return map[string][]string{
+				"column":     {"depend"},
+				"type":       {"json"},
+				"serializer": {"json"},
+				"not null":   nil,
+			}
+		}),
+		gen.FieldType("action", "JSON"),
+		gen.FieldType("input", "JSON"),
+		gen.FieldType("output", "JSON"),
+		gen.FieldType("started_at", "*time.Time"),
+		gen.FieldType("finished_at", "*time.Time"),
 		gen.FieldType("state", "StepState"))
 	jobs := g.GenerateModelAs("chatbot_jobs", "Job",
 		gen.FieldType("state", "JobState"),

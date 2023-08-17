@@ -14,8 +14,8 @@ type Step struct {
 	Finalizers        interface{} `json:"finalizers,omitempty"`
 	DeletionTimestamp *time.Time  `json:"deletion_timestamp,omitempty"`
 
-	DagUID       string          `json:"dag_uid,omitempty"`
-	NodeId       string          `json:"node_id,omitempty"`
-	DependNodeId []string        `json:"depend_node_id,omitempty"`
-	State        model.StepState `json:"state,omitempty"`
+	DagUID string          `json:"dag_uid,omitempty"`
+	NodeId string          `json:"node_id,omitempty"`
+	Depend []string        `json:"depend,omitempty"`
+	State  model.StepState `json:"state,omitempty"`
 }

@@ -48,6 +48,8 @@ CREATE TABLE `chatbot_steps`
     `action`      JSON             NOT NULL,
     `name`        VARCHAR(100)     NOT NULL DEFAULT '' COLLATE 'utf8mb4_unicode_ci',
     `describe`    VARCHAR(300)     NOT NULL DEFAULT '' COLLATE 'utf8mb4_unicode_ci',
+    `node_id`     VARCHAR(50)      NOT NULL DEFAULT '' COLLATE 'utf8mb4_unicode_ci',
+    `depend`      JSON             NULL     DEFAULT NULL,
     `input`       JSON             NULL     DEFAULT NULL,
     `output`      JSON             NULL     DEFAULT NULL,
     `error`       VARCHAR(1000)    NULL     DEFAULT NULL COLLATE 'utf8mb4_unicode_ci',

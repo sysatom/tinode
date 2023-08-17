@@ -94,7 +94,7 @@ func (sched *Scheduler) nextStep() *meta.QueuedStepInfo {
 				DeletionTimestamp: nil,
 				DagUID:            "",
 				NodeId:            "",
-				DependNodeId:      nil,
+				Depend:            nil,
 				State:             0,
 			},
 			ParseError: nil,
