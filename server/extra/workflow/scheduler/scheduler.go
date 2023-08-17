@@ -3,28 +3,15 @@ package scheduler
 import (
 	"context"
 	"github.com/tinode/chat/server/extra/pkg/flog"
+	"github.com/tinode/chat/server/extra/store"
+	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/types/meta"
 	"github.com/tinode/chat/server/extra/utils/parallelizer"
 	"time"
 )
 
-// ScheduleResult represents the result of scheduling a stage.
-type ScheduleResult struct {
-	// UID of the selected worker.
-	SuggestedHost string
-	// The number of workers the scheduler evaluated the stage against in the filtering
-	// phase and beyond.
-	EvaluatedWorkers int
-	// The number of workers out of the evaluated ones that fit the stage.
-	FeasibleWorkers int
-}
-
 type Scheduler struct {
 	NextStep func() *meta.QueuedStepInfo
-
-	Error func(*meta.QueuedStepInfo, error)
-
-	ScheduleStep func(ctx context.Context, step *meta.Step) (ScheduleResult, error)
 
 	stop chan struct{}
 
@@ -33,9 +20,9 @@ type Scheduler struct {
 	nextStartWorkerIndex int
 }
 
-func NewScheduler() *Scheduler {
+func NewScheduler(queue SchedulingQueue) *Scheduler {
 	s := &Scheduler{
-		SchedulingQueue: NewSchedulingQueue(nil),
+		SchedulingQueue: queue,
 		stop:            make(chan struct{}),
 	}
 	s.NextStep = s.nextStep
@@ -68,38 +55,36 @@ func (sched *Scheduler) SchedulingOne() {
 		return
 	}
 
-	// todo assume
-
-	// todo bind
-}
-
-func (sched *Scheduler) assume() {
-
-}
-
-func (sched *Scheduler) bind() {
-
+	err := sched.SchedulingQueue.Add(step)
+	if err != nil {
+		flog.Error(err)
+	}
 }
 
 func (sched *Scheduler) nextStep() *meta.QueuedStepInfo {
+	readyStep, err := store.Chatbot.GetStepByState(model.StepReady)
+	if err != nil {
+		flog.Error(err)
+		return nil
+	}
+
 	return &meta.QueuedStepInfo{
 		StepInfo: &meta.StepInfo{
 			Step: &meta.Step{
-				Name:              "1",
-				UID:               "1",
-				WorkerUID:         "",
-				ResourceVersion:   "",
-				Generation:        0,
-				Finalizers:        nil,
-				DeletionTimestamp: nil,
-				DagUID:            "",
-				NodeId:            "",
-				Depend:            nil,
-				State:             0,
+				Name:            readyStep.Name,
+				UID:             "",
+				WorkerUID:       "",
+				ResourceVersion: "",
+				Generation:      0,
+				Finalizers:      nil,
+				JobId:           readyStep.JobID,
+				NodeId:          readyStep.NodeID,
+				Depend:          readyStep.Depend,
+				State:           readyStep.State,
 			},
 			ParseError: nil,
 		},
-		Timestamp:               time.Time{},
+		Timestamp:               readyStep.CreatedAt,
 		Attempts:                0,
 		InitialAttemptTimestamp: time.Time{},
 		UnschedulablePlugins:    nil,
@@ -117,7 +102,6 @@ func (sched *Scheduler) skipStepSchedule(step *meta.Step) bool {
 }
 
 func (sched *Scheduler) handleSchedulingFailure(ctx context.Context, stepInfo *meta.QueuedStepInfo, err error, reason string, nominatingInfo *meta.NominatingInfo) {
-	sched.Error(stepInfo, err)
 
 	//if sched.SchedulingQueue != nil {
 	//	sched.SchedulingQueue.AddNominatedStep(stepInfo.StepInfo, nominatingInfo)

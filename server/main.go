@@ -63,7 +63,6 @@ import (
 	"github.com/tinode/chat/server/extra/ruleset/cron"
 	"github.com/tinode/chat/server/extra/workflow/manager"
 	"github.com/tinode/chat/server/extra/workflow/scheduler"
-	"github.com/tinode/chat/server/extra/workflow/worker"
 )
 
 const (
@@ -215,7 +214,7 @@ var globals struct {
 	cronRuleset []*cron.Ruleset
 	manager     *manager.Manager
 	scheduler   *scheduler.Scheduler
-	worker      *worker.Worker
+	workers     []*scheduler.Worker
 }
 
 // Credential validator config.

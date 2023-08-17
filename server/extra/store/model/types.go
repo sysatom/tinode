@@ -188,9 +188,9 @@ const (
 	JobStateUnknown JobState = iota
 	JobReady
 	JobStart
-	JobDone
-	JobCancel
-	JobError
+	JobFinished
+	JobCanceled
+	JobFailed
 )
 
 func (j JobState) Value() (driver.Value, error) {
@@ -204,9 +204,9 @@ const (
 	StepCreated
 	StepReady
 	StepRunning
-	StepError
-	StepCancel
-	StepSuccess
+	StepFinished
+	StepFailed
+	StepCanceled
 	StepSkipped
 )
 

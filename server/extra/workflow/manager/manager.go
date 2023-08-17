@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/looplab/fsm"
 	"github.com/tinode/chat/server/extra/pkg/dag"
 	"github.com/tinode/chat/server/extra/pkg/flog"
 	"github.com/tinode/chat/server/extra/store"
@@ -17,6 +18,8 @@ type Manager struct {
 	Queue *queue.DeltaFIFO
 
 	stop chan struct{}
+
+	fsm *fsm.FSM
 }
 
 func NewManager() *Manager {
@@ -25,6 +28,7 @@ func NewManager() *Manager {
 			KeyFunction: JobKeyFunc,
 		}),
 		stop: make(chan struct{}),
+		fsm:  NewJobFSM(),
 	}
 }
 
@@ -50,12 +54,16 @@ func (m *Manager) Shutdown() {
 	m.stop <- struct{}{}
 }
 
-func (m *Manager) manager() {
-	fmt.Println("manager", time.Now().UnixMicro())
-}
-
 func (m *Manager) pushJob() {
-	fmt.Println("manager", time.Now().UnixMicro())
+
+	fmt.Println(m.fsm.Current())
+	fmt.Println(m.fsm.AvailableTransitions())
+	fmt.Println(m.fsm.Event(context.Background(), "run", 1))
+	fmt.Println(m.fsm.Current())
+	fmt.Println(m.fsm.AvailableTransitions())
+	fmt.Println(m.fsm.Event(context.Background(), "success", 1))
+	fmt.Println(m.fsm.Current())
+	fmt.Println(m.fsm.AvailableTransitions())
 
 	list, err := store.Chatbot.GetJobsByState(model.JobReady)
 	if err != nil {
@@ -99,6 +107,8 @@ func (m *Manager) popJob() {
 }
 
 func (m *Manager) splitDag(job *model.Job) error {
+	flog.Info("job:%d split dag", job.ID)
+
 	d, err := store.Chatbot.GetDag(int64(job.DagID))
 	if err != nil {
 		return err
@@ -136,4 +146,32 @@ func JobKeyFunc(obj interface{}) (string, error) {
 		return fmt.Sprintf("job-%d", j.ID), nil
 	}
 	return "", errors.New("unknown object")
+}
+
+func NewJobFSM() *fsm.FSM {
+	f := fsm.NewFSM(
+		"ready",
+		fsm.Events{
+			{Name: "run", Src: []string{"ready"}, Dst: "start"},
+			{Name: "success", Src: []string{"start"}, Dst: "finished"},
+			{Name: "cancel", Src: []string{"start"}, Dst: "canceled"},
+			{Name: "error", Src: []string{"start"}, Dst: "failed"},
+		},
+		fsm.Callbacks{
+			"before_state": func(_ context.Context, e *fsm.Event) {
+				fmt.Println("before_state", e)
+			},
+			"after_state": func(_ context.Context, e *fsm.Event) {
+				fmt.Println("after_state", e)
+			},
+		},
+	)
+
+	s, err := fsm.VisualizeWithType(f, fsm.MERMAID)
+	if err != nil {
+		flog.Error(err)
+	}
+	fmt.Println(s)
+
+	return f
 }

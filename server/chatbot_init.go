@@ -14,7 +14,6 @@ import (
 	"github.com/tinode/chat/server/extra/vendors/rollbar"
 	"github.com/tinode/chat/server/extra/workflow/manager"
 	"github.com/tinode/chat/server/extra/workflow/scheduler"
-	"github.com/tinode/chat/server/extra/workflow/worker"
 	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/store"
 	"github.com/tinode/chat/server/store/types"
@@ -400,13 +399,20 @@ func initializeCrawler() error {
 
 // init workflow
 func initializeWorkflow() error {
+	const workerNum = 2
 	ctx := context.Background()
+	// manager
 	globals.manager = manager.NewManager()
 	go globals.manager.Run(ctx)
-	globals.scheduler = scheduler.NewScheduler()
+	// scheduler
+	queue := scheduler.NewSchedulingQueue(nil)
+	globals.scheduler = scheduler.NewScheduler(queue)
 	go globals.scheduler.Run(ctx)
-	globals.worker = worker.NewWorker()
-	go globals.worker.Run(ctx)
+	for i := 0; i < workerNum; i++ {
+		worker := scheduler.NewWorker(queue)
+		globals.workers = append(globals.workers, worker)
+		go worker.Run(ctx)
+	}
 	return nil
 }
 

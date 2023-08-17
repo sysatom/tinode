@@ -217,6 +217,7 @@ type Adapter interface {
 	UpdateStepState(id int64, state model.StepState) error
 	CreateStep(step *model.Step) (int64, error)
 	CreateSteps(steps []*model.Step) error
+	GetStepByState(state model.StepState) (*model.Step, error)
 }
 
 var Chatbot Adapter

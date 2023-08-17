@@ -57,7 +57,6 @@ func TopologySort(item *model.Dag) ([]meta.Step, error) {
 				state = model.StepReady
 			}
 			result = append(result, meta.Step{
-				DagUID: item.UID,
 				NodeId: id,
 				Depend: dependNodeId,
 				State:  state,
