@@ -1,4 +1,4 @@
-package scheduler
+package schedule
 
 import (
 	"github.com/tinode/chat/server/extra/pkg/flog"

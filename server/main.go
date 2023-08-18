@@ -61,8 +61,8 @@ import (
 
 	"github.com/tinode/chat/server/extra/pkg/channels/crawler"
 	"github.com/tinode/chat/server/extra/ruleset/cron"
-	"github.com/tinode/chat/server/extra/workflow/manager"
-	"github.com/tinode/chat/server/extra/workflow/scheduler"
+	"github.com/tinode/chat/server/extra/workflow/manage"
+	"github.com/tinode/chat/server/extra/workflow/schedule"
 )
 
 const (
@@ -212,9 +212,9 @@ var globals struct {
 	// Extra vars
 	crawler     *crawler.Crawler
 	cronRuleset []*cron.Ruleset
-	manager     *manager.Manager
-	scheduler   *scheduler.Scheduler
-	workers     []*scheduler.Worker
+	manager     *manage.Manager
+	scheduler   *schedule.Scheduler
+	workers     []*schedule.Worker
 }
 
 // Credential validator config.

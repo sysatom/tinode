@@ -1,7 +1,6 @@
 package flog
 
 import (
-	"github.com/rollbar/rollbar-go"
 	"github.com/rs/zerolog"
 	"io"
 	"os"
@@ -32,7 +31,6 @@ func Warn(format string, a ...any) {
 }
 
 func Error(err error) {
-	rollbar.Error(err)
 	l.Error().Caller(1).Err(err)
 }
 

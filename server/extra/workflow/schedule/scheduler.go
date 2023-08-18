@@ -1,7 +1,9 @@
-package scheduler
+package schedule
 
 import (
 	"context"
+	"fmt"
+	"github.com/looplab/fsm"
 	"github.com/tinode/chat/server/extra/pkg/flog"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/store/model"
@@ -108,4 +110,45 @@ func (sched *Scheduler) handleSchedulingFailure(ctx context.Context, stepInfo *m
 	//}
 
 	// todo update store
+}
+
+func NewStepFSM(state model.StepState) *fsm.FSM {
+	initial := "created"
+	switch state {
+	case model.StepCreated:
+		initial = "created"
+	case model.StepReady:
+		initial = "ready"
+	case model.StepRunning:
+		initial = "running"
+	case model.StepFinished:
+		initial = "finished"
+	case model.StepCanceled:
+		initial = "canceled"
+	case model.StepFailed:
+		initial = "failed"
+	case model.StepSkipped:
+		initial = "skipped"
+	}
+	f := fsm.NewFSM(
+		initial,
+		fsm.Events{
+			{Name: "bind", Src: []string{"created"}, Dst: "ready"},
+			{Name: "run", Src: []string{"ready"}, Dst: "running"},
+			{Name: "success", Src: []string{"running"}, Dst: "finished"},
+			{Name: "error", Src: []string{"running"}, Dst: "failed"},
+			{Name: "cancel", Src: []string{"running"}, Dst: "canceled"},
+			{Name: "skip", Src: []string{"running"}, Dst: "skipped"},
+		},
+		fsm.Callbacks{
+			"before_state": func(_ context.Context, e *fsm.Event) {
+				fmt.Println("before_state")
+			},
+			"after_state": func(_ context.Context, e *fsm.Event) {
+				fmt.Println("after_state")
+			},
+		},
+	)
+
+	return f
 }

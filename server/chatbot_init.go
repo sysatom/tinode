@@ -12,8 +12,8 @@ import (
 	extraTypes "github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/utils"
 	"github.com/tinode/chat/server/extra/vendors/rollbar"
-	"github.com/tinode/chat/server/extra/workflow/manager"
-	"github.com/tinode/chat/server/extra/workflow/scheduler"
+	"github.com/tinode/chat/server/extra/workflow/manage"
+	"github.com/tinode/chat/server/extra/workflow/schedule"
 	"github.com/tinode/chat/server/logs"
 	"github.com/tinode/chat/server/store"
 	"github.com/tinode/chat/server/store/types"
@@ -402,14 +402,14 @@ func initializeWorkflow() error {
 	const workerNum = 2
 	ctx := context.Background()
 	// manager
-	globals.manager = manager.NewManager()
+	globals.manager = manage.NewManager()
 	go globals.manager.Run(ctx)
 	// scheduler
-	queue := scheduler.NewSchedulingQueue(nil)
-	globals.scheduler = scheduler.NewScheduler(queue)
+	queue := schedule.NewSchedulingQueue(nil)
+	globals.scheduler = schedule.NewScheduler(queue)
 	go globals.scheduler.Run(ctx)
 	for i := 0; i < workerNum; i++ {
-		worker := scheduler.NewWorker(queue)
+		worker := schedule.NewWorker(queue)
 		globals.workers = append(globals.workers, worker)
 		go worker.Run(ctx)
 	}

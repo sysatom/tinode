@@ -1,4 +1,4 @@
-package manager
+package manage
 
 import (
 	"context"
@@ -9,6 +9,7 @@ import (
 	"github.com/tinode/chat/server/extra/pkg/flog"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/store/model"
+	"github.com/tinode/chat/server/extra/types/meta"
 	"github.com/tinode/chat/server/extra/utils/parallelizer"
 	"github.com/tinode/chat/server/extra/utils/queue"
 	"time"
@@ -18,8 +19,6 @@ type Manager struct {
 	Queue *queue.DeltaFIFO
 
 	stop chan struct{}
-
-	fsm *fsm.FSM
 }
 
 func NewManager() *Manager {
@@ -28,7 +27,6 @@ func NewManager() *Manager {
 			KeyFunction: JobKeyFunc,
 		}),
 		stop: make(chan struct{}),
-		fsm:  NewJobFSM(),
 	}
 }
 
@@ -55,16 +53,6 @@ func (m *Manager) Shutdown() {
 }
 
 func (m *Manager) pushJob() {
-
-	fmt.Println(m.fsm.Current())
-	fmt.Println(m.fsm.AvailableTransitions())
-	fmt.Println(m.fsm.Event(context.Background(), "run", 1))
-	fmt.Println(m.fsm.Current())
-	fmt.Println(m.fsm.AvailableTransitions())
-	fmt.Println(m.fsm.Event(context.Background(), "success", 1))
-	fmt.Println(m.fsm.Current())
-	fmt.Println(m.fsm.AvailableTransitions())
-
 	list, err := store.Chatbot.GetJobsByState(model.JobReady)
 	if err != nil {
 		flog.Error(err)
@@ -80,7 +68,10 @@ func (m *Manager) pushJob() {
 			continue
 		}
 
-		err = m.Queue.Add(job)
+		err = m.Queue.Add(meta.JobInfo{
+			Job: job,
+			FSM: NewJobFSM(job.State),
+		})
 		if err != nil {
 			flog.Error(err)
 		}
@@ -94,8 +85,8 @@ func (m *Manager) popJob() {
 				if delta.Type != queue.Added {
 					return nil
 				}
-				if j, ok := delta.Object.(*model.Job); ok {
-					return m.splitDag(j)
+				if j, ok := delta.Object.(*meta.JobInfo); ok {
+					return j.FSM.Event(context.Background(), "run", j.Job)
 				}
 			}
 		}
@@ -106,41 +97,6 @@ func (m *Manager) popJob() {
 	}
 }
 
-func (m *Manager) splitDag(job *model.Job) error {
-	flog.Info("job:%d split dag", job.ID)
-
-	d, err := store.Chatbot.GetDag(int64(job.DagID))
-	if err != nil {
-		return err
-	}
-	list, err := dag.TopologySort(d)
-	if err != nil {
-		return err
-	}
-
-	// create steps
-	steps := make([]*model.Step, 0, len(list))
-	for _, step := range list {
-		steps = append(steps, &model.Step{
-			UID:    job.UID,
-			Topic:  job.Topic,
-			JobID:  job.ID,
-			Action: model.JSON{"bot": "demo", "action": "start"}, // todo
-			Name:   step.Name,
-			State:  step.State,
-			NodeID: step.NodeId,
-			Depend: step.Depend,
-		})
-	}
-	err = store.Chatbot.CreateSteps(steps)
-	if err != nil {
-		return err
-	}
-
-	// update job state
-	return store.Chatbot.UpdateJobState(int64(job.ID), model.JobStart)
-}
-
 func JobKeyFunc(obj interface{}) (string, error) {
 	if j, ok := obj.(*model.Job); ok {
 		return fmt.Sprintf("job-%d", j.ID), nil
@@ -148,9 +104,22 @@ func JobKeyFunc(obj interface{}) (string, error) {
 	return "", errors.New("unknown object")
 }
 
-func NewJobFSM() *fsm.FSM {
+func NewJobFSM(state model.JobState) *fsm.FSM {
+	initial := "created"
+	switch state {
+	case model.JobReady:
+		initial = "ready"
+	case model.JobStart:
+		initial = "start"
+	case model.JobFinished:
+		initial = "finished"
+	case model.JobCanceled:
+		initial = "canceled"
+	case model.JobFailed:
+		initial = "failed"
+	}
 	f := fsm.NewFSM(
-		"ready",
+		initial,
 		fsm.Events{
 			{Name: "run", Src: []string{"ready"}, Dst: "start"},
 			{Name: "success", Src: []string{"start"}, Dst: "finished"},
@@ -158,20 +127,60 @@ func NewJobFSM() *fsm.FSM {
 			{Name: "error", Src: []string{"start"}, Dst: "failed"},
 		},
 		fsm.Callbacks{
-			"before_state": func(_ context.Context, e *fsm.Event) {
-				fmt.Println("before_state", e)
-			},
-			"after_state": func(_ context.Context, e *fsm.Event) {
-				fmt.Println("after_state", e)
+			// split dag
+			"before_run": func(_ context.Context, e *fsm.Event) {
+				var job *model.Job
+				for _, item := range e.Args {
+					if j, ok := item.(*model.Job); ok {
+						job = j
+					}
+				}
+				if job == nil {
+					e.Cancel(errors.New("error job"))
+					return
+				}
+
+				flog.Info("job:%d split dag", job.ID)
+
+				d, err := store.Chatbot.GetDag(int64(job.DagID))
+				if err != nil {
+					e.Cancel(err)
+					return
+				}
+				list, err := dag.TopologySort(d)
+				if err != nil {
+					e.Cancel(err)
+					return
+				}
+
+				// create steps
+				steps := make([]*model.Step, 0, len(list))
+				for _, step := range list {
+					steps = append(steps, &model.Step{
+						UID:    job.UID,
+						Topic:  job.Topic,
+						JobID:  job.ID,
+						Action: model.JSON{"bot": "demo", "action": "start"}, // todo
+						Name:   step.Name,
+						State:  step.State,
+						NodeID: step.NodeId,
+						Depend: step.Depend,
+					})
+				}
+				err = store.Chatbot.CreateSteps(steps)
+				if err != nil {
+					e.Cancel(err)
+					return
+				}
+
+				// update job state
+				err = store.Chatbot.UpdateJobState(int64(job.ID), model.JobStart)
+				if err != nil {
+					e.Cancel(err)
+					return
+				}
 			},
 		},
 	)
-
-	s, err := fsm.VisualizeWithType(f, fsm.MERMAID)
-	if err != nil {
-		flog.Error(err)
-	}
-	fmt.Println(s)
-
 	return f
 }
