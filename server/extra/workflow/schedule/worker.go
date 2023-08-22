@@ -21,9 +21,6 @@ func NewWorker(queue *queue.DeltaFIFO) *Worker {
 }
 
 func (m *Worker) Run(ctx context.Context) {
-
-	//go parallelizer.JitterUntil(m.work, time.Second, 0.0, true, m.stop)
-
 	for {
 		select {
 		case <-ctx.Done():

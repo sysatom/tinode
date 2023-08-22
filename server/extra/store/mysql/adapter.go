@@ -19,6 +19,7 @@ import (
 	serverStore "github.com/tinode/chat/server/store"
 	"github.com/tinode/chat/server/store/types"
 	mysqlDriver "gorm.io/driver/mysql"
+	"gorm.io/gen/field"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"log"
@@ -1239,6 +1240,11 @@ func (a *adapter) CreateSteps(steps []*model.Step) error {
 func (a *adapter) GetStepsByState(state model.StepState) ([]*model.Step, error) {
 	q := dao.Q.Step
 	return q.Where(q.State.Eq(state)).Find()
+}
+
+func (a *adapter) GetStepsByDepend(jobId int64, depend []string) ([]*model.Step, error) {
+	q := dao.Q.Step
+	return q.Where(q.JobID.Eq(int32(jobId)), q.Columns(q.Depend).In(field.Values(depend))).Find()
 }
 
 func Init() {

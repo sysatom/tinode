@@ -32,7 +32,9 @@ func NewScheduler(queue *queue.DeltaFIFO) *Scheduler {
 
 func (sched *Scheduler) Run(ctx context.Context) {
 
-	go parallelizer.JitterUntil(sched.pushStep, time.Second, 0.0, true, sched.stop)
+	go parallelizer.JitterUntil(sched.pushReadyStep, time.Second, 0.0, true, sched.stop)
+
+	go parallelizer.JitterUntil(sched.dependStep, 2*time.Second, 0.0, true, sched.stop)
 
 	<-sched.stop
 	flog.Info("scheduler stopped")
@@ -43,7 +45,7 @@ func (sched *Scheduler) Shutdown() {
 	sched.stop <- struct{}{}
 }
 
-func (sched *Scheduler) pushStep() {
+func (sched *Scheduler) pushReadyStep() {
 	list, err := store.Chatbot.GetStepsByState(model.StepReady)
 	if err != nil {
 		flog.Error(err)
@@ -65,6 +67,43 @@ func (sched *Scheduler) pushStep() {
 		})
 		if err != nil {
 			flog.Error(err)
+		}
+	}
+}
+
+func (sched *Scheduler) dependStep() {
+	list, err := store.Chatbot.GetStepsByState(model.StepCreated)
+	if err != nil {
+		flog.Error(err)
+		return
+	}
+	for _, step := range list {
+		dependSteps, err := store.Chatbot.GetStepsByDepend(int64(step.JobID), step.Depend)
+		if err != nil {
+			flog.Error(err)
+			continue
+		}
+		allFinished := true
+		for _, dependStep := range dependSteps {
+			switch dependStep.State {
+			case model.StepCreated, model.StepReady, model.StepRunning:
+				allFinished = false
+				break
+			case model.StepFinished:
+			case model.StepFailed, model.StepCanceled, model.StepSkipped:
+				err = store.Chatbot.UpdateStepState(int64(step.ID), dependStep.State)
+				if err != nil {
+					flog.Error(err)
+				}
+				allFinished = false
+				break
+			}
+		}
+		if allFinished {
+			err = store.Chatbot.UpdateStepState(int64(step.ID), model.StepReady)
+			if err != nil {
+				flog.Error(err)
+			}
 		}
 	}
 }
@@ -129,12 +168,8 @@ func NewStepFSM(state model.StepState) *fsm.FSM {
 					return
 				}
 
-				if time.Now().Unix()%2 == 0 { // todo
-					return
-				} else {
-					e.Err = errors.New("error run")
-					return
-				}
+				//e.Err = errors.New("error run")
+				return
 			},
 			"before_success": func(_ context.Context, e *fsm.Event) {
 				var step *model.Step
