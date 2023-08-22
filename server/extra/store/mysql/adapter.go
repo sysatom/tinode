@@ -1236,9 +1236,9 @@ func (a *adapter) CreateSteps(steps []*model.Step) error {
 	})
 }
 
-func (a *adapter) GetStepByState(state model.StepState) (*model.Step, error) {
+func (a *adapter) GetStepsByState(state model.StepState) ([]*model.Step, error) {
 	q := dao.Q.Step
-	return q.Where(q.State.Eq(state)).First()
+	return q.Where(q.State.Eq(state)).Find()
 }
 
 func Init() {

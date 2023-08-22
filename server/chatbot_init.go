@@ -11,6 +11,7 @@ import (
 	"github.com/tinode/chat/server/extra/store/model"
 	extraTypes "github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/utils"
+	"github.com/tinode/chat/server/extra/utils/queue"
 	"github.com/tinode/chat/server/extra/vendors/rollbar"
 	"github.com/tinode/chat/server/extra/workflow/manage"
 	"github.com/tinode/chat/server/extra/workflow/schedule"
@@ -405,11 +406,13 @@ func initializeWorkflow() error {
 	globals.manager = manage.NewManager()
 	go globals.manager.Run(ctx)
 	// scheduler
-	queue := schedule.NewSchedulingQueue(nil)
-	globals.scheduler = schedule.NewScheduler(queue)
+	q := queue.NewDeltaFIFOWithOptions(queue.DeltaFIFOOptions{
+		KeyFunction: schedule.KeyFunc,
+	})
+	globals.scheduler = schedule.NewScheduler(q)
 	go globals.scheduler.Run(ctx)
 	for i := 0; i < workerNum; i++ {
-		worker := schedule.NewWorker(queue)
+		worker := schedule.NewWorker(q)
 		globals.workers = append(globals.workers, worker)
 		go worker.Run(ctx)
 	}

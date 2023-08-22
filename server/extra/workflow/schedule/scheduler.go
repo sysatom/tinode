@@ -2,6 +2,7 @@ package schedule
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/looplab/fsm"
 	"github.com/tinode/chat/server/extra/pkg/flog"
@@ -9,32 +10,29 @@ import (
 	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/types/meta"
 	"github.com/tinode/chat/server/extra/utils/parallelizer"
+	"github.com/tinode/chat/server/extra/utils/queue"
 	"time"
 )
 
 type Scheduler struct {
-	NextStep func() *meta.QueuedStepInfo
-
 	stop chan struct{}
 
-	SchedulingQueue SchedulingQueue
+	SchedulingQueue *queue.DeltaFIFO
 
 	nextStartWorkerIndex int
 }
 
-func NewScheduler(queue SchedulingQueue) *Scheduler {
+func NewScheduler(queue *queue.DeltaFIFO) *Scheduler {
 	s := &Scheduler{
 		SchedulingQueue: queue,
 		stop:            make(chan struct{}),
 	}
-	s.NextStep = s.nextStep
 	return s
 }
 
 func (sched *Scheduler) Run(ctx context.Context) {
-	sched.SchedulingQueue.Run()
 
-	go parallelizer.JitterUntil(sched.SchedulingOne, time.Second, 0.0, true, sched.stop)
+	go parallelizer.JitterUntil(sched.pushStep, time.Second, 0.0, true, sched.stop)
 
 	<-sched.stop
 	flog.Info("scheduler stopped")
@@ -45,71 +43,41 @@ func (sched *Scheduler) Shutdown() {
 	sched.stop <- struct{}{}
 }
 
-func (sched *Scheduler) SchedulingOne() {
-	stepInfo := sched.NextStep()
-
-	if stepInfo == nil || stepInfo.Step == nil {
-		return
-	}
-
-	step := stepInfo.Step
-	if sched.skipStepSchedule(step) {
-		return
-	}
-
-	err := sched.SchedulingQueue.Add(step)
+func (sched *Scheduler) pushStep() {
+	list, err := store.Chatbot.GetStepsByState(model.StepReady)
 	if err != nil {
 		flog.Error(err)
+		return
+	}
+	for _, step := range list {
+		_, exists, err := sched.SchedulingQueue.GetByKey(stepKey(step))
+		if err != nil {
+			flog.Error(err)
+			continue
+		}
+		if exists {
+			continue
+		}
+
+		err = sched.SchedulingQueue.Add(&meta.StepInfo{
+			Step: step,
+			FSM:  NewStepFSM(step.State),
+		})
+		if err != nil {
+			flog.Error(err)
+		}
 	}
 }
 
-func (sched *Scheduler) nextStep() *meta.QueuedStepInfo {
-	readyStep, err := store.Chatbot.GetStepByState(model.StepReady)
-	if err != nil {
-		flog.Error(err)
-		return nil
+func KeyFunc(obj interface{}) (string, error) {
+	if j, ok := obj.(*meta.StepInfo); ok {
+		return stepKey(j.Step), nil
 	}
-
-	return &meta.QueuedStepInfo{
-		StepInfo: &meta.StepInfo{
-			Step: &meta.Step{
-				Name:            readyStep.Name,
-				UID:             "",
-				WorkerUID:       "",
-				ResourceVersion: "",
-				Generation:      0,
-				Finalizers:      nil,
-				JobId:           readyStep.JobID,
-				NodeId:          readyStep.NodeID,
-				Depend:          readyStep.Depend,
-				State:           readyStep.State,
-			},
-			ParseError: nil,
-		},
-		Timestamp:               readyStep.CreatedAt,
-		Attempts:                0,
-		InitialAttemptTimestamp: time.Time{},
-		UnschedulablePlugins:    nil,
-	}
+	return "", errors.New("unknown object")
 }
 
-func (sched *Scheduler) skipStepSchedule(step *meta.Step) bool {
-	// step is being deleted
-	if step.DeletionTimestamp != nil {
-		flog.Info("skip step schedule %s", step.UID)
-		return true
-	}
-
-	return false
-}
-
-func (sched *Scheduler) handleSchedulingFailure(ctx context.Context, stepInfo *meta.QueuedStepInfo, err error, reason string, nominatingInfo *meta.NominatingInfo) {
-
-	//if sched.SchedulingQueue != nil {
-	//	sched.SchedulingQueue.AddNominatedStep(stepInfo.StepInfo, nominatingInfo)
-	//}
-
-	// todo update store
+func stepKey(step *model.Step) string {
+	return fmt.Sprintf("step-%d", step.ID)
 }
 
 func NewStepFSM(state model.StepState) *fsm.FSM {
@@ -141,11 +109,68 @@ func NewStepFSM(state model.StepState) *fsm.FSM {
 			{Name: "skip", Src: []string{"running"}, Dst: "skipped"},
 		},
 		fsm.Callbacks{
-			"before_state": func(_ context.Context, e *fsm.Event) {
-				fmt.Println("before_state")
+			"before_run": func(_ context.Context, e *fsm.Event) {
+				var step *model.Step
+				for _, item := range e.Args {
+					if m, ok := item.(*model.Step); ok {
+						step = m
+					}
+				}
+				if step == nil {
+					e.Cancel(errors.New("error step"))
+					return
+				}
+
+				flog.Info("step:%d run", step.ID)
+
+				err := store.Chatbot.UpdateStepState(int64(step.ID), model.StepRunning)
+				if err != nil {
+					e.Cancel(err)
+					return
+				}
+
+				if time.Now().Unix()%2 == 0 { // todo
+					return
+				} else {
+					e.Err = errors.New("error run")
+					return
+				}
 			},
-			"after_state": func(_ context.Context, e *fsm.Event) {
-				fmt.Println("after_state")
+			"before_success": func(_ context.Context, e *fsm.Event) {
+				var step *model.Step
+				for _, item := range e.Args {
+					if m, ok := item.(*model.Step); ok {
+						step = m
+					}
+				}
+				if step == nil {
+					e.Cancel(errors.New("error step"))
+					return
+				}
+
+				err := store.Chatbot.UpdateStepState(int64(step.ID), model.StepFinished)
+				if err != nil {
+					e.Cancel(err)
+					return
+				}
+			},
+			"before_error": func(_ context.Context, e *fsm.Event) {
+				var step *model.Step
+				for _, item := range e.Args {
+					if m, ok := item.(*model.Step); ok {
+						step = m
+					}
+				}
+				if step == nil {
+					e.Cancel(errors.New("error step"))
+					return
+				}
+
+				err := store.Chatbot.UpdateStepState(int64(step.ID), model.StepFailed)
+				if err != nil {
+					e.Cancel(err)
+					return
+				}
 			},
 		},
 	)

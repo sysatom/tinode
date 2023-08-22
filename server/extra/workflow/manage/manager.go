@@ -24,7 +24,7 @@ type Manager struct {
 func NewManager() *Manager {
 	return &Manager{
 		Queue: queue.NewDeltaFIFOWithOptions(queue.DeltaFIFOOptions{
-			KeyFunction: JobKeyFunc,
+			KeyFunction: keyFunc,
 		}),
 		stop: make(chan struct{}),
 	}
@@ -45,7 +45,6 @@ func (m *Manager) Run(ctx context.Context) {
 			m.popJob()
 		}
 	}
-
 }
 
 func (m *Manager) Shutdown() {
@@ -59,7 +58,7 @@ func (m *Manager) pushJob() {
 		return
 	}
 	for _, job := range list {
-		_, exists, err := m.Queue.Get(job)
+		_, exists, err := m.Queue.GetByKey(jobKey(job))
 		if err != nil {
 			flog.Error(err)
 			continue
@@ -68,7 +67,7 @@ func (m *Manager) pushJob() {
 			continue
 		}
 
-		err = m.Queue.Add(meta.JobInfo{
+		err = m.Queue.Add(&meta.JobInfo{
 			Job: job,
 			FSM: NewJobFSM(job.State),
 		})
@@ -97,11 +96,15 @@ func (m *Manager) popJob() {
 	}
 }
 
-func JobKeyFunc(obj interface{}) (string, error) {
-	if j, ok := obj.(*model.Job); ok {
-		return fmt.Sprintf("job-%d", j.ID), nil
+func keyFunc(obj interface{}) (string, error) {
+	if j, ok := obj.(*meta.JobInfo); ok {
+		return jobKey(j.Job), nil
 	}
 	return "", errors.New("unknown object")
+}
+
+func jobKey(job *model.Job) string {
+	return fmt.Sprintf("job-%d", job.ID)
 }
 
 func NewJobFSM(state model.JobState) *fsm.FSM {
@@ -131,8 +134,8 @@ func NewJobFSM(state model.JobState) *fsm.FSM {
 			"before_run": func(_ context.Context, e *fsm.Event) {
 				var job *model.Job
 				for _, item := range e.Args {
-					if j, ok := item.(*model.Job); ok {
-						job = j
+					if m, ok := item.(*model.Job); ok {
+						job = m
 					}
 				}
 				if job == nil {
@@ -163,7 +166,7 @@ func NewJobFSM(state model.JobState) *fsm.FSM {
 						Action: model.JSON{"bot": "demo", "action": "start"}, // todo
 						Name:   step.Name,
 						State:  step.State,
-						NodeID: step.NodeId,
+						NodeID: step.NodeID,
 						Depend: step.Depend,
 					})
 				}

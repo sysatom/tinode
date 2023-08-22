@@ -2,46 +2,66 @@ package schedule
 
 import (
 	"context"
-	"fmt"
 	"github.com/tinode/chat/server/extra/pkg/flog"
+	"github.com/tinode/chat/server/extra/types/meta"
+	"github.com/tinode/chat/server/extra/utils/queue"
 )
 
 type Worker struct {
-	Queue SchedulingQueue
+	Queue *queue.DeltaFIFO
 
 	stop chan struct{}
 }
 
-func NewWorker(queue SchedulingQueue) *Worker {
+func NewWorker(queue *queue.DeltaFIFO) *Worker {
 	return &Worker{
 		Queue: queue,
 		stop:  make(chan struct{}),
 	}
 }
 
-func (m *Worker) Run(_ context.Context) {
+func (m *Worker) Run(ctx context.Context) {
 
 	//go parallelizer.JitterUntil(m.work, time.Second, 0.0, true, m.stop)
 
-	item, err := m.Queue.Pop()
-	if err != nil {
-		flog.Error(err)
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-m.stop:
+			flog.Info("worker stopped")
+			return
+		default:
+			m.popStep()
+		}
 	}
-	fmt.Println("worker run", item)
-	_ = m.state()
-
-	<-m.stop
-	flog.Info("worker stopped")
 }
 
 func (m *Worker) Shutdown() {
 	m.stop <- struct{}{}
 }
 
-func (m *Worker) work() {
-
-}
-
-func (m *Worker) state() error {
-	return nil
+func (m *Worker) popStep() {
+	_, err := m.Queue.Pop(func(i interface{}) error {
+		if d, ok := i.(queue.Deltas); ok {
+			for _, delta := range d {
+				if delta.Type != queue.Added {
+					return nil
+				}
+				if j, ok := delta.Object.(*meta.StepInfo); ok {
+					err := j.FSM.Event(context.Background(), "run", j.Step)
+					if err != nil {
+						flog.Error(err)
+						_ = j.FSM.Event(context.Background(), "error", j.Step)
+					} else {
+						_ = j.FSM.Event(context.Background(), "success", j.Step)
+					}
+				}
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		flog.Error(err)
+	}
 }

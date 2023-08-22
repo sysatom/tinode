@@ -31,7 +31,7 @@ func Warn(format string, a ...any) {
 }
 
 func Error(err error) {
-	l.Error().Caller(1).Err(err)
+	l.Error().Caller(1).Err(err).Msg(err.Error())
 }
 
 func Fatal(format string, a ...any) {
