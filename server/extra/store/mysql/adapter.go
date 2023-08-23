@@ -1161,13 +1161,13 @@ func (a *adapter) ListWorkflows(uid types.Uid, topic string) ([]*model.Workflow,
 	return q.Where(q.UID.Eq(uid.UserId())).Where(q.Topic.Eq(topic)).Find()
 }
 
-func (a *adapter) IncreaseWorkflowCount(id int64, successful int, failed int, running int, canceled int) error {
+func (a *adapter) IncreaseWorkflowCount(id int64, successful int32, failed int32, running int32, canceled int32) error {
 	q := dao.Q.Workflow
 	_, err := q.Where(q.ID.Eq(int32(id))).UpdateSimple(
-		q.SuccessfulCount.Value(int32(successful)),
-		q.FailedCount.Value(int32(failed)),
-		q.RunningCount.Value(int32(running)),
-		q.CanceledCount.Value(int32(canceled)))
+		q.SuccessfulCount.Add(successful),
+		q.FailedCount.Add(failed),
+		q.RunningCount.Add(running),
+		q.CanceledCount.Add(canceled))
 	return err
 }
 
@@ -1245,6 +1245,11 @@ func (a *adapter) GetStepsByState(state model.StepState) ([]*model.Step, error) 
 func (a *adapter) GetStepsByDepend(jobId int64, depend []string) ([]*model.Step, error) {
 	q := dao.Q.Step
 	return q.Where(q.JobID.Eq(int32(jobId)), q.Columns(q.Depend).In(field.Values(depend))).Find()
+}
+
+func (a *adapter) GetStepsByJobId(jobId int64) ([]*model.Step, error) {
+	q := dao.Q.Step
+	return q.Where(q.JobID.Eq(int32(jobId))).Find()
 }
 
 func Init() {

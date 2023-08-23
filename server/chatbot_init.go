@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"github.com/tinode/chat/server/auth"
@@ -401,20 +400,19 @@ func initializeCrawler() error {
 // init workflow
 func initializeWorkflow() error {
 	const workerNum = 2
-	ctx := context.Background()
 	// manager
 	globals.manager = manage.NewManager()
-	go globals.manager.Run(ctx)
+	go globals.manager.Run()
 	// scheduler
 	q := queue.NewDeltaFIFOWithOptions(queue.DeltaFIFOOptions{
 		KeyFunction: schedule.KeyFunc,
 	})
 	globals.scheduler = schedule.NewScheduler(q)
-	go globals.scheduler.Run(ctx)
+	go globals.scheduler.Run()
 	for i := 0; i < workerNum; i++ {
 		worker := schedule.NewWorker(q)
 		globals.workers = append(globals.workers, worker)
-		go worker.Run(ctx)
+		go worker.Run()
 	}
 	return nil
 }

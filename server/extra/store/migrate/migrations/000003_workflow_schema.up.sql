@@ -32,7 +32,8 @@ CREATE TABLE `chatbot_jobs`
     `updated_at`  DATETIME         NOT NULL,
     PRIMARY KEY (`id`) USING BTREE,
     INDEX `uid` (`uid`, `topic`) USING BTREE,
-    INDEX `workflow_id` (`workflow_id`) USING BTREE
+    INDEX `workflow_id` (`workflow_id`) USING BTREE,
+    INDEX `state` (`state`) USING BTREE
 )
     COLLATE = 'utf8mb4_unicode_ci'
     ENGINE = InnoDB
@@ -60,7 +61,9 @@ CREATE TABLE `chatbot_steps`
     `updated_at`  DATETIME         NOT NULL,
     PRIMARY KEY (`id`) USING BTREE,
     INDEX `uid` (`uid`, `topic`) USING BTREE,
-    INDEX `job_id` (`job_id`) USING BTREE
+    INDEX `job_id` (`job_id`) USING BTREE,
+    INDEX `node_id` (`node_id`) USING BTREE,
+    INDEX `state` (`state`) USING BTREE
 )
     COLLATE = 'utf8mb4_unicode_ci'
     ENGINE = InnoDB

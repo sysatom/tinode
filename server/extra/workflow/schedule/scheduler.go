@@ -30,10 +30,10 @@ func NewScheduler(queue *queue.DeltaFIFO) *Scheduler {
 	return s
 }
 
-func (sched *Scheduler) Run(ctx context.Context) {
-
+func (sched *Scheduler) Run() {
+	// ready step
 	go parallelizer.JitterUntil(sched.pushReadyStep, time.Second, 0.0, true, sched.stop)
-
+	// depend step
 	go parallelizer.JitterUntil(sched.dependStep, 2*time.Second, 0.0, true, sched.stop)
 
 	<-sched.stop
@@ -160,15 +160,13 @@ func NewStepFSM(state model.StepState) *fsm.FSM {
 					return
 				}
 
-				flog.Info("step:%d run", step.ID)
-
 				err := store.Chatbot.UpdateStepState(int64(step.ID), model.StepRunning)
 				if err != nil {
 					e.Cancel(err)
 					return
 				}
 
-				//e.Err = errors.New("error run")
+				//e.Err = errors.New("error run") // todo run bot
 				return
 			},
 			"before_success": func(_ context.Context, e *fsm.Event) {

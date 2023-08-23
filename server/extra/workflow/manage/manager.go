@@ -30,15 +30,16 @@ func NewManager() *Manager {
 	}
 }
 
-func (m *Manager) Run(ctx context.Context) {
-
-	go parallelizer.JitterUntil(m.pushJob, time.Second, 0.0, true, m.stop)
+func (m *Manager) Run() {
+	// ready job
+	go parallelizer.JitterUntil(m.pushReadyJob, time.Second, 0.0, true, m.stop)
+	// check job
+	go parallelizer.JitterUntil(m.checkJob, 10*time.Second, 0.0, true, m.stop)
 
 	for {
 		select {
-		case <-ctx.Done():
-			return
 		case <-m.stop:
+			m.Queue.Close()
 			flog.Info("manager stopped")
 			return
 		default:
@@ -51,7 +52,7 @@ func (m *Manager) Shutdown() {
 	m.stop <- struct{}{}
 }
 
-func (m *Manager) pushJob() {
+func (m *Manager) pushReadyJob() {
 	list, err := store.Chatbot.GetJobsByState(model.JobReady)
 	if err != nil {
 		flog.Error(err)
@@ -73,6 +74,78 @@ func (m *Manager) pushJob() {
 		})
 		if err != nil {
 			flog.Error(err)
+		}
+	}
+}
+
+func (m *Manager) checkJob() {
+	list, err := store.Chatbot.GetJobsByState(model.JobStart)
+	if err != nil {
+		flog.Error(err)
+		return
+	}
+	for _, job := range list {
+		steps, err := store.Chatbot.GetStepsByJobId(int64(job.ID))
+		if err != nil {
+			flog.Error(err)
+			continue
+		}
+		allFinished := true
+		keeping := false
+		canceled := false
+		failed := false
+		for _, step := range steps {
+			switch step.State {
+			case model.StepCreated, model.StepReady, model.StepRunning:
+				keeping = true
+				allFinished = false
+			case model.StepFinished, model.StepSkipped:
+			case model.StepFailed:
+				failed = true
+				allFinished = false
+			case model.StepCanceled:
+				canceled = true
+				allFinished = false
+			}
+		}
+		if keeping {
+			continue
+		}
+		if allFinished {
+			err = store.Chatbot.UpdateJobState(int64(job.ID), model.JobFinished)
+			if err != nil {
+				flog.Error(err)
+			}
+			// successful count
+			err = store.Chatbot.IncreaseWorkflowCount(int64(job.WorkflowID), 1, 0, -1, 0)
+			if err != nil {
+				flog.Error(err)
+			}
+			continue
+		}
+		if failed {
+			err = store.Chatbot.UpdateJobState(int64(job.ID), model.JobFailed)
+			if err != nil {
+				flog.Error(err)
+			}
+			// failed count
+			err = store.Chatbot.IncreaseWorkflowCount(int64(job.WorkflowID), 0, 1, -1, 0)
+			if err != nil {
+				flog.Error(err)
+			}
+			continue
+		}
+		if canceled {
+			err = store.Chatbot.UpdateJobState(int64(job.ID), model.JobCanceled)
+			if err != nil {
+				flog.Error(err)
+			}
+			// canceled count
+			err = store.Chatbot.IncreaseWorkflowCount(int64(job.WorkflowID), 0, 0, -1, 1)
+			if err != nil {
+				flog.Error(err)
+			}
+			continue
 		}
 	}
 }
@@ -143,8 +216,6 @@ func NewJobFSM(state model.JobState) *fsm.FSM {
 					return
 				}
 
-				flog.Info("job:%d split dag", job.ID)
-
 				d, err := store.Chatbot.GetDag(int64(job.DagID))
 				if err != nil {
 					e.Cancel(err)
@@ -181,6 +252,11 @@ func NewJobFSM(state model.JobState) *fsm.FSM {
 				if err != nil {
 					e.Cancel(err)
 					return
+				}
+				// running count
+				err = store.Chatbot.IncreaseWorkflowCount(int64(job.WorkflowID), 0, 0, 1, 0)
+				if err != nil {
+					flog.Error(err)
 				}
 			},
 		},

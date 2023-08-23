@@ -20,11 +20,9 @@ func NewWorker(queue *queue.DeltaFIFO) *Worker {
 	}
 }
 
-func (m *Worker) Run(ctx context.Context) {
+func (m *Worker) Run() {
 	for {
 		select {
-		case <-ctx.Done():
-			return
 		case <-m.stop:
 			flog.Info("worker stopped")
 			return

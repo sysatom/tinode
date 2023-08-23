@@ -1,7 +1,6 @@
 package dag
 
 import (
-	"fmt"
 	dagLib "github.com/heimdalr/dag"
 	"github.com/tinode/chat/server/extra/store/model"
 )
@@ -28,7 +27,6 @@ func TopologySort(item *model.Dag) ([]model.Step, error) {
 			return nil, err
 		}
 	}
-	fmt.Printf("dag %s: %s", item.UID, d.String())
 
 	baseRoots := d.GetRoots()
 	roots := baseRoots
