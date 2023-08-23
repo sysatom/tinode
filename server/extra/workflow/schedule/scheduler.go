@@ -104,6 +104,11 @@ func (sched *Scheduler) dependStep() {
 			if err != nil {
 				flog.Error(err)
 			}
+			// update started at
+			err = store.Chatbot.UpdateStepStartedAt(int64(step.ID), time.Now())
+			if err != nil {
+				flog.Error(err)
+			}
 		}
 	}
 }
@@ -182,6 +187,12 @@ func NewStepFSM(state model.StepState) *fsm.FSM {
 				}
 
 				err := store.Chatbot.UpdateStepState(int64(step.ID), model.StepFinished)
+				if err != nil {
+					e.Cancel(err)
+					return
+				}
+				// update finished at
+				err = store.Chatbot.UpdateStepFinishedAt(int64(step.ID), time.Now())
 				if err != nil {
 					e.Cancel(err)
 					return

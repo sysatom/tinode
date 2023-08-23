@@ -94,12 +94,16 @@ func (m *Manager) checkJob() {
 		keeping := false
 		canceled := false
 		failed := false
+		lastFinishedAt := time.Now().AddDate(-1000, 0, 0)
 		for _, step := range steps {
 			switch step.State {
 			case model.StepCreated, model.StepReady, model.StepRunning:
 				keeping = true
 				allFinished = false
 			case model.StepFinished, model.StepSkipped:
+				if step.FinishedAt != nil && step.FinishedAt.After(lastFinishedAt) {
+					lastFinishedAt = *step.FinishedAt
+				}
 			case model.StepFailed:
 				failed = true
 				allFinished = false
@@ -113,6 +117,11 @@ func (m *Manager) checkJob() {
 		}
 		if allFinished {
 			err = store.Chatbot.UpdateJobState(int64(job.ID), model.JobFinished)
+			if err != nil {
+				flog.Error(err)
+			}
+			// update finished at
+			err = store.Chatbot.UpdateJobFinishedAt(int64(job.ID), lastFinishedAt)
 			if err != nil {
 				flog.Error(err)
 			}
@@ -230,7 +239,7 @@ func NewJobFSM(state model.JobState) *fsm.FSM {
 				// create steps
 				steps := make([]*model.Step, 0, len(list))
 				for _, step := range list {
-					steps = append(steps, &model.Step{
+					m := &model.Step{
 						UID:    job.UID,
 						Topic:  job.Topic,
 						JobID:  job.ID,
@@ -239,7 +248,13 @@ func NewJobFSM(state model.JobState) *fsm.FSM {
 						State:  step.State,
 						NodeID: step.NodeID,
 						Depend: step.Depend,
-					})
+					}
+					// update started at
+					if step.State == model.StepReady {
+						now := time.Now()
+						m.StartedAt = &now
+					}
+					steps = append(steps, m)
 				}
 				err = store.Chatbot.CreateSteps(steps)
 				if err != nil {
@@ -252,6 +267,11 @@ func NewJobFSM(state model.JobState) *fsm.FSM {
 				if err != nil {
 					e.Cancel(err)
 					return
+				}
+				// update job started at
+				err = store.Chatbot.UpdateJobStartedAt(int64(job.ID), time.Now())
+				if err != nil {
+					flog.Error(err)
 				}
 				// running count
 				err = store.Chatbot.IncreaseWorkflowCount(int64(job.WorkflowID), 0, 0, 1, 0)

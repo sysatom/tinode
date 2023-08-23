@@ -1209,9 +1209,33 @@ func (a *adapter) UpdateJobState(id int64, state model.JobState) error {
 	return err
 }
 
+func (a *adapter) UpdateJobStartedAt(id int64, at time.Time) error {
+	q := dao.Q.Job
+	_, err := q.Where(q.ID.Eq(int32(id))).Update(q.StartedAt, at)
+	return err
+}
+
+func (a *adapter) UpdateJobFinishedAt(id int64, at time.Time) error {
+	q := dao.Q.Job
+	_, err := q.Where(q.ID.Eq(int32(id))).Update(q.FinishedAt, at)
+	return err
+}
+
 func (a *adapter) UpdateStepState(id int64, state model.StepState) error {
 	q := dao.Q.Step
 	_, err := q.Where(q.ID.Eq(int32(id))).Update(q.State, state)
+	return err
+}
+
+func (a *adapter) UpdateStepStartedAt(id int64, at time.Time) error {
+	q := dao.Q.Step
+	_, err := q.Where(q.ID.Eq(int32(id))).Update(q.StartedAt, at)
+	return err
+}
+
+func (a *adapter) UpdateStepFinishedAt(id int64, at time.Time) error {
+	q := dao.Q.Step
+	_, err := q.Where(q.ID.Eq(int32(id))).Update(q.FinishedAt, at)
 	return err
 }
 
