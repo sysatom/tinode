@@ -1239,6 +1239,18 @@ func (a *adapter) UpdateStepFinishedAt(id int64, at time.Time) error {
 	return err
 }
 
+func (a *adapter) UpdateStepInput(id int64, input extraTypes.KV) error {
+	q := dao.Q.Step
+	_, err := q.Where(q.ID.Eq(int32(id))).Update(q.Input, input)
+	return err
+}
+
+func (a *adapter) UpdateStepOutput(id int64, output extraTypes.KV) error {
+	q := dao.Q.Step
+	_, err := q.Where(q.ID.Eq(int32(id))).Update(q.Output, output)
+	return err
+}
+
 func (a *adapter) CreateStep(step *model.Step) (int64, error) {
 	q := dao.Q.Step
 	err := q.Create(step)
@@ -1268,7 +1280,7 @@ func (a *adapter) GetStepsByState(state model.StepState) ([]*model.Step, error) 
 
 func (a *adapter) GetStepsByDepend(jobId int64, depend []string) ([]*model.Step, error) {
 	q := dao.Q.Step
-	return q.Where(q.JobID.Eq(int32(jobId)), q.Columns(q.Depend).In(field.Values(depend))).Find()
+	return q.Where(q.JobID.Eq(int32(jobId)), q.Columns(q.NodeID).In(field.Values(depend))).Find()
 }
 
 func (a *adapter) GetStepsByJobId(jobId int64) ([]*model.Step, error) {

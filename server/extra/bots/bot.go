@@ -26,6 +26,7 @@ import (
 	"github.com/tinode/chat/server/extra/ruleset/session"
 	"github.com/tinode/chat/server/extra/ruleset/setting"
 	"github.com/tinode/chat/server/extra/ruleset/webservice"
+	"github.com/tinode/chat/server/extra/ruleset/workflow"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/store/model"
 	"github.com/tinode/chat/server/extra/types"
@@ -103,6 +104,9 @@ type Handler interface {
 
 	// Webapp return webapp
 	Webapp() func(rw http.ResponseWriter, req *http.Request)
+
+	// Workflow return workflow result
+	Workflow(ctx types.Context, input types.KV) (types.KV, error)
 }
 
 type Base struct{}
@@ -185,6 +189,10 @@ func (Base) Webservice() *restful.WebService {
 
 func (Base) Webapp() func(rw http.ResponseWriter, req *http.Request) {
 	return nil
+}
+
+func (Base) Workflow(_ types.Context, _ types.KV) (types.KV, error) {
+	return nil, nil
 }
 
 type configType struct {
@@ -595,6 +603,11 @@ func RunAgent(agentVersion int, agentRules []agent.Rule, ctx types.Context, cont
 	return rs.ProcessAgent(agentVersion, ctx, content)
 }
 
+func RunWorkflow(workflowRules []workflow.Rule, ctx types.Context, input types.KV) (types.KV, error) {
+	rs := workflow.Ruleset(workflowRules)
+	return rs.ProcessRule(ctx, input)
+}
+
 func RunSession(sessionRules []session.Rule, ctx types.Context, content interface{}) (types.MsgPayload, error) {
 	rs := session.Ruleset(sessionRules)
 	return rs.ProcessSession(ctx, content)
@@ -610,20 +623,22 @@ func FormMsg(ctx types.Context, id string) types.MsgPayload {
 			switch v := item.(type) {
 			case []form.Rule:
 				for _, rule := range v {
-					if rule.Id == id {
-						title = rule.Title
-						field = rule.Field
+					if rule.Id != id {
+						continue
+					}
 
-						// default value type
-						for index, formField := range field {
-							if formField.ValueType == "" {
-								switch formField.Type {
-								case types.FormFieldText, types.FormFieldPassword, types.FormFieldTextarea,
-									types.FormFieldEmail, types.FormFieldUrl:
-									field[index].ValueType = types.FormFieldValueString
-								case types.FormFieldNumber:
-									field[index].ValueType = types.FormFieldValueInt64
-								}
+					title = rule.Title
+					field = rule.Field
+
+					// default value type
+					for index, formField := range field {
+						if formField.ValueType == "" {
+							switch formField.Type {
+							case types.FormFieldText, types.FormFieldPassword, types.FormFieldTextarea,
+								types.FormFieldEmail, types.FormFieldUrl:
+								field[index].ValueType = types.FormFieldValueString
+							case types.FormFieldNumber:
+								field[index].ValueType = types.FormFieldValueInt64
 							}
 						}
 					}
@@ -647,8 +662,8 @@ func StoreForm(ctx types.Context, payload types.MsgPayload) types.MsgPayload {
 	}
 
 	formId := types.Id()
-	var json = jsoniter.ConfigCompatibleWithStandardLibrary
-	d, err := json.Marshal(payload)
+	var j = jsoniter.ConfigCompatibleWithStandardLibrary
+	d, err := j.Marshal(payload)
 	if err != nil {
 		flog.Error(err)
 		return types.TextMsg{Text: "store form error"}
@@ -743,8 +758,8 @@ func ActionMsg(_ types.Context, id string) types.MsgPayload {
 
 func StorePage(ctx types.Context, category model.PageType, title string, payload types.MsgPayload) types.MsgPayload {
 	pageId := types.Id()
-	var json = jsoniter.ConfigCompatibleWithStandardLibrary
-	d, err := json.Marshal(payload)
+	var j = jsoniter.ConfigCompatibleWithStandardLibrary
+	d, err := j.Marshal(payload)
 	if err != nil {
 		flog.Error(err)
 		return types.TextMsg{Text: "store form error"}

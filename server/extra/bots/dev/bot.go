@@ -94,6 +94,7 @@ func (b bot) Rules() []interface{} {
 		pageRules,
 		agentRules,
 		webserviceRules,
+		workflowRules,
 	}
 }
 
@@ -139,4 +140,8 @@ func (b bot) Instruct() (instruct.Ruleset, error) {
 
 func (b bot) Page(ctx types.Context, flag string) (string, error) {
 	return bots.RunPage(pageRules, ctx, flag)
+}
+
+func (b bot) Workflow(ctx types.Context, input types.KV) (types.KV, error) {
+	return bots.RunWorkflow(workflowRules, ctx, input)
 }

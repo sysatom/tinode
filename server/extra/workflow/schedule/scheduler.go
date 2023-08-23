@@ -5,10 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"github.com/looplab/fsm"
+	"github.com/tinode/chat/server/extra/bots"
 	"github.com/tinode/chat/server/extra/pkg/flog"
+	"github.com/tinode/chat/server/extra/ruleset/workflow"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/store/model"
-	"github.com/tinode/chat/server/extra/types/meta"
+	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/utils/parallelizer"
 	"github.com/tinode/chat/server/extra/utils/queue"
 	"time"
@@ -61,7 +63,7 @@ func (sched *Scheduler) pushReadyStep() {
 			continue
 		}
 
-		err = sched.SchedulingQueue.Add(&meta.StepInfo{
+		err = sched.SchedulingQueue.Add(&types.StepInfo{
 			Step: step,
 			FSM:  NewStepFSM(step.State),
 		})
@@ -84,12 +86,15 @@ func (sched *Scheduler) dependStep() {
 			continue
 		}
 		allFinished := true
+		mergeOutput := types.KV{}
 		for _, dependStep := range dependSteps {
 			switch dependStep.State {
 			case model.StepCreated, model.StepReady, model.StepRunning:
 				allFinished = false
 				break
 			case model.StepFinished:
+				// merge output
+				mergeOutput = mergeOutput.Merge(types.KV(dependStep.Output))
 			case model.StepFailed, model.StepCanceled, model.StepSkipped:
 				err = store.Chatbot.UpdateStepState(int64(step.ID), dependStep.State)
 				if err != nil {
@@ -104,6 +109,11 @@ func (sched *Scheduler) dependStep() {
 			if err != nil {
 				flog.Error(err)
 			}
+			// update input
+			err = store.Chatbot.UpdateStepInput(int64(step.ID), mergeOutput)
+			if err != nil {
+				flog.Error(err)
+			}
 			// update started at
 			err = store.Chatbot.UpdateStepStartedAt(int64(step.ID), time.Now())
 			if err != nil {
@@ -114,7 +124,7 @@ func (sched *Scheduler) dependStep() {
 }
 
 func KeyFunc(obj interface{}) (string, error) {
-	if j, ok := obj.(*meta.StepInfo); ok {
+	if j, ok := obj.(*types.StepInfo); ok {
 		return stepKey(j.Step), nil
 	}
 	return "", errors.New("unknown object")
@@ -171,7 +181,46 @@ func NewStepFSM(state model.StepState) *fsm.FSM {
 					return
 				}
 
-				//e.Err = errors.New("error run") // todo run bot
+				// run step
+				bot, _ := types.KV(step.Action).String("bot")
+				ruleId, _ := types.KV(step.Action).String("rule_id")
+
+				var botHandler bots.Handler
+				for name, handler := range bots.List() {
+					if bot != name {
+						continue
+					}
+					for _, item := range handler.Rules() {
+						switch v := item.(type) {
+						case []workflow.Rule:
+							for _, rule := range v {
+								if rule.Id == ruleId {
+									botHandler = handler
+								}
+							}
+						}
+					}
+				}
+				if botHandler == nil {
+					e.Err = errors.New("bot handler not found")
+					return
+				}
+				ctx := types.Context{
+					Original:       step.UID,
+					RcptTo:         step.Topic,
+					WorkflowRuleId: ruleId,
+				}
+				output, err := botHandler.Workflow(ctx, types.KV(step.Input))
+				if err != nil {
+					e.Err = err
+					return
+				}
+
+				// update output
+				err = store.Chatbot.UpdateStepOutput(int64(step.ID), output)
+				if err != nil {
+					flog.Error(err)
+				}
 				return
 			},
 			"before_success": func(_ context.Context, e *fsm.Event) {

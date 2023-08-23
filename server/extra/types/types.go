@@ -63,6 +63,8 @@ type Context struct {
 	PipelineStepIndex int
 	// page rule id
 	PageRuleId string
+	// workflow rule id
+	WorkflowRuleId string
 }
 
 func Id() string {
@@ -81,8 +83,8 @@ type QueuePayload struct {
 }
 
 func ConvertQueuePayload(rcptTo string, uid string, msg MsgPayload) (QueuePayload, error) {
-	var json = jsoniter.ConfigCompatibleWithStandardLibrary
-	data, err := json.Marshal(msg)
+	var j = jsoniter.ConfigCompatibleWithStandardLibrary
+	data, err := j.Marshal(msg)
 	if err != nil {
 		return QueuePayload{}, err
 	}

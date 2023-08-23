@@ -244,11 +244,13 @@ type Node struct {
 		Tooltip   string `json:"tooltip,omitempty"`
 		Connected bool   `json:"connected,omitempty"`
 	} `json:"ports,omitempty"`
-	Order       int        `json:"_order,omitempty"`
-	Code        string     `json:"code"`
-	Variables   []string   `json:"variables"`
-	Connections []string   `json:"connections"`
-	Status      NodeStatus `json:"status,omitempty"`
+	Order       int                    `json:"_order,omitempty"`
+	Bot         string                 `json:"bot"`
+	RuleId      string                 `json:"rule_id"`
+	Parameters  map[string]interface{} `json:"parameters"`
+	Variables   []string               `json:"variables"`
+	Connections []string               `json:"connections"`
+	Status      NodeStatus             `json:"status,omitempty"`
 }
 
 type Edge struct {

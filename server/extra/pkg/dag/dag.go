@@ -53,9 +53,17 @@ func TopologySort(item *model.Dag) ([]model.Step, error) {
 			if ok {
 				state = model.StepReady
 			}
+
+			n := nodeMap[id]
+			action := model.JSON{
+				"bot":        n.Bot,
+				"rule_id":    n.RuleId,
+				"parameters": n.Parameters,
+			}
 			result = append(result, model.Step{
 				NodeID: id,
 				Depend: dependNodeId,
+				Action: action,
 				State:  state,
 			})
 			have[id] = struct{}{}

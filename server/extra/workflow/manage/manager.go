@@ -9,7 +9,7 @@ import (
 	"github.com/tinode/chat/server/extra/pkg/flog"
 	"github.com/tinode/chat/server/extra/store"
 	"github.com/tinode/chat/server/extra/store/model"
-	"github.com/tinode/chat/server/extra/types/meta"
+	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/utils/parallelizer"
 	"github.com/tinode/chat/server/extra/utils/queue"
 	"time"
@@ -68,7 +68,7 @@ func (m *Manager) pushReadyJob() {
 			continue
 		}
 
-		err = m.Queue.Add(&meta.JobInfo{
+		err = m.Queue.Add(&types.JobInfo{
 			Job: job,
 			FSM: NewJobFSM(job.State),
 		})
@@ -166,7 +166,7 @@ func (m *Manager) popJob() {
 				if delta.Type != queue.Added {
 					return nil
 				}
-				if j, ok := delta.Object.(*meta.JobInfo); ok {
+				if j, ok := delta.Object.(*types.JobInfo); ok {
 					return j.FSM.Event(context.Background(), "run", j.Job)
 				}
 			}
@@ -179,7 +179,7 @@ func (m *Manager) popJob() {
 }
 
 func keyFunc(obj interface{}) (string, error) {
-	if j, ok := obj.(*meta.JobInfo); ok {
+	if j, ok := obj.(*types.JobInfo); ok {
 		return jobKey(j.Job), nil
 	}
 	return "", errors.New("unknown object")
@@ -243,7 +243,7 @@ func NewJobFSM(state model.JobState) *fsm.FSM {
 						UID:    job.UID,
 						Topic:  job.Topic,
 						JobID:  job.ID,
-						Action: model.JSON{"bot": "demo", "action": "start"}, // todo
+						Action: step.Action,
 						Name:   step.Name,
 						State:  step.State,
 						NodeID: step.NodeID,

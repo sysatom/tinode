@@ -1,6 +1,7 @@
 package types
 
 import (
+	"database/sql/driver"
 	"errors"
 	"fmt"
 	jsoniter "github.com/json-iterator/go"
@@ -25,6 +26,14 @@ func (j *KV) Scan(value interface{}) error {
 		return nil
 	}
 	return errors.New(fmt.Sprint("Failed to unmarshal JSONB value:", value))
+}
+
+func (j KV) Value() (driver.Value, error) {
+	if len(j) == 0 {
+		return nil, nil
+	}
+	var json = jsoniter.ConfigCompatibleWithStandardLibrary
+	return json.Marshal(j)
 }
 
 func (j KV) String(key string) (string, bool) {
@@ -94,4 +103,13 @@ func (j KV) Uint64Value() (uint64, bool) {
 
 func (j KV) Float64Value() (float64, bool) {
 	return j.Float64("value")
+}
+
+func (j KV) Merge(kvs ...KV) KV {
+	for _, kv := range kvs {
+		for k, v := range kv {
+			j[k] = v
+		}
+	}
+	return j
 }

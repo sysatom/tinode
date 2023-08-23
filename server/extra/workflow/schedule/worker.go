@@ -3,7 +3,7 @@ package schedule
 import (
 	"context"
 	"github.com/tinode/chat/server/extra/pkg/flog"
-	"github.com/tinode/chat/server/extra/types/meta"
+	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/utils/queue"
 )
 
@@ -43,7 +43,7 @@ func (m *Worker) popStep() {
 				if delta.Type != queue.Added {
 					return nil
 				}
-				if j, ok := delta.Object.(*meta.StepInfo); ok {
+				if j, ok := delta.Object.(*types.StepInfo); ok {
 					err := j.FSM.Event(context.Background(), "run", j.Step)
 					if err != nil {
 						flog.Error(err)

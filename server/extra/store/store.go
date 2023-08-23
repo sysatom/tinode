@@ -219,6 +219,8 @@ type Adapter interface {
 	UpdateStepState(id int64, state model.StepState) error
 	UpdateStepStartedAt(id int64, at time.Time) error
 	UpdateStepFinishedAt(id int64, at time.Time) error
+	UpdateStepInput(id int64, input extraTypes.KV) error
+	UpdateStepOutput(id int64, output extraTypes.KV) error
 	CreateStep(step *model.Step) (int64, error)
 	CreateSteps(steps []*model.Step) error
 	GetStepsByState(state model.StepState) ([]*model.Step, error)
