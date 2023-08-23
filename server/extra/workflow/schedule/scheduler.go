@@ -21,7 +21,7 @@ type Scheduler struct {
 
 	SchedulingQueue *queue.DeltaFIFO
 
-	nextStartWorkerIndex int
+	//nextStartWorkerIndex int
 }
 
 func NewScheduler(queue *queue.DeltaFIFO) *Scheduler {
@@ -91,7 +91,6 @@ func (sched *Scheduler) dependStep() {
 			switch dependStep.State {
 			case model.StepCreated, model.StepReady, model.StepRunning:
 				allFinished = false
-				break
 			case model.StepFinished:
 				// merge output
 				mergeOutput = mergeOutput.Merge(types.KV(dependStep.Output))
@@ -101,7 +100,6 @@ func (sched *Scheduler) dependStep() {
 					flog.Error(err)
 				}
 				allFinished = false
-				break
 			}
 		}
 		if allFinished {
@@ -221,7 +219,6 @@ func NewStepFSM(state model.StepState) *fsm.FSM {
 				if err != nil {
 					flog.Error(err)
 				}
-				return
 			},
 			"before_success": func(_ context.Context, e *fsm.Event) {
 				var step *model.Step
