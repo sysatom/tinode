@@ -3,6 +3,7 @@ package workflow
 import (
 	"encoding/json"
 	"errors"
+	"github.com/emicklei/go-restful/v3"
 	"github.com/tinode/chat/server/extra/bots"
 	"github.com/tinode/chat/server/extra/pkg/flog"
 	"github.com/tinode/chat/server/extra/types"
@@ -69,4 +70,8 @@ func (b bot) Command(ctx types.Context, content interface{}) (types.MsgPayload, 
 
 func (b bot) Pipeline(ctx types.Context, head types.KV, content interface{}, operate types.PipelineOperate) (types.MsgPayload, string, int, error) {
 	return bots.RunPipeline(pipelineRules, ctx, head, content, operate)
+}
+
+func (bot) Webservice() *restful.WebService {
+	return bots.Webservice(Name, serviceVersion, webserviceRules)
 }
