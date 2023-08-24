@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/go-resty/resty/v2"
 	jsoniter "github.com/json-iterator/go"
+	"github.com/tinode/chat/server/extra/types"
 	"io"
 	"net/http"
 	"time"
@@ -41,11 +42,11 @@ func NewDropbox(clientId, clientSecret, redirectURI, accessToken string) *Dropbo
 	return v
 }
 
-func (v *Dropbox) AuthorizeURL() string {
+func (v *Dropbox) GetAuthorizeURL() string {
 	return fmt.Sprintf("https://www.dropbox.com/oauth2/authorize?client_id=%s&response_type=code&redirect_uri=%s", v.clientId, v.redirectURI)
 }
 
-func (v *Dropbox) GetAccessToken(code string) (interface{}, error) {
+func (v *Dropbox) completeAuth(code string) (interface{}, error) {
 	resp, err := v.c.R().
 		SetBasicAuth(v.clientId, v.clientSecret).
 		SetFormData(map[string]string{
@@ -73,21 +74,18 @@ func (v *Dropbox) GetAccessToken(code string) (interface{}, error) {
 }
 
 func (v *Dropbox) Redirect(req *http.Request) (string, error) {
-	clientId := "" // todo
-	v.clientId = clientId
-
-	appRedirectURI := v.AuthorizeURL()
+	appRedirectURI := v.GetAuthorizeURL()
 	return appRedirectURI, nil
 }
 
-func (v *Dropbox) StoreAccessToken(req *http.Request) (map[string]interface{}, error) {
+func (v *Dropbox) GetAccessToken(req *http.Request) (types.KV, error) {
 	code := req.URL.Query().Get("code")
 	clientId := ""     // todo
 	clientSecret := "" // todo
 	v.clientId = clientId
 	v.clientSecret = clientSecret
 
-	tokenResp, err := v.GetAccessToken(code)
+	tokenResp, err := v.completeAuth(code)
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +95,7 @@ func (v *Dropbox) StoreAccessToken(req *http.Request) (map[string]interface{}, e
 	if err != nil {
 		return nil, err
 	}
-	return map[string]interface{}{
+	return types.KV{
 		"name":  ID,
 		"type":  ID,
 		"token": v.accessToken,

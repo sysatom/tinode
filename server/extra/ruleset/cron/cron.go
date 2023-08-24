@@ -122,7 +122,7 @@ func (r *Ruleset) ruleWorker(rule Rule) {
 					}
 
 					// get oauth token
-					oauth, err := store.Chatbot.OAuthGet(uid, botUid.UserId(), r.Type)
+					oauth, err := store.Chatbot.OAuthGet(uid, botUid.UserId(), r.Type) // todo not oauth cron
 					if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 						continue
 					}

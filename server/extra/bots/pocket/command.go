@@ -11,8 +11,8 @@ import (
 	"github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/vendors"
 	"github.com/tinode/chat/server/extra/vendors/pocket"
-	serverTypes "github.com/tinode/chat/server/store/types"
 	"gorm.io/gorm"
+	"time"
 )
 
 var commandRules = []command.Rule{
@@ -36,13 +36,21 @@ var commandRules = []command.Rule{
 				return types.TextMsg{Text: "App is authorized"}
 			}
 
-			redirectURI := vendors.RedirectURI(pocket.ID, ctx.AsUser, serverTypes.ParseUserId(ctx.Original))
+			flag, err := bots.StoreParameter(types.KV{
+				"uid":   ctx.AsUser.UserId(),
+				"topic": ctx.Original,
+			}, time.Now().Add(time.Hour))
+			if err != nil {
+				flog.Error(err)
+				return nil
+			}
+			redirectURI := vendors.RedirectURI(pocket.ID, flag)
 			provider := pocket.NewPocket(Config.ConsumerKey, "", redirectURI, "")
 			_, err = provider.GetCode("")
 			if err != nil {
 				return types.TextMsg{Text: "get code error"}
 			}
-			url, err := bots.CreateShortUrl(provider.AuthorizeURL())
+			url, err := bots.CreateShortUrl(provider.GetAuthorizeURL())
 			if err != nil {
 				return types.TextMsg{Text: "create url error"}
 			}

@@ -204,10 +204,10 @@ func botSend(rcptTo string, uid types.Uid, out extraTypes.MsgPayload, option ...
 	t.handleClientMsg(msg)
 }
 
-func newProvider(category string) vendors.OAuthProvider {
+func newProvider(name string) vendors.OAuthProvider {
 	var provider vendors.OAuthProvider
 
-	switch category {
+	switch name {
 	case pocket.ID:
 		provider = pocket.NewPocket(botPocket.Config.ConsumerKey, "", "", "")
 	case github.ID:

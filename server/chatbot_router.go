@@ -39,7 +39,7 @@ func newRouter() *mux.Router {
 	s := r.PathPrefix("/extra").Subrouter()
 	s.Use(mux.CORSMethodMiddleware(r))
 	// common
-	s.HandleFunc("/oauth/{category}/{uid1}/{uid2}", storeOAuth)
+	s.HandleFunc("/oauth/{provider}/{flag}", storeOAuth)
 	s.HandleFunc("/page/{id}", getPage)
 	s.HandleFunc("/form", postForm).Methods(http.MethodPost)
 	s.HandleFunc("/queue/stats", queueStats)
@@ -80,17 +80,29 @@ func newDownloadRouter() *mux.Router {
 
 func storeOAuth(rw http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
-	category := vars["category"]
-	ui1, _ := strconv.ParseUint(vars["uid1"], 10, 64)
-	ui2, _ := strconv.ParseUint(vars["uid2"], 10, 64)
-	if ui1 == 0 || ui2 == 0 {
+	name := vars["provider"]
+	flag := vars["flag"]
+
+	p, err := extraStore.Chatbot.ParameterGet(flag)
+	if err != nil {
+		errorResponse(rw, "flag error")
+		return
+	}
+	if p.IsExpired() {
+		errorResponse(rw, "oauth expired")
+		return
+	}
+
+	uid, _ := extraTypes.KV(p.Params).String("uid")
+	topic, _ := extraTypes.KV(p.Params).String("topic")
+	if uid == "" || topic == "" {
 		errorResponse(rw, "path error")
 		return
 	}
 
 	// code -> token
-	provider := newProvider(category)
-	tk, err := provider.StoreAccessToken(req)
+	provider := newProvider(name)
+	tk, err := provider.GetAccessToken(req)
 	if err != nil {
 		logs.Err.Println("router oauth", err)
 		errorResponse(rw, "oauth error")
@@ -101,10 +113,10 @@ func storeOAuth(rw http.ResponseWriter, req *http.Request) {
 	extra := extraTypes.KV{}
 	_ = extra.Scan(tk["extra"])
 	err = extraStore.Chatbot.OAuthSet(model.OAuth{
-		UID:   types.Uid(ui1).UserId(),
-		Topic: types.Uid(ui2).UserId(),
-		Name:  category,
-		Type:  category,
+		UID:   uid,
+		Topic: topic,
+		Name:  name,
+		Type:  name,
 		Token: tk["token"].(string),
 		Extra: model.JSON(extra),
 	})
