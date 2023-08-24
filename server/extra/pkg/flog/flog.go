@@ -2,6 +2,7 @@ package flog
 
 import (
 	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/pkgerrors"
 	"io"
 	"os"
 )
@@ -9,6 +10,9 @@ import (
 var l zerolog.Logger
 
 func init() {
+	// error stack
+	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
+
 	var writer []io.Writer
 	// console
 	console := zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: zerolog.TimeFieldFormat, NoColor: true}
@@ -56,7 +60,7 @@ func Warn(format string, a ...any) {
 }
 
 func Error(err error) {
-	l.Error().Caller(1).Err(err).Msg(err.Error())
+	l.Error().Caller(1).Err(err).Stack().Msg(err.Error())
 }
 
 func Fatal(format string, a ...any) {
