@@ -5,6 +5,8 @@ import (
 	"github.com/tinode/chat/server/extra/bots"
 	"github.com/tinode/chat/server/extra/pkg/cache"
 	"github.com/tinode/chat/server/extra/pkg/channels"
+	"github.com/tinode/chat/server/extra/pkg/config"
+	"github.com/tinode/chat/server/extra/pkg/flog"
 	"github.com/tinode/chat/server/extra/pkg/queue"
 	"github.com/tinode/chat/server/extra/pkg/route"
 	extraStore "github.com/tinode/chat/server/extra/store"
@@ -58,6 +60,18 @@ import (
 )
 
 // hook
+
+func hookConfig(jsconfig json.RawMessage) {
+	err := config.Load(jsconfig)
+	if err != nil {
+		logs.Err.Fatal("Failed to initialize config:", err)
+	}
+}
+
+func hookInit() {
+	// log level
+	flog.SetLevel(config.Server.Log.Level)
+}
 
 func hookMux() *http.ServeMux {
 	// Webservice

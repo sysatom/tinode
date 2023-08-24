@@ -316,8 +316,9 @@ type configType struct {
 	WebRTC    json.RawMessage             `json:"webrtc"`
 
 	// Configs for extra
-	Bot    json.RawMessage `json:"bots"`
-	Vendor json.RawMessage `json:"vendors"`
+	Chatbot json.RawMessage `json:"chatbot"`
+	Bot     json.RawMessage `json:"bots"`
+	Vendor  json.RawMessage `json:"vendors"`
 }
 
 func main() {
@@ -647,11 +648,17 @@ func main() {
 		logs.Err.Fatalln(err)
 	}
 
-	// Initialize chatbot store.
-	hookStore()
-
 	// Initialize plugins.
 	pluginsInit(config.Plugin)
+
+	// Initialize config
+	hookConfig(config.Chatbot)
+
+	// Initialize components
+	hookInit()
+
+	// Initialize chatbot store.
+	hookStore()
 
 	// Initialize users cache
 	usersInit()
@@ -662,14 +669,14 @@ func main() {
 	// Initialize channels
 	hookChannel()
 
-	// Mounted
-	hookMounted()
-
 	// Queue
 	hookQueue()
 
 	// Event
 	hookEvent()
+
+	// Mounted
+	hookMounted()
 
 	// Set up gRPC server, if one is configured
 	if *listenGrpc == "" {

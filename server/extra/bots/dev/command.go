@@ -279,7 +279,6 @@ var commandRules = []command.Rule{
 		Define: "log",
 		Help:   `print log`,
 		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
-			flog.SetLevel("warn")
 			flog.Debug("debug")
 			flog.Info("info")
 			flog.Warn("warn")

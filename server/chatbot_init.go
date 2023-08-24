@@ -7,6 +7,7 @@ import (
 	"github.com/tinode/chat/server/extra/bots"
 	"github.com/tinode/chat/server/extra/pkg/channels"
 	"github.com/tinode/chat/server/extra/pkg/channels/crawler"
+	"github.com/tinode/chat/server/extra/pkg/config"
 	"github.com/tinode/chat/server/extra/store/model"
 	extraTypes "github.com/tinode/chat/server/extra/types"
 	"github.com/tinode/chat/server/extra/utils"
@@ -399,7 +400,11 @@ func initializeCrawler() error {
 
 // init workflow
 func initializeWorkflow() error {
-	const workerNum = 2
+	var workerNum = config.Server.Workflow.Worker
+	// default worker num
+	if workerNum == 0 {
+		workerNum = 1
+	}
 	// manager
 	globals.manager = manage.NewManager()
 	go globals.manager.Run()
