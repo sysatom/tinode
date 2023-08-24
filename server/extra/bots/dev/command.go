@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/rand"
 	_ "embed"
+	"errors"
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/tinode/chat/server/extra/bots"
@@ -272,6 +273,19 @@ var commandRules = []command.Rule{
 			}
 
 			return types.LinkMsg{Url: url}
+		},
+	},
+	{
+		Define: "log",
+		Help:   `print log`,
+		Handler: func(ctx types.Context, tokens []*parser.Token) types.MsgPayload {
+			flog.SetLevel("warn")
+			flog.Debug("debug")
+			flog.Info("info")
+			flog.Warn("warn")
+			flog.Error(errors.New("error"))
+
+			return types.TextMsg{Text: "ok"}
 		},
 	},
 }
