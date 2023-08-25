@@ -9,37 +9,36 @@ import (
 
 const serviceVersion = "v1"
 
+type rule struct {
+	Bot          string            `json:"bot"`
+	Id           string            `json:"id"`
+	Title        string            `json:"title"`
+	Desc         string            `json:"desc"`
+	InputSchema  []types.FormField `json:"input_schema"`
+	OutputSchema []types.FormField `json:"output_schema"`
+}
+
 func actions(_ *restful.Request, resp *restful.Response) {
-	var result []struct {
-		Bot          string
-		Id           string
-		Title        string
-		Desc         string
-		InputSchema  []types.FormField
-		OutputSchema []types.FormField
-	}
+	result := make(map[string][]rule, len(bots.List()))
 	for name, handler := range bots.List() {
+		var list []rule
 		for _, item := range handler.Rules() {
 			switch v := item.(type) {
 			case []workflow.Rule:
-				for _, rule := range v {
-					result = append(result, struct {
-						Bot          string
-						Id           string
-						Title        string
-						Desc         string
-						InputSchema  []types.FormField
-						OutputSchema []types.FormField
-					}{
+				for _, item := range v {
+					list = append(list, rule{
 						Bot:          name,
-						Id:           rule.Id,
-						Title:        rule.Title,
-						Desc:         rule.Desc,
-						InputSchema:  rule.InputSchema,
-						OutputSchema: rule.OutputSchema,
+						Id:           item.Id,
+						Title:        item.Title,
+						Desc:         item.Desc,
+						InputSchema:  item.InputSchema,
+						OutputSchema: item.OutputSchema,
 					})
 				}
 			}
+		}
+		if len(list) > 0 {
+			result[name] = list
 		}
 	}
 
