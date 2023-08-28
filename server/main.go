@@ -57,6 +57,7 @@ import (
 
 	// File upload handlers
 	_ "github.com/tinode/chat/server/media/fs"
+	_ "github.com/tinode/chat/server/media/minio"
 	_ "github.com/tinode/chat/server/media/s3"
 
 	"github.com/tinode/chat/server/extra/pkg/channels/crawler"
